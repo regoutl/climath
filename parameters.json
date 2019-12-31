@@ -1,0 +1,222 @@
+{"tvi":{
+	"pop":{
+		"histoUntill": 2018,
+		"years": [1024, 1026, 1031, 1036, 1040, 
+				1045, 1051, 1058, 1067, 1075,
+				1084, 1100, 1108, 1114, 1118,
+				1124, 1131, 1135, 1140],
+		"valMul": 10000, 
+		"source": "Eurostat",
+		"in2050": 1222,
+		"ctrlPts": [{"x": 2018, "y": 1140}, {"x": 2028, "y": 1215}],
+		"label":"Population",
+		"unit":"H"
+	},
+	"consoPerCap":{
+		"histoUntill": 2018,
+		"years": [64.9, 64.6, 63.9, 66.3, 66.3, 65.5, 65.4, 65.2, 66.2, 60.6, 64.3, 58.2, 56.2, 57, 53.8, 55.2, 57.3, 57.4, 56.9],
+		"source": "https://ourworldindata.org/energy-production-and-changing-energy-sources#global-total-energy-production-long-run-view-by-source",
+		"valMul": 1000000, 
+		"in2050": 49,
+		"unit":"Wh/Hy",
+		"label":"Consommation annuelle par habitant"
+		},
+	"gdpPerCap":{
+		"histoUntill": 2018,
+		"years": [382, 383, 388, 390, 402, 408, 416, 427, 427, 414, 422, 424, 422, 421, 424, 429, 433, 439, 443],
+		"valMul": 100, 
+		"source": "https://data.worldbank.org/indicator/NY.GDP.PCAP.PP.KD?cid=GPD_31&locations=BE&name_desc=false",
+		"in2050": 550,
+		"unit":"€/Hy",
+		"comment":"Donnee en € 2019. ",
+		"label":"Revenu annuel moyen brut par habitant"
+	},
+	"nukeFootprint":{
+		"label":"Empreinte carbone du nucleaire",
+		"unit":"C/Wh",
+		"years":[0.012],
+		"in2050":0.012,
+		"source":"https://en.wikipedia.org/wiki/Life-cycle_greenhouse-gas_emissions_of_energy_sources",
+		"comment":"Cette valeur prend en compte l'installation, l'entretient et la decommission de la centrale, ainsi les emmissions liees au traitement des dechets, ainsi que la production du carburant. "
+	},
+	"nukeOnM":{
+		"label":"Frais d'exploitation et de maintenance",
+		"unit":"€/Wh",
+		"years":[26],
+		"valMul":0.000001,
+		"in2050":26,
+		"comment":"Inclut le carburant",
+		"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf"
+	},
+	"nukeCapex":{
+		"label":"Frais d'installation",
+		"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf",
+		"unit":"€/W",
+		"years":[4.43],
+		"in2050":4.43
+	},
+	"pvEffi":{
+		"histoUntill": 2018,
+		"years": [0.144, 0.146, 0.148, 0.15, 0.156, 
+				  0.163, 0.17, 0.18, 0.19, 0.19, 
+				  0.191, 0.19, 0.195, 0.2, 0.205, 
+				  0.21, 0.217, 0.220, 0.223],
+		"source": "https://www.irena.org/-/media/Images/IRENA/Costs/Chart/Solar-photovoltaic/irena_costs_fig_55.jpg avant 2014, https://www.nrel.gov/pv/assets/images/efficiency-chart.png sinon",
+		"in2050": 0.3,
+		"comment": "Cette donnee vise a representer l'efficacite des panneaux solaires en vente, et non celle atteinte en laboratoire. Concerle les multi crystals ",
+		"label":"Efficacite des panneaux solaires"
+	},
+	"pvOnM":{
+		"years":[3.47],
+		"in2050": 3.47,
+		"unit":"€/m2y",
+		"source":"https://www.scottmadden.com/insight/solar-photovoltaic-plant-operating-and-maintenance-costs/",
+		"comment": "En supposant qu'il est independant du PIB par habitant. P.e. besoin d'etre capable de controler cette varaible. Donnee en € 2019.",
+		"label":"Frais d'exploitation et de maintenance"
+		
+	},
+	"resiCapexCost":{
+		"unit":"€/N",
+		"years":[10.73, 9.98, 9.28, 8.63, 8.03, 7.47, 6.94, 6.46, 6.01, 5.59, 5.2, 4.83, 4.49, 4.18, 3.89, 3.61, 3.36, 3.13, 2.91],
+		"source":"-&% par an : https://understandsolar.com/cost-of-solar/, valeur 2016 : https://understandsolar.com/sunpower-panel-cost/, voir aussi https://www.nrel.gov/docs/fy18osti/71493.pdf, assuming buying 2 time the number of ondulator, as life expectancy is 15 yrs",
+		"comment":"Donnee en € 2019. "
+	},
+	"pvFarmCapexCost":{
+		"label":"Cout d'installation d'un m2 de panneaux en ferme solaire",
+		"unit":"€/m2",
+		"years":[275, 275, 275, 275, 275, 
+				275, 275, 275, 262, 234, 
+				218, 200, 164, 174, 166, 
+				139, 111],
+		"in2050": 63,
+		"euroPerWattyears":[5.1, 5.1, 5.1, 5.1, 5.1, 
+				5.1, 5.1, 5.1, 4.6, 4.1, 
+				3.8, 3.5, 2.8, 2.9, 2.7, 
+				2.2, 1.7],
+		"euroPerWattin2050": 0.7,
+		"source":"https://atb.nrel.gov/electricity/2018/images/solar-util/chart-solar-util-capex-RD-2018.png. Pas de donnees avant 2007. La donnee etait en eur/W, a ete converti via W/m2, pour UI.",
+		"comment":"Donnee en € 2019. ",
+		"ctrlPts": [{"x": 2020, "y": 80}, {"x": 2034, "y": 63}]
+	},
+
+	"pvCapexEnergy":{
+		"unit":"Wh/m2",
+		"years":[554, 554, 554, 554, 554],
+		"in2050": 554,
+		"valMul":1000,
+		"source":"https://www.sciencedirect.com/science/article/pii/S0360544204001148. Note : cet article donne ses infos en MJprim/W . La valeur ci dessus est en energie electrique. Cette valeur a ensuite etee convertie via le rapport W (nameplate) /m2 des PV de 2004 (120 W/m2). L'efficacite de l'onduleur est ignoree (suppossee 1). ",
+		"oldsource":"http://www.smartgreenscans.nl/publications/deWildScholten-and-Glockner-2012-Environmental-footprint-of-Elkem-Solar-Silicon.pdf,https://pubs.acs.org/doi/full/10.1021/es071763q, http://www.clca.columbia.edu/Task12_LCI_LCA_10_21_Final_Report.pdf, https://onlinelibrary.wiley.com/doi/epdf/10.1002/%28SICI%291099-159X%28200001/02%298%3A1%3C17%3A%3AAID-PIP295%3E3.0.CO%3B2-C",
+		"label":"Energie necessaire a la production d'un m2 de panneaux"
+	},
+	"chinaElecFootprint":{
+		"unit":"C/Wh",
+		"years":[0.482, 0.482, 0.482, 0.482, 0.482, 
+				0.482, 0.482, 0.482, 0.482, 0.482, 
+				0.482, 0.482, 0.482, 0.482, 0.482, 
+				0.482, 0.482, 0.482],
+		"in2050": 0.482,
+		"source":"https://en.wikipedia.org/wiki/Electricity_sector_in_China. Uniquement donnee en 2017.",
+		"label":"Empreinte carbone de l'electricite Chinoise"
+	},
+	"usaElecFootprint":{
+		"unit":"C/Wh",
+		"years":[0.401, 0.401, 0.401, 0.401, 0.401, 
+				0.401, 0.401, 0.401, 0.401, 0.401, 
+				0.401, 0.401, 0.401, 0.401, 0.401, 
+				0.401, 0.401, 0.401, 0.401],
+		"in2050": 0.401,
+		"source":"https://en.wikipedia.org/wiki/Electricity_sector_of_the_United_States. Uniquement donnee en 2018.",
+		"label":"Empreinte carbone de l'electricite des states. ",
+		"comment":"cette valeur change fortement d'etat en etat"
+	}
+},
+"nuke":{
+	"buildTime": 8,
+	"decommissioningRatio":0.15, 
+	"maxCentralSize":1600,
+	"note":"a verifier (maxCentralSize)",
+	"water":{
+		"unit":"L/Wh",
+		"source":"https://www.youtube.com/watch?v=HMystmGbctw",
+		"through":{
+			"withdrawal": 0.175,
+			"consumption": 0
+		},
+		"loop":{
+			"withdrawal": 0.0125,
+			"consumption": 0.006
+		}
+	},
+	"primEnEfficiency":0.4
+},
+"water":{
+},
+"pv":{
+	"buildTime": 1,
+	"decommissioningRatio":0.05,
+	"resiFirms":{
+		"sunPower":{
+			"pvEffiMul":0.88,
+			"powerDecline25Years":0.92,
+			"madeIn":"china",
+			"priceMul":1.31,
+			"source":"https://news.energysage.com/sunpower-solar-panels-complete-review/",
+			"Warranty":25
+		},
+		"Panasonic":{
+			"pvEffiMul":0.86,
+			"powerDecline25Years":0.9,
+			"madeIn":"china",
+			"priceMul":1.2,
+			"source":"https://news.energysage.com/panasonic-solar-panels-complete-review/",
+			"Warranty":25
+		},
+		"JinkoSolar":{
+			"pvEffiMul":0.75,
+			"powerDecline25Years":0.807,
+			"madeIn":"china",
+			"priceMul":1.17,
+			"source":"https://news.energysage.com/jinkosolar-panels-complete-review/",
+			"warranty":12
+		}
+	}
+},
+"bat":{
+	"densityUnit":"S/m3",
+	"capexUnit":"€/S",
+	"products":{
+		"powerwall2":{
+			"capex":500,
+			"roundTrip":0.9,
+			"warranty":10,
+			"selfDischarge":0.98,
+			"capaDecline10Years":0.7,
+			"madeIn":"USA",
+			"source":"https://www.energysage.com/solar/solar-energy-storage/tesla-powerwall-home-battery/",
+			"density":110000
+		},
+		"simpliphi":{
+			"capex":873,
+			"roundTrip":0.98,
+			"warranty":10,
+			"selfDischarge":0.99,
+			"capaDecline10Years":0.7,
+			"madeIn":"USA",
+			"source":"https://www.energysage.com/solar/solar-energy-storage/simpliphi-power-batteries-homes-complete-review/, https://www.altestore.com/store/deep-cycle-batteries/lithium-batteries/simpliphi-power-smart-tech-lithium-batteries-p40602/#SIMPHI3_8-24V",
+			"density":309200
+		}
+	},
+	"capexEnergy":{
+		"source":"https://www.lowtechmagazine.com/2015/05/sustainability-off-grid-solar-power.html",
+		"value":388,
+		"unit":"W/S"
+	}
+},
+
+"countries":{
+	"china":{
+	},
+	"USA":{
+	}
+}
+}
