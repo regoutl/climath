@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>Belgique energy</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<header>
+
+		<h1 class="vCountryName"></h1>
+	</header>
+	<div id="dCorps">
+		<div id="dTabBar">
+			<div>Annee <span class="vYear"></span></div>
+			<div class="bShowPlot" data-target="chinaElecFootprint">Empreinte elec Chine : <span class="vChinaElecFootprint"></span></div>
+			<div class="bShowPlot" data-target="usaElecFootprint">Empreinte elec USA : <span class="vUsaElecFootprint"></span></div>
+
+			<div class="bShowPlot" data-target="pop">Population : <span class="vPop"></span></div>
+			<div class="bShowPlot" data-target="consoPerCap">Conso / hab : <span class="vConsoPerCap"></span></div>
+			<div class="bShowPlot" data-target="conso" title="Consomation annuelle">Consommation : <span class="vConso"></span></div>
+			<div class="bShowPlot" data-target="pvEffi" title="Proportion d'energie lumineuse convertie en energie electricique">PV efficiency : <span class="vPvEffi"></span></div>
+			<div class="bShowPlot" data-target="pvEnergyDensity" title="Capacite de production installable par km2">PV place : <span class="vPvEnergyDensity"></span></div>
+			<div class="bShowPlot" data-target="pvOnM" title="Frais d'exploitation et de maintenance par W">PV O&amp;M : <span class="vPvOnM"></span></div>
+			<div class="bShowPlot" data-target="pvFarmCapexCost" title="Cout des panneaux solaires">Cout ferme solaire  : <span class="vPvFarmCapexCost"></span></div>
+			<div class="bShowPlot" data-target="pvDeco" title="Cout de demantellement par Watt de ferme solaire">Solaire demantellement : <span class="vPvDeco"></span></div>
+			<div class="bShowPlot" data-target="pvCapexEnergy" title="Energie pour produire des panneaux solaires">Production des PV : <span class="vPvCapexEnergy"></span></div>
+			<div class="bShowPlot" data-target="nukeCapex" title="Cout d'installation par Watt de nucleaire">Nuke capex : <span class="vNukeCapex"></span></div>
+			<div class="bShowPlot" data-target="nukeDeco" title="Cout de demantellement par Watt de nucleaire">Nuke demantellement : <span class="vNukeDeco"></span></div>
+			<div class="bShowPlot" data-target="nukeOnM" title="Frais d'exploitation et de maintenance par Wh">Nuke O&amp;M : <span class="vNukeOnM"></span></div>
+			<div class="bShowPlot" data-target="nukeFootprint" title="Empreinte du nucleaire">Nuke empreinte : <span class="vNukeFootprint"></span></div>
+			<div class="bShowPlot" data-target="gdpPerCap" title="Revenu annuel moyen brut par habitant">PIB par hab : <span class="vGdpPerCap"></span></div>
+			<div class="bShowPlot" data-target="taxRate" title="Valeur de taxe">Taxe : <span class="vTaxRate"></span></div>
+			<div class="bShowPlot" data-target="gouvIncome" title="Entrees du gouvernement">Revenu grouv : <span class="vGouvIncome"></span></div>
+			<div>Intalle : <span class="vCapa"></span></div>
+			<div><span class="vMoney"></span> euros</div>
+			<div>CO2 emmit l'an passe : <span></span></div>
+
+		</div>
+		<div id="dCentral">
+			<div id="dMovable"><!-- Every sub div in this is movable and scrolable. sub div should be 'pos absolute' -->
+				<canvas id="groundUsage" width="1559" height="1342"></canvas>
+			</div>
+			<div id="dPlotDisplay">
+				<h2>Population</h2>
+				<canvas id="cPlot" width="400" height="300"></canvas>
+				<p class="pComment"></p>
+				<p class="pSource"></p>
+			</div>
+		</div>
+		<div id="dActions">
+			<div> Tu as  <span class="vMoney"></span></div>
+			<div id="buildMenu">
+				<h3>Construire : </h3>
+				<div id="buildMenuOptionTable">
+					<img src='icons/solar.jpeg' class="bBuild" title="Panneaux solaires" data-target="pv"/>
+					<img src='icons/nuke.png'  class="bBuild" title="Centrale nucleaire" data-target="nuke"/>
+					<img src='icons/bat.png'  class="bBuild" title="Batterie" data-target="bat"/>
+				</div>
+				<div id="pvBuildDetails" class='buildDetail'>
+					<div>Installation : <span id = "vBuildPvCost"></span></div>
+					<div>Remarque : la production moyenne est environ 12% de cette valeur</div>
+					<div>Maintenance : <span class = "vPvOnM"></span></div>
+					
+					<div>Rayon : </div>
+					<input type="range" min="1" max="100" value="50" id='pvBuildRange'>
+				</div>
+				<div id="nukeBuildDetails" class='buildDetail'>
+					<div>Prix : <span class = "vNukeCapex"></span></div>
+				</div>
+				<div id="batBuildDetails" class='buildDetail'>
+					<div>Prix : <span class = "vBatCapexCost"></span></div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+
+
+
+	<img src="radioactive.png" id="inNuke" class="input"  crossorigin="anonymous"/>
+</body>
+<!--	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->
+<script src="jQuery.js"></script>
+<script src="timevarin.js"></script>
+<script src="plot.js"></script>
+<script src="moveIt.js"></script>
+<script src="main.js"></script>
+  
+</html>
