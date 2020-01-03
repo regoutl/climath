@@ -12,11 +12,26 @@ $(function(){
 	$('.vCountryName').text("Belgique");
 
 	var money = 10000000000;
+<<<<<<< HEAD
 
 	var params = {};
 
 
 
+=======
+	
+	var simu = new Simulateur;
+	simu.onParamLoaded = function(){
+		//print the values in the appropriates blocks
+		for(var k in simu.params){
+			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(currentYear), simu.params[k].unit, true));
+		}
+		$('.vPvEffi').text(	quantityToHuman(simu.params['pvEffi'].at(currentYear), '%', true));
+	}
+	
+	simu.loadParams();
+		
+>>>>>>> cd9a312b0389d986485ee08564f0d8631a58cfa5
 
 	var cGrUse = $("#groundUsage")[0].getContext("2d");
 
@@ -26,6 +41,7 @@ $(function(){
 	$('.vMoney').text(plainTextEuro(money));
 
 
+<<<<<<< HEAD
 	/// load coefficients
 	$.ajax('parameters.json',{
         success: function (data, status, xhr) {
@@ -102,6 +118,27 @@ $(function(){
         $('#dPlotDisplay').css('display', 'none');
     }
     tabGroundUsage();
+=======
+	
+	
+	
+	/// load ground usage
+	var groundUseMap = new Image();
+	groundUseMap.crossOrigin = '';
+	groundUseMap.onload = function () {
+		tabGroundUsage();
+		
+		var imgData = cGrUse.getImageData(0, 0, 1374, 1183);
+		var pix = new Uint32Array(imgData.data.buffer);
+		
+		
+		for(var i = 0; i < pix.data.length; i++){
+			
+		}
+	};
+	groundUseMap.src = 'landUse.png';
+	
+>>>>>>> cd9a312b0389d986485ee08564f0d8631a58cfa5
 
 
 
@@ -113,9 +150,15 @@ $(function(){
 
 		var targetLabel = e.currentTarget.getAttribute("data-target");
 		var dataToPlot, title, src = '', suffix = undefined;
+<<<<<<< HEAD
 
 		dataToPlot = params[targetLabel];
 
+=======
+		
+		dataToPlot = simu.params[targetLabel];
+		
+>>>>>>> cd9a312b0389d986485ee08564f0d8631a58cfa5
 		if(dataToPlot.source)
 			src = dataToPlot.source;
 
@@ -132,17 +175,6 @@ $(function(){
 			$('#dPlotDisplay .pComment').text('');
 	}
 
-	const GroundUse = {
-		city: 4280237790,
-		forest: 4281259417,
-		forest2: 4279864386,
-		water: 4292140191,
-		field: 4288667881,
-		field2: 4283420126,
-		industry: 4290663815,
-		airport: 4290756057,
-		heath: 4290663815
-	}
 
 
 
