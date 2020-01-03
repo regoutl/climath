@@ -12,11 +12,20 @@
 
 
 class Map{
-	/// load the map data (land use, 
-	/// 
-	constructor(k){
+	/// load the map data (land use,
+	///
+	constructor(drawCtx){
+        this.groundUseMap = new Image();
+        this.groundUseMap.crossOrigin = '';
+        // this.groundUseMap.onload = () => { tabGroundUsage(); }
+        this.groundUseMap.onload = () => { drawMap(drawCtx); }
+        this.groundUseMap.src = 'landUse.png';
 	}
-	
+
+    drawMap(ctx){
+        ctx.drawImage(this.groundUseMap, 0, 0);
+    }
+
 	/// return the land use at a given pixel.
 	/// ans format : pop  => int,
 	///              solar => {//can be undefined
@@ -26,7 +35,7 @@ class Map{
 	///				 bat => { //can be undefined
 	///              }
 	/// baseLandUse => { //undefined = out of country
-	///     City,    
+	///     City,
 	///     Field
 	///     Forest
 	///     Water
@@ -35,9 +44,9 @@ class Map{
 	/// }
 	getPx(x, y){
 	}
-	
+
 	/// set pixel x, y with value with same format as get
 	setPx(x, y, landUse){
 	}
-	
+
 }
