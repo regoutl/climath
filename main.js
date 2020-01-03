@@ -13,10 +13,17 @@ $(function(){
 	
 	var money = 10000000000;
 	
-	var params = {};
+	var simu = new Simulateur;
+	simu.onParamLoaded = function(){
+		//print the values in the appropriates blocks
+		for(var k in simu.params){
+			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(currentYear), simu.params[k].unit, true));
+		}
+		$('.vPvEffi').text(	quantityToHuman(simu.params['pvEffi'].at(currentYear), '%', true));
+	}
 	
-	
-	
+	simu.loadParams();
+		
 
 	var cGrUse = $("#groundUsage")[0].getContext("2d");
 	
@@ -26,52 +33,6 @@ $(function(){
 	$('.vMoney').text(plainTextEuro(money));
 	
 
-	/// load coefficients
-	$.ajax('parameters.json',{
-        success: function (data, status, xhr) {
-			var jsCoefs = data;
-			
-			// all the coefs
-						
-			for(var attrN in jsCoefs.tvi){
-				params[attrN] = new TimeVaryingInput(0);
-				params[attrN].fromJSON(jsCoefs.tvi[attrN]);
-			}
-			
-			// some derived quantities, might change
-			params['pvEnergyDensity'] = new Mult(params['pvEffi'], new Constant(1000 * 63 / 210));//wh/m2
-			params['pvEnergyDensity'].label = "Densite energetique des panneaux solaires";
-			params['pvEnergyDensity'].source = "Estime via les stats des fermes solaires allemandes de berlin (irradiance similaire a la belgique)";
-			params['pvEnergyDensity'].unit = 'N/m2';
-			
-			params['conso'] = new Mult(params['pop'], params['consoPerCap']);
-			params['conso'].label = "consommation annuelle totale";
-			params['conso'].source = "population * consommation annuelle par habitant";
-
-			params['nukeDeco'] = new Mult(params['nukeCapex'], new Constant(jsCoefs.nuke.decommissioningRatio));
-			params['nukeDeco'].label = "Couts de démantèlement du nucleaire";
-			params['nukeDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
-
-			params['pvDeco'] = new Mult(params['pvFarmCapexCost'], new Constant(jsCoefs.pv.decommissioningRatio));
-			params['pvDeco'].label = "Couts de démantèlement du photovoltaique";
-			params['pvDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
-			
-			
-			//print the values in the appropriates blocks
-			for(var k in params){
-				$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(params[k].at(currentYear), params[k].unit, true));
-			}
-			$('.vPvEffi').text(	quantityToHuman(params['pvEffi'].at(currentYear), '%', true));
-						
-			
-					
-			//http://www.wiki-solar.org/map/world.html
-		},
-	
-		error: function (request, status, error) {
-			alert(error + status + request.responseText);
-		}
-	});
 	
 	
 	
@@ -83,6 +44,7 @@ $(function(){
 		
 		var imgData = cGrUse.getImageData(0, 0, 1374, 1183);
 		var pix = new Uint32Array(imgData.data.buffer);
+		
 		
 		for(var i = 0; i < pix.data.length; i++){
 			
@@ -112,7 +74,7 @@ $(function(){
 		var targetLabel = e.currentTarget.getAttribute("data-target");
 		var dataToPlot, title, src = '', suffix = undefined;
 		
-		dataToPlot = params[targetLabel];
+		dataToPlot = simu.params[targetLabel];
 		
 		if(dataToPlot.source)
 			src = dataToPlot.source;
@@ -130,17 +92,6 @@ $(function(){
 			$('#dPlotDisplay .pComment').text('');
 	}
 
-	const GroundUse = {
-		city: 4280237790,
-		forest: 4281259417,
-		forest2: 4279864386,
-		water: 4292140191,
-		field: 4288667881,
-		field2: 4283420126,
-		industry: 4290663815,
-		airport: 4290756057,
-		heath: 4290663815
-	}
 
 
 	
