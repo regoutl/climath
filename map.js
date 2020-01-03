@@ -44,6 +44,7 @@ class Map{
     }
 
 	/// return the land use at a given pixel.
+    /// faire l'ajoute des pv
 	/// ans format : pop  => int,
 	///              solar => {//can be undefined
     ///                  year of installation

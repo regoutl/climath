@@ -114,34 +114,30 @@ $(function(){
 
 
 		if(nowBuilding == 'pv'){
-			cGrUse.beginPath();
-			cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);
-			cGrUse.stroke();
+            let radius = $('#pvBuildRange').val();
+            $('#pv-radius').css({"border-radius":radius+'px',
+                                "left":curPos.x-radius,
+                                "top": +curPos.y+ +radius,
+                                "height":radius*2,
+                                "width":radius*2,
+                                "visibility":"visible",
+                            });
 
-			var radius = $('#pvBuildRange').val();
+			// cGrUse.beginPath();
+			// cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);
+			// cGrUse.stroke();
 
-			var imgData = cGrUse.getImageData(curPos.x - radius, curPos.y - radius, 2*radius, 2*radius);
-			var pix = new Uint32Array(imgData.data.buffer);
-
-
-			var area = pix[0];
-			var i =0;
-			//~ for(var x = -radius; x < radius; x++)
-				//~ for(var y = -radius; y < radius; y++){
-					//~ if(x*x + y*y < radius * radius &&pix.data[i + 0] == GroundUse.grass){
-						//~ area++;
-						//~ pix.data[i+0] = 64;
-						//~ pix.data[i+1] = 64;
-						//~ pix.data[i+2] = 182;
-					//~ }
-
-					//~ i+=4;
-				//~ }
-
-
-			cGrUse.putImageData(imgData, curPos.x - radius, curPos.y - radius);
-
-			$('#vBuildPvCost').text(area);
+			// var radius = $('#pvBuildRange').val();
+            //
+			// var imgData = cGrUse.getImageData(curPos.x - radius, curPos.y - radius, 2*radius, 2*radius);
+			// var pix = new Uint32Array(imgData.data.buffer);
+            //
+            //
+			// var area = pix[0];
+            //
+			// cGrUse.putImageData(imgData, curPos.x - radius, curPos.y - radius);
+            //
+			// $('#vBuildPvCost').text(area);
 
 
 		}
