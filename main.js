@@ -34,19 +34,6 @@ $(function(){
 
 
 	/// load ground usage
-	// var groundUseMap = new Image();
-	// groundUseMap.crossOrigin = '';
-	// groundUseMap.onload = function () {
-	// 	tabGroundUsage();
-    //
-	// 	var imgData = cGrUse.getImageData(0, 0, 1374, 1183);
-	// 	var pix = new Uint32Array(imgData.data.buffer);
-    //
-	// 	for(var i = 0; i < pix.length; i++){
-    //
-	// 	}
-	// };
-	// groundUseMap.src = 'landUse.png';
     let map = new Map(cGrUse);
 
 
