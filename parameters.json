@@ -15,10 +15,10 @@
 		"histoUntill": 2018,
 		"years": [64.9, 64.6, 63.9, 66.3, 66.3, 65.5, 65.4, 65.2, 66.2, 60.6, 64.3, 58.2, 56.2, 57, 53.8, 55.2, 57.3, 57.4, 56.9],
 		"source": "https://ourworldindata.org/energy-production-and-changing-energy-sources#global-total-energy-production-long-run-view-by-source",
-		"valMul": 1000000, 
+		"valMul": 114.08, 
 		"in2050": 49,
-		"unit":"Wh/Hy",
-		"label":"Consommation annuelle par habitant"
+		"unit":"W/H",
+		"label":"Consommation par habitant"
 		},
 	"gdpPerCap":{
 		"histoUntill": 2018,
