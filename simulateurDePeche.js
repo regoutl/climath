@@ -19,7 +19,7 @@ class SolarCapaFact{
 	constructor(){
 		//load pv capacity factor
 		let oReq = new XMLHttpRequest();
-		oReq.open("GET", "pvcapfactAll365.bin", true);
+		oReq.open("GET", "res/pvcapfactAll365.bin", true);
 		oReq.responseType = "arraybuffer";
 		
 		let self = this;
@@ -80,7 +80,7 @@ class Simulateur{
 		var self = this;
 		
 		// load coefficients
-		$.ajax('parameters.json', {
+		$.ajax('res/parameters.json', {
 			success: function (data, status, xhr) {
 				var jsCoefs = data;
 				

@@ -50,7 +50,7 @@ class Map{
                 }
             }
             im.src = file;
-            this[name+'Im'] = im;
+            this['res/' + name+'Im'] = im;
         }
 	}
 
