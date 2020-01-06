@@ -12,6 +12,7 @@ function quantityToHuman(value, unit, compact = false){
 		case 2: suffix = 'M'; break;
 		case 3: suffix = 'G'; break;
 		case 4: suffix = 'T'; break;
+		case 5: suffix = 'P'; break;
 		case -1: suffix = 'm'; break;
 		case -2: suffix = 'μ'; break;
 		case -3: suffix = 'ν'; break;
@@ -24,6 +25,9 @@ function quantityToHuman(value, unit, compact = false){
 		div = Math.round(div);
 	else
 		div = Math.round(div * 10) / 10;
+		
+	if(value == 0)
+		div = 0;
 		
 		
 	return div + ' ' + unitToHuman(suffix + unit, compact);
@@ -42,6 +46,9 @@ function unitToHuman(unit, compact = false){
 		tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (nameplate) ').replace('C', 'gCO2eq');
 	else
 		tmp = tmp.replace('N', 'Wp').replace('C', 'gCO2');
+
+	tmp = tmp.replace('PgCO2', 'GT CO2').replace('TgCO2', 'MT CO2').replace('GgCO2', 'kT CO2').replace('MgCO2', 'T CO2');
+
 	
 	return tmp.replace('  ', ' ');
 }

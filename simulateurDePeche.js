@@ -18,7 +18,20 @@ class Simulateur{
 	constructor(){
 		this.params = {};
 		
-
+		// production means, sorted by priority (higher production mean will produce at max capa first)
+		this.productionMeans = [{
+			label:"pv",
+			co2PerW:0, /// g co2 eq / watt
+			capacity:0 /// W installed
+		},
+		{
+			label:"ccgt",
+			co2PerW:200, /// g co2 eq / watt
+			capacity:100000000000 /// W installed
+		}
+		];
+		
+		this.year = 2019;
 	}
 	
 	/// load all the constants.
@@ -26,7 +39,7 @@ class Simulateur{
 	loadParams(){
 		var self = this;
 		
-		/// load coefficients
+		// load coefficients
 		$.ajax('parameters.json', {
 			success: function (data, status, xhr) {
 				var jsCoefs = data;
@@ -45,8 +58,8 @@ class Simulateur{
 				self.params['pvEnergyDensity'].unit = 'N/m2';
 				
 				self.params['conso'] = new Mult(self.params['pop'], self.params['consoPerCap']);
-				self.params['conso'].label = "consommation annuelle totale";
-				self.params['conso'].source = "population * consommation annuelle par habitant";
+				self.params['conso'].label = "consommation totale";
+				self.params['conso'].source = "population * consommation par habitant";
 
 				self.params['nukeDeco'] = new Mult(self.params['nukeCapex'], new Constant(jsCoefs.nuke.decommissioningRatio));
 				self.params['nukeDeco'].label = "Couts de démantèlement du nucleaire";
@@ -70,7 +83,32 @@ class Simulateur{
 	}
 	
 	
-	install(){
+	addPv(capa){
+		this.productionMeans[0].capacity += capa;
+	}
+	
+	/// simulate using the coefs for the given year
+	/// simulation is done hour by hour
+	/// battery lvx is resumed from last run.
+	run(){
+		var conso = this.params.conso.at(this.year);//watt
+		console.log(this.year);
+		var co2 = 0;//grammes
 		
+		for(let i = 0; i < 8760; i++){
+			var toProduce = conso;
+			
+			this.productionMeans.forEach( prodMean =>{
+				let realProd = Math.min(toProduce, prodMean.capacity);
+				
+				toProduce -= realProd;
+				co2 += realProd * prodMean.co2PerW;
+			});
+		}
+		
+		this.year ++;
+		this.onNewYear();
+		
+		console.log("co2 produced " + quantityToHuman(co2, "C") );
 	}
 }

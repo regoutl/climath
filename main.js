@@ -17,13 +17,12 @@ $(function(){
 	simu.onParamLoaded = function(){
 		//print the values in the appropriates blocks
 		for(var k in simu.params){
-			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(currentYear), simu.params[k].unit, true));
+			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(simu.year), simu.params[k].unit, true));
 		}
-		$('.vPvEffi').text(	quantityToHuman(simu.params['pvEffi'].at(currentYear), '%', true));
+		$('.vPvEffi').text(	quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
 	}
 
 	simu.loadParams();
-
 
 	var cGrUse = $("#groundUsage")[0].getContext("2d");
 
@@ -79,10 +78,18 @@ $(function(){
 
 
 
+	simu.onNewYear = function(){
+		$('.vYear').text(simu.year);
+	};
+	
+	$('#bRunSimu').on('click', () => {
+		simu.run();
+	});
+	$('#bAddLotPv').on('click', () => {
+		simu.addPv(10000000000);
+	});
 
-	var currentYear = 2019;
-
-	$('.vYear').text(currentYear);
+	
 
 
 	$('.bShowPlot').on('click', tabPlot);
