@@ -1,19 +1,57 @@
-	var installed = {
-		solar:[{//array start in 2020
-				capacity: 0 //amount of solar panels installed in 2020 (W)
+
+class CstCapaFact{
+	constructor(value){
+		this.v = value;
+	}
+
+	/// for concistency with SolarCapaFact, have the unused hour param
+	at(hour){
+		return this.v;
+	}
+	
+	//check ths has loaded all the needed data
+	isReady(){
+		return true;
+	}
+}
+
+class SolarCapaFact{
+	constructor(){
+		//load pv capacity factor
+		let oReq = new XMLHttpRequest();
+		oReq.open("GET", "res/pvcapfactAll365.bin", true);
+		oReq.responseType = "arraybuffer";
+		
+		let self = this;
+		
+		oReq.onload = function(oEvent) {
+			var arrayBuffer = oReq.response;
+			self.pvCapaFact = new Uint8Array(arrayBuffer);
+			if(self.pvCapaFact.length % (365*24) != 0){
+				throw 'all years must have 365 days (got ' + self.pvCapaFact.length + ' days total)';
+				self.pvCapaFact = undefined;
 			}
-		],
-		nuke:{
-			capacity: 0 // W
-		},
-		bat:[{//array start in 2020
-			capacity: 0, //amount of bateries installed in 2020
-			storage: 0 // chqrge level of those batteries
-		},
-		]
-	};
+		};
+		oReq.send();
+	}
+	
+	/// get the historical capacity factor at the given hour.
+	/// hour 0 is from 0 to 1am of the 1st year of the data
+	/// hour 365*24 is the first hour of the second year
+	/// no need to bound check ; values wrap around
+	at(hour){
+		hour = hour % this.pvCapaFact.length;
+		
+		return this.pvCapaFact[hour] / 255.0;
+	}
+	
+	//check ths has loaded all the needed data
+	isReady(){
+		return this.pvCapaFact != undefined;
+	}
+}
 
-
+/// note : all years are assumed to be 365 days long
 class Simulateur{
 	constructor(){
 		this.params = {};
@@ -22,12 +60,14 @@ class Simulateur{
 		this.productionMeans = [{
 			label:"pv",
 			co2PerW:0, /// g co2 eq / watt
-			capacity:0 /// W installed
+			capacity:0, /// W installed
+			capacityFactor: new SolarCapaFact
 		},
 		{
 			label:"ccgt",
 			co2PerW:200, /// g co2 eq / watt
-			capacity:100000000000 /// W installed
+			capacity:100000000000, /// W installed
+			capacityFactor: new CstCapaFact(1.0)
 		}
 		];
 		
@@ -40,7 +80,7 @@ class Simulateur{
 		var self = this;
 		
 		// load coefficients
-		$.ajax('parameters.json', {
+		$.ajax('res/parameters.json', {
 			success: function (data, status, xhr) {
 				var jsCoefs = data;
 				
@@ -80,6 +120,7 @@ class Simulateur{
 				alert("failed to load the parameters");
 			}
 		});
+
 	}
 	
 	
@@ -91,24 +132,37 @@ class Simulateur{
 	/// simulation is done hour by hour
 	/// battery lvx is resumed from last run.
 	run(){
-		var conso = this.params.conso.at(this.year);//watt
+		//check all async loads are complete
+		if(this.params == undefined ||
+		   !this.productionMeans[0].capacityFactor.isReady()){
+			alert('1 sec, on charge la page');
+			return;
+		}
+		
+		
+		let conso = this.params.conso.at(this.year);//watt
 		console.log(this.year);
-		var co2 = 0;//grammes
+		let co2 = 0;//grammes
+		
+		let yearForTheCapaFactor = rand() % 100; //chooses a random year to sample the capacity factors from
+		let capaFactHour = yearForTheCapaFactor * 365*24;
 		
 		for(let i = 0; i < 8760; i++){
-			var toProduce = conso;
+			let toProduce = conso;
 			
-			this.productionMeans.forEach( prodMean =>{
-				let realProd = Math.min(toProduce, prodMean.capacity);
+			this.productionMeans.forEach( prodMean => {
+				let realProd = Math.min(toProduce, prodMean.capacity * prodMean.capacityFactor.at(capaFactHour));
 				
 				toProduce -= realProd;
 				co2 += realProd * prodMean.co2PerW;
 			});
+			
+			capaFactHour ++;
 		}
 		
 		this.year ++;
 		this.onNewYear();
 		
-		console.log("co2 produced " + quantityToHuman(co2, "C") );
+		console.log("co2 produced " + quantityToHuman(co2, "C"));
 	}
 }
