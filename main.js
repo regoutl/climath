@@ -19,20 +19,20 @@ $(function(){
 		for(var k in simu.params){
 			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(simu.year), simu.params[k].unit, true));
 		}
-		$('.vPvEffi').text(	quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
+		$('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
 	}
 
-	simu.loadParams();
+    simu.loadParams();
 
-	var cGrUse = $("#groundUsage")[0].getContext("2d");
+    var cGrUse = $("#groundUsage")[0].getContext("2d");
 
-	var cPlot = $("#cPlot")[0];
-	canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
+    var cPlot = $("#cPlot")[0];
+    canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
 
-	$('.vMoney').text(plainTextEuro(money));
+    $('.vMoney').text(plainTextEuro(money));
 
 
-	/// load ground usage
+    /// load ground usage
     let map = new Map(cGrUse);
 
 
@@ -81,7 +81,7 @@ $(function(){
 	simu.onNewYear = function(){
 		$('.vYear').text(simu.year);
 	};
-	
+
 	$('#bRunSimu').on('click', () => {
 		simu.run();
 	});
@@ -89,7 +89,7 @@ $(function(){
 		simu.addPv(10000000000);
 	});
 
-	
+
 
 
 	$('.bShowPlot').on('click', tabPlot);
