@@ -19,20 +19,20 @@ $(function(){
 		for(var k in simu.params){
 			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(simu.year), simu.params[k].unit, true));
 		}
-		$('.vPvEffi').text(	quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
+		$('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
 	}
 
-	simu.loadParams();
+    simu.loadParams();
 
-	var cGrUse = $("#groundUsage")[0].getContext("2d");
+    var cGrUse = $("#groundUsage")[0].getContext("2d");
 
-	var cPlot = $("#cPlot")[0];
-	canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
+    var cPlot = $("#cPlot")[0];
+    canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
 
-	$('.vMoney').text(plainTextEuro(money));
+    $('.vMoney').text(plainTextEuro(money));
 
 
-	/// load ground usage
+    /// load ground usage
     let map = new Map(cGrUse);
 
 
@@ -81,7 +81,7 @@ $(function(){
 	simu.onNewYear = function(){
 		$('.vYear').text(simu.year);
 	};
-	
+
 	$('#bRunSimu').on('click', () => {
 		simu.run();
 	});
@@ -89,7 +89,7 @@ $(function(){
 		simu.addPv(10000000000);
 	});
 
-	
+
 
 
 	$('.bShowPlot').on('click', tabPlot);
@@ -121,34 +121,30 @@ $(function(){
 
 
 		if(nowBuilding == 'pv'){
-			cGrUse.beginPath();
-			cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);
-			cGrUse.stroke();
+            let radius = $('#pvBuildRange').val();
+            $('#pv-radius').css({"border-radius":radius+'px',
+                                "left":curPos.x-radius,
+                                "top": +curPos.y+ +radius,
+                                "height":radius*2,
+                                "width":radius*2,
+                                "visibility":"visible",
+                            });
 
-			var radius = $('#pvBuildRange').val();
+			// cGrUse.beginPath();
+			// cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);
+			// cGrUse.stroke();
 
-			var imgData = cGrUse.getImageData(curPos.x - radius, curPos.y - radius, 2*radius, 2*radius);
-			var pix = new Uint32Array(imgData.data.buffer);
-
-
-			var area = pix[0];
-			var i =0;
-			//~ for(var x = -radius; x < radius; x++)
-				//~ for(var y = -radius; y < radius; y++){
-					//~ if(x*x + y*y < radius * radius &&pix.data[i + 0] == GroundUse.grass){
-						//~ area++;
-						//~ pix.data[i+0] = 64;
-						//~ pix.data[i+1] = 64;
-						//~ pix.data[i+2] = 182;
-					//~ }
-
-					//~ i+=4;
-				//~ }
-
-
-			cGrUse.putImageData(imgData, curPos.x - radius, curPos.y - radius);
-
-			$('#vBuildPvCost').text(area);
+			// var radius = $('#pvBuildRange').val();
+            //
+			// var imgData = cGrUse.getImageData(curPos.x - radius, curPos.y - radius, 2*radius, 2*radius);
+			// var pix = new Uint32Array(imgData.data.buffer);
+            //
+            //
+			// var area = pix[0];
+            //
+			// cGrUse.putImageData(imgData, curPos.x - radius, curPos.y - radius);
+            //
+			// $('#vBuildPvCost').text(area);
 
 
 		}

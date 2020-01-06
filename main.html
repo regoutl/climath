@@ -39,6 +39,7 @@
 		</div>
 		<div id="dCentral">
 			<div id="dMovable"><!-- Every sub div in this is movable and scrolable. sub div should be 'pos absolute' -->
+                <div id="pv-radius"></div>
 				<canvas id="groundUsage" width="1559" height="1342"></canvas>
 			</div>
 			<div id="dPlotDisplay">
@@ -61,7 +62,7 @@
 					<div>Installation : <span id = "vBuildPvCost"></span></div>
 					<div>Remarque : la production moyenne est environ 12% de cette valeur</div>
 					<div>Maintenance : <span class = "vPvOnM"></span></div>
-					
+
 					<div>Rayon : </div>
 					<input type="range" min="1" max="100" value="50" id='pvBuildRange'>
 				</div>
@@ -71,7 +72,7 @@
 				<div id="batBuildDetails" class='buildDetail'>
 					<div>Prix : <span class = "vBatCapexCost"></span></div>
 				</div>
-				
+
 			</div>
 
 			<div>
@@ -96,5 +97,5 @@
 
 <script src="moveIt.js"></script>
 <script src="main.js"></script>
-  
+
 </html>
