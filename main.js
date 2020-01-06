@@ -118,17 +118,11 @@ $(function(){
 
 		var curPos = {x: evt.offsetX,
 					 y: evt.offsetY};
+         // console.log(map.getPx(curPos.x, curPos.y));
 
 
 		if(nowBuilding == 'pv'){
-            let radius = $('#pvBuildRange').val();
-            $('#pv-radius').css({"border-radius":radius+'px',
-                                "left":curPos.x-radius,
-                                "top": +curPos.y+ +radius,
-                                "height":radius*2,
-                                "width":radius*2,
-                                "visibility":"visible",
-                            });
+            map.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
 
 			// cGrUse.beginPath();
 			// cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);

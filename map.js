@@ -19,9 +19,13 @@ const GroundUsage = {
     4294014481: 'heath',
 }
 
+const PopDensity = {
+}
+
 let mapslist = {
     groundUse: 'landUse.png',
     popDensity: 'popDensity.png',
+    energyMap: 'beedges.png',
 }
 
 class Map{
@@ -30,10 +34,11 @@ class Map{
 	constructor(drawCtx){
         this.drawCtx = drawCtx;
 
-        this.defaultMap = 'groundUse';
+        // this.defaultMap = 'groundUse';
+        this.defaultMap = 'popDensity';
 
         this.mapLoaded = 0;
-        this.mapToLoad = 2;
+        this.mapToLoad = 3;
 
         // Load each map
         for (const [name, file] of Object.entries(mapslist)) {
@@ -64,8 +69,9 @@ class Map{
     */
     drawMap(mapsToShow){
         this.clear();
+
         mapsToShow = mapsToShow || [this.defaultMap];
-        this.currentShowMap = mapsToShow.reverse();
+        this.currentShowMap = mapsToShow;
 
         for (let mapname of mapsToShow) {
             this.drawCtx.putImageData(this[mapname+'Data'], 0, 0);
@@ -90,29 +96,41 @@ class Map{
 	///     Airport
 	/// }
 	getPx(x, y){
-        if(GroundUsage[this.groundUseData[y*1374+x]] === undefined) {
-            console.log('x:'+x+' y:'+y+'  v:'+this.groundUseData[y*1374+x]);
-        } else {
-            console.log(GroundUsage[this.groundUseData[y*1374+x]]);
-        }
+        // if(GroundUsage[this.groundUseData[y*1374+x]] === undefined) {
+        //     console.log('x:'+x+' y:'+y+'  v:'+this.groundUseData[y*1374+x]);
+        // } else {
+        //     console.log(GroundUsage[this.groundUseData[y*1374+x]]);
+        // }
+        // if(PopDensity[this.popDensityVal[y*1374+x]] === undefined) {
+        //     console.log('x:'+x+' y:'+y+'  pop:'+this.popDensityVal[y*1374+x]);
+        // } else {
+        //     console.log(PopDensity[this.popDensityVal[y*1374+x]]);
+        // }
         return {
             pop: undefined,
             solar: undefined,
             nuke: undefined,
-            baseLandUse: GroundUsage[this.groundUseData[y*1374+x]],
+            baseLandUse: GroundUsage[this.groundUseVal[y*1374+x]],
         }
 	}
 
 	/// set pixel x, y with value with same format as get
 	setPx(x, y, landUse){
-        if(landUse.baseLandUse !== undefined){
-            this.groundUseData[y*1374+x] = GroundUsage[landUse.baseLandUse];
+        if(landUse.energyMap !== undefined){
+            this.energyMap[y*1374+x] = GroundUsage[landUse.baseLandUse];
         }
 	}
 
     // get the name of every map
     listMaps(){
         return Object.keys(mapslist);
+    }
+
+    drawCircle(x,y,radius) {
+        this.drawMap(this.currentShowMap);
+        this.drawCtx.beginPath();
+        this.drawCtx.arc(x, y, radius, 0, 2*Math.PI, true);
+        this.drawCtx.fill();
     }
 
 }
