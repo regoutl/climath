@@ -56,22 +56,37 @@ class Simulateur{
 	constructor(){
 		this.params = {};
 		
+		this.productionMeansOrder = ['pv', 'nuke', 'ccgt'];
+		
 		// production means, sorted by priority (higher production mean will produce at max capa first)
-		this.productionMeans = [{
-			label:"pv",
-			co2PerW:0, /// g co2 eq / watt
+		this.productionMeans = {
+		pv:{
+			co2PerW: new Constant(0), /// g co2 eq / watt
 			capacity:0, /// W installed
-			capacityFactor: new SolarCapaFact
+			capacityFactor: new SolarCapaFact,
+			
+			/// store pv with same stat. only used for yearly capacity update
+			/// store, for each (powerDeclinePerYears) the installed capacity
+			groups: new Map(),  
 		},
-		{
-			label:"ccgt",
-			co2PerW:200, /// g co2 eq / watt
+		nuke:{
+//defined in params			co2PerW:200, /// g co2 eq / watt
+			capacity:0, /// W installed
+			capacityFactor: new CstCapaFact(0.9)
+		},
+		ccgt:{
+			co2PerW:new Constant(0.2), /// g co2 eq / watt
 			capacity:100000000000, /// W installed
 			capacityFactor: new CstCapaFact(1.0)
-		}
-		];
+		}};
 		
 		this.year = 2019;
+		
+		this.co2Produced = new TimeVaryingInput(0.0);
+		this.co2Produced.unit = 'C';
+		
+		this.costs = new TimeVaryingInput(0.0);
+		this.costs.unit = '€';
 	}
 	
 	/// load all the constants.
@@ -82,11 +97,11 @@ class Simulateur{
 		// load coefficients
 		$.ajax('res/parameters.json', {
 			success: function (data, status, xhr) {
-				var jsCoefs = data;
+				let jsCoefs = data;
 				
 				// all the coefs
 							
-				for(var attrN in jsCoefs.tvi){
+				for(let attrN in jsCoefs.tvi){
 					self.params[attrN] = new TimeVaryingInput(0);
 					self.params[attrN].fromJSON(jsCoefs.tvi[attrN]);
 				}
@@ -101,7 +116,7 @@ class Simulateur{
 				self.params['conso'].label = "consommation totale";
 				self.params['conso'].source = "population * consommation par habitant";
 
-				self.params['nukeDeco'] = new Mult(self.params['nukeCapex'], new Constant(jsCoefs.nuke.decommissioningRatio));
+				self.params['nukeDeco'] = new Mult(self.params['nukeCapexCost'], new Constant(jsCoefs.nuke.decommissioningRatio));
 				self.params['nukeDeco'].label = "Couts de démantèlement du nucleaire";
 				self.params['nukeDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
 
@@ -109,6 +124,9 @@ class Simulateur{
 				self.params['pvDeco'].label = "Couts de démantèlement du photovoltaique";
 				self.params['pvDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
 				
+				
+				
+				self.productionMeans.nuke.co2PerW = self.params.nukeFootprint;
 				
 				if(self.onParamLoaded)
 					self.onParamLoaded();
@@ -123,9 +141,78 @@ class Simulateur{
 
 	}
 	
+	/** @param what.type : pv or nuke. required.
+	 * IF what.type == pv 
+	 * 		@param what.area : R. m^2 . required.
+	 *      @param what.effiMul : [0-1], default val = 1
+	 *      @param what.madeIn : {china, usa} , default val = china
+	 *      @param what.powerDecline : [0, 1] , power decline per year. 
+	 * 						nextYearCapa = thisYearCapa * powerDecline.   
+	 * 						default val = 1.
+	 *      @param what.priceMul : R, coef of price for installation. 
+	 * 						default val = 1
+	 * 
+	 * todo:		@param what.seller : {sunPower ,Panasonic, JinkoSolar}. set above params (see parameters.json)
+	 * ELSEIF what.type == nuke
+	 * 		@param what.capa : R. Watt (nameplate) . required.
+	 * ENDIF
+	 * @param what.capa : watt nameplate installed. note : can be negative
+	 * @return cost of the installation
+	 */
+	capex(what){
+//		this.productionMeans[what.type].capacity += what.capa;
+		let co2 = 0, cost = 0;
+		if(what.type=='pv'){
+			if(what.area === undefined)
+				throw 'must define an area';
+			
+			if(what.effiMul === undefined)
+				what.effiMul = 1;
+			if(what.madeIn === undefined)
+				what.madeIn = 'china';
+			if(what.powerDecline === undefined)
+				what.powerDecline = 1;
+			if(what.priceMul === undefined)
+				what.priceMul = 1;
+			
+			let capacity = what.area * this.params.pvEnergyDensity.at(this.year) * what.effiMul;
+			this.productionMeans.pv.capacity += capacity;
+			
+			co2 = what.area * // m2
+					this.params.pvCapexEnergy.at(this.year) *  // wH / m2
+					this.params[what.madeIn + 'ElecFootprint'].at(this.year); // C / Wh
+			cost  = what.area * what.priceMul * // m2
+					this.params.pvFarmCapexCost.at(this.year);  // eur/m2
+			
+			if(!this.productionMeans.pv.groups.has(what.powerDecline))
+				this.productionMeans.pv.groups.set(what.powerDecline, capacity);
+			else
+				this.productionMeans.pv.groups.set(what.powerDecline, this.productionMeans.pv.groups.get(what.powerDecline) + capacity);
+		}
+		else if(what.type=='nuke'){
+			if(what.capa === undefined)
+				throw 'must define a capa';
+			co2 = 0;
+			cost  = what.capa * // N
+					this.params.nukeCapexCost.at(this.year) /  // eur/N
+					this.params.pvEnergyDensity.at(this.year);	 // N / m2
+		}
+		else
+			throw 'je connais pas ce genre d energie la';
+		
+		this.co2Produced.setAt(this.year, this.co2Produced.at(this.year) + co2);
+		this.costs.setAt(this.year, this.costs.at(this.year) + cost);
+
+		return cost;
+	}
 	
-	addPv(capa){
-		this.productionMeans[0].capacity += capa;
+	doPowerDecline(){
+		this.pv.capacity = 0;
+		
+		this.pv.groups.forEach( (value, key, map) => {
+			map[key] *= key;
+			this.pv.capacity += value;
+		});
 	}
 	
 	/// simulate using the coefs for the given year
@@ -134,7 +221,7 @@ class Simulateur{
 	run(){
 		//check all async loads are complete
 		if(this.params == undefined ||
-		   !this.productionMeans[0].capacityFactor.isReady()){
+		   !this.productionMeans['pv'].capacityFactor.isReady()){
 			alert('1 sec, on charge la page');
 			return;
 		}
@@ -143,6 +230,7 @@ class Simulateur{
 		let conso = this.params.conso.at(this.year);//watt
 		console.log(this.year);
 		let co2 = 0;//grammes
+		let cost = 0;
 		
 		let yearForTheCapaFactor = rand() % 100; //chooses a random year to sample the capacity factors from
 		let capaFactHour = yearForTheCapaFactor * 365*24;
@@ -150,19 +238,31 @@ class Simulateur{
 		for(let i = 0; i < 8760; i++){
 			let toProduce = conso;
 			
-			this.productionMeans.forEach( prodMean => {
-				let realProd = Math.min(toProduce, prodMean.capacity * prodMean.capacityFactor.at(capaFactHour));
+			//for each prod mean in order
+			for(let prodMeanIndex = 0; prodMeanIndex < this.productionMeansOrder.length; prodMeanIndex++){
+				let prodMeanLabel = this.productionMeansOrder[prodMeanIndex];//get label
+				
+				let prodMean = this.productionMeans[prodMeanLabel];//get data for that prod mean
+				let realProd = Math.min(toProduce, 
+										prodMean.capacity * prodMean.capacityFactor.at(capaFactHour));
 				
 				toProduce -= realProd;
-				co2 += realProd * prodMean.co2PerW;
-			});
+				co2 += realProd * prodMean.co2PerW.at(this.year);// this function call returns 8760 time the same value
+			}
 			
 			capaFactHour ++;
 		}
 		
+		this.co2Produced.setAt(this.year, this.co2Produced.at(this.year) + co2);
+		this.costs.setAt(this.year, this.costs.at(this.year) + cost);
+		
+		console.log("co2 produced " + quantityToHuman(this.co2Produced.at(this.year), "C"));
+		
+		this.doPowerDecline();
+		
+		
 		this.year ++;
 		this.onNewYear();
 		
-		console.log("co2 produced " + quantityToHuman(co2, "C"));
 	}
 }
