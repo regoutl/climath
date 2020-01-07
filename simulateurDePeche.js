@@ -200,18 +200,19 @@ class Simulateur{
 		else
 			throw 'je connais pas ce genre d energie la';
 		
-		this.co2Produced.setAt(this.year, this.co2Produced.at(this.year) + co2);
+		this.co2Produced.setAt(this.year, this.co2Produced.at(this.year) + co2);//679781166396
 		this.costs.setAt(this.year, this.costs.at(this.year) + cost);
 
 		return cost;
 	}
 	
 	doPowerDecline(){
-		this.pv.capacity = 0;
+		this.productionMeans.pv.capacity = 0;
 		
-		this.pv.groups.forEach( (value, key, map) => {
-			map[key] *= key;
-			this.pv.capacity += value;
+		this.productionMeans.pv.groups.forEach( (value, key, map) => {
+			value *= key;
+			map.set(key, value);
+			this.productionMeans.pv.capacity += value;
 		});
 	}
 	

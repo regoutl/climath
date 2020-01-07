@@ -84,9 +84,8 @@ $(function(){
 		simu.run();
 	});
 	$('#bAddLotPv').on('click', () => {
-		simu.capex({type: 'pv', area: 10000000000, powerDecline: 0.5});
+		simu.capex({type: 'pv', area: 10000000000, powerDecline: 0.9966});
 	});
-
 
 
 
