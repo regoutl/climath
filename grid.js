@@ -142,7 +142,6 @@ class Grid{
     }
 
     drawCircle(x,y,radius) {
-        console.log('draw cicle');
         const ctx = this.canvas.top[0].getContext('2d');
         ctx.clearRect(0, 0,
             this.canvas.top[0].width,

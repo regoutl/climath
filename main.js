@@ -133,7 +133,6 @@ $(function(){
 		var curPos = {x: evt.offsetX,
 					 y: evt.offsetY};
 
-        console.log(nowBuilding);
 		if(nowBuilding == 'pv'){
             grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
 
