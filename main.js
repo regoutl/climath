@@ -33,7 +33,7 @@ $(function(){
 
 
     /// load ground usage
-    let map = new Map(cGrUse);
+    let grid = new Grid(cGrUse);
 
 
     /// switch to ground usage tab
@@ -46,8 +46,6 @@ $(function(){
         $('#dPlotDisplay').css('display', 'none');
     }
     tabGroundUsage();
-
-
 
 	/// switch to the pop plot tab
 	function tabPlot(e){
@@ -110,19 +108,37 @@ $(function(){
 		$('#' + t + 'BuildDetails').css('display', 'block');
 	});
 
+    $('#groundUsage').on('click', (evt) => {
+        if(!nowBuilding)
+            return;
+        var curPos = {x: evt.offsetX, y: evt.offsetY};
+        if(nowBuilding == 'pv'){
+            // let m = grid;
+            grid.saveCircle(
+                curPos.x,
+                curPos.y,
+                $('#pvBuildRange').val(),
+                'pv');
+            // grid.forEachInCircle({
+            //     x:curPos.x,
+            //     y:curPos.y,
+            //     radius:$('#pvBuildRange').val(),
+            // }, (x, y, pix) => {
+            //     pix.landUse = 'solarpanel';
+            //     return pix;
+            // })
+        }
+    })
 	$('#groundUsage').on('mousemove', function(evt){
 		if(!nowBuilding)
 			return;
 
-		// cGrUse.drawImage(groundUseMap, 0, 0);
-
 		var curPos = {x: evt.offsetX,
 					 y: evt.offsetY};
-         // console.log(map.getPx(curPos.x, curPos.y));
 
 
 		if(nowBuilding == 'pv'){
-            map.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
+            grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
 
 			// cGrUse.beginPath();
 			// cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);
