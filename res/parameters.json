@@ -47,10 +47,10 @@
 		"comment":"Inclut le carburant",
 		"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf"
 	},
-	"nukeCapex":{
+	"nukeCapexCost":{
 		"label":"Frais d'installation",
 		"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf",
-		"unit":"€/W",
+		"unit":"€/N",
 		"years":[4.43],
 		"in2050":4.43
 	},

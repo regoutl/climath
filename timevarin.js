@@ -17,7 +17,7 @@ function bezier(first, control1, control2, end, t){
 class TimeVaryingInput{
 	constructor(k){
 		this.unit = '';
-		/// the historical (aka verified, certain) data goes from [1950: histoUntill]
+		/// the historical (aka verified, certain) data goes from [2000: histoUntill]
 		this.histoUntill = 2018;
 		
 		this.years = [];
