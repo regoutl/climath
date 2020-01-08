@@ -39,13 +39,21 @@
 		"comment":"Cette valeur prend en compte l'installation, l'entretient et la decommission de la centrale, ainsi les emmissions liees au traitement des dechets, ainsi que la production du carburant. "
 	},
 	"nukeOnM":{
-		"label":"Frais d'exploitation et de maintenance",
+		"label":"Frais (variables)  d'exploitation et de maintenance du nucleaire",
 		"unit":"€/Wh",
 		"years":[26],
 		"valMul":0.000001,
 		"in2050":26,
 		"comment":"Inclut le carburant",
 		"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf"
+	},
+	"ccgtOnM":{
+		"label":"Frais (variables) d'exploitation et de maintenance des centrales gaz",
+		"unit":"€/Wh",
+		"years":[10],
+		"valMul":0.000001,
+		"in2050":10,
+		"source":"todo ; find the correct value"
 	},
 	"nukeCapexCost":{
 		"label":"Frais d'installation",
@@ -94,7 +102,7 @@
 				2.2, 1.7],
 		"euroPerWattin2050": 0.7,
 		"source":"https://atb.nrel.gov/electricity/2018/images/solar-util/chart-solar-util-capex-RD-2018.png. Pas de donnees avant 2007. La donnee etait en eur/W, a ete converti via W/m2, pour UI.",
-		"comment":"Donnee en € 2019. ",
+		"comment":"",
 		"ctrlPts": [{"x": 2020, "y": 80}, {"x": 2034, "y": 63}]
 	},
 
@@ -211,11 +219,19 @@
 		"unit":"W/S"
 	}
 },
-
 "countries":{
 	"china":{
 	},
 	"USA":{
 	}
+},
+"initInstalledCapa" : { 
+	"unit":"W",
+	"valMul":1000000000,
+	"pv":   3.58, 
+	"nuke": 5.92,
+	"ccgt": 6.97, 
+	"fossil": 1000000, 
+	"source":"https://www.electricitymap.org"
 }
 }

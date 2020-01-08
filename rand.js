@@ -1,3 +1,4 @@
+"use strict";
 var _lastRandValue = BigInt(1);
 
 function srand(val){

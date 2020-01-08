@@ -1,35 +1,64 @@
+"use strict";
+
+import Simulateur from './simulateurDePeche.js';
+
 function plainTextEuro(amound){
-	var inMillion = Math.round(amound * 0.000001).toString();
+	let coef = 0.000001, unit = 'million';
+	if(Math.abs(amound) >= 1000000){
+		coef *= 0.001;
+		unit = 'milliard';
+	}
+		
+		
+	var inMillion = Math.round(amound * coef).toString();
 
-	if(inMillion.length > 3)
-		inMillion = inMillion.substring(0, inMillion.length - 3) + ' ' + inMillion.substring(inMillion.length - 3);
 
-	return   inMillion +  " millions €";
+	return   inMillion +  " " + unit + " €";
 }
 
 
 $(function(){
+	
 	$('.vCountryName').text("Belgique");
+	
+	
+//	let loadParamsPromice = loadDataFile('res/parameters.json');
+	
+	let simu;
+	Promise.all(
+		[fetch('res/parameters.json').then((response) => {return response.json();}), //async load parameters.json, and interpred data as json
+     	 fetch('res/pvcapfactAll365.bin').then((response) => {return response.arrayBuffer();})//interpret as arraybuf
+		])
+	.then(function(values){ //called when all simu related res are loaded
+		simu = new Simulateur({	parameters: values[0], 
+								capaFactor : { //todo : move this to parameters
+									pv: new Uint8Array(values[1]),
+									nuke: 0.9,
+								},
+								valChangedCallbacks:{
+									money: function(money){
+										$('.vMoney').text(plainTextEuro(money));
+									},
+									year: function(year){
+										$('.vYear').text(year);
+									}
+								}});
 
-	var money = 10000000000;
 
-	var simu = new Simulateur;
-	simu.onParamLoaded = function(){
 		//print the values in the appropriates blocks
-		for(var k in simu.params){
+		for(let k in simu.params){
 			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(simu.year), simu.params[k].unit, true));
 		}
 		$('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
-	}
 
-    simu.loadParams();
+		
+	});
 
     var cGrUse = $("#groundUsage")[0].getContext("2d");
 
     var cPlot = $("#cPlot")[0];
     canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
 
-    $('.vMoney').text(plainTextEuro(money));
 
 
     /// load ground usage
@@ -76,15 +105,12 @@ $(function(){
 
 
 
-	simu.onNewYear = function(){
-		$('.vYear').text(simu.year);
-	};
 
 	$('#bRunSimu').on('click', () => {
 		simu.run();
 	});
 	$('#bAddLotPv').on('click', () => {
-		simu.capex({type: 'pv', area: 10000000000, powerDecline: 0.9966});
+		simu.capex(simu.prepareCapex({type: 'pv', area: 10000000000, powerDecline: 0.9966}));
 	});
 
 
