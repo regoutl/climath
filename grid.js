@@ -22,17 +22,43 @@ const GroundUsage = {
     4294040525:'solarpanel',
 };
 
+PopDensitylegend = {
+    4278190191:{min:5001, max:44973},
+    4279314829:{min:2001, max:5000},
+    4279979441:{min:1001, max:2000},
+    4280710099:{min:501, max:1000},
+    4281639415:{min:201, max:500},
+    4282890747:{min:101, max:200},
+    4284009982:{min:51, max:100},
+    4285327102:{min:21, max:50},
+    4286709503:{min:0, max:20},
+}
+countDensity = {
+  "0": 763983,
+  "4279314829": 23421,
+  "4279979441": 37733,
+  "4280710099": 49076,
+  "4281639415": 44879,
+  "4282890747": 116199,
+  "4284009982": 162670,
+  "4285327102": 191224,
+  "4286709503": 236257
+}//Not sure it is correct?
+
+
 const PopDensity = {
 };
 
 let gridslist = {
     groundUse: 'landUse.png',
     popDensity: 'popDensity.png',
+    // popDensitylegended: 'popDensity-legended.png',
     energyGrid: 'beedges.png',
 };
 let layerOrder = {
     'energyGrid':10,
     'groundUse':5,
+    // 'popDensitylegended':4,
     'popDensity':1
 };
 
@@ -47,6 +73,10 @@ function newCanvas(name, file, zindex, visible){
         canvas.imData = ctx.getImageData(0, 0, 1374, 1183);
         canvas.pixVal = new Uint32Array(
                                     canvas.imData.data.buffer);
+        ctx.clearRect(0, 0,
+            canvas[0].width,
+            canvas[0].height);
+        ctx.putImageData(canvas.imData,0,0);
     }
     im.src = 'res/' + file;
     canvas['Im'] = im;
@@ -120,11 +150,11 @@ class Grid{
         //     console.log(PopDensity[this.popDensityVal[y*1374+x]]);
         // }
         return {
-            pop: undefined,
+            pop: this._getPop[this.canvas['popDensity'].pixVal[y*1374+x]],
             solar: undefined,
             nuke: undefined,
-            // baseLandUse: GroundUsage[this.groundUseVal[y*1374+x]],
-            baseLandUse: undefined,
+            baseLandUse: GroundUsage[this.groundUseVal[y*1374+x]],
+            // baseLandUse: undefined,
         }
 	}
 
@@ -135,6 +165,12 @@ class Grid{
         // if(landUse.energyGrid === undefined){
         // }
 	}
+
+    logPx(x,y){
+        let col = this.canvas['popDensity'].pixVal[y*1374+x];
+        let legend = PopDensitylegend[col];
+        console.log('x:'+x+' y:'+y+' v:'+col+' legend:'+JSON.stringify(legend));
+    }
 
     // get the name of every grid
     listGrids(){
@@ -154,14 +190,26 @@ class Grid{
 
     saveCircle(x,y,radius, landuse) {
         let ctx = this.canvas['energyGrid'][0].getContext('2d');
-        // ctx.fillStyle = 'rgba(30,30,30,0.9)'
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2*Math.PI, true);
-        ctx.fill();
+        // ctx.fillStyle = 'rgba(255,35,90,179)';
+        // ctx.beginPath();
+        // ctx.arc(x, y, radius, 0, 2*Math.PI, true);
+        // ctx.fill();
+        this._forEarch(x,y,radius);
+        ctx.putImageData(this.canvas['energyGrid'].imData,0,0);
         ctx.drawImage(this.canvas['energyGrid']['Im'], 0, 0);
     }
 
-    setGridLayerCheckbox(){
+    _forEarch(x,y,radius) {
+        for(let i=-radius; i<radius; i++){
+            for(let j=-radius; j<radius; j++){
+                if(i*i+j*j<radius*radius){
+                    this.canvas['energyGrid'].pixVal[(y+j)*1374+(x+i)] = 4279314829;
+                }
+            }
+        }
+    }
+
+    setGridLayerCheckbox() {
         let grid = this;
         for (let m of Object.keys(layerOrder)) {
             let checkbox = $('<label>' + '<input type="checkbox"'+
