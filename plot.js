@@ -1,3 +1,4 @@
+"use strict";
 const PlotLeftMargin = 60.5;
 
 function quantityToHuman(value, unit, compact = false){

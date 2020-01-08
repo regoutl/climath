@@ -1,8 +1,10 @@
+"use strict";
+
 /// how this works : this moves 
 
 
-	var mousePos = {x: 0, y:0};
-	transform = {x: -00, y: 0, scale: 1};
+	let mousePos = {x: 0, y:0};
+	var transform = {x: -0, y: 0, scale: 1};
 		$('#dMovable').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
 
 	/// view control facilities----------------------------------------------------

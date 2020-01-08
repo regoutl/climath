@@ -1,3 +1,5 @@
+"use strict";
+
 const GroundUsage = {
     city: 4280501491,
     4280501491: 'city',
