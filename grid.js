@@ -24,7 +24,7 @@ const GroundUsage = {
     4294040525:'solarpanel',
 };
 
-PopDensitylegend = {
+const PopDensitylegend = {
     4278190191:{min:5001, max:44973},
     4279314829:{min:2001, max:5000},
     4279979441:{min:1001, max:2000},
@@ -35,7 +35,7 @@ PopDensitylegend = {
     4285327102:{min:21, max:50},
     4286709503:{min:0, max:20},
 }
-countDensity = {
+const countDensity = {
   "0": 763983,
   "4279314829": 23421,
   "4279979441": 37733,
