@@ -1,4 +1,5 @@
 "use strict";
+
 function mix(x, y, a){
 	return x * (1-a) + y * a;
 }
@@ -15,7 +16,7 @@ function bezier(first, control1, control2, end, t){
 	return mix2d(mix2d(tmp1, tmp2, t), mix2d(tmp2, tmp3, t), t);
 }
 
-class TimeVaryingInput{
+export class Raw{
 	constructor(k){
 		this.unit = '';
 		/// the historical (aka verified, certain) data goes from [2000: histoUntill]
@@ -187,7 +188,7 @@ function combineUnits(u1, u2, mult = true){
 	return myUnit;
 }
 
-class Mult{
+export class Mult{
 	constructor(subExpr1, subExpr2){
 		this.a = subExpr1;
 		this.b = subExpr2;
@@ -205,7 +206,7 @@ class Mult{
 	}
 }
 
-class Divide{
+export class Divide{
 	constructor(subExpr1, subExpr2){
 		this.a = subExpr1;
 		this.b = subExpr2;
@@ -223,7 +224,7 @@ class Divide{
 	}
 }
 
-class Add{
+export class Add{
 	constructor(subExpr1, subExpr2){
 		this.a = subExpr1;
 		this.b = subExpr2;
@@ -244,7 +245,7 @@ class Add{
 }
 
 
-class Constant{
+export class Constant{
 	constructor(val){
 		this.unit = '';
 		this.v = val;

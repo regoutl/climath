@@ -1,6 +1,8 @@
 "use strict";
 
 import Simulateur from './simulateurDePeche.js';
+import * as mapNav from './moveIt.js';
+import {Plot, canvasEnablePloting, quantityToHuman} from './plot.js';
 
 function plainTextEuro(amound){
 	let coef = 0.000001, unit = 'million';
@@ -67,7 +69,7 @@ $(function(){
     function tabGroundUsage(){
         // cGrUse.drawImage(groundUseMap, 0, 0); // TODO -> should be somewhere else
 
-        enableAreaMoving();
+        mapNav.enableAreaMoving();
 
         $('#dMovable').css('display', 'block');
         $('#dPlotDisplay').css('display', 'none');
@@ -76,7 +78,7 @@ $(function(){
 
 	/// switch to the pop plot tab
 	function tabPlot(e){
-		disableAreaMoving();
+		mapNav.disableAreaMoving();
 		$('#dMovable').css('display', 'none');
 		$('#dPlotDisplay').css('display', 'block');
 

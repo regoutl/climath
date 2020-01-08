@@ -1,6 +1,7 @@
 "use strict";
 
-
+import * as Yearly from "./timevarin.js";
+import {quantityToHuman} from "./plot.js";
 
 /// note : all years are assumed to be 365 days long
 export default class Simulateur{
@@ -32,29 +33,29 @@ export default class Simulateur{
 		// production means
 		this.productionMeans = {
 			pv:{
-				co2PerWh: new Constant(0), /// g co2 eq / watt
+				co2PerWh: new Yearly.Constant(0), /// g co2 eq / watt
 				
 				/// store pv with same stat. only used for yearly capacity update
 				/// store, for each (powerDeclinePerYears) the installed capacity
 				groups: new Map(),  
 				area: 0, ///m2 installed. usefull for o&m compute
-				onmPerWh: new Constant(0), //does not matter whether it produces or not
+				onmPerWh: new Yearly.Constant(0), //does not matter whether it produces or not
 			},
 			nuke:{
 				co2PerWh: this.params.nukeFootprint,
 				onmPerWh: this.params.nukeOnM,
 			},
 			ccgt:{
-				co2PerWh:new Constant(0.2), /// g co2 eq / watt
+				co2PerWh:new Yearly.Constant(0.2), /// g co2 eq / watt
 				onmPerWh: this.params.ccgtOnM, /// todo: check this value
 			},
 			fossil:{ // this is the energy not event going through electric form
 				//todo : check this number
 				// todo : move those hard coded values to parameters.json
-				co2PerWh:new Constant(0.3), /// g co2 eq / watt
+				co2PerWh:new Yearly.Constant(0.3), /// g co2 eq / watt
 					// O & M = 0 bc payed by the citizen directly. 
 					//todo: take citizens saving into account for the tax system when they pay less fossil fuel
-				onmPerWh: new Constant(0),  
+				onmPerWh: new Yearly.Constant(0),  
 			}
 		};
 		
@@ -62,7 +63,6 @@ export default class Simulateur{
 			/** array of batteries (map BatSpec => stored). 
 			 * struct BatterySpec{
 			 * 	storageCapacity: R wh
-			 *  stored : 		 R wh
 			 *  storageCapaDecline:   [0-1] yearly storage capacity evolution
 			 *  loadCoef		[0-1] 'energy actually Stored'/'energy injected'
 			 *  unloadCoef	    [0-1] 'energy output'/'actual discharge'
@@ -95,10 +95,10 @@ export default class Simulateur{
 		
 		this.year = 2019;
 		
-		this.co2Produced = new TimeVaryingInput(0.0);
+		this.co2Produced = new Yearly.Raw(0.0);
 		this.co2Produced.unit = 'C';
 		
-		this.costs = new TimeVaryingInput(0.0);
+		this.costs = new Yearly.Raw(0.0);
 		this.costs.unit = '€';
 	}
 	
@@ -126,25 +126,25 @@ export default class Simulateur{
 		// all the coefs
 					
 		for(let attrN in jsCoefs.tvi){
-			self.params[attrN] = new TimeVaryingInput(0);
+			self.params[attrN] = new Yearly.Raw(0);
 			self.params[attrN].fromJSON(jsCoefs.tvi[attrN]);
 		}
 					
 		// some derived quantities, might change
-		self.params['pvEnergyDensity'] = new Mult(self.params['pvEffi'], new Constant(1000 * 63 / 210));//wh/m2
+		self.params['pvEnergyDensity'] = new Yearly.Mult(self.params['pvEffi'], new Yearly.Constant(1000 * 63 / 210));//wh/m2
 		self.params['pvEnergyDensity'].label = "Densite energetique des panneaux solaires";
 		self.params['pvEnergyDensity'].source = "Estime via les stats des fermes solaires allemandes de berlin (irradiance similaire a la belgique)";
 		self.params['pvEnergyDensity'].unit = 'N/m2';
 		
-		self.params['conso'] = new Mult(self.params['pop'], self.params['consoPerCap']);
+		self.params['conso'] = new Yearly.Mult(self.params['pop'], self.params['consoPerCap']);
 		self.params['conso'].label = "consommation totale";
 		self.params['conso'].source = "population * consommation par habitant";
 
-		self.params['nukeDeco'] = new Mult(self.params['nukeCapexCost'], new Constant(jsCoefs.nuke.decommissioningRatio));
+		self.params['nukeDeco'] = new Yearly.Mult(self.params['nukeCapexCost'], new Yearly.Constant(jsCoefs.nuke.decommissioningRatio));
 		self.params['nukeDeco'].label = "Couts de démantèlement du nucleaire";
 		self.params['nukeDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
 
-		self.params['pvDeco'] = new Mult(self.params['pvFarmCapexCost'], new Constant(jsCoefs.pv.decommissioningRatio));
+		self.params['pvDeco'] = new Yearly.Mult(self.params['pvFarmCapexCost'], new Yearly.Constant(jsCoefs.pv.decommissioningRatio));
 		self.params['pvDeco'].label = "Couts de démantèlement du photovoltaique";
 		self.params['pvDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
 	}
@@ -168,16 +168,22 @@ export default class Simulateur{
 	 * @param what.capa : watt nameplate installed. note : can be negative
 	 * 
 	 * @param buildYear year of the build. default value : current year. 
+	 * @warning todo : how build year is affected by parameters evolution ?
 	 *
 	 * returns {co2  	  : co2 for the build
 	 * 			cost      : cost of the build
 	 * 			nameplate : peak watt production
 	 * 			otherStuff: pass internal data 
+	 * 			
 	 * 			}
 	 */
 	prepareCapex(what, buildYear = undefined){
 		let ans = {co2: 0, cost: 0, nameplate: 0};
 		ans.type = what.type;
+		
+		if(buildYear === undefined)
+			buildYear = this.year;
+		ans.buildYear = this.year;
 		
 		if(what.type=='pv'){
 			if(what.area === undefined)

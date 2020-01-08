@@ -1,7 +1,10 @@
 "use strict";
+
+import * as Yearly from "./timevarin.js"
+
 const PlotLeftMargin = 60.5;
 
-function quantityToHuman(value, unit, compact = false){
+export function quantityToHuman(value, unit, compact = false){
 	if(unit == '%')
 		return Math.round(value * 1000) / 10 + ' %';
 		
@@ -54,7 +57,7 @@ function unitToHuman(unit, compact = false){
 	return tmp.replace('  ', ' ');
 }
 
-class Plot{
+export class Plot{
 
 	constructor(timeVar, width, height){
 		this.data= timeVar;
@@ -388,7 +391,7 @@ function plotOnMove(evt){
 	}
 }
 
-function canvasEnablePloting(canvas){
+export function canvasEnablePloting(canvas){
 	canvas.addEventListener("click", plotOnClick);
 	canvas.addEventListener("mousemove", plotOnMove);
 	canvas.setPlot = function(plot){
@@ -398,7 +401,7 @@ function canvasEnablePloting(canvas){
 	}
 }
 
-function canvasDisablePloting(canvas){
+export function canvasDisablePloting(canvas){
 	canvas.removeEventListener("click", plotOnClick);
 	canvas.removeEventListener("mousemove", plotOnMove);
 	canvas.setPlot = undefined;

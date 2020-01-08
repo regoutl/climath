@@ -8,13 +8,13 @@
 		$('#dMovable').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
 
 	/// view control facilities----------------------------------------------------
-	function enableAreaMoving(){
+	export function enableAreaMoving(){
 		$("#dCentral").on("wheel", onWheel);
 		$('#dCentral').on("mousedown", onMouseDown);
 		$('body').on("mouseup", onMouseUp);
 	}
 	
-	function disableAreaMoving(){
+	export function disableAreaMoving(){
 		$("#dCentral").off("wheel", onWheel);
 		$('#dCentral').off("mousedown", onMouseDown);
 		$('body').off("mouseup", onMouseUp);
