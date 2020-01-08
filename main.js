@@ -54,15 +54,13 @@ $(function(){
 		
 	});
 
-    var cGrUse = $("#groundUsage")[0].getContext("2d");
-
     var cPlot = $("#cPlot")[0];
     canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
 
 
 
     /// load ground usage
-    let grid = new Grid(cGrUse);
+    let grid = new Grid();
 
 
     /// switch to ground usage tab
@@ -133,7 +131,7 @@ $(function(){
 		$('#' + t + 'BuildDetails').css('display', 'block');
 	});
 
-    $('#groundUsage').on('click', (evt) => {
+    $('#top').on('click', (evt) => {
         if(!nowBuilding)
             return;
         var curPos = {x: evt.offsetX, y: evt.offsetY};
@@ -154,13 +152,12 @@ $(function(){
             // })
         }
     })
-	$('#groundUsage').on('mousemove', function(evt){
+	$('#top').on('mousemove', function(evt){
 		if(!nowBuilding)
 			return;
 
 		var curPos = {x: evt.offsetX,
 					 y: evt.offsetY};
-
 
 		if(nowBuilding == 'pv'){
             grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());

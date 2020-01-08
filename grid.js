@@ -32,64 +32,64 @@ let gridslist = {
     popDensity: 'popDensity.png',
     energyGrid: 'beedges.png',
 };
-let layerOrder = ['energyGrid', 'groundUse', 'popDensity'];
+let layerOrder = {
+    'energyGrid':10,
+    'groundUse':5,
+    'popDensity':1
+};
+
+function newCanvas(name, file, zindex, visible){
+    let canvas = $('<canvas id="'+name+'"'
+                            + ' width="1374" height="1183"></canvas>');
+    let ctx = canvas[0].getContext("2d");
+    let im = new Image();
+    im.crossOrigin = '';
+    im.onload = () => {
+        ctx.drawImage(im, 0, 0);
+        canvas.imData = ctx.getImageData(0, 0, 1374, 1183);
+        canvas.pixVal = new Uint32Array(
+                                    canvas.imData.data.buffer);
+    }
+    im.src = 'res/' + file;
+    canvas['Im'] = im;
+    canvas.css({'z-index':zindex, visibility: (visible?'visible':'hidden'), position: 'fixed'});
+    $('#dMovable').append(canvas);
+    return canvas;
+}
 
 class Grid{
-    currentShowGrid = {'groundUse':true};
+    currentShowGrid = {'groundUse':true, 'energyGrid':true};
 
-	constructor(drawCtx){
-        this.drawCtx = drawCtx;
+	constructor(){
+        // create multicaneva;
 
         this.gridLoaded = 0;
         this.gridToLoad = Object.keys(gridslist).length;
 
+        this.canvas = {
+            top: $('#top'),
+        }
+
         // Load each grid
         for (const [name, file] of Object.entries(gridslist)) {
-            let im = new Image();
-            im.crossOrigin = '';
-            im.onload = () => {
-                this.clear();
-                this.drawCtx.drawImage(im, 0, 0);
-                this[name+'Data']=this.drawCtx.getImageData(0, 0, 1374, 1183);
-                this[name+'Val']=new Uint32Array(
-                                            this[name+'Data'].data.buffer);
-                this.clear();
-                this.gridLoaded ++;
-                if(this.gridLoaded === this.gridToLoad){
-                    this.drawGrid();
-                }
-            }
-            im.src = 'res/' + file;
-            this[name+'Im'] = im;
+            this.canvas[name] = newCanvas(name, file, layerOrder[name], this.currentShowGrid[name]);
         }
+
+        this.canvas.top[0].getContext("2d").globalAlpha = 0.3;
         this.setGridLayerCheckbox();
 	}
-
-    clear(){
-        this.drawCtx.clearRect(0, 0,
-            this.drawCtx.canvas.width,
-            this.drawCtx.canvas.height);
-        this.drawCtx.fillStyle = "rgba(0,0,0,1)";
-        this.drawCtx.fillRect(0, 0, this.drawCtx.width, this.drawCtx.height);
-        this.drawCtx.fillStyle = "rgba(0,0,0,1)";
-    }
 
     /**
         draw all specified grid, preserve order of drawing
         (first is first to be draw, thus is under the others)
     */
-    drawGrid(gridsToShow){
-        this.currentShowGrid = gridsToShow || this.currentShowGrid;
-        this.draw();
+    drawCanvas(name){
+        this.canvas[name].css('visibility','visible');
     }
-    draw(){
-        this.clear();
-        for (let gridname of layerOrder) {
-            if(this.currentShowGrid[gridname]){
-                this.drawCtx.putImageData(this[gridname+'Data'], 0, 0);
-            }
-        }
+    hideCanvas(name){
+        this.canvas[name].css('visibility','hidden');
     }
+
 	/// return the land use at a given pixel.
     /// faire l'ajoute des pv
 	/// ans format : pop  => int,
@@ -125,13 +125,14 @@ class Grid{
             pop: undefined,
             solar: undefined,
             nuke: undefined,
-            baseLandUse: GroundUsage[this.groundUseVal[y*1374+x]],
+            // baseLandUse: GroundUsage[this.groundUseVal[y*1374+x]],
+            baseLandUse: undefined,
         }
 	}
 
 	/// set pixel x, y with value with same format as get
 	setPx(x, y, landUse){
-        this.energyGrid[y*1374+x] = Number(4280501491);
+        // this.canvas['energyGrid'].pixVal[y*1374+x] = Number(4280501491);
         // GroundUsage[landUse.baseLandUse];
         // if(landUse.energyGrid === undefined){
         // }
@@ -142,46 +143,29 @@ class Grid{
         return Object.keys(gridslist);
     }
 
-    forEachInCircle({x,y,radius}, setter){
-        for(let i=-radius; i<radius; i++){
-            for(let j=-radius; j<radius; j++){
-                if(i*i+j*j<radius*radius){
-                    this.setPx = setter(x,y,this.getPx(x+i, y+j));
-                }
-            }
-        }
-        this.draw();
-    }
-
     drawCircle(x,y,radius) {
-        this.drawGrid(this.currentShowGrid);
-        this.drawCtx.beginPath();
-        this.drawCtx.arc(x, y, radius, 0, 2*Math.PI, true);
-        this.drawCtx.fill();
+        const ctx = this.canvas.top[0].getContext('2d');
+        ctx.clearRect(0, 0,
+            this.canvas.top[0].width,
+            this.canvas.top[0].height);
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2*Math.PI, true);
+        ctx.fill();
     }
 
     saveCircle(x,y,radius, landuse) {
-        let old = this.drawCtx.save();
-        this.clear();
-        this.drawCtx.putImageData(this['energyGridData'], 0, 0);
-        // this.drawCtx.beginPath();
-        // this.drawCtx.arc(x, y, radius, 0, 2*Math.PI, true);
-        this.drawCtx.fill();
-        console.log(this['energyGridIm']);
-        this.drawCtx.drawImage(this['energyGridIm'],0,0)
-        this['energyGridData']=this.drawCtx.getImageData(0, 0, 1374, 1183);
-        this['energyGridVal']=new Uint32Array(
-                                    this['energyGridData'].data.buffer);
-        this.drawCtx.restore(old);
+        let ctx = this.canvas['energyGrid'][0].getContext('2d');
+        // ctx.fillStyle = 'rgba(30,30,30,0.9)'
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2*Math.PI, true);
+        ctx.fill();
+        ctx.drawImage(this.canvas['energyGrid']['Im'], 0, 0);
     }
 
-    setGridVisible(grid, visible){
-        this.currentShowGrid[grid] = visible;
-        this.draw();
-    }
     setGridLayerCheckbox(){
         let grid = this;
-        for (let m of layerOrder.reverse()) {
+        for (let m of Object.keys(layerOrder)) {
             let checkbox = $('<label>' + '<input type="checkbox"'+
                 'name="' + m + '"' + ' value="'+ m + '"' +
                 (this.currentShowGrid[m] ? 'checked':'') + '> ' +
@@ -189,7 +173,12 @@ class Grid{
             $('#gridLayers').append(checkbox);
             $('#gridLayers input:checkbox').on('change',
             function() {
-                    grid.setGridVisible($(this).val(), $(this).is(':checked'));
+                    if($(this).is(':checked')){
+                        grid.drawCanvas($(this).val());
+                    }else{
+                        grid.hideCanvas($(this).val());
+
+                    }
             });
         }
     }
