@@ -2,6 +2,7 @@
 
 import * as Yearly from "./timevarin.js";
 import {quantityToHuman} from "./plot.js";
+import PriorityQueue from './res/priorityqueue.js';
 
 /// note : all years are assumed to be 365 days long
 export default class Simulateur{
@@ -30,9 +31,12 @@ export default class Simulateur{
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
 		this.productionMeansOrder = ['pv', 'nuke', 'ccgt', 'fossil'];
 		
+		this.pendingBuilds = new PriorityQueue((a, b) => a.build.end < b.build.end);
+		
 		// production means
 		this.productionMeans = {
 			pv:{
+				buildDelay: data.parameters.pv.buildTime,
 				co2PerWh: new Yearly.Constant(0), /// g co2 eq / watt
 				
 				/// store pv with same stat. only used for yearly capacity update
@@ -42,10 +46,12 @@ export default class Simulateur{
 				onmPerWh: new Yearly.Constant(0), //does not matter whether it produces or not
 			},
 			nuke:{
+				buildDelay: 7,
 				co2PerWh: this.params.nukeFootprint,
 				onmPerWh: this.params.nukeOnM,
 			},
 			ccgt:{
+				buildDelay: 1,
 				co2PerWh:new Yearly.Constant(0.2), /// g co2 eq / watt
 				onmPerWh: this.params.ccgtOnM, /// todo: check this value
 			},
@@ -77,7 +83,8 @@ export default class Simulateur{
 		for(let mean in this.productionMeans){
 			//note : fossil fuel have unlimited installed capacity
 			this.productionMeans[mean].capacity = data.parameters.initInstalledCapa[mean] * data.parameters.initInstalledCapa.valMul; //W installed
-			
+			this.productionMeans[mean].deconstructionRatio = data.parameters[mean].deconstructionRatio,
+
 			if(data.capaFactor[mean] === undefined)
 				data.capaFactor[mean] = 1.0;
 			
@@ -167,29 +174,42 @@ export default class Simulateur{
 	 * ENDIF
 	 * @param what.capa : watt nameplate installed. note : can be negative
 	 * 
-	 * @param buildYear year of the build. default value : current year. 
-	 * @warning todo : how build year is affected by parameters evolution ?
+	 * @param startBuildYear year of the build (of the click). default value : current year. 
+	 * @warning [if the build in confirmed] this value means that :
+	 * 				1) the cost (CO2 & euro) is applied on the start build year
+	 * 				2) the nameplate is the one that will be available at year startBuildYear + ans.
 	 *
-	 * returns {co2  	  : co2 for the build
-	 * 			cost      : cost of the build
-	 * 			nameplate : peak watt production
-	 * 			otherStuff: pass internal data 
-	 * 			
+	 * @returns 
+	 * 
+	 * IF nameplate > 0
+	 * 			{build.co2  	  : co2 for the build
+	 * 			build.cost      : cost of the build
+	 * 			build.begin		: year of the beginning of the build (@see param startBuildYear)
+	 * 			build.end		: year of the 1st production
+	 * 			nameplate : (Yearly value) peak watt production
 	 * 			}
+	 * ELSE
+	 * 			{demolish.co2  	  : co2 for the demolish
+	 * 			demolish.cost      : cost of the demolish
+	 * 			nameplate : (Yearly value) peak watt production (will be negative)
+	 * 			}
+	 * ENDIF
 	 */
-	prepareCapex(what, buildYear = undefined){
-		let ans = {co2: 0, cost: 0, nameplate: 0};
-		ans.type = what.type;
+	prepareCapex(what, beginBuildYear = undefined){
+		let ans = {};
 		
-		if(buildYear === undefined)
-			buildYear = this.year;
-		ans.buildYear = this.year;
+		if(beginBuildYear === undefined)
+			beginBuildYear = this.year;
+		
+		ans.type = what.type;
+		ans.build = {};
+		ans.build.begin = beginBuildYear;
+		ans.build.end = this.productionMeans[what.type].buildDelay + beginBuildYear;
 		
 		if(what.type=='pv'){
+			//check for parameters
 			if(what.area === undefined)
 				throw 'must define an area';
-			ans.area = what.area;
-			
 			if(what.effiMul === undefined)
 				what.effiMul = 1;
 			if(what.madeIn === undefined)
@@ -199,56 +219,69 @@ export default class Simulateur{
 			if(what.priceMul === undefined)
 				what.priceMul = 1;
 
-			ans.powerDecline = what.powerDecline;
+			let initNameplate = what.area * this.params.pvEnergyDensity.at(ans.build.begin) * what.effiMul;
+			ans.nameplate = new Yearly.Expo(ans.build.end, initNameplate, what.powerDecline);
 			
-			ans.nameplate = what.area * this.params.pvEnergyDensity.at(this.year) * what.effiMul;
+
+			//~ ans.area = what.area;
 			
-			ans.co2 = what.area * // m2
-					this.params.pvCapexEnergy.at(this.year) *  // wH / m2
-					this.params[what.madeIn + 'ElecFootprint'].at(this.year); // C / Wh
-			ans.cost  = what.area * what.priceMul * // m2
-					this.params.pvFarmCapexCost.at(this.year);  // eur/m2
+			
+			ans.build.co2 = what.area * // m2
+					this.params.pvCapexEnergy.at(ans.build.begin) *  // wH / m2
+					this.params[what.madeIn + 'ElecFootprint'].at(ans.build.begin); // C / Wh
+			ans.build.cost  = what.area * what.priceMul * // m2
+					this.params.pvFarmCapexCost.at(ans.build.begin);  // eur/m2
 		}
-		else if(what.type=='nuke'){
-			if(what.capa === undefined)
-				throw 'must define a capa';
-			ans.co2 = 0;
-			ans.cost  = what.capa * // N
-					this.params.nukeCapexCost.at(this.year);  // eur/N
-			ans.nameplate = what.capa;
-		}
+		//~ else if(what.type=='nuke'){
+			//~ if(what.capa === undefined)
+				//~ throw 'must define a capa';
+			//~ ans.co2 = 0;
+			//~ ans.cost  = what.capa * // N
+					//~ this.params.nukeCapexCost.at(this.year);  // eur/N
+			//~ ans.nameplate = what.capa;
+		//~ }
 		else
 			throw 'je connais pas ce genre d energie la';
 			
+			
+		//modify the ans if unbuild
+		if(ans.nameplate.at(ans.build.end) < 0){		
+			ans.demolish = {};
+			
+			ans.demolish.co2 = 0; //unbuild produces no co2
+			ans.demolish.cost =   -ans.build.cost * this.productionMeans[ans.type].deconstructionRatio;
+			
+			ans.build = undefined;
+		}
+		
+		
+		//no modif on the ans plz (garante no compute mistake)
+		Object.freeze(ans);
 		return ans;
 	}
 	
 	/** @brief build stuff. vals is the object returned by capexStat
 	 *  @ex capex(prepareCapex({type:pv, area:10})) // build 10 m2 of pv
+	 * @note : the build begin year must be the current one
 	 */
-	capex(vals){
-		if(vals.nameplate === undefined)
-			throw 'plz call prepareCapex';
-		
-		this.productionMeans[vals.type].capacity += vals.nameplate;
-		
-		//some weird shit around pv
-		if(vals.type=='pv'){
-			this.productionMeans.pv.area += vals.area;
+	execute(cmd){
+		if(cmd.build){
+			if(cmd.build.begin !== this.year)
+				throw 'can only build in present';
 			
-			if(!this.productionMeans.pv.groups.has(vals.powerDecline))
-				this.productionMeans.pv.groups.set(vals.powerDecline, vals.nameplate);
-			else
-				this.productionMeans.pv.groups.set(vals.powerDecline, 
-						this.productionMeans.pv.groups.get(vals.powerDecline) + vals.nameplate);
+			this.pendingBuilds.push(cmd);
 		}
+		else if(cmd.demolish)
+			this._processBuild(cmd);
 		
 		//record some stats
-		this.co2Produced.setAt(this.year, this.co2Produced.at(this.year) + vals.co2);
-		this.costs.setAt(this.year, this.costs.at(this.year) + vals.cost);
+		let action = cmd.build || cmd.demolish;
+		
+		this.co2Produced.addAt(this.year, action.co2);
+		this.costs.addAt(this.year, action.cost);
 
 		//and modify the actual value
-		this.money -= vals.cost;
+		this.money -= action.cost;
 	}
 	
 	/// decrease pv capex according to the power decline coef
@@ -326,10 +359,35 @@ export default class Simulateur{
 		
 		console.log("co2 produced " + quantityToHuman(this.co2Produced.at(this.year), "C"));
 		
-		this._doPowerDecline();
-		
-		
 		this.year ++;
 		
+		this._doPowerDecline();
+		this._processPendingBuilds();
+	}
+	
+	_processPendingBuilds(){
+		let a =this.pendingBuilds.peek();
+		while(a && a.build.end == this.year){
+			this.processBuild(this.pendingBuilds.pop());
+
+			a =this.pendingBuilds.peek();
+		}
+	}
+
+	_processBuild(build){
+		this.productionMeans[build.type].capacity += build.nameplate.at(this.year);
+	
+		//some weird shit around pv
+		if(build.type=='pv'){
+			//~ this.productionMeans.pv.area += build.area;
+			
+			let powerDecline = build.nameplate.rate;
+			
+			if(!this.productionMeans.pv.groups.has(powerDecline))
+				this.productionMeans.pv.groups.set(powerDecline, build.nameplate.at(this.year));
+			else
+				this.productionMeans.pv.groups.set(powerDecline, 
+						this.productionMeans.pv.groups.get(powerDecline) + build.nameplate.at(this.year));
+		}
 	}
 }

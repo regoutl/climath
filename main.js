@@ -110,7 +110,9 @@ $(function(){
 		simu.run();
 	});
 	$('#bAddLotPv').on('click', () => {
-		simu.capex(simu.prepareCapex({type: 'pv', area: 10000000000, powerDecline: 0.9966}));
+		let myPlan = simu.prepareCapex({type: 'pv', area: 10000000000, powerDecline: 0.9966});
+		
+		simu.execute(myPlan);
 	});
 
 

@@ -137,9 +137,15 @@
 		"comment":"cette valeur change fortement d'etat en etat"
 	}
 },
+"ccgt":{
+	"deconstructionRatio":0.05, 
+},
+"fossil":{
+	"deconstructionRatio":0.0, 
+},
 "nuke":{
 	"buildTime": 8,
-	"decommissioningRatio":0.15, 
+	"deconstructionRatio":0.15, 
 	"maxCentralSize":1600,
 	"note":"a verifier (maxCentralSize)",
 	"water":{
@@ -160,7 +166,7 @@
 },
 "pv":{
 	"buildTime": 1,
-	"decommissioningRatio":0.05,
+	"deconstructionRatio":0.05,
 	"resiFirms":{
 		"sunPower":{
 			"pvEffiMul":0.88,

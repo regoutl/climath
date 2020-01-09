@@ -58,6 +58,12 @@ export class Raw{
 			throw "year must be in [2000:2050]";
 		this.years[year - 2000] = val;
 	}
+	/// convenience ; equivalent to setAt(year, at(year) + val)
+	addAt(year, val){
+		if(year < 2000 || year > 2050)
+			throw "year must be in [2000:2050]";
+		this.years[year - 2000] += val;
+	}
 	
 	lastHistoricalYear(){
 		return this.histoUntill;
@@ -253,6 +259,30 @@ export class Constant{
 
 	at(year){
 		return this.v;
+	}
+	lastHistoricalYear(){
+		return 2050;
+	}
+}
+
+export class Expo{
+	/** build an exponent shaped value :=
+	*     [2000: startYear[ = 0
+	*     startYear = startValue
+	* 	  year_i = year i-1 * coef   forall i > startYear
+	*/ 
+	constructor(startYear, startValue, coef){
+		this.unit = '';
+		this.firstNonZero = startYear;
+		this.init = startValue;
+		this.rate = coef;
+	}
+
+	at(year){
+		if(year < this.firstNonZero)
+			return 0;
+			
+		return Math.pow(this.rate, year - this.firstNonZero) * this.init;
 	}
 	lastHistoricalYear(){
 		return 2050;
