@@ -190,25 +190,79 @@ class Grid{
         ctx.fill();
     }
 
-    saveCircle(x,y,radius, landuse) {
+    _nrg2color(nrj, year){
+        if(nrj == 'pv'){
+            return {red:0, green:year-2000, blue:250, alpha:150};
+        }
+        return {red:255, green:255, blue:255, alpha:100};
+    }
+    _color2nrj(c){
+        if(!isNaN(c)){
+            let a = c>>24 & 0xFF,
+                b = c>>16 & 0xFF,
+                g = c>>8 & 0xFF,
+                r = c & 0xFF;
+                c = {red:r, blue:b, green:g, alpha:a}
+        }
+        if(c.red === 255 && c.blue === 255 && c.green === 255 && c.alpha === 255){
+            return undefined;
+        } else if(c.red === 0 && c.blue === 250){
+            return {nrj:'pv', year:2000+c.green};
+        }
+        return {};
+    }
+
+    saveCircle(x,y,radius, nrj, year) {
         let ctx = this.canvas['energyGrid'][0].getContext('2d');
-        // ctx.fillStyle = 'rgba(255,35,90,179)';
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
         // ctx.beginPath();
         // ctx.arc(x, y, radius, 0, 2*Math.PI, true);
         // ctx.fill();
-        this._forEarch(x,y,radius);
+        this._setForEarch(x,y,radius, this._nrg2color(nrj, year));
         ctx.putImageData(this.canvas['energyGrid'].imData,0,0);
         ctx.drawImage(this.canvas['energyGrid']['Im'], 0, 0);
     }
 
-    _forEarch(x,y,radius) {
+    _setForEarch(x,y,radius, color) {
+        let r = color.red & 0xFF,
+            g = color.green & 0xFF,
+            b = color.blue & 0xFF,
+            a = color.alpha & 0xFF;
+        let abgr = (a << 24) + (b << 16) + (g << 8) + (r);
         for(let i=-radius; i<radius; i++){
             for(let j=-radius; j<radius; j++){
                 if(i*i+j*j<radius*radius){
-                    this.canvas['energyGrid'].pixVal[(y+j)*1374+(x+i)] = 4279314829;
+                    // this.canvas['energyGrid'].pixVal[(y+j)*1374+(x+i)] = 4279314829;
+                    this.canvas['energyGrid'].pixVal[(y+j)*1374+(x+i)] = abgr;
                 }
             }
         }
+    }
+
+    getNRJcount(){
+        let count = {
+            'pv':{},
+            countrysize:0,
+        }
+        for(let x=0; x<this.canvas.top[0].width; x++){
+            for(let y=0; y<this.canvas.top[0].height; y++){
+                let nrj = this._color2nrj(
+                            this.canvas['energyGrid'].pixVal[(y)*1374+(x)]);
+                if(nrj !== undefined){
+                    count.countrysize ++;
+                    if(nrj.nrj !== undefined){
+                        if(nrj.nrj === 'pv'){
+                            if(count['pv'][nrj.year] === undefined){
+                                count['pv'][nrj.year] = 1;
+                            } else {
+                                count['pv'][nrj.year] ++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return count;
     }
 
     setGridLayerCheckbox() {

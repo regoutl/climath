@@ -10,8 +10,8 @@ function plainTextEuro(amound){
 		coef *= 0.001;
 		unit = 'milliard';
 	}
-		
-		
+
+
 	var inMillion = Math.round(amound * coef).toString();
 
 
@@ -20,19 +20,19 @@ function plainTextEuro(amound){
 
 
 $(function(){
-	
+
 	$('.vCountryName').text("Belgique");
-	
-	
+
+
 //	let loadParamsPromice = loadDataFile('res/parameters.json');
-	
+
 	let simu;
 	Promise.all(
 		[fetch('res/parameters.json').then((response) => {return response.json();}), //async load parameters.json, and interpred data as json
      	 fetch('res/pvcapfactAll365.bin').then((response) => {return response.arrayBuffer();})//interpret as arraybuf
 		])
 	.then(function(values){ //called when all simu related res are loaded
-		simu = new Simulateur({	parameters: values[0], 
+		simu = new Simulateur({	parameters: values[0],
 								capaFactor : { //todo : move this to parameters
 									pv: new Uint8Array(values[1]),
 									nuke: 0.9,
@@ -53,7 +53,7 @@ $(function(){
 		}
 		$('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
 
-		
+
 	});
 
     var cPlot = $("#cPlot")[0];
@@ -111,7 +111,7 @@ $(function(){
 	});
 	$('#bAddLotPv').on('click', () => {
 		let myPlan = simu.prepareCapex({type: 'pv', area: 10000000000, powerDecline: 0.9966});
-		
+
 		simu.execute(myPlan);
 	});
 
@@ -140,20 +140,12 @@ $(function(){
             return;
         var curPos = {x: evt.offsetX, y: evt.offsetY};
         if(nowBuilding == 'pv'){
-            // let m = grid;
             grid.saveCircle(
                 curPos.x,
                 curPos.y,
                 $('#pvBuildRange').val(),
-                'pv');
-            // grid.forEachInCircle({
-            //     x:curPos.x,
-            //     y:curPos.y,
-            //     radius:$('#pvBuildRange').val(),
-            // }, (x, y, pix) => {
-            //     pix.landUse = 'solarpanel';
-            //     return pix;
-            // })
+                'pv', 2019);
+                // $('.vYear').text(year)); // TODO set Year
         }
     })
 	$('#top').on('mousemove', function(evt){
@@ -165,27 +157,7 @@ $(function(){
 
 		if(nowBuilding == 'pv'){
             grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
-
-			// cGrUse.beginPath();
-			// cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);
-			// cGrUse.stroke();
-
-			// var radius = $('#pvBuildRange').val();
-            //
-			// var imgData = cGrUse.getImageData(curPos.x - radius, curPos.y - radius, 2*radius, 2*radius);
-			// var pix = new Uint32Array(imgData.data.buffer);
-            //
-            //
-			// var area = pix[0];
-            //
-			// cGrUse.putImageData(imgData, curPos.x - radius, curPos.y - radius);
-            //
-			// $('#vBuildPvCost').text(area);
-
-
 		}
-		//~ cGrUse.fillStyle = 'red';
-		//~ cGrUse.fillRect(curPos.x, curPos.y, 10, 10);
 	});
 
 
