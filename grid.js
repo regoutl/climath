@@ -241,7 +241,7 @@ class Grid{
 
     getNRJcount(){
         let count = {
-            'pv':{},
+            pv:{},
             countrysize:0,
         }
         for(let x=0; x<this.canvas.top[0].width; x++){
