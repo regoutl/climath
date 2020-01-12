@@ -142,20 +142,12 @@ $(function(){
             return;
         var curPos = {x: evt.offsetX, y: evt.offsetY};
         if(nowBuilding == 'pv'){
-            // let m = grid;
             grid.saveCircle(
                 curPos.x,
                 curPos.y,
                 $('#pvBuildRange').val(),
-                'pv');
-            // grid.forEachInCircle({
-            //     x:curPos.x,
-            //     y:curPos.y,
-            //     radius:$('#pvBuildRange').val(),
-            // }, (x, y, pix) => {
-            //     pix.landUse = 'solarpanel';
-            //     return pix;
-            // })
+                'pv', 2019);
+                // $('.vYear').text(year)); // TODO set Year
         }
     })
 	$('#top').on('mousemove', function(evt){
@@ -167,27 +159,7 @@ $(function(){
 
 		if(nowBuilding == 'pv'){
             grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
-
-			// cGrUse.beginPath();
-			// cGrUse.arc(curPos.x, curPos.y, $('#pvBuildRange').val(), 0, 2 * Math.PI);
-			// cGrUse.stroke();
-
-			// var radius = $('#pvBuildRange').val();
-            //
-			// var imgData = cGrUse.getImageData(curPos.x - radius, curPos.y - radius, 2*radius, 2*radius);
-			// var pix = new Uint32Array(imgData.data.buffer);
-            //
-            //
-			// var area = pix[0];
-            //
-			// cGrUse.putImageData(imgData, curPos.x - radius, curPos.y - radius);
-            //
-			// $('#vBuildPvCost').text(area);
-
-
 		}
-		//~ cGrUse.fillStyle = 'red';
-		//~ cGrUse.fillRect(curPos.x, curPos.y, 10, 10);
 	});
 
 
