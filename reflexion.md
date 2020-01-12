@@ -1,6 +1,6 @@
-#Interface entre grid et simu
+# Interface entre grid et simu
 
-##Idée 1 : simu garde en memoire les différences
+## Idée 1 : simu garde en memoire les différences
 
 ```javascript
 on(click, ()=>{
@@ -21,7 +21,7 @@ class Grid {
 - dupplication des infos entre l'affichage et la simulation
 
 
-##Idée 2 : calculer à la simu la somme des infrastructures de chaque type
+## Idée 2 : calculer à la simu la somme des infrastructures de chaque type
 
 ```javascript
 on(over, ()=>{
