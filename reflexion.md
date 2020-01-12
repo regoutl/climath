@@ -5,14 +5,15 @@
 ```javascript
 function prepareBuild(what, cursor, radius, flags){
         if(what == 'pv'){
-          areaData = grid.getAreaAndAvgIrradiance(cursor, radius, flags);
+          let cmd = {};
+          cmd.grid = grid.getAreaAndAvgIrradiance(cursor, radius, flags);
 
           let build;
           build.type = 'pv';
-          build.area = areaData.area;
-          build.effiMul = areaData.avg;
+          build.area = cmd.grid.area;
+          build.effiMul = cmd.grid.avgIrradiance;
 
-          let cmd = simu.prepareCapex(build);
+          cmd.simu = simu.prepareCapex(build);
 
           return cmd;
         }
