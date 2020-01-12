@@ -141,16 +141,6 @@ class Grid{
 	///     Airport
 	/// }
 	getPx(x, y){
-        // if(GroundUsage[this.groundUseData[y*1374+x]] === undefined) {
-        //     console.log('x:'+x+' y:'+y+'  v:'+this.groundUseData[y*1374+x]);
-        // } else {
-        //     console.log(GroundUsage[this.groundUseData[y*1374+x]]);
-        // }
-        // if(PopDensity[this.popDensityVal[y*1374+x]] === undefined) {
-        //     console.log('x:'+x+' y:'+y+'  pop:'+this.popDensityVal[y*1374+x]);
-        // } else {
-        //     console.log(PopDensity[this.popDensityVal[y*1374+x]]);
-        // }
         return {
             pop: this._getPop[this.canvas['popDensity'].pixVal[y*1374+x]],
             solar: undefined,
