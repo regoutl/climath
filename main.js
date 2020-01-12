@@ -10,8 +10,8 @@ function plainTextEuro(amound){
 		coef *= 0.001;
 		unit = 'milliard';
 	}
-		
-		
+
+
 	var inMillion = Math.round(amound * coef).toString();
 
 
@@ -20,23 +20,19 @@ function plainTextEuro(amound){
 
 
 $(function(){
-	
+
 	$('.vCountryName').text("Belgique");
-	
-	
+
+
 //	let loadParamsPromice = loadDataFile('res/parameters.json');
-	
+
 	let simu;
 	Promise.all(
 		[fetch('res/parameters.json').then((response) => {return response.json();}), //async load parameters.json, and interpred data as json
-     	 fetch('res/pvcapfactAll365.bin').then((response) => {return response.arrayBuffer();})//interpret as arraybuf
+// now encoded in parameters itself    	 fetch('res/pvcapfactAll365.bin').then((response) => {return response.arrayBuffer();})//interpret as arraybuf
 		])
 	.then(function(values){ //called when all simu related res are loaded
-		simu = new Simulateur({	parameters: values[0], 
-								capaFactor : { //todo : move this to parameters
-									pv: new Uint8Array(values[1]),
-									nuke: 0.9,
-								},
+		simu = new Simulateur({	parameters: values[0],
 								valChangedCallbacks:{
 									money: function(money){
 										$('.vMoney').text(plainTextEuro(money));
@@ -47,34 +43,34 @@ $(function(){
 								}});
 
 
-		//print the values in the appropriates blocks
-		for(let k in simu.params){
-			$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(simu.year), simu.params[k].unit, true));
-		}
-		$('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
+		// //print the values in the appropriates blocks
+		// for(let k in simu.params){
+		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(simu.year), simu.params[k].unit, true));
+		// }
+		// $('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
 
-		
+
 	});
 
-    var cPlot = $("#cPlot")[0];
-    canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
+  var cPlot = $("#cPlot")[0];
+  canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
 
 
 
-    /// load ground usage
-    let grid = new Grid();
+  /// load ground usage
+  let grid = new Grid();
 
 
-    /// switch to ground usage tab
-    function tabGroundUsage(){
-        // cGrUse.drawImage(groundUseMap, 0, 0); // TODO -> should be somewhere else
+  /// switch to ground usage tab
+  function tabGroundUsage(){
+      // cGrUse.drawImage(groundUseMap, 0, 0); // TODO -> should be somewhere else
 
-        mapNav.enableAreaMoving();
+      mapNav.enableAreaMoving();
 
-        $('#dMovable').css('display', 'block');
-        $('#dPlotDisplay').css('display', 'none');
-    }
-    tabGroundUsage();
+      $('#dMovable').css('display', 'block');
+      $('#dPlotDisplay').css('display', 'none');
+  }
+  tabGroundUsage();
 
 	/// switch to the pop plot tab
 	function tabPlot(e){
@@ -111,7 +107,13 @@ $(function(){
 	});
 	$('#bAddLotPv').on('click', () => {
 		let myPlan = simu.prepareCapex({type: 'pv', area: 10000000000, powerDecline: 0.9966});
-		
+
+		simu.execute(myPlan);
+	});
+	$('#bAddLotBat').on('click', () => {
+		let myPlan = simu.prepareCapex({type: 'battery',
+										storageCapacity: 10000000000000});
+
 		simu.execute(myPlan);
 	});
 
