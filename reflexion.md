@@ -4,8 +4,19 @@
 
 ```javascript
 on(click, ()=>{
-        area = addToMap(pos, rad);
-        simu.add(area, spec);
+        if(pv == 'pv'){
+          areaData = grid.getAreaAndAvgIrradiance(cursor, radius, flags);
+          let build;
+          build.type = 'pv';
+          build.area = areaData.area;
+          build.effiMul = areaData.avg;
+
+          let cmd = simu.prepareCapex(build);
+
+          alert(cmd)
+
+          simu.execute(cmd);
+        }
     });
 ```
 ```javascript
@@ -15,6 +26,8 @@ class Grid {
     }
 }
 ```
+
+
 
 + Simu est déjà penser comme ça
 + Sauvegarde de toutes les actions en JSON
