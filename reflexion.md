@@ -20,7 +20,7 @@ function prepareBuild(what, cursor, radius, flags){
 
 //on build confirmed
 function execBuild(cmd){  
-  gird.commitBuild();
+  gird.commitBuild(cmd);
 
   simu.execute(cmd);
 
