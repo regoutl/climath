@@ -3,9 +3,10 @@
 ## Idée 1 : simu garde en memoire les différences
 
 ```javascript
-on(click, ()=>{
-        if(pv == 'pv'){
+function prepareBuild(what, cursor, radius, flags){
+        if(what == 'pv'){
           areaData = grid.getAreaAndAvgIrradiance(cursor, radius, flags);
+
           let build;
           build.type = 'pv';
           build.area = areaData.area;
@@ -13,11 +14,29 @@ on(click, ()=>{
 
           let cmd = simu.prepareCapex(build);
 
-          alert(cmd)
-
-          simu.execute(cmd);
+          return cmd;
         }
-    });
+    }
+
+//on build confirmed
+function execBuild(cmd){  
+  gird.commitBuild();
+
+  simu.execute(cmd);
+
+}
+
+function Demolish(filterFunction, cursor, radius){
+  forEach(pixel in (cursor, radius)){
+    if(filterFunction(pixel)){
+      (what, flags) = getPixelExistingBuild();
+      cmd = prepareBuild(what, cursor, radius, flags);
+      cmd.inverse()
+
+      execBuild(cmd)
+    }
+  }
+}
 ```
 ```javascript
 class Grid {
