@@ -20,15 +20,27 @@ export default class AbstractProductionMean{
 
     this._currentYear = {};
 
-    this.build = {};
+    this.build = {co2: new Yearly.Raw(0)};
     this.build.delay = parameters.build.time;
-    this.build.cost = new Yearly.Raw(0);
-    this.build.cost.fromJSON(parameters.build.cost);
+    this.build.cost = new Yearly.Raw(parameters.build.cost);
 
     this.deconstructionRatio = parameters.deconstructionRatio;
 
-    this.fixedOnM = new Yearly.Raw(0.0);
-    this.fixedOnM.fromJSON(parameters.onm);
+    this.perWh = {cost:  new Yearly.Raw(0), co2:  new Yearly.Raw(0)};
+    this.perYear = {cost:  new Yearly.Raw(0),
+                    co2:  new Yearly.Raw(0)};
+    if(parameters.perYear){
+      if(parameters.perYear.cost)
+        this.perYear.cost =  new Yearly.Raw(parameters.perYear.cost);
+      if(parameters.perYear.co2)
+        this.perYear.co2 =  new Yearly.Raw(parameters.perYear.co2);
+    }
+    if(parameters.perWh){
+      if(parameters.perWh.cost)
+        this.perWh.cost =  new Yearly.Raw(parameters.perWh.cost);
+      if(parameters.perWh.co2)
+        this.perWh.co2 =  new Yearly.Raw(parameters.perWh.co2);
+    }
   }
 
   /// return the amount that this can produce at current time t

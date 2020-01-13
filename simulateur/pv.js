@@ -34,7 +34,7 @@ export default class Pv extends IntermittentProductionMean{
 
 
     //compute fixed o & M
-    output.cost += this.area * this.fixedOnM.at(year); // pv
+    output.cost += this.area * this.perYear.cost.at(year); // pv
   }
 
 /**
@@ -92,7 +92,7 @@ export default class Pv extends IntermittentProductionMean{
 
     ans.pm = this;
 
-    ans.perYear = {cost: this.fixedOnM.at(ans.build.end) * what.area, co2: 0};
+    ans.perYear = {cost: this.perYear.cost.at(ans.build.end) * what.area, co2: 0};
     ans.perWh = {cost: 0, co2: 0};
     ans.avgCapacityFactor = 0.12; //todo : do a real computation ?
 

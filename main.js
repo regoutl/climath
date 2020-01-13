@@ -49,6 +49,8 @@ $(function(){
 		// $('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
 
 
+		$('#iTaxRate').val( simu.taxRate);
+		$('.vTaxRate').text(Math.round(simu.taxRate * 100) + '%');
 	});
 
   var cPlot = $("#cPlot")[0];
@@ -147,6 +149,12 @@ $(function(){
 		strco2Total = strco2Total.substr(0, strco2Total.length - 6);
 		$('.vTotalCo2').text(strco2Total);
 
+	});
+
+	$('#iTaxRate').on('input', function(e){
+		simu.taxRate = this.value;
+
+		$('.vTaxRate').text(Math.round(simu.taxRate * 100) + '%');
 	});
 
 /*

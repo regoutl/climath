@@ -154,6 +154,9 @@ class Grid{
     else if(buildState.type == 'battery'){
       ans.volume = validPixels * 200 * 200 * 5; //m3
     }
+    else if(buildState.type == 'nuke'){
+      ans.nameplate = 3000000000; //Watt
+    }
     else {
       throw 'to do';
     }

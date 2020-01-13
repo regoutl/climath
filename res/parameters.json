@@ -40,22 +40,24 @@
 			},
 			"time": 8
 		},
-		"footprint":{
-			"label":"Empreinte carbone du nucleaire",
-			"unit":"C/Wh",
-			"years":[0.012],
-			"in2050":0.012,
-			"source":"https://en.wikipedia.org/wiki/Life-cycle_greenhouse-gas_emissions_of_energy_sources",
-			"comment":"Cette valeur prend en compte l'installation, l'entretient et la decommission de la centrale, ainsi les emmissions liees au traitement des dechets, ainsi que la production du carburant. "
-		},
-		"onm":{
-			"label":"Frais (variables)  d'exploitation et de maintenance du nucleaire",
-			"unit":"€/Wh",
-			"years":[26],
-			"valMul":0.000001,
-			"in2050":26,
-			"comment":"Inclut le carburant",
-			"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf"
+		"perWh":{
+			"co2":{
+				"label":"Empreinte carbone du nucleaire",
+				"unit":"C/Wh",
+				"years":[0.012],
+				"in2050":0.012,
+				"source":"https://en.wikipedia.org/wiki/Life-cycle_greenhouse-gas_emissions_of_energy_sources",
+				"comment":"Cette valeur prend en compte l'installation, l'entretient et la decommission de la centrale, ainsi les emmissions liees au traitement des dechets, ainsi que la production du carburant. "
+			},
+			"cost":{
+				"label":"Frais (variables)  d'exploitation et de maintenance du nucleaire",
+				"unit":"€/Wh",
+				"years":[26],
+				"valMul":0.000001,
+				"in2050":26,
+				"comment":"Inclut le carburant",
+				"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf"
+			}
 		},
 
 		"deconstructionRatio":0.15,
@@ -122,13 +124,15 @@
 				"label":"Energie necessaire a la production d'un m2 de panneaux"
 			}
 		},
-		"onm":{
-			"years":[3.47],
-			"in2050": 3.47,
-			"unit":"€/m2y",
-			"source":"https://www.scottmadden.com/insight/solar-photovoltaic-plant-operating-and-maintenance-costs/",
-			"comment": "En supposant qu'il est independant du PIB par habitant. P.e. besoin d'etre capable de controler cette varaible. Donnee en € 2019.",
-			"label":"Frais d'exploitation et de maintenance"
+		"perYear":{
+			"cost":{
+				"years":[3.47],
+				"in2050": 3.47,
+				"unit":"€/m2y",
+				"source":"https://www.scottmadden.com/insight/solar-photovoltaic-plant-operating-and-maintenance-costs/",
+				"comment": "En supposant qu'il est independant du PIB par habitant. P.e. besoin d'etre capable de controler cette varaible. Donnee en € 2019.",
+				"label":"Frais d'exploitation et de maintenance"
+			}
 		},
 		"deconstructionRatio":0.05,
 		"unused_resiFirms":{

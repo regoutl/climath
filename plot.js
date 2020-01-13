@@ -72,10 +72,23 @@ export function plainTextEuro(amound){
 	if(amound == 0)
 		return 0 + ' €';
 
-	let coef = 0.000001, unit = 'million';
+	let coef = 1, unit = '';
 	if(Math.abs(amound) >= 1000000000){
-		coef *= 0.001;
+		coef = 0.000000001;
 		unit = 'milliard';
+	}
+	else if(Math.abs(amound) >= 1000000){
+		coef = 0.000001;
+		unit = 'million';
+	}
+	else if(Math.abs(amound) >= 1000){
+		coef = 0.001;
+		unit = 'miles';
+	}
+	else if(Math.abs(amound) >= 1);
+	else if(Math.abs(amound) >= 0.01){
+		coef = 100;
+		unit = 'cent';
 	}
 
 
@@ -85,7 +98,7 @@ export function plainTextEuro(amound){
 		inMillion = inMillion.substr(0, inMillion.length - 2);
 	}
 
-	return   inMillion +  " " + unit + " €";
+	return   inMillion +  " " + unit + (unit != 'cent' ? " €":"");
 }
 
 

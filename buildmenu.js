@@ -79,15 +79,19 @@ $(function(){
 });
 
 
-export function displayStat(cmd, currentCash){
+export function displayStat(cmd){
   ['build', 'perYear', 'perWh'].forEach( fieldName => {
     let cap = fieldName.substr(0, 1).toUpperCase() + fieldName.substr(1);
+    let mul = 1;
+    if(fieldName == 'perWh')
+      mul = 1000;
+
     let lines = [];
     if(cmd[fieldName] ){
       if(cmd[fieldName].cost != 0)
-        lines.push('<span class="vBM' + cap + 'Cost">' + plainTextEuro(cmd[fieldName].cost) + '</span>');
+        lines.push('<span class="vBM' + cap + 'Cost">' + plainTextEuro(cmd[fieldName].cost * mul) + '</span>');
       if(cmd[fieldName].co2 != 0)
-        lines.push(quantityToHuman(cmd[fieldName].co2, 'C'));
+        lines.push(quantityToHuman(cmd[fieldName].co2 * mul, 'C'));
 
     }
     if(lines.length > 0){
@@ -99,7 +103,7 @@ export function displayStat(cmd, currentCash){
     }
   });
 
-  $('.vBMBuildCost').css('color', 'red');
+  $('.vBMBuildCost').css('color', (cmd.build.can) ? 'black': 'red');
 
   if(cmd.area){
     $('.vBMArea').parent().show();

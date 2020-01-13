@@ -6,6 +6,7 @@ import PriorityQueue from './res/priorityqueue.js';
 import Pv from './simulateur/pv.js';
 import Fossil from './simulateur/fossil.js';
 import Storage from './simulateur/storage.js';
+import Nuke from './simulateur/nuke.js';
 
 /// note : all years are assumed to be 365 days long
 export default class Simulateur{
@@ -32,17 +33,17 @@ export default class Simulateur{
 
 		//sorted by priority (higher production mean will produce at max capa first)
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
-		this.productionMeansOrder = ['pv'/*, 'nuke'*/, 'storage'/*, 'ccgt'*/, 'fossil'];
+		this.productionMeansOrder = ['pv', 'nuke', 'storage'/*, 'ccgt'*/, 'fossil'];
 
 		// top := next to be finished build
 		this.pendingBuilds = new PriorityQueue((a, b) => a.build.end < b.build.end);
 
 		this.productionMeans = {
 			pv: new Pv(data.parameters.energies.pv),
-			// nuke: new Nuke(data.parameters),
+		  nuke: new Nuke(data.parameters.energies.nuke),
 			storage: new Storage(data.parameters.energies.storage),
 			// ccgt: new Ccgt(data.parameters),
-			 fossil: new Fossil(data.parameters.energies.fossil),
+		  fossil: new Fossil(data.parameters.energies.fossil),
 		};
 
 
@@ -55,12 +56,7 @@ export default class Simulateur{
 		this.costs.unit = '€';
 	}
 
-/*	_initNuke(){
-		this.productionMeans.nuke={
-			co2PerWh: this.params.nukeFootprint,
-			onmPerWh: this.params.nukeOnM,
-		};
-	}
+/*
 	_initCCGT(){
 		this.productionMeans.ccgt={
 			co2PerWh:new Yearly.Constant(0.2), /// g co2 eq / watt
@@ -166,6 +162,10 @@ export default class Simulateur{
 		else
 			ans = this.productionMeans[what.type]
 						.prepareCapex(what, beginBuildYear, this.countries);
+
+		if(ans.build){
+			ans.build.can = ans.build.cost < this._money;
+		}
 
 		Object.freeze(ans);
 
