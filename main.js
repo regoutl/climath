@@ -88,16 +88,20 @@ $(function(){
 			$('#dPlotDisplay .pComment').text('');
 	}
 
+	/// called for each change in what to build, or where to
 	function updatePreparedBuildData(){
+		// nothin to build, skip
 		if(BuildMenu.state === undefined)
 			return;
 
-
+		//ask the grid about ground usage aso
 		let build = grid.prepareBuild(BuildMenu.state,
 			{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});
 
+		//ask the simu what would happend on build
 		let simuBuild = simu.prepareCapex(build);
 
+		//display that information
 		BuildMenu.displayStat(simuBuild);
 
 		return simuBuild;
@@ -106,22 +110,23 @@ $(function(){
 	BuildMenu.setStateChangedCallback(updatePreparedBuildData);
 
 
+	//on click on the grid
 	$('#top').on('click', (evt) => {
+		//get build data (prepare capex)
 		let simuBuild = updatePreparedBuildData();
 
+		//try to execute it, and on success
 		if(simu.execute(simuBuild))
+			//save the modif on the grid
 			grid.build(BuildMenu.state,
 				{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});
 	});
 
-/*	$('#bRunSimu').on('click', () => {
+	$('#bRunSimu').on('click', () => {
 		simu.run();
 	});
-	$('#bAddLotPv').on('click', () => {
-		let myPlan = simu.prepareCapex({type: 'pv', area: 10000000000, powerDecline: 0.9966});
 
-		simu.execute(myPlan);
-	});
+/*
 	$('#bAddLotBat').on('click', () => {
 		let myPlan = simu.prepareCapex({type: 'battery',
 										storageCapacity: 10000000000000});
@@ -136,19 +141,7 @@ $(function(){
 		if(e.keyCode == 27)
 			tabGroundUsage();
 	});
-
-
-	$('#top').on('mousemove', function(evt){
-		if(!nowBuilding)
-			return;
-
-		let curPos = {x: evt.offsetX,
-					 y: evt.offsetY};
-
-		if(nowBuilding == 'pv'){
-            grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
-		}
-	});*/
+*/
 
 
 });

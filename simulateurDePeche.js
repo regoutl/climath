@@ -205,6 +205,7 @@ export default class Simulateur{
 	/** @brief build stuff. vals is the object returned by capexStat
 	 *  @ex capex(prepareCapex({type:pv, area:10})) // build 10 m2 of pv
 	 * @note : the build begin year must be the current one
+	 @return true on success.
 	 */
 	execute(cmd){
 		if(cmd.build){
@@ -224,6 +225,8 @@ export default class Simulateur{
 
 		//and modify the actual value
 		this.money -= action.cost;
+
+		return true;
 	}
 
 	// ///wrapper around eval. usage ex : evaluate('pop * gdpPerCap')

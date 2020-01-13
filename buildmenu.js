@@ -5,11 +5,11 @@ import { quantityToHuman, plainTextEuro} from './plot.js';
 **/
 export let state = undefined;
 /** @brief radius : Number (unit : pixel ( switch to meters ?) of the build*/
-export let radius = 0;
+export let radius = 50;
 /** @brief curPos : {x, y} (unit : pixel (switch meters ?)).
 @note if cursor is out of the map, undefined
 */
-export let curPos = {};
+export let curPos = undefined;
 
 let stateChangedCallback = undefined;
 
@@ -27,7 +27,7 @@ $(function(){
     let t = e.currentTarget.getAttribute("data-target");
 
     state = {};
-    state.label = t;
+    state.type = t;
     if(stateChangedCallback)
       stateChangedCallback();
 
@@ -42,7 +42,6 @@ $(function(){
       stateChangedCallback();
   });
 
-  radius = 50;
 
   $('#top').on('mousemove', function(evt){
     curPos = {x: evt.offsetX, y: evt.offsetY};

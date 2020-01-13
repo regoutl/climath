@@ -132,7 +132,29 @@ class Grid{
   @warning ans.area (if any) unit : m2
   **/
   prepareBuild(buildState, area){
+    //exemple code
+    let ans = {};
 
+    ans.theorical = (area.center === undefined);
+
+    let validPixels = area.radius * area.radius * 3.14;
+
+    if(!ans.theorical){
+      this.drawCircle(area.center.x, area.center.y, area.radius);
+      //count the valid pixels
+    }
+    else {
+      //clear cursor
+    }
+
+    ans.type = buildState.type;
+    if(buildState.type == 'pv')
+      ans.area = validPixels * 200 * 200; //m2
+    else {
+      throw 'to do';
+    }
+
+    return ans;
   }
 
 
@@ -146,6 +168,9 @@ class Grid{
     must succeed !
   **/
   build(buildState, area){
+    //exemple code
+    this.saveCircle(area.center.x, area.center.y, area.radius);
+
   }
 
 
