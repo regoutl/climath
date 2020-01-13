@@ -28,7 +28,7 @@ export default class Simulateur{
 		this.taxRate = this.minTaxRate + 0.05;
 
 
-		this.initParams(data.parameters);
+		this._initParams(data.parameters);
 
 		//sorted by priority (higher production mean will produce at max capa first)
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
@@ -69,6 +69,53 @@ export default class Simulateur{
 	}
 */
 
+	/// simulate using the coefs for the given year
+	/// simulation is done hour by hour
+	/// battery lvx is resumed from last run.
+	run(){
+		console.log(this.year);
+
+		//init a few things------------------------------------
+		let y = {co2:0, cost: 0};
+		y.conso=  this.countries.belgium.pop.at(this.year) *    //watt
+							this.countries.belgium.consoPerCap.at(this.year);
+
+		//taxes
+		y.cost -= this._computeTaxIncome();
+
+		for(let prodMeanIndex = 0;
+				prodMeanIndex < this.productionMeansOrder.length;
+				prodMeanIndex++){
+			let prodMeanLabel = this.productionMeansOrder[prodMeanIndex];//get label
+
+			let prodMean = this.productionMeans[prodMeanLabel];//get data for that prod mean
+			prodMean.happyNY(this.year, this, y);
+		}
+
+
+		//capacity factor sampling hour
+		let yearForTheCapaFactor = rand() % 100; //chooses a random year to sample the capacity factors from
+		y.capaFactHour = yearForTheCapaFactor * 365*24;
+		y.storageIndex = this.productionMeansOrder.indexOf('storage');
+
+		//simulate hour by hour------------------------------------
+		for(let i = 0; i < 8760; i++){
+			this._runHour(y);
+		}
+
+		// save the computed result
+		this.co2Produced.addAt(this.year,  y.co2);
+		this.costs.addAt(this.year, y.cost);
+		this.money -= y.cost;
+
+
+		console.log("co2 produced " + quantityToHuman(this.co2Produced.at(this.year), "C"));
+
+		this.year ++;
+
+		this._processPendingBuilds();
+	}
+
 
 	get money(){
 		return this._money;
@@ -86,58 +133,6 @@ export default class Simulateur{
 		this.valChangedCallbacks.year(this._year);
 	}
 
-	/// private function. init a lot of thing based on parametesr.json
-	initParams(jsCoefs){
-		this.countries = {belgium:{}, china:{}};
-
-		let be = this.countries.belgium;
-		be.pop = new Yearly.Raw(0);
-		be.pop.fromJSON(jsCoefs.countries.belgium.pop);
-		be.gdpPerCap = new Yearly.Raw(0);
-		be.gdpPerCap.fromJSON(jsCoefs.countries.belgium.gdpPerCap);
-		be.consoPerCap = new Yearly.Raw(0);
-		be.consoPerCap.fromJSON(jsCoefs.countries.belgium.consoPerCap);
-
-		be.irradiance = jsCoefs.countries.belgium.irradiance;
-
-		// be.conso = new Yearly.Mult(be.pop, be.consoPerCap);
-		// be.conso.label = "consommation totale";
-		// be.conso.source = "population * consommation par habitant";
-
-		let china = this.countries.china;
-		china.elecFootprint = new Yearly.Raw(0);
-		china.elecFootprint.fromJSON(jsCoefs.countries.china.elecFootprint);
-
-
-
-/*		let self = this;
-
-		self.params = {};
-		// all the coefs
-
-		for(let attrN in jsCoefs.tvi){
-			self.params[attrN] = new Yearly.Raw(0);
-			self.params[attrN].fromJSON(jsCoefs.tvi[attrN]);
-		}
-
-		// some derived quantities, might change
-		self.params['pvEnergyDensity'] = new Yearly.Mult(self.params['pvEffi'], new Yearly.Constant(1000 * 63 / 210));//wh/m2
-		self.params['pvEnergyDensity'].label = "Densite energetique des panneaux solaires";
-		self.params['pvEnergyDensity'].source = "Estime via les stats des fermes solaires allemandes de berlin (irradiance similaire a la belgique)";
-		self.params['pvEnergyDensity'].unit = 'N/m2';
-
-		self.params['conso'] = new Yearly.Mult(self.params['pop'], self.params['consoPerCap']);
-		self.params['conso'].label = "consommation totale";
-		self.params['conso'].source = "population * consommation par habitant";
-
-		self.params['nukeDeco'] = new Yearly.Mult(self.params['nukeCapexCost'], new Yearly.Constant(jsCoefs.nuke.decommissioningRatio));
-		self.params['nukeDeco'].label = "Couts de démantèlement du nucleaire";
-		self.params['nukeDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
-
-		self.params['pvDeco'] = new Yearly.Mult(self.params['pvFarmCapexCost'], new Yearly.Constant(jsCoefs.pv.decommissioningRatio));
-		self.params['pvDeco'].label = "Couts de démantèlement du photovoltaique";
-		self.params['pvDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";*/
-	}
 
 	/** @brief get the data about an installation
 	 * @param what.type : pv or nuke. required.
@@ -209,8 +204,14 @@ export default class Simulateur{
 	 */
 	execute(cmd){
 		if(cmd.build){
-			if(cmd.build.begin !== this.year)
-				throw 'can only build in present';
+			if(cmd.build.begin !== this.year){
+				console.log('can only build in present');
+				return false;
+			}
+			if(cmd.build.cost > this._money){
+				console.log('no enough cash');
+				return false;
+			}
 
 			this.pendingBuilds.push(cmd);
 		}
@@ -312,52 +313,6 @@ export default class Simulateur{
 		y.capaFactHour ++;
 	}
 
-	/// simulate using the coefs for the given year
-	/// simulation is done hour by hour
-	/// battery lvx is resumed from last run.
-	run(){
-		console.log(this.year);
-
-		//init a few things------------------------------------
-		let y = {co2:0, cost: 0};
-		y.conso=  this.countries.belgium.pop.at(this.year) *    //watt
-							this.countries.belgium.consoPerCap.at(this.year);
-
-		//taxes
-		y.cost -= this._computeTaxIncome();
-
-		for(let prodMeanIndex = 0;
-				prodMeanIndex < this.productionMeansOrder.length;
-				prodMeanIndex++){
-			let prodMeanLabel = this.productionMeansOrder[prodMeanIndex];//get label
-
-			let prodMean = this.productionMeans[prodMeanLabel];//get data for that prod mean
-			prodMean.happyNY(this.year, this, y);
-		}
-
-
-		//capacity factor sampling hour
-		let yearForTheCapaFactor = rand() % 100; //chooses a random year to sample the capacity factors from
-		y.capaFactHour = yearForTheCapaFactor * 365*24;
-		y.storageIndex = this.productionMeansOrder.indexOf('storage');
-
-		//simulate hour by hour------------------------------------
-		for(let i = 0; i < 8760; i++){
-			this._runHour(y);
-		}
-
-		// save the computed result
-		this.co2Produced.addAt(this.year,  y.co2);
-		this.costs.addAt(this.year, y.cost);
-		this.money -= y.cost;
-
-
-		console.log("co2 produced " + quantityToHuman(this.co2Produced.at(this.year), "C"));
-
-		this.year ++;
-
-		this._processPendingBuilds();
-	}
 
 
 	_processPendingBuilds(){
@@ -374,4 +329,58 @@ export default class Simulateur{
 		build.pm.capex(build);
 
 	}
+
+	/// private function. init a lot of thing based on parametesr.json
+	_initParams(jsCoefs){
+		this.countries = {belgium:{}, china:{}};
+
+		let be = this.countries.belgium;
+		be.pop = new Yearly.Raw(0);
+		be.pop.fromJSON(jsCoefs.countries.belgium.pop);
+		be.gdpPerCap = new Yearly.Raw(0);
+		be.gdpPerCap.fromJSON(jsCoefs.countries.belgium.gdpPerCap);
+		be.consoPerCap = new Yearly.Raw(0);
+		be.consoPerCap.fromJSON(jsCoefs.countries.belgium.consoPerCap);
+
+		be.irradiance = jsCoefs.countries.belgium.irradiance;
+
+		// be.conso = new Yearly.Mult(be.pop, be.consoPerCap);
+		// be.conso.label = "consommation totale";
+		// be.conso.source = "population * consommation par habitant";
+
+		let china = this.countries.china;
+		china.elecFootprint = new Yearly.Raw(0);
+		china.elecFootprint.fromJSON(jsCoefs.countries.china.elecFootprint);
+
+
+
+/*		let self = this;
+
+		self.params = {};
+		// all the coefs
+
+		for(let attrN in jsCoefs.tvi){
+			self.params[attrN] = new Yearly.Raw(0);
+			self.params[attrN].fromJSON(jsCoefs.tvi[attrN]);
+		}
+
+		// some derived quantities, might change
+		self.params['pvEnergyDensity'] = new Yearly.Mult(self.params['pvEffi'], new Yearly.Constant(1000 * 63 / 210));//wh/m2
+		self.params['pvEnergyDensity'].label = "Densite energetique des panneaux solaires";
+		self.params['pvEnergyDensity'].source = "Estime via les stats des fermes solaires allemandes de berlin (irradiance similaire a la belgique)";
+		self.params['pvEnergyDensity'].unit = 'N/m2';
+
+		self.params['conso'] = new Yearly.Mult(self.params['pop'], self.params['consoPerCap']);
+		self.params['conso'].label = "consommation totale";
+		self.params['conso'].source = "population * consommation par habitant";
+
+		self.params['nukeDeco'] = new Yearly.Mult(self.params['nukeCapexCost'], new Yearly.Constant(jsCoefs.nuke.decommissioningRatio));
+		self.params['nukeDeco'].label = "Couts de démantèlement du nucleaire";
+		self.params['nukeDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";
+
+		self.params['pvDeco'] = new Yearly.Mult(self.params['pvFarmCapexCost'], new Yearly.Constant(jsCoefs.pv.decommissioningRatio));
+		self.params['pvDeco'].label = "Couts de démantèlement du photovoltaique";
+		self.params['pvDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";*/
+	}
+
 }

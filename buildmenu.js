@@ -26,15 +26,34 @@ $(function(){
   $('.bBuild').on('click', function(e){
     let t = e.currentTarget.getAttribute("data-target");
 
+    if(state && state.type == t){
+      state = undefined;
+      $('#dBuildDetails').hide();
+
+      if(stateChangedCallback)
+        stateChangedCallback();
+      return;
+    }
+
+    if(t == 'pv'){
+      $('#BMRange').attr({min:1, max:100});
+    }
+    else if(t == 'battery'){
+      $('#BMRange').attr({min:1, max:50});
+      if(radius > $('#BMRange').attr('max'))
+        radius = $('#BMRange').attr('max');
+    }
+
     state = {};
     state.type = t;
     if(stateChangedCallback)
       stateChangedCallback();
 
-    // $('.buildDetail').css('display', 'none');
+    $('#dBuildDetails').show();
     // $('#' + t + 'BuildDetails').css('display', 'block');
 
   });
+
 
   $('#BMRange').on('change', function(e){
     radius = this.value;
@@ -60,11 +79,57 @@ $(function(){
 });
 
 
-export function displayStat(cmd){
-  $('.vBMBuildCost').text(plainTextEuro(cmd.build.cost));
-  $('.vBMBuildCo2').text(quantityToHuman(cmd.build.co2, 'C'));
+export function displayStat(cmd, currentCash){
+  ['build', 'perYear', 'perWh'].forEach( fieldName => {
+    let cap = fieldName.substr(0, 1).toUpperCase() + fieldName.substr(1);
+    let lines = [];
+    if(cmd[fieldName] ){
+      if(cmd[fieldName].cost != 0)
+        lines.push('<span class="vBM' + cap + 'Cost">' + plainTextEuro(cmd[fieldName].cost) + '</span>');
+      if(cmd[fieldName].co2 != 0)
+        lines.push(quantityToHuman(cmd[fieldName].co2, 'C'));
+
+    }
+    if(lines.length > 0){
+      $('.vBM' + cap).parent().show();
+      $('.vBM' + cap).html( lines.join('<br />'));
+    }
+    else {
+      $('.vBM' + cap).parent().hide();
+    }
+  });
+
+  $('.vBMBuildCost').css('color', 'red');
 
   if(cmd.area){
+    $('.vBMArea').parent().show();
     $('.vBMArea').text(quantityToHuman(cmd.area, 'm2'));
   }
+  else {
+    $('.vBMArea').parent().hide();
+
+  }
+
+  if(cmd.nameplate){
+    $('.vBMNameplate').parent().show();
+    let lines = [];
+    lines.push(quantityToHuman(cmd.nameplate.at(cmd.build.end), cmd.nameplate.unit));
+    if(cmd.avgCapacityFactor)
+      lines.push(quantityToHuman(cmd.nameplate.at(cmd.build.end) * cmd.avgCapacityFactor, 'W') + ' (en moyenne)');
+
+    $('.vBMNameplate').html(lines.join('<br />'));
+  }
+  else {
+    $('.vBMNameplate').parent().hide();
+  }
+
+//  $('.vBMStorageCapacity').parent().toogle(cmd.storageCapacity);
+  if(cmd.storageCapacity){
+    $('.vBMStorageCapacity').html(quantityToHuman(cmd.storageCapacity, 'S'));
+    $('.vBMStorageCapacity').parent().show();
+  }
+  else {
+    $('.vBMStorageCapacity').parent().hide();
+  }
+
 }

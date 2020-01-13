@@ -78,6 +78,7 @@ export default class Pv extends IntermittentProductionMean{
     ans.nameplate = new Yearly.Expo(ans.build.end,
                                     initNameplate,
                                     what.powerDecline);
+    ans.nameplate.unit = 'N';
 
 
     ans.area = what.area;
@@ -90,6 +91,10 @@ export default class Pv extends IntermittentProductionMean{
         this.build.cost.at(ans.build.begin);  // eur/m2
 
     ans.pm = this;
+
+    ans.perYear = {cost: this.fixedOnM.at(ans.build.end) * what.area, co2: 0};
+    ans.perWh = {cost: 0, co2: 0};
+    ans.avgCapacityFactor = 0.12; //todo : do a real computation ?
 
     return ans;
   }

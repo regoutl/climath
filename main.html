@@ -12,7 +12,6 @@
 	</header>
 	<div id="dCorps">
 		<div id="dTabBar">
-			<div>Annee <span class="vYear"></span></div>
 			<div class="bShowPlot" data-target="chinaElecFootprint">Empreinte elec Chine : <span class="vChinaElecFootprint"></span></div>
 			<div class="bShowPlot" data-target="usaElecFootprint">Empreinte elec USA : <span class="vUsaElecFootprint"></span></div>
 
@@ -49,29 +48,32 @@
 			</div>
 		</div>
 		<div id="dActions">
-            <div id="gridLayers"></div>
-			<div> Budget <span class="vMoney"></span></div>
+      <div id="gridLayers"></div>
+			<div>Annee <span class="vYear"></span></div>
+			<div>Budget <span class="vMoney"></span></div>
+			<div><span class="vTotalCo2">0 T</span> de carbonne au total <br/> dont <span class="vLastYearCo2">0 T</span> l'an passe</div>
 			<div id="buildMenu">
 				<h3>Construire : </h3>
 				<div id="buildMenuOptionTable">
 					<img src='res/icons/solar.jpeg' class="bBuild" title="Panneaux solaires" data-target="pv"/>
 					<img src='res/icons/nuke.png'  class="bBuild" title="Centrale nucleaire" data-target="nuke"/>
-					<img src='res/icons/bat.png'  class="bBuild" title="Batterie" data-target="bat"/>
+					<img src='res/icons/bat.png'  class="bBuild" title="Batterie" data-target="battery"/>
 				</div>
 				<div id="dBuildDetails">
-					<div>Installation : <span class = "vBMBuildCost"></span></div>
-					<div>Installation : <span class = "vBMBuildCo2"></span></div>
-					<div>Maintenance : <span class = "vBMOnM"></span></div>
-
-					<div>Area : <span class = "vBMArea"></span></div>
-					<input type="range" min="1" max="100" value="50" id='BMRange'>
+					<table>
+						<tr><th>Installation</th><td class = "vBMBuild"></td></tr>
+						<tr><th>Par an : </th><td class = "vBMPerYear"></td></tr>
+						<tr><th>Par Wh : </th><td class = "vBMPerWh"></td></tr>
+						<tr><th>Production </th><td class = "vBMNameplate"></td></tr>
+						<tr><th>Capacite </th><td class = "vBMStorageCapacity"></td></tr>
+						<tr><th>Aire</th><td class = "vBMArea"></td></tr>
+					</table>
+					<input type="range" id='BMRange'>
 				</div>
 			</div>
 
 			<div>
 				<input type="button" value="run" id="bRunSimu"/>
-				<input type="button" value="place Pv (10 000 km2)" id="bAddLotPv"/>
-				<input type="button" value="place Bat " id="bAddLotBat"/>
 			</div>
 		</div>
 	</div>

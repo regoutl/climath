@@ -1,3 +1,10 @@
+/*
+This file is part of Benergy. Benergy is free software: you can redistribute it and/or modify
+ it under the terms of the GPL-3.0-only.
+
+Copyright 2020, louis-amedee regout, charles edwin de brouwer
+*/
+
 "use strict";
 
 import * as BuildMenu from './buildmenu.js';
@@ -28,6 +35,9 @@ $(function(){
 									},
 									year: function(year){
 										$('.vYear').text(year);
+									},
+									totalCo2: function(co2){
+										$('.vTotalCo2').text(quantityToHuman(co2, 'C'));
 									}
 								}});
 
@@ -122,8 +132,21 @@ $(function(){
 				{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});
 	});
 
+
+	let co2Total = 0;
 	$('#bRunSimu').on('click', () => {
 		simu.run();
+
+		co2Total += simu.co2Produced.at(simu.year - 1);
+
+		let lastYearCo2 = quantityToHuman(simu.co2Produced.at(simu.year - 1), 'C');
+		lastYearCo2 = lastYearCo2.substr(0, lastYearCo2.length - 6);
+		$('.vLastYearCo2').text(lastYearCo2);
+
+		let strco2Total = quantityToHuman(co2Total, 'C');
+		strco2Total = strco2Total.substr(0, strco2Total.length - 6);
+		$('.vTotalCo2').text(strco2Total);
+
 	});
 
 /*

@@ -59,22 +59,31 @@ function unitToHuman(unit, compact = false){
 	else
 		tmp = tmp.replace('N', 'Wp').replace('C', 'gCO2');
 
+	//improve carbon readibility
 	tmp = tmp.replace('PgCO2', 'GT CO2').replace('TgCO2', 'MT CO2').replace('GgCO2', 'kT CO2').replace('MgCO2', 'T CO2');
 
+	//storage
+	tmp = tmp.replace('S', 'Wh');
 
 	return tmp.replace('  ', ' ');
 }
 
 export function plainTextEuro(amound){
+	if(amound == 0)
+		return 0 + ' €';
+
 	let coef = 0.000001, unit = 'million';
-	if(Math.abs(amound) >= 1000000){
+	if(Math.abs(amound) >= 1000000000){
 		coef *= 0.001;
 		unit = 'milliard';
 	}
 
 
-	var inMillion = Math.round(amound * coef).toString();
+	var inMillion = (Math.round(amound * coef * 10)/10).toString();
 
+	if(inMillion.length != 3 && inMillion.includes('.')){
+		inMillion = inMillion.substr(0, inMillion.length - 2);
+	}
 
 	return   inMillion +  " " + unit + " €";
 }

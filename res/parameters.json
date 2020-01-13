@@ -190,14 +190,19 @@
 					"comment":""
 				},
 				"time": 1,
-				"deconstructionRatio":0.05,
-				"onm":{
-					"years":[6],
-					"unit":"€/S",
-					"source":"a checker (moodle QEE projet V2)",
-					"comment": "A checker",
-					"label":"Frais (fixes) d'exploitation et de maintenance des batteries"
-				}
+				"deconstructionRatio":0.05
+			},
+			"onm":{
+				"years":[0.006],
+				"unit":"€/S",
+				"source":"a checker (moodle QEE projet V2)",
+				"comment": "A checker",
+				"label":"Frais (fixes) d'exploitation et de maintenance des batteries"
+			},
+			"energyDensity":{
+				"source":"Valeur tesla power wall 2",
+				"years":[110000],
+				"unit":"S/m3"
 			}
 		}
 	},
@@ -295,7 +300,7 @@
 	}
 },
 "gameplay":{
-	"minTaxRate": 0.3,
+	"minTaxRate": 0.398,
 	"initMoney":10000000000
 }
 }

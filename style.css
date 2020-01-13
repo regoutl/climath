@@ -124,11 +124,18 @@ h1{
 	flex-direction: row;
 
 }
+
+/** BUILD MENU ----------------------------------*/
+
 .bBuild{
 	height: 60px;
 	margin: 10px;
 	cursor: pointer;
+}
 
+#dBuildDetails th{
+	text-align:left;
+	vertical-align: top;
 }
 
 

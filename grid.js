@@ -87,6 +87,7 @@ function newCanvas(name, file, zindex, visible){
     return canvas;
 }
 
+/** @note : pour chaque pixel, enregistrer le build state */
 class Grid{
     currentShowGrid = {'groundUse':true, 'energyGrid':true};
 
@@ -150,6 +151,9 @@ class Grid{
     ans.type = buildState.type;
     if(buildState.type == 'pv')
       ans.area = validPixels * 200 * 200; //m2
+    else if(buildState.type == 'battery'){
+      ans.volume = validPixels * 200 * 200 * 5; //m3
+    }
     else {
       throw 'to do';
     }
