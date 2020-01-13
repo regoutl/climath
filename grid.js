@@ -180,6 +180,12 @@ class Grid{
 
   }
 
+  /** @brief check if any nuclear central explode.
+  @details : if a central explode, must reallocate surounding pop, and estimate cost
+  */
+  testBoom(){
+
+  }
 
 
     /**
