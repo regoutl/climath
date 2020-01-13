@@ -1,22 +1,11 @@
 "use strict";
 
+import * as BuildMenu from './buildmenu.js';
+
 import Simulateur from './simulateurDePeche.js';
 import * as mapNav from './moveIt.js';
-import {Plot, canvasEnablePloting, quantityToHuman} from './plot.js';
+import {Plot, canvasEnablePloting, quantityToHuman, plainTextEuro} from './plot.js';
 
-function plainTextEuro(amound){
-	let coef = 0.000001, unit = 'million';
-	if(Math.abs(amound) >= 1000000){
-		coef *= 0.001;
-		unit = 'milliard';
-	}
-
-
-	var inMillion = Math.round(amound * coef).toString();
-
-
-	return   inMillion +  " " + unit + " €";
-}
 
 
 $(function(){
@@ -99,10 +88,36 @@ $(function(){
 			$('#dPlotDisplay .pComment').text('');
 	}
 
+	function updatePreparedBuildData(){
+		if(BuildMenu.state === undefined)
+			return;
 
 
+		let build = grid.prepareBuild(BuildMenu.state,
+			{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});
 
-	$('#bRunSimu').on('click', () => {
+		let simuBuild = simu.prepareCapex(build);
+
+		BuildMenu.displayStat(simuBuild);
+	}
+
+	BuildMenu.setStateChangedCallback(updatePreparedBuildData);
+
+
+	$('#top').on('click', (evt) => {
+		if(BuildMenu.state === undefined)
+			return;
+
+		let build = grid.prepareBuild(BuildMenu.state,
+			{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});
+
+		let simuBuild = simu.prepareCapex(build);
+
+		if(simu.execute(simuBuild))
+			grid.build(BuildMenu.state,
+				{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});	});
+
+/*	$('#bRunSimu').on('click', () => {
 		simu.run();
 	});
 	$('#bAddLotPv').on('click', () => {
@@ -125,42 +140,18 @@ $(function(){
 			tabGroundUsage();
 	});
 
-	/// building -------------------------------------------------------------
-	var nowBuilding = undefined;
 
-	$('.bBuild').on('click', function(e){
-		var t = e.currentTarget.getAttribute("data-target");
-
-		nowBuilding  = t;
-
-		$('.buildDetail').css('display', 'none');
-		$('#' + t + 'BuildDetails').css('display', 'block');
-	});
-
-    $('#top').on('click', (evt) => {
-        if(!nowBuilding)
-            return;
-        var curPos = {x: evt.offsetX, y: evt.offsetY};
-        if(nowBuilding == 'pv'){
-            grid.saveCircle(
-                curPos.x,
-                curPos.y,
-                $('#pvBuildRange').val(),
-                'pv', 2019);
-                // $('.vYear').text(year)); // TODO set Year
-        }
-    })
 	$('#top').on('mousemove', function(evt){
 		if(!nowBuilding)
 			return;
 
-		var curPos = {x: evt.offsetX,
+		let curPos = {x: evt.offsetX,
 					 y: evt.offsetY};
 
 		if(nowBuilding == 'pv'){
             grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
 		}
-	});
+	});*/
 
 
 });

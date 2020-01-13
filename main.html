@@ -58,21 +58,14 @@
 					<img src='res/icons/nuke.png'  class="bBuild" title="Centrale nucleaire" data-target="nuke"/>
 					<img src='res/icons/bat.png'  class="bBuild" title="Batterie" data-target="bat"/>
 				</div>
-				<div id="pvBuildDetails" class='buildDetail'>
-					<div>Installation : <span id = "vBuildPvCost"></span></div>
-					<div>Remarque : la production moyenne est environ 12% de cette valeur</div>
-					<div>Maintenance : <span class = "vPvOnM"></span></div>
+				<div id="dBuildDetails">
+					<div>Installation : <span class = "vBMBuildCost"></span></div>
+					<div>Installation : <span class = "vBMBuildCo2"></span></div>
+					<div>Maintenance : <span class = "vBMOnM"></span></div>
 
-					<div>Rayon : </div>
-					<input type="range" min="1" max="100" value="50" id='pvBuildRange'>
+					<div>Area : <span class = "vBMArea"></span></div>
+					<input type="range" min="1" max="100" value="50" id='BMRange'>
 				</div>
-				<div id="nukeBuildDetails" class='buildDetail'>
-					<div>Prix : <span class = "vNukeCapex"></span></div>
-				</div>
-				<div id="batBuildDetails" class='buildDetail'>
-					<div>Prix : <span class = "vBatCapexCost"></span></div>
-				</div>
-
 			</div>
 
 			<div>

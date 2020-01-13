@@ -17,7 +17,6 @@ export default class Simulateur{
 	 * 					if undefined, set to 1.0
 	 */
 	constructor(data){
-
 		this.valChangedCallbacks = data.valChangedCallbacks;
 
 		this.money  = data.parameters.gameplay.initMoney;

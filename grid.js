@@ -109,6 +109,46 @@ class Grid{
         this.setGridLayerCheckbox();
 	}
 
+  /** @brief convert build menu state to simu prepare capex cmd
+  @param buildState :as described in   buildmenu ->  state
+  @param area :  {shape: (circle|...)}
+  IF area.shape == cicle THEN area := {center, radius} (unit pix)
+  IF area.center === undefined THEN areaInvalid
+
+  @return a cmd as described in Simulateur.prepareCapex
+  @details
+    called on mouse move and on build state change
+
+    draw the cursor
+
+    areaInvalid means that the cursor is not in the map.
+      Then return what would theorically happend if it was
+           set ans.theorical = true
+
+    if problem with build state, can return undefined or throw
+
+  @note for now, only build is considered. no rebuild. no deconstruction
+  @note for points (ex, nuke central), area is still send as circle, but radius can be ignored
+  **/
+  prepareBuild(buildState, area){
+
+  }
+
+
+  /**   @brief : like prepareBuild BUT saves the action
+  @return void
+  @details
+    called on click
+
+    will only be called if prepareBuild(...).theorical != True
+
+    must succeed !
+  **/
+  build(buildState, area){
+  }
+
+
+
     /**
         draw all specified grid, preserve order of drawing
         (first is first to be draw, thus is under the others)
