@@ -99,23 +99,20 @@ $(function(){
 		let simuBuild = simu.prepareCapex(build);
 
 		BuildMenu.displayStat(simuBuild);
+
+		return simuBuild;
 	}
 
 	BuildMenu.setStateChangedCallback(updatePreparedBuildData);
 
 
 	$('#top').on('click', (evt) => {
-		if(BuildMenu.state === undefined)
-			return;
-
-		let build = grid.prepareBuild(BuildMenu.state,
-			{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});
-
-		let simuBuild = simu.prepareCapex(build);
+		let simuBuild = updatePreparedBuildData();
 
 		if(simu.execute(simuBuild))
 			grid.build(BuildMenu.state,
-				{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});	});
+				{shape:'circle', center:BuildMenu.curPos, radius:BuildMenu.radius});
+	});
 
 /*	$('#bRunSimu').on('click', () => {
 		simu.run();
