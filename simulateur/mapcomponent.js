@@ -88,7 +88,7 @@ function newCanvas(name, file, zindex, visible){
 }
 
 /** @note : pour chaque pixel, enregistrer le build state */
-class Grid{
+export default class MapComponent{
     currentShowGrid = {'groundUse':true, 'energyGrid':true};
 
 	constructor(){

@@ -20,6 +20,11 @@ export function setStateChangedCallback(callback){
   stateChangedCallback = callback;
 }
 
+function notifyStateChanged(){
+  if(stateChangedCallback)
+    displayStat(stateChangedCallback(state, curPos, radius));
+}
+
 
 $(function(){
 
@@ -30,8 +35,7 @@ $(function(){
       state = undefined;
       $('#dBuildDetails').hide();
 
-      if(stateChangedCallback)
-        stateChangedCallback();
+      notifyStateChanged();
       return;
     }
 
@@ -46,8 +50,7 @@ $(function(){
 
     state = {};
     state.type = t;
-    if(stateChangedCallback)
-      stateChangedCallback();
+    notifyStateChanged();
 
     $('#dBuildDetails').show();
     // $('#' + t + 'BuildDetails').css('display', 'block');
@@ -57,29 +60,29 @@ $(function(){
 
   $('#BMRange').on('change', function(e){
     radius = this.value;
-    if(stateChangedCallback)
-      stateChangedCallback();
+    notifyStateChanged();
   });
 
 
   $('#top').on('mousemove', function(evt){
     curPos = {x: evt.offsetX, y: evt.offsetY};
 
-    if(stateChangedCallback)
-      stateChangedCallback();
+    notifyStateChanged();
   });
 
   $('#top').on('pointerleave', function(evt){
     curPos = undefined;
 
-    if(stateChangedCallback)
-      stateChangedCallback();
+    notifyStateChanged();
   });
 
 });
 
 
 export function displayStat(cmd){
+  if(cmd === undefined)
+    return;
+
   ['build', 'perYear', 'perWh'].forEach( fieldName => {
     let cap = fieldName.substr(0, 1).toUpperCase() + fieldName.substr(1);
     let mul = 1;

@@ -1,15 +1,15 @@
 "use strict";
 
-import * as Yearly from "./timevarin.js";
-import {quantityToHuman} from "./plot.js";
-import PriorityQueue from './res/priorityqueue.js';
-import Pv from './simulateur/pv.js';
-import Fossil from './simulateur/fossil.js';
-import Storage from './simulateur/storage.js';
-import Nuke from './simulateur/nuke.js';
+import * as Yearly from "../timevarin.js";
+import {quantityToHuman} from "../plot.js";
+import PriorityQueue from '../res/priorityqueue.js';
+import Pv from './pv.js';
+import Fossil from './fossil.js';
+import Storage from './storage.js';
+import Nuke from './nuke.js';
 
 /// note : all years are assumed to be 365 days long
-export default class Simulateur{
+export default class LogicalComponent{
 	/// build a simulator with the given
 	/** @param data.parameters : obj, the content of parameters.json
 	 *  @param data.capaFactor.{prod mean name} : Uint8Array or Number or undefined. \
