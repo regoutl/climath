@@ -69,7 +69,6 @@ const PopDensity = {
 
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
-
 	constructor(mapImgs){
 
     this.energyGrid = new Uint16Array(1374 * 1183);
@@ -184,6 +183,12 @@ export default class MapComponent{
       this.drawer.update('energy');
       this.drawer.draw();
     }
+    else if(buildState.type == 'nuke'){
+      this.drawer.addNuke(area.center);
+    }
+    else{
+      throw 'to do';
+    }
   }
 
   /** @brief check if any nuclear central explode.
@@ -214,6 +219,46 @@ export default class MapComponent{
     this._forEach(area, counter);
 
     return counter.area;
+  }
+
+
+  /** @brief will call f for each pixel in the given area */
+  _forEach(area, f){
+    const radius = area.radius;
+    const radius2 = radius*radius;
+    const x = area.center.x;
+    const y = area.center.y;
+
+    let box = {
+      minX: area.center.x-radius,
+      minY: area.center.y-radius,
+      maxX: area.center.x+radius,
+      maxY: area.center.y+radius,
+    };
+
+    //no outside
+    box.minX = Math.max(box.minX, 0);
+    box.minY = Math.max(box.minY, 0);
+
+    box.maxX = Math.min(box.maxX, 1374);
+    box.maxY = Math.min(box.maxY, 1183);
+
+    //re center it
+    box.minX -= x;
+    box.minY -= y;
+    box.maxX += x;
+    box.maxY += y;
+
+    for(let i = box.minX; i < box.maxX; i++){
+      const i2 = i*i;
+      const xi = i + x;
+      for(let j=box.minY; j < box.maxY; j++){
+        if(i2+j*j<radius2){
+          f(xi, y+j);
+        }
+      }
+
+    }
   }
 
 	/// return the land use at a given pixel.
@@ -261,10 +306,10 @@ export default class MapComponent{
         console.log('x:'+x+' y:'+y+' v:'+col+' legend:'+JSON.stringify(legend));
     }
 
-    // get the name of every grid
-    listGrids(){
-        return Object.keys(gridslist);
-    }
+    // // get the name of every grid
+    // listGrids(){
+    //     return Object.keys(gridslist);
+    // }
 
 
     // _color2nrj(c){
@@ -308,44 +353,6 @@ export default class MapComponent{
   // }
 
 
-  /** @brief will call f for each pixel in the given area */
-  _forEach(area, f){
-    const radius = area.radius;
-    const radius2 = radius*radius;
-    const x = area.center.x;
-    const y = area.center.y;
-
-    let box = {
-      minX: area.center.x-radius,
-      minY: area.center.y-radius,
-      maxX: area.center.x+radius,
-      maxY: area.center.y+radius,
-    };
-
-    //no outside
-    box.minX = Math.max(box.minX, 0);
-    box.minY = Math.max(box.minY, 0);
-
-    box.maxX = Math.min(box.maxX, 1374);
-    box.maxY = Math.min(box.maxY, 1183);
-
-    //re center it
-    box.minX -= x;
-    box.minY -= y;
-    box.maxX += x;
-    box.maxY += y;
-
-    for(let i = box.minX; i < box.maxX; i++){
-      const i2 = i*i;
-      const xi = i + x;
-      for(let j=box.minY; j < box.maxY; j++){
-        if(i2+j*j<radius2){
-          f(xi, y+j);
-        }
-      }
-
-    }
-  }
 
     // getNRJcount(){
     //     let count = {

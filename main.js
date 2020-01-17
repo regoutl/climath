@@ -51,9 +51,15 @@ $(function(){
 
 
 		//on click on the grid
-		$('#top').on('click', simu.confirmCurrentBuild.bind(simu));
+		$('#dCentral').on('click', function(){
+			if($(this).data('moving'))
+				return;
+			simu.confirmCurrentBuild();
+		});
 
 		$('#bRunSimu').on('click', simu.run.bind(simu));
+
+		$('#iTaxRate').val(simu.taxRate);
 
 		// //print the values in the appropriates blocks
 		// for(let k in simu.params){

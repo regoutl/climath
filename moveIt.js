@@ -4,25 +4,28 @@
 
 
 	let mousePos = {x: 0, y:0};
-	var transform = {x: -0, y: 0, scale: 1};
-		$('#dMovable').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
+	var transform = {x: -500, y: -300, scale: 6};
+	$('#dMovable').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
+
+	let dCentral = $("#dCentral");
+	dCentral.data('moving', false);
 
 	/// view control facilities----------------------------------------------------
 	export function enableAreaMoving(){
-		$("#dCentral").on("wheel", onWheel);
-		$('#dCentral').on("mousedown", onMouseDown);
+		dCentral.on("wheel", onWheel);
+		dCentral.on("mousedown", onMouseDown);
 		$('body').on("mouseup", onMouseUp);
 	}
 
 	export function disableAreaMoving(){
-		$("#dCentral").off("wheel", onWheel);
-		$('#dCentral').off("mousedown", onMouseDown);
+		dCentral.off("wheel", onWheel);
+		dCentral.off("mousedown", onMouseDown);
 		$('body').off("mouseup", onMouseUp);
 	}
 
 	function onWheel(e){
-		var curX = e.originalEvent.pageX - $('#dCentral').offset().left;
-		var curY = e.originalEvent.pageY - $('#dCentral').offset().top;
+		var curX = e.originalEvent.pageX - dCentral.offset().left;
+		var curY = e.originalEvent.pageY - dCentral.offset().top;
 
 
 		var origin = {x: (curX  / transform.scale- transform.x), y: (curY  / transform.scale- transform.y)}
@@ -43,6 +46,7 @@
 
 
 		$('#dMovable').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
+		$('.scaleInvariant').css('transform', 'scale(' + (1/transform.scale) + ')');
 	}
 
 	function onMouseDown(e){
@@ -55,10 +59,14 @@
 
 			mousePos.x = e.screenX;
 			mousePos.y = e.screenY;
+			dCentral.data('moving', true);
 
 			$('#dMovable').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
 		});
 	}
 	function onMouseUp(e){
+		setTimeout(() => {
+			dCentral.data('moving', false);
+		}, 1);
 		$('body').off('mousemove');
 	}

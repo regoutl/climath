@@ -173,7 +173,6 @@ export function promiseSimulater(valChangedCallbacks){
     [fetch('res/parameters.json').then((response) => {return response.json();}),
     // loadImage('res/landUse.png'),
     // loadImage('res/popDensity.png'),
-// how to load arraybuffer -- now encoded in parameters itself
     fetch('res/landUse.bin').then((response) => {return response.arrayBuffer();})
     ])
   .then(function(values){ //called when all simu related res are loaded

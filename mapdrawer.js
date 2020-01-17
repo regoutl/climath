@@ -60,6 +60,8 @@ export default class MapDrawer{
   currentShowGrid = {'groundUse':true, 'energyGrid':true};
 
   constructor(arg){
+    this.nuke = [];
+
     this.canvas = {
         top: $('#top'),
     }
@@ -67,7 +69,7 @@ export default class MapDrawer{
     this.canvas.top[0].getContext("2d").globalAlpha = 0.6;
 
 
-    this.setGridLayerCheckbox();
+    this._setGridLayerCheckbox();
 
     this.c = $('<canvas id="wololo" width="1374" height="1183"></canvas>');
     this.c.css({
@@ -104,6 +106,7 @@ export default class MapDrawer{
     this.draw();
   }
 
+  /** @brief draw the currenty visible layers*/
   draw(){
     let gl = this.gl;
 
@@ -116,12 +119,33 @@ export default class MapDrawer{
       this._drawTex(this.energy);
   }
 
+  /** @brief update the given layer*/
   update(layerName){
     if(layerName != 'energy')
       throw 'olala';
     this.energy.update(this.energySrc);
   }
 
+  /** @brief draw a cursor */
+  drawCircle(x,y,radius) {
+    const ctx = this.canvas.top[0].getContext('2d');
+    ctx.clearRect(0, 0,
+        this.canvas.top[0].width,
+        this.canvas.top[0].height);
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2*Math.PI, true);
+    ctx.fill();
+  }
+
+  addNuke(pos){
+    let node = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="32px"/>');
+    node.css({top:pos.y-20, left:pos.x - 16});
+    $('#dMovable').append(node);
+
+
+    this.nuke.push({pos:pos, node:node});
+  }
 
   _createProg(){
     let vert = `
@@ -195,7 +219,7 @@ export default class MapDrawer{
   }
 
 
-  setGridLayerCheckbox() {
+  _setGridLayerCheckbox() {
     let layers = ['groundUse', 'energyGrid'];
 
     let grid = this;
@@ -206,7 +230,13 @@ export default class MapDrawer{
             m + '</label><br>');
         $('#gridLayers').append(checkbox);
         $('#gridLayers input:checkbox').on('change',
-        function() { grid.currentShowGrid[$(this).val()] = $(this).is(':checked');  grid.draw();});
+        function() {
+          grid.currentShowGrid[$(this).val()] = $(this).is(':checked');
+          grid.draw();
+          if($(this).val() == 'energyGrid'){
+            $('.energyRelated').css('opacity', $(this).is(':checked') ? 1.0: 0);
+          }
+        });
     });
   }
 
@@ -217,15 +247,5 @@ export default class MapDrawer{
       return {red:255, green:255, blue:255, alpha:100};
   }
 
-  drawCircle(x,y,radius) {
-      const ctx = this.canvas.top[0].getContext('2d');
-      ctx.clearRect(0, 0,
-          this.canvas.top[0].width,
-          this.canvas.top[0].height);
-
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, 2*Math.PI, true);
-      ctx.fill();
-  }
 
 };

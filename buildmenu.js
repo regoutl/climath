@@ -5,7 +5,7 @@ import { quantityToHuman as valStr} from './plot.js';
 **/
 export let state = undefined;
 /** @brief radius : Number (unit : pixel ( switch to meters ?) of the build*/
-export let radius = 50;
+export let radius = 0;
 /** @brief curPos : {x, y} (unit : pixel (switch meters ?)).
 @note if cursor is out of the map, undefined
 */
@@ -27,6 +27,7 @@ function notifyStateChanged(){
 
 
 $(function(){
+  radius = $('#BMRange').val();
 
   $('.bBuild').on('click', function(e){
     let t = e.currentTarget.getAttribute("data-target");
