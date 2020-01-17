@@ -1,7 +1,6 @@
 "use strict";
 
 import * as Yearly from "../timevarin.js";
-import {quantityToHuman} from "../plot.js";
 import PriorityQueue from '../res/priorityqueue.js';
 import Pv from './pv.js';
 import Fossil from './fossil.js';
@@ -9,27 +8,16 @@ import Storage from './storage.js';
 import Nuke from './nuke.js';
 
 /// note : all years are assumed to be 365 days long
-export default class LogicalComponent{
+export default class ProductionComponent{
 	/// build a simulator with the given
-	/** @param data.parameters : obj, the content of parameters.json
-	 *  @param data.capaFactor.{prod mean name} : Uint8Array or Number or undefined. \
+	/** @param parameters : obj, the content of parameters.json
+	 *  @param capaFactor.{prod mean name} : Uint8Array or Number or undefined. \
 	 *					capacity factor of an energy. if number : cst.
 	 * 					if uint8Array, value will be divided by 255. length must be a multiple of 8760 (hourly data)
 	 * 					if undefined, set to 1.0
 	 */
-	constructor(data){
-		this.valChangedCallbacks = data.valChangedCallbacks;
-
-		this.money  = data.parameters.gameplay.initMoney;
-		// they would pay 30% if all spending were only for other purposes
-		/// WARNING TODO check this number
-		// minimum tax level. const.
-		this.minTaxRate = data.parameters.gameplay.minTaxRate;
-		// Player controlled
-		this.taxRate = this.minTaxRate + 0.05;
-
-
-		this._initParams(data.parameters);
+	constructor(parameters){
+		this._initCountries(parameters.countries);
 
 		//sorted by priority (higher production mean will produce at max capa first)
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
@@ -39,21 +27,12 @@ export default class LogicalComponent{
 		this.pendingBuilds = new PriorityQueue((a, b) => a.build.end < b.build.end);
 
 		this.productionMeans = {
-			pv: new Pv(data.parameters.energies.pv),
-		  nuke: new Nuke(data.parameters.energies.nuke),
-			storage: new Storage(data.parameters.energies.storage),
-			// ccgt: new Ccgt(data.parameters),
-		  fossil: new Fossil(data.parameters.energies.fossil),
+			pv: new Pv(parameters.energies.pv),
+		  nuke: new Nuke(parameters.energies.nuke),
+			storage: new Storage(parameters.energies.storage),
+			// ccgt: new Ccgt(parameters),
+		  fossil: new Fossil(parameters.energies.fossil),
 		};
-
-
-		this.year = 2020;
-
-		this.co2Produced = new Yearly.Raw(0.0);
-		this.co2Produced.unit = 'C';
-
-		this.costs = new Yearly.Raw(0.0);
-		this.costs.unit = '€';
 	}
 
 /*
@@ -68,16 +47,11 @@ export default class LogicalComponent{
 	/// simulate using the coefs for the given year
 	/// simulation is done hour by hour
 	/// battery lvx is resumed from last run.
-	run(){
-		console.log(this.year);
-
+	run(year, out){
 		//init a few things------------------------------------
-		let y = {co2:0, cost: 0};
-		y.conso=  this.countries.belgium.pop.at(this.year) *    //watt
-							this.countries.belgium.consoPerCap.at(this.year);
+		out.conso=  this.countries.belgium.pop.at(year) *    //watt
+							this.countries.belgium.consoPerCap.at(year);
 
-		//taxes
-		y.cost -= this._computeTaxIncome();
 
 		for(let prodMeanIndex = 0;
 				prodMeanIndex < this.productionMeansOrder.length;
@@ -85,49 +59,24 @@ export default class LogicalComponent{
 			let prodMeanLabel = this.productionMeansOrder[prodMeanIndex];//get label
 
 			let prodMean = this.productionMeans[prodMeanLabel];//get data for that prod mean
-			prodMean.happyNY(this.year, this, y);
+			prodMean.happyNY(year, this, out);
 		}
 
 
 		//capacity factor sampling hour
 		let yearForTheCapaFactor = rand() % 100; //chooses a random year to sample the capacity factors from
-		y.capaFactHour = yearForTheCapaFactor * 365*24;
-		y.storageIndex = this.productionMeansOrder.indexOf('storage');
+		out.capaFactHour = yearForTheCapaFactor * 365*24;
+		out.storageIndex = this.productionMeansOrder.indexOf('storage');
 
 		//simulate hour by hour------------------------------------
 		for(let i = 0; i < 8760; i++){
-			this._runHour(y);
+			this._runHour(out);
 		}
 
-		// save the computed result
-		this.co2Produced.addAt(this.year,  y.co2);
-		this.costs.addAt(this.year, y.cost);
-		this.money -= y.cost;
-
-
-		console.log("co2 produced " + quantityToHuman(this.co2Produced.at(this.year), "C"));
-
-		this.year ++;
-
-		this._processPendingBuilds();
+		this._processPendingBuilds(year);
 	}
 
 
-	get money(){
-		return this._money;
-	}
-	set money(val){
-		this._money = val;
-		this.valChangedCallbacks.money(this._money);
-	}
-
-	get year(){
-		return this._year;
-	}
-	set year(val){
-		this._year = val;
-		this.valChangedCallbacks.year(this._year);
-	}
 
 
 	/** @brief get the data about an installation
@@ -152,9 +101,7 @@ export default class LogicalComponent{
 	 * 			}
 	 * ENDIF
 	 */
-	prepareCapex(what, beginBuildYear = undefined){
-		if(beginBuildYear === undefined)
-			beginBuildYear = this.year;
+	prepareCapex(what, beginBuildYear){
 
 		let ans;
 		if(what.type == 'battery')
@@ -163,11 +110,6 @@ export default class LogicalComponent{
 			ans = this.productionMeans[what.type]
 						.prepareCapex(what, beginBuildYear, this.countries);
 
-		if(ans.build){
-			ans.build.can = ans.build.cost < this._money;
-		}
-
-		Object.freeze(ans);
 
 		return ans;
 
@@ -203,29 +145,15 @@ export default class LogicalComponent{
 	 @return true on success.
 	 */
 	execute(cmd){
-		if(cmd.build){
-			if(cmd.build.begin !== this.year){
-				console.log('can only build in present');
-				return false;
-			}
-			if(cmd.build.cost > this._money){
-				console.log('no enough cash');
-				return false;
-			}
+		if(!cmd)
+			return;
 
+		if(cmd.build){
 			this.pendingBuilds.push(cmd);
 		}
 		else if(cmd.demolish)
 			this._processBuild(cmd);
 
-		//record some stats
-		let action = cmd.build || cmd.demolish;
-
-		this.co2Produced.addAt(this.year, action.co2);
-		this.costs.addAt(this.year, action.cost);
-
-		//and modify the actual value
-		this.money -= action.cost;
 
 		return true;
 	}
@@ -241,18 +169,13 @@ export default class LogicalComponent{
 	// 	return eval(replaced);
 	// }
 
-	_computeTaxIncome(){
-		return this.countries.belgium.pop.at(this.year)
-		 				* this.countries.belgium.gdpPerCap.at(this.year)
-					  * (this.taxRate - this.minTaxRate);
-	}
 
 
 	/**
 	* @brief simulate a hour in a year : compute co2 and cost; tries to load the storage
 	*/
-	_runHour(y){
-		let toProduce = y.conso;
+	_runHour(out){
+		let toProduce = out.conso;
 		let fillingBatteries = false;
 		let produceUntill = this.productionMeansOrder.length;
 
@@ -266,14 +189,14 @@ export default class LogicalComponent{
 			let prodMean = this.productionMeans[prodMeanLabel];//get data for that prod mean
 
 			//maximum amound that this production mean can produce at this hour
-			let canProduce = prodMean.capacityAt(y.capaFactHour);
+			let canProduce = prodMean.capacityAt(out.capaFactHour);
 			if(canProduce == 0)//this energy is useless
 				continue;
 
 			//amount that this prod mean should produce
 			let production = Math.min(toProduce, canProduce);
 
-			prodMean.produce(production, y);
+			prodMean.produce(production, out);
 
 			// decrease the leftover envergy needed by how much this enegry produces
 			toProduce -= production;
@@ -285,11 +208,11 @@ export default class LogicalComponent{
 					break;
 
 				//if we passed the storage unloading, dont try to load the storage
-				if(prodMeanIndex >= y.storageIndex)
+				if(prodMeanIndex >= out.storageIndex)
 					break;
 
 				//we will stop the prod mean loop just before unloading the batteries
-				produceUntill = y.storageIndex;
+				produceUntill = out.storageIndex;
 
 				// try to produce energy so that all batteries are full
 				toProduce = this.productionMeans.storage.maxInput();
@@ -299,7 +222,7 @@ export default class LogicalComponent{
 				canProduce = canProduce - production;
 
 				production = Math.min(toProduce, canProduce);
-				prodMean.produce(production, y);
+				prodMean.produce(production, out);
 				toProduce -= production;
 			}
 		}
@@ -310,14 +233,14 @@ export default class LogicalComponent{
 
 		this.productionMeans.storage.runHour(batIn);
 
-		y.capaFactHour ++;
+		out.capaFactHour ++;
 	}
 
 
 
-	_processPendingBuilds(){
+	_processPendingBuilds(year){
 		let a =this.pendingBuilds.peek();
-		while(a && a.build.end == this.year){
+		while(a && a.build.end == year){
 			this._processBuild(this.pendingBuilds.pop());
 
 			a =this.pendingBuilds.peek();
@@ -331,18 +254,18 @@ export default class LogicalComponent{
 	}
 
 	/// private function. init a lot of thing based on parametesr.json
-	_initParams(jsCoefs){
+	_initCountries(countries){
 		this.countries = {belgium:{}, china:{}};
 
 		let be = this.countries.belgium;
 		be.pop = new Yearly.Raw(0);
-		be.pop.fromJSON(jsCoefs.countries.belgium.pop);
+		be.pop.fromJSON(countries.belgium.pop);
 		be.gdpPerCap = new Yearly.Raw(0);
-		be.gdpPerCap.fromJSON(jsCoefs.countries.belgium.gdpPerCap);
+		be.gdpPerCap.fromJSON(countries.belgium.gdpPerCap);
 		be.consoPerCap = new Yearly.Raw(0);
-		be.consoPerCap.fromJSON(jsCoefs.countries.belgium.consoPerCap);
+		be.consoPerCap.fromJSON(countries.belgium.consoPerCap);
 
-		be.irradiance = jsCoefs.countries.belgium.irradiance;
+		be.irradiance = countries.belgium.irradiance;
 
 		// be.conso = new Yearly.Mult(be.pop, be.consoPerCap);
 		// be.conso.label = "consommation totale";
@@ -350,7 +273,7 @@ export default class LogicalComponent{
 
 		let china = this.countries.china;
 		china.elecFootprint = new Yearly.Raw(0);
-		china.elecFootprint.fromJSON(jsCoefs.countries.china.elecFootprint);
+		china.elecFootprint.fromJSON(countries.china.elecFootprint);
 
 
 

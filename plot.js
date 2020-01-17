@@ -7,6 +7,8 @@ const PlotLeftMargin = 60.5;
 export function quantityToHuman(value, unit, compact = false){
 	if(unit == '%')
 		return Math.round(value * 1000) / 10 + ' %';
+	if(unit == '€' && !compact)
+		return plainTextEuro(value);
 
 	let yolo = 1000;
 	if(unit.length >= 2 && !isNaN(Number(unit[1]))){
@@ -68,7 +70,7 @@ function unitToHuman(unit, compact = false){
 	return tmp.replace('  ', ' ');
 }
 
-export function plainTextEuro(amound){
+function plainTextEuro(amound){
 	if(amound == 0)
 		return 0 + ' €';
 

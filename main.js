@@ -9,9 +9,9 @@ Copyright 2020, louis-amedee regout, charles edwin de brouwer
 
 import * as BuildMenu from './buildmenu.js';
 
-import Simulateur from './simulateur/simulateur.js';
+import {Simulateur, promiseSimulater} from './simulateur/simulateur.js';
 import * as mapNav from './moveIt.js';
-import {Plot, canvasEnablePloting, quantityToHuman, plainTextEuro} from './plot.js';
+import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
 
 
 
@@ -19,20 +19,60 @@ $(function(){
 
 	$('.vCountryName').text("Belgique");
 
-	let simu = new Simulateur;
+	let valChangedCallbacks={
+		money: function(money){
+			$('.vMoney').text(valStr(money, '€'));
+		},
+		year: function(year){
+			$('.vYear').text(year);
+		},
+		totalCo2: function(co2){
+			let strco2Total = valStr(co2, 'C');
+	    strco2Total = strco2Total.substr(0, strco2Total.length - 6);
+	    $('.vTotalCo2').text(strco2Total);
+		},
+		lastYearCo2: function(co2){
+			let strco2Total = valStr(co2, 'C');
+	    strco2Total = strco2Total.substr(0, strco2Total.length - 6);
+	    $('.vLastYearCo2').text(strco2Total);
+		},
+		taxRate: function(rate){
+			$('.vTaxRate').text(Math.round(rate * 100) + '%');
+		}
+	}
 
-	BuildMenu.setStateChangedCallback(simu.onBuildMenuStateChanged.bind(simu));
+	let simu;
 
-	//on click on the grid
-	$('#top').on('click', simu.confirmCurrentBuild.bind(simu));
+	promiseSimulater(valChangedCallbacks)
+	.then((s) => { //when the simulater is ready
+		simu = s;
 
-	let co2Total = 0;
-	$('#bRunSimu').on('click', simu.run.bind(simu));
+		BuildMenu.setStateChangedCallback(simu.onBuildMenuStateChanged.bind(simu));
+
+
+		//on click on the grid
+		$('#top').on('click', simu.confirmCurrentBuild.bind(simu));
+
+		$('#bRunSimu').on('click', simu.run.bind(simu));
+
+		// //print the values in the appropriates blocks
+		// for(let k in simu.params){
+		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	valStr(simu.params[k].at(simu.year), simu.params[k].unit, true));
+		// }
+		// $('.vPvEffi').text(valStr(simu.params['pvEffi'].at(simu.year), '%', true));
+
+
+	})
+	.catch(function(err){//sth failed for the ini of simulater
+		alert(err);
+	});
+
+
+
 
 	$('#iTaxRate').on('input', function(e){
 		simu.taxRate = this.value;
 
-		$('.vTaxRate').text(Math.round(simu.taxRate * 100) + '%');
 	});
 
 

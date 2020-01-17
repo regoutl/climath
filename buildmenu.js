@@ -1,4 +1,4 @@
-import { quantityToHuman, plainTextEuro} from './plot.js';
+import { quantityToHuman as valStr} from './plot.js';
 
 /** @brief all the infos about what to build except radius and curPos
 @field type  in ('pv') : what to build
@@ -92,9 +92,9 @@ export function displayStat(cmd){
     let lines = [];
     if(cmd[fieldName] ){
       if(cmd[fieldName].cost != 0)
-        lines.push('<span class="vBM' + cap + 'Cost">' + plainTextEuro(cmd[fieldName].cost * mul) + '</span>');
+        lines.push('<span class="vBM' + cap + 'Cost">' + valStr(cmd[fieldName].cost * mul, '€') + '</span>');
       if(cmd[fieldName].co2 != 0)
-        lines.push(quantityToHuman(cmd[fieldName].co2 * mul, 'C'));
+        lines.push(valStr(cmd[fieldName].co2 * mul, 'C'));
 
     }
     if(lines.length > 0){
@@ -110,7 +110,7 @@ export function displayStat(cmd){
 
   if(cmd.area){
     $('.vBMArea').parent().show();
-    $('.vBMArea').text(quantityToHuman(cmd.area, 'm2'));
+    $('.vBMArea').text(valStr(cmd.area, 'm2'));
   }
   else {
     $('.vBMArea').parent().hide();
@@ -120,9 +120,9 @@ export function displayStat(cmd){
   if(cmd.nameplate){
     $('.vBMNameplate').parent().show();
     let lines = [];
-    lines.push(quantityToHuman(cmd.nameplate.at(cmd.build.end), cmd.nameplate.unit));
+    lines.push(valStr(cmd.nameplate.at(cmd.build.end), cmd.nameplate.unit));
     if(cmd.avgCapacityFactor)
-      lines.push(quantityToHuman(cmd.nameplate.at(cmd.build.end) * cmd.avgCapacityFactor, 'W') + ' (en moyenne)');
+      lines.push(valStr(cmd.nameplate.at(cmd.build.end) * cmd.avgCapacityFactor, 'W') + ' (en moyenne)');
 
     $('.vBMNameplate').html(lines.join('<br />'));
   }
@@ -132,7 +132,7 @@ export function displayStat(cmd){
 
 //  $('.vBMStorageCapacity').parent().toogle(cmd.storageCapacity);
   if(cmd.storageCapacity){
-    $('.vBMStorageCapacity').html(quantityToHuman(cmd.storageCapacity, 'S'));
+    $('.vBMStorageCapacity').html(valStr(cmd.storageCapacity, 'S'));
     $('.vBMStorageCapacity').parent().show();
   }
   else {
