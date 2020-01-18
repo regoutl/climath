@@ -5,9 +5,7 @@ import * as Yearly from "../timevarin.js";
 /// in fact extends AbstractProductionMean. but much simplified
 export default class Nuke extends RegularProductionMean{
   constructor(parameters){
-    super(parameters);
-
-
+    super(parameters, 'nuke');
   }
 
   prepareCapex(what, beginBuildYear, countries){

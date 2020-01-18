@@ -47,7 +47,6 @@ export default class PaletteTexture{
     gl.texImage2D(gl.TEXTURE_2D, 0, content,
                   1374, 1183, 0,
                   content, gl.UNSIGNED_BYTE, enAsUint8Array);
-                  console.log(gl.getError());
 
     if(this.palette.modified){
       this.palette.modified = false;

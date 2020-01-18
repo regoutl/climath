@@ -8,15 +8,19 @@ import * as Yearly from "../timevarin.js";
 
   float capacityAt (int hour)
   float deconstructionRatio
-  void produce(float amount, output:{co2, cost})
-  void happyNY(year, simul);
+  void produce(float amount, year stat)
+  void happyNY(yearStat);
 }
 */
 export default class AbstractProductionMean{
-  constructor(parameters){
+  constructor(parameters, label){
     if (new.target === AbstractProductionMean) {
       throw new TypeError("Cannot construct AbstractProductionMean instances directly");
     }
+    if(label === undefined)
+      throw 'nononno';
+
+    this.label = label;
 
     this._currentYear = {};
 
@@ -50,8 +54,8 @@ export default class AbstractProductionMean{
   /// update output : incease output.co2 and output.cost
   produce(amount, output){throw 'pure virtual';}
 
-  //O & M
-  happyNY(year, simulater, output){throw 'pure virtual';}
+  //O & M. Called right after the new year, for the previous year
+  happyNY(yStats){throw 'pure virtual';}
 
   /// expand capacity
   capex(param){throw 'pure virtual';  }

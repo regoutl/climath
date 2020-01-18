@@ -43,8 +43,8 @@ export default class Storage /*extends AbstractProductionMean*/{
   //Output the requested energy. energyOut <= capacityAt
   // todo : check unload order
   produce(energyOut, out){
-    out.cost += 0;//todo : check this value
-    out.co2 += 0;//todo : check this value
+    // out.cost += 0;//todo : check this value
+    // out.co2 += 0;//todo : check this value
 
     let devices = this.devices;
     for(let i = 0; i < devices.length; i++){
@@ -71,7 +71,7 @@ export default class Storage /*extends AbstractProductionMean*/{
     return ans;
   }
 
-  happyNY(year, simulater, output){
+  happyNY(yStats){
     let devices = this.devices;
 
     let sumCapa = 0;
@@ -82,7 +82,7 @@ export default class Storage /*extends AbstractProductionMean*/{
     }
 
     //todo : check O & M : here, it decreases every year
-    output.cost += sumCapa * this.solutions.battery.perYear.cost.at(year);
+    yStats.cost.perYear.storage += sumCapa * this.solutions.battery.perYear.cost.at(yStats.year);
   }
 
   // return the maximum amount of energy we can store

@@ -13,6 +13,8 @@ import {Simulateur, promiseSimulater} from './simulateur/simulateur.js';
 import * as CentralArea from './centralArea.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
 
+import {pieChart} from './ui/piechart.js';
+
 function docEl(id){
 	return document.getElementById(id);
 }
@@ -23,6 +25,8 @@ $(function(){
 
 	$('.vCountryName').text("Belgique");
 
+	let simu;
+
 	/// set of small functions that update screen text when some values changes
 	let valChangedCallbacks={
 		money: function(money){
@@ -30,6 +34,8 @@ $(function(){
 		},
 		year: function(year){
 			$('.vYear').text(year);
+			if(simu)
+				leftDockStats();
 		},
 		totalCo2: function(co2){
 			let strco2Total = valStr(co2, 'C');
@@ -46,7 +52,6 @@ $(function(){
 		}
 	}
 
-	let simu;
 
 	promiseSimulater(valChangedCallbacks)
 	.then((s) => { //when the simulater is ready
@@ -66,7 +71,6 @@ $(function(){
 
 		$('#iTaxRate').val(simu.taxRate);
 
-		prepareConfiguration();
 
 		CentralArea.setSimu(simu);
 
@@ -75,14 +79,12 @@ $(function(){
 		alert(err);
 	});
 
-	$('#bConfigure,#bMenuConfigure').on("click", () => {
-		$('#dLeftDock').toggle();
-	});
+	$('#bConfigure,#bMenuConfigure').on("click", leftDockCoefs);
+	$('#bStats').on("click", leftDockStats);
 
 
 	$('#iTaxRate').on('input', function(e){
 		simu.taxRate = this.value;
-
 	});
 
 
@@ -92,7 +94,9 @@ $(function(){
 
 
 
-	function prepareConfiguration(){
+	function leftDockCoefs(){
+		$('#dLeftDock').show();
+
 		let txt = '';
 
 		simu.primaryDataList().forEach(yearly => {
@@ -110,22 +114,78 @@ $(function(){
 		});
 
 		$('#dLeftDock').html(txt);
-		// //print the values in the appropriates blocks
-		// for(let k in simu.params){
-		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	valStr(simu.params[k].at(simu.year), simu.params[k].unit, true));
-		// }
-		// $('.vPvEffi').text(valStr(simu.params['pvEffi'].at(simu.year), '%', true));
-
 
 		$('.bShowPlot').on('click', CentralArea.tabPlot);
+	}
 
+	function leftDockStats(){
+		$('#dLeftDock').show();
+		let txt = '';
+
+		// //consumed energy origin :
+		// //spendings
+		// //co2
+		//
+		// txt += valStr( consumed.total, 'Wh');
+		//
+		//
+		// ['fossil', 'pv', 'nuke', 'storage'].forEach(e =>{
+		// 	txt += '<br />' + e + valStr(consumed.origin[e], 'Wh');
+		// });
+		// txt += '<br />';
+		//
+		// txt += '<br />co2 : ' + valStr( simu.lastYeatStats.co2.total, 'C');
+		//
+		// txt += '<br />';
+		//
+		// let costs =  simu.lastYeatStats.cost;
+		// txt += '<br />cost : ' + valStr(costs.total, '€');
+		// ['fossil', 'pv', 'nuke', 'storage'].forEach(e =>{
+		// 	if(costs.perWh[e] > 0)
+		// 		txt += '<br />Frais variables ' + e + ' ' + valStr(costs.perWh[e], '€');
+		// 	if(costs.perYear[e] > 0)
+		// 		txt += '<br />Frais fixes ' + e + ' ' + valStr(costs.perYear[e], '€');
+		// 	if(costs.build[e] > 0)
+		// 		txt += '<br />Construction ' + e + ' ' + valStr(costs.build[e], '€');
+		// });
+
+		$('#dLeftDock').html(txt);
+
+		//electricity origin
+		let myPie = $('<canvas width="100" height="100"></canvas>');
+
+		let ctx = myPie[0].getContext("2d");
+		ctx.translate(50, 50);
+		const consumed = simu.lastYeatStats.consumedEnergy;
+		pieChart(ctx, consumed.origin, {nuke: 'yellow', pv:'blue', fossil:'red', storage:'rgb(0, 255, 250)'});
+
+		$('#dLeftDock').append('<h2>Origine de l energie</h2>');
+		$('#dLeftDock').append(myPie);
+
+		$('#dLeftDock').append('<h2>Empreinte carbonne</h2>');
+
+		$('#dLeftDock').append('<h2>Budget</h2>');
+		//should do a function
+		// myPie = $('<canvas width="100" height="100"></canvas>');
+		//
+		// let ctx = myPie[0].getContext("2d");
+		// ctx.translate(50, 50);
+		// pieChart(ctx, consumed.origin, {nuke: 'yellow', pv:'blue', fossil:'red', storage:'rgb(0, 255, 250)'});
+		//
+		// $('#dLeftDock').append('<h2>Origine de l energie</h2>');
+		// $('#dLeftDock').append(myPie);
 	}
 
 
 	$('#bStartGame').on('click', () => {
 		gameStarted = true;
 		CentralArea.tabGame();
+		$('#bStats').css('display', 'block');
 	});
+	//skip click tmp todo : remove
+	gameStarted = true;
+	CentralArea.tabGame();
+	$('#bStats').css('display', 'block');
 
 	$(document).on('keydown', function(e){
 	  if(e.keyCode == 27)

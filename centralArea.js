@@ -70,5 +70,9 @@ function baseSetTab(id){
   mapNav.disableAreaMoving();
   $('#' + current).css('display', 'none');
   current = id;
-  $('#' + current).css('display', 'block');
+
+  let display = 'block';
+  if(id == 'dMainMenu')
+    display = 'flex';
+  $('#' + current).css('display', display);
 }

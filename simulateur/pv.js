@@ -22,7 +22,7 @@ export default class Pv extends IntermittentProductionMean{
                     this.capacity);
   }
 
-  happyNY(year, simulateur, output){
+  happyNY(yStats){
     //do power decline
     this.capacity = 0;
 
@@ -34,7 +34,8 @@ export default class Pv extends IntermittentProductionMean{
 
 
     //compute fixed o & M
-    output.cost += this.area * this.perYear.cost.at(year); // pv
+    yStats.cost.perYear.pv +=
+          this.area * this.perYear.cost.at(yStats.year); // pv
   }
 
 /**
