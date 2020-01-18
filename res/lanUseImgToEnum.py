@@ -1,32 +1,32 @@
+#!/bin/python3
+#
 
 from PIL import Image, ImageDraw, ImageFont
-import struct
+from struct import pack
+from tqdm import tqdm
 
-image = Image.open("landUse.png")
+im = Image.open("landUse.png")
 
-fout = open("landUse.bin", "wb")
-
-
-pix = image.load()
+pix = im.load()
 
 dic = {}
 counter = 0
 
-outBytes = bytearray(image.width * image.height)
 
+outBytes = bytearray(im.width * im.height)
 
-for x in range(0, image.width):
-	for y in range(0, image.height):
-		v = 0
-		if( pix[x, y] not in dic):
-			dic[pix[x, y]]= counter
-			counter += 1
+for x in tqdm(range(im.width)):
+    for y in range(im.height):
+        if( pix[x, y] not in dic):
+            dic[pix[x, y]]= counter
+            counter += 1
 
-		v = dic[pix[x, y]]
-		outBytes[x+y*image.width] = struct.pack("B", v)
+        outBytes[x+y*im.width] = dic[pix[x, y]]
 
+im.close()
 
+with open("landUse.bin", "wb") as fout:
+    fout.write(outBytes)
 
-fout.write(outBytes)
+print('done')
 
-print 'done'
