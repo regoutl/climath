@@ -1,64 +1,90 @@
+/*
+This file is part of Benergy. Benergy is free software: you can redistribute it and/or modify
+ it under the terms of the GPL-3.0-only.
+
+Copyright 2020, louis-amedee regout, charles edwin de brouwer
+*/
+
 "use strict";
 
-import Simulateur from './simulateurDePeche.js';
+import * as BuildMenu from './buildmenu.js';
+
+import {Simulateur, promiseSimulater} from './simulateur/simulateur.js';
 import * as mapNav from './moveIt.js';
-import {Plot, canvasEnablePloting, quantityToHuman} from './plot.js';
+import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
 
-function plainTextEuro(amound){
-	let coef = 0.000001, unit = 'million';
-	if(Math.abs(amound) >= 1000000){
-		coef *= 0.001;
-		unit = 'milliard';
-	}
-
-
-	var inMillion = Math.round(amound * coef).toString();
-
-
-	return   inMillion +  " " + unit + " €";
-}
 
 
 $(function(){
 
 	$('.vCountryName').text("Belgique");
 
-
-//	let loadParamsPromice = loadDataFile('res/parameters.json');
+	let valChangedCallbacks={
+		money: function(money){
+			$('.vMoney').text(valStr(money, '€'));
+		},
+		year: function(year){
+			$('.vYear').text(year);
+		},
+		totalCo2: function(co2){
+			let strco2Total = valStr(co2, 'C');
+	    strco2Total = strco2Total.substr(0, strco2Total.length - 6);
+	    $('.vTotalCo2').text(strco2Total);
+		},
+		lastYearCo2: function(co2){
+			let strco2Total = valStr(co2, 'C');
+	    strco2Total = strco2Total.substr(0, strco2Total.length - 6);
+	    $('.vLastYearCo2').text(strco2Total);
+		},
+		taxRate: function(rate){
+			$('.vTaxRate').text(Math.round(rate * 100) + '%');
+		}
+	}
 
 	let simu;
-	Promise.all(
-		[fetch('res/parameters.json').then((response) => {return response.json();}), //async load parameters.json, and interpred data as json
-// now encoded in parameters itself    	 fetch('res/pvcapfactAll365.bin').then((response) => {return response.arrayBuffer();})//interpret as arraybuf
-		])
-	.then(function(values){ //called when all simu related res are loaded
-		simu = new Simulateur({	parameters: values[0],
-								valChangedCallbacks:{
-									money: function(money){
-										$('.vMoney').text(plainTextEuro(money));
-									},
-									year: function(year){
-										$('.vYear').text(year);
-									}
-								}});
 
+	promiseSimulater(valChangedCallbacks)
+	.then((s) => { //when the simulater is ready
+		simu = s;
+
+		BuildMenu.setStateChangedCallback(simu.onBuildMenuStateChanged.bind(simu));
+
+
+		//on click on the grid
+		$('#dCentral').on('click', function(){
+			if($(this).data('moving'))
+				return;
+			simu.confirmCurrentBuild();
+		});
+
+		$('#bRunSimu').on('click', simu.run.bind(simu));
+
+		$('#iTaxRate').val(simu.taxRate);
 
 		// //print the values in the appropriates blocks
 		// for(let k in simu.params){
-		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	quantityToHuman(simu.params[k].at(simu.year), simu.params[k].unit, true));
+		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	valStr(simu.params[k].at(simu.year), simu.params[k].unit, true));
 		// }
-		// $('.vPvEffi').text(quantityToHuman(simu.params['pvEffi'].at(simu.year), '%', true));
+		// $('.vPvEffi').text(valStr(simu.params['pvEffi'].at(simu.year), '%', true));
 
+
+	})
+	.catch(function(err){//sth failed for the ini of simulater
+		alert(err);
+	});
+
+
+
+
+	$('#iTaxRate').on('input', function(e){
+		simu.taxRate = this.value;
 
 	});
 
+
+
   var cPlot = $("#cPlot")[0];
   canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
-
-
-
-  /// load ground usage
-  let grid = new Grid();
 
 
   /// switch to ground usage tab
@@ -101,66 +127,12 @@ $(function(){
 
 
 
-
-	$('#bRunSimu').on('click', () => {
-		simu.run();
-	});
-	$('#bAddLotPv').on('click', () => {
-		let myPlan = simu.prepareCapex({type: 'pv', area: 10000000000, powerDecline: 0.9966});
-
-		simu.execute(myPlan);
-	});
-	$('#bAddLotBat').on('click', () => {
-		let myPlan = simu.prepareCapex({type: 'battery',
-										storageCapacity: 10000000000000});
-
-		simu.execute(myPlan);
-	});
-
-
-
-	$('.bShowPlot').on('click', tabPlot);
+/*	$('.bShowPlot').on('click', tabPlot);
 	$(document).on('keydown', function(e){
 		if(e.keyCode == 27)
 			tabGroundUsage();
 	});
-
-	/// building -------------------------------------------------------------
-	var nowBuilding = undefined;
-
-	$('.bBuild').on('click', function(e){
-		var t = e.currentTarget.getAttribute("data-target");
-
-		nowBuilding  = t;
-
-		$('.buildDetail').css('display', 'none');
-		$('#' + t + 'BuildDetails').css('display', 'block');
-	});
-
-    $('#top').on('click', (evt) => {
-        if(!nowBuilding)
-            return;
-        var curPos = {x: evt.offsetX, y: evt.offsetY};
-        if(nowBuilding == 'pv'){
-            grid.saveCircle(
-                curPos.x,
-                curPos.y,
-                $('#pvBuildRange').val(),
-                'pv', 2019);
-                // $('.vYear').text(year)); // TODO set Year
-        }
-    })
-	$('#top').on('mousemove', function(evt){
-		if(!nowBuilding)
-			return;
-
-		var curPos = {x: evt.offsetX,
-					 y: evt.offsetY};
-
-		if(nowBuilding == 'pv'){
-            grid.drawCircle(curPos.x, curPos.y, $('#pvBuildRange').val());
-		}
-	});
+*/
 
 
 });

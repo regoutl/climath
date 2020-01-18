@@ -124,16 +124,20 @@ h1{
 	flex-direction: row;
 
 }
+
+/** BUILD MENU ----------------------------------*/
+
 .bBuild{
 	height: 60px;
 	margin: 10px;
 	cursor: pointer;
-
 }
 
-.buildDetail{
-	display: none;
+#dBuildDetails th{
+	text-align:left;
+	vertical-align: top;
 }
+
 
 #pv-radius{
     position: relative;
@@ -148,4 +152,14 @@ canvas {
 	image-rendering: -webkit-optimize-contrast;
 	image-rendering: optimize-contrast;
 	-ms-interpolation-mode: nearest-neighbor;
+}
+
+
+
+.scaleInvariant{
+	position: fixed;
+	transform-origin: center;
+	top: 300px;
+	left: 300px;
+	z-index: 50;
 }

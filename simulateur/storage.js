@@ -35,6 +35,8 @@ export default class Storage /*extends AbstractProductionMean*/{
     this.solutions.battery.fixedOnM
       = new Yearly.Raw(parameters.battery.onm);
 
+    this.solutions.battery.energyDensity
+      = new Yearly.Raw(parameters.battery.energyDensity);
   }
 
   //Output the requested energy. energyOut <= capacityAt
@@ -135,8 +137,11 @@ export default class Storage /*extends AbstractProductionMean*/{
 
     if(what.type != 'battery')
       throw 'only bat supported';
-    if(what.storageCapacity === undefined)
-      throw 'need storageCapacity';
+    if(what.volume === undefined)
+      throw 'need volume';
+
+    what.storageCapacity
+      = what.volume * this.solutions.battery.energyDensity.at(beginBuildYear);
 
     if(what.priceMul === undefined)
       what.priceMul = 1;
@@ -168,6 +173,8 @@ export default class Storage /*extends AbstractProductionMean*/{
         * what.priceMul;
 
     ans.pm = this;
+
+    ans.perYear = {cost: this.solutions.battery.fixedOnM.at(ans.build.end) * ans.storageCapacity, co2: 0};
 
     return ans;
   }
