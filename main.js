@@ -10,8 +10,12 @@ Copyright 2020, louis-amedee regout, charles edwin de brouwer
 import * as BuildMenu from './buildmenu.js';
 
 import {Simulateur, promiseSimulater} from './simulateur/simulateur.js';
-import * as mapNav from './moveIt.js';
+import * as CentralArea from './centralArea.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
+
+function docEl(id){
+	return document.getElementById(id);
+}
 
 
 
@@ -19,6 +23,7 @@ $(function(){
 
 	$('.vCountryName').text("Belgique");
 
+	/// set of small functions that update screen text when some values changes
 	let valChangedCallbacks={
 		money: function(money){
 			$('.vMoney').text(valStr(money, '€'));
@@ -51,7 +56,7 @@ $(function(){
 
 
 		//on click on the grid
-		$('#dCentral').on('click', function(){
+		$('#dCentralArea').on('click', function(){
 			if($(this).data('moving'))
 				return;
 			simu.confirmCurrentBuild();
@@ -61,19 +66,18 @@ $(function(){
 
 		$('#iTaxRate').val(simu.taxRate);
 
-		// //print the values in the appropriates blocks
-		// for(let k in simu.params){
-		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	valStr(simu.params[k].at(simu.year), simu.params[k].unit, true));
-		// }
-		// $('.vPvEffi').text(valStr(simu.params['pvEffi'].at(simu.year), '%', true));
+		prepareConfiguration();
 
+		CentralArea.setSimu(simu);
 
 	})
 	.catch(function(err){//sth failed for the ini of simulater
 		alert(err);
 	});
 
-
+	$('#bConfigure,#bMenuConfigure').on("click", () => {
+		$('#dLeftDock').toggle();
+	});
 
 
 	$('#iTaxRate').on('input', function(e){
@@ -83,56 +87,51 @@ $(function(){
 
 
 
-  var cPlot = $("#cPlot")[0];
-  canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
+
+	let gameStarted = false;
 
 
-  /// switch to ground usage tab
-  function tabGroundUsage(){
-      // cGrUse.drawImage(groundUseMap, 0, 0); // TODO -> should be somewhere else
 
-      mapNav.enableAreaMoving();
+	function prepareConfiguration(){
+		let txt = '';
 
-      $('#dMovable').css('display', 'block');
-      $('#dPlotDisplay').css('display', 'none');
-  }
-  tabGroundUsage();
+		simu.primaryDataList().forEach(yearly => {
+			txt += '<div class="bShowPlot" data-target="';
+			//add a data target
+			txt += '"">';
+			txt += yearly.label + ' ';
+			txt += '<span>';
+			let unit = yearly.unit;
+			if(unit == '')
+				unit = '%';
 
-	/// switch to the pop plot tab
-	function tabPlot(e){
-		mapNav.disableAreaMoving();
-		$('#dMovable').css('display', 'none');
-		$('#dPlotDisplay').css('display', 'block');
+			txt += valStr(yearly.at(simu.year), unit, true);
+			txt += '</span></div>';
+		});
 
-		var targetLabel = e.currentTarget.getAttribute("data-target");
-		var dataToPlot, title, src = '', suffix = undefined;
+		$('#dLeftDock').html(txt);
+		// //print the values in the appropriates blocks
+		// for(let k in simu.params){
+		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	valStr(simu.params[k].at(simu.year), simu.params[k].unit, true));
+		// }
+		// $('.vPvEffi').text(valStr(simu.params['pvEffi'].at(simu.year), '%', true));
 
-		dataToPlot = simu.params[targetLabel];
 
-		if(dataToPlot.source)
-			src = dataToPlot.source;
+		$('.bShowPlot').on('click', CentralArea.tabPlot);
 
-		$('#dPlotDisplay h2').text(dataToPlot.label);
-		$('#dPlotDisplay .pSource').text('Source : ' + src);
-		var plot = new Plot(dataToPlot, 400, 300)
-		if(suffix == '%')
-			plot.setPercentMode(true);
-		cPlot.setPlot(plot);
-
-		if(dataToPlot.comment)
-			$('#dPlotDisplay .pComment').text(dataToPlot.comment);
-		else
-			$('#dPlotDisplay .pComment').text('');
 	}
 
 
-
-/*	$('.bShowPlot').on('click', tabPlot);
-	$(document).on('keydown', function(e){
-		if(e.keyCode == 27)
-			tabGroundUsage();
+	$('#bStartGame').on('click', () => {
+		gameStarted = true;
+		CentralArea.tabGame();
 	});
-*/
 
+	$(document).on('keydown', function(e){
+	  if(e.keyCode == 27)
+	    CentralArea.closeTabPlot();
+	});
+
+	$('#bClosePlot').on('click', CentralArea.closeTabPlot);
 
 });

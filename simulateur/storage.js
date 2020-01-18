@@ -32,7 +32,8 @@ export default class Storage /*extends AbstractProductionMean*/{
     this.solutions.battery.deconstructionRatio
       = parameters.battery.deconstructionRatio;
 
-    this.solutions.battery.fixedOnM
+    this.solutions.battery.perYear = {};
+    this.solutions.battery.perYear.cost
       = new Yearly.Raw(parameters.battery.onm);
 
     this.solutions.battery.energyDensity
@@ -81,7 +82,7 @@ export default class Storage /*extends AbstractProductionMean*/{
     }
 
     //todo : check O & M : here, it decreases every year
-    output.cost += sumCapa * this.solutions.battery.fixedOnM.at(year);
+    output.cost += sumCapa * this.solutions.battery.perYear.cost.at(year);
   }
 
   // return the maximum amount of energy we can store
@@ -174,7 +175,7 @@ export default class Storage /*extends AbstractProductionMean*/{
 
     ans.pm = this;
 
-    ans.perYear = {cost: this.solutions.battery.fixedOnM.at(ans.build.end) * ans.storageCapacity, co2: 0};
+    ans.perYear = {cost: this.solutions.battery.perYear.cost.at(ans.build.end) * ans.storageCapacity, co2: 0};
 
     return ans;
   }

@@ -148,6 +148,36 @@ export class Simulateur{
     this.valChangedCallbacks.lastYearCo2(this.co2Produced.at(this.year - 1));
   }
 
+  //return a list of all the primary (yearly coefs) data there are
+  primaryDataList(){
+    let ans = [];
+
+    const prodMeans = this.cProd.productionMeans;
+
+    ans.push(prodMeans.pv.efficiency);
+    ans.push(prodMeans.pv.build.energy);
+    ans.push(prodMeans.pv.build.cost);
+    ans.push(prodMeans.pv.perYear.cost);
+    ans.push(prodMeans.nuke.build.cost);
+    ans.push(prodMeans.nuke.perWh.cost);
+    ans.push(prodMeans.nuke.perWh.co2);
+    const store = prodMeans.storage.solutions;
+
+    ans.push(store.battery.build.energy);
+    ans.push(store.battery.perYear.cost);
+
+    let countries = this.cProd.countries;
+
+    ans.push(countries.belgium.pop);
+    ans.push(countries.belgium.gdpPerCap);
+    ans.push(countries.belgium.consoPerCap);
+
+    ans.push(countries.china.elecFootprint);
+//    ans.push(countries.usa.elecFootprint);
+
+    return ans;
+  }
+
   _computeTaxIncome(){
     return this.cProd.countries.belgium.pop.at(this.year)
             * this.cProd.countries.belgium.gdpPerCap.at(this.year)
@@ -185,5 +215,8 @@ export function promiseSimulater(valChangedCallbacks){
     };
 
     return new Simulateur(parameters, mapImgs, valChangedCallbacks);
-  });
+  })
+  .catch(err => {
+    alert('loading error ' + err);
+  }) ;
 }
