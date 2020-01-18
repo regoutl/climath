@@ -182,6 +182,7 @@
 		"battery":{
 			"build":{
 				"energy":{
+					"label":"Energie pour produire des batteries",
 					"source":"https://www.lowtechmagazine.com/2015/05/sustainability-off-grid-solar-power.html",
 					"years":[388],
 					"unit":"Wh/S"

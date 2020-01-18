@@ -4,10 +4,10 @@
 
 
 	let mousePos = {x: 0, y:0};
-	var transform = {x: -500, y: -300, scale: 6};
+	var transform = {x: -0, y: -0, scale:0.64};
 	$('#dMovable').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
 
-	let dCentral = $("#dCentral");
+	let dCentral = $("#dCentralArea");
 	dCentral.data('moving', false);
 
 	/// view control facilities----------------------------------------------------

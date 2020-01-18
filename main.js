@@ -10,8 +10,14 @@ Copyright 2020, louis-amedee regout, charles edwin de brouwer
 import * as BuildMenu from './buildmenu.js';
 
 import {Simulateur, promiseSimulater} from './simulateur/simulateur.js';
-import * as mapNav from './moveIt.js';
+import * as CentralArea from './centralArea.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
+
+import {pieChart} from './ui/piechart.js';
+
+function docEl(id){
+	return document.getElementById(id);
+}
 
 
 
@@ -19,12 +25,17 @@ $(function(){
 
 	$('.vCountryName').text("Belgique");
 
+	let simu;
+
+	/// set of small functions that update screen text when some values changes
 	let valChangedCallbacks={
 		money: function(money){
 			$('.vMoney').text(valStr(money, '€'));
 		},
 		year: function(year){
 			$('.vYear').text(year);
+			if(simu)
+				leftDockStats();
 		},
 		totalCo2: function(co2){
 			let strco2Total = valStr(co2, 'C');
@@ -41,7 +52,6 @@ $(function(){
 		}
 	}
 
-	let simu;
 
 	promiseSimulater(valChangedCallbacks)
 	.then((s) => { //when the simulater is ready
@@ -51,7 +61,7 @@ $(function(){
 
 
 		//on click on the grid
-		$('#dCentral').on('click', function(){
+		$('#dCentralArea').on('click', function(){
 			if($(this).data('moving'))
 				return;
 			simu.confirmCurrentBuild();
@@ -61,78 +71,127 @@ $(function(){
 
 		$('#iTaxRate').val(simu.taxRate);
 
-		// //print the values in the appropriates blocks
-		// for(let k in simu.params){
-		// 	$('.v' + k.charAt(0).toUpperCase() +  k.slice(1)).text(	valStr(simu.params[k].at(simu.year), simu.params[k].unit, true));
-		// }
-		// $('.vPvEffi').text(valStr(simu.params['pvEffi'].at(simu.year), '%', true));
 
+		CentralArea.setSimu(simu);
 
 	})
 	.catch(function(err){//sth failed for the ini of simulater
 		alert(err);
 	});
 
-
+	$('#bConfigure,#bMenuConfigure').on("click", leftDockCoefs);
+	$('#bStats').on("click", leftDockStats);
 
 
 	$('#iTaxRate').on('input', function(e){
 		simu.taxRate = this.value;
-
 	});
 
 
 
-  var cPlot = $("#cPlot")[0];
-  canvasEnablePloting(cPlot);/// make cPlot ready for ploting (call cPlot.setPlot(myPlot))
+
+	let gameStarted = false;
 
 
-  /// switch to ground usage tab
-  function tabGroundUsage(){
-      // cGrUse.drawImage(groundUseMap, 0, 0); // TODO -> should be somewhere else
 
-      mapNav.enableAreaMoving();
+	function leftDockCoefs(){
+		$('#dLeftDock').show();
 
-      $('#dMovable').css('display', 'block');
-      $('#dPlotDisplay').css('display', 'none');
-  }
-  tabGroundUsage();
+		let txt = '';
 
-	/// switch to the pop plot tab
-	function tabPlot(e){
-		mapNav.disableAreaMoving();
-		$('#dMovable').css('display', 'none');
-		$('#dPlotDisplay').css('display', 'block');
+		simu.primaryDataList().forEach(yearly => {
+			txt += '<div class="bShowPlot" data-target="';
+			//add a data target
+			txt += '"">';
+			txt += yearly.label + ' ';
+			txt += '<span>';
+			let unit = yearly.unit;
+			if(unit == '')
+				unit = '%';
 
-		var targetLabel = e.currentTarget.getAttribute("data-target");
-		var dataToPlot, title, src = '', suffix = undefined;
+			txt += valStr(yearly.at(simu.year), unit, true);
+			txt += '</span></div>';
+		});
 
-		dataToPlot = simu.params[targetLabel];
+		$('#dLeftDock').html(txt);
 
-		if(dataToPlot.source)
-			src = dataToPlot.source;
+		$('.bShowPlot').on('click', CentralArea.tabPlot);
+	}
 
-		$('#dPlotDisplay h2').text(dataToPlot.label);
-		$('#dPlotDisplay .pSource').text('Source : ' + src);
-		var plot = new Plot(dataToPlot, 400, 300)
-		if(suffix == '%')
-			plot.setPercentMode(true);
-		cPlot.setPlot(plot);
+	function leftDockStats(){
+		$('#dLeftDock').show();
+		let txt = '';
 
-		if(dataToPlot.comment)
-			$('#dPlotDisplay .pComment').text(dataToPlot.comment);
-		else
-			$('#dPlotDisplay .pComment').text('');
+		// //consumed energy origin :
+		// //spendings
+		// //co2
+		//
+		// txt += valStr( consumed.total, 'Wh');
+		//
+		//
+		// ['fossil', 'pv', 'nuke', 'storage'].forEach(e =>{
+		// 	txt += '<br />' + e + valStr(consumed.origin[e], 'Wh');
+		// });
+		// txt += '<br />';
+		//
+		// txt += '<br />co2 : ' + valStr( simu.lastYeatStats.co2.total, 'C');
+		//
+		// txt += '<br />';
+		//
+		// let costs =  simu.lastYeatStats.cost;
+		// txt += '<br />cost : ' + valStr(costs.total, '€');
+		// ['fossil', 'pv', 'nuke', 'storage'].forEach(e =>{
+		// 	if(costs.perWh[e] > 0)
+		// 		txt += '<br />Frais variables ' + e + ' ' + valStr(costs.perWh[e], '€');
+		// 	if(costs.perYear[e] > 0)
+		// 		txt += '<br />Frais fixes ' + e + ' ' + valStr(costs.perYear[e], '€');
+		// 	if(costs.build[e] > 0)
+		// 		txt += '<br />Construction ' + e + ' ' + valStr(costs.build[e], '€');
+		// });
+
+		$('#dLeftDock').html(txt);
+
+		//electricity origin
+		let myPie = $('<canvas width="100" height="100"></canvas>');
+
+		let ctx = myPie[0].getContext("2d");
+		ctx.translate(50, 50);
+		const consumed = simu.lastYeatStats.consumedEnergy;
+		pieChart(ctx, consumed.origin, {nuke: 'yellow', pv:'blue', fossil:'red', storage:'rgb(0, 255, 250)'});
+
+		$('#dLeftDock').append('<h2>Origine de l energie</h2>');
+		$('#dLeftDock').append(myPie);
+
+		$('#dLeftDock').append('<h2>Empreinte carbonne</h2>');
+
+		$('#dLeftDock').append('<h2>Budget</h2>');
+		//should do a function
+		// myPie = $('<canvas width="100" height="100"></canvas>');
+		//
+		// let ctx = myPie[0].getContext("2d");
+		// ctx.translate(50, 50);
+		// pieChart(ctx, consumed.origin, {nuke: 'yellow', pv:'blue', fossil:'red', storage:'rgb(0, 255, 250)'});
+		//
+		// $('#dLeftDock').append('<h2>Origine de l energie</h2>');
+		// $('#dLeftDock').append(myPie);
 	}
 
 
-
-/*	$('.bShowPlot').on('click', tabPlot);
-	$(document).on('keydown', function(e){
-		if(e.keyCode == 27)
-			tabGroundUsage();
+	$('#bStartGame').on('click', () => {
+		gameStarted = true;
+		CentralArea.tabGame();
+		$('#bStats').css('display', 'block');
 	});
-*/
+	//skip click tmp todo : remove
+	gameStarted = true;
+	CentralArea.tabGame();
+	$('#bStats').css('display', 'block');
 
+	$(document).on('keydown', function(e){
+	  if(e.keyCode == 27)
+	    CentralArea.closeTabPlot();
+	});
+
+	$('#bClosePlot').on('click', CentralArea.closeTabPlot);
 
 });

@@ -246,8 +246,8 @@ export default class MapComponent{
     //re center it
     box.minX -= x;
     box.minY -= y;
-    box.maxX += x;
-    box.maxY += y;
+    box.maxX -= x;
+    box.maxY -= y;
 
     for(let i = box.minX; i < box.maxX; i++){
       const i2 = i*i;

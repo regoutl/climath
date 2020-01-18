@@ -8,6 +8,7 @@ import Storage from './storage.js';
 import Nuke from './nuke.js';
 
 /// note : all years are assumed to be 365 days long
+/** @brief compute the hourly demand meeting and building*/
 export default class ProductionComponent{
 	/// build a simulator with the given
 	/** @param parameters : obj, the content of parameters.json
@@ -47,33 +48,32 @@ export default class ProductionComponent{
 	/// simulate using the coefs for the given year
 	/// simulation is done hour by hour
 	/// battery lvx is resumed from last run.
+/** @note out.stats is reset to
+out.stats.consumedEnergy := {
+	origin:{ // note : sum = 1, energy used to load batteries not included
+		fossil: float,
+		pv: float,
+		nuke: float,
+		battery: float
+	},
+	total: float //wh consumed this year
+}
+	*/
 	run(year, out){
 		//init a few things------------------------------------
-		out.conso=  this.countries.belgium.pop.at(year) *    //watt
+		out._conso=  this.countries.belgium.pop.at(year) *    //watt
 							this.countries.belgium.consoPerCap.at(year);
-
-
-		for(let prodMeanIndex = 0;
-				prodMeanIndex < this.productionMeansOrder.length;
-				prodMeanIndex++){
-			let prodMeanLabel = this.productionMeansOrder[prodMeanIndex];//get label
-
-			let prodMean = this.productionMeans[prodMeanLabel];//get data for that prod mean
-			prodMean.happyNY(year, this, out);
-		}
-
 
 		//capacity factor sampling hour
 		let yearForTheCapaFactor = rand() % 100; //chooses a random year to sample the capacity factors from
-		out.capaFactHour = yearForTheCapaFactor * 365*24;
-		out.storageIndex = this.productionMeansOrder.indexOf('storage');
+		out._capaFactHour = yearForTheCapaFactor * 365*24;
+		out._storageIndex = this.productionMeansOrder.indexOf('storage');
 
 		//simulate hour by hour------------------------------------
 		for(let i = 0; i < 8760; i++){
 			this._runHour(out);
 		}
 
-		this._processPendingBuilds(year);
 	}
 
 
@@ -113,16 +113,6 @@ export default class ProductionComponent{
 
 		return ans;
 
-		// //~ else if(what.type=='nuke'){
-		// 	//~ if(what.capa === undefined)
-		// 		//~ throw 'must define a capa';
-		// 	//~ ans.co2 = 0;
-		// 	//~ ans.cost  = what.capa * // N
-		// 			//~ this.params.nukeCapexCost.at(this.year);  // eur/N
-		// 	//~ ans.nameplate = what.capa;
-		// //~ }
-		//
-		//
 		// //modify the ans if unbuild
 		// if(ans.nameplate.at(ans.build.end) < 0){
 		// 	ans.demolish = {};
@@ -132,11 +122,6 @@ export default class ProductionComponent{
 		//
 		// 	ans.build = undefined;
 		// }
-		//
-		//
-		// //no modif on the ans plz (garante no compute mistake)
-		// Object.freeze(ans);
-		// return ans;
 	}
 
 	/** @brief build stuff. vals is the object returned by capexStat
@@ -158,24 +143,21 @@ export default class ProductionComponent{
 		return true;
 	}
 
-	// ///wrapper around eval. usage ex : evaluate('pop * gdpPerCap')
-	// /// if year is ommited, uses the current year
-	// /// only work with parameters
-	// evaluate(expr, year = undefined){
-	// 	if(year === undefined)
-	// 		year = this.year;
-	//
-	// 	let replaced = expr.replace(/\w*/g, 'this.params.$&.at(' + year + ')');
-	// 	return eval(replaced);
-	// }
+	happyNY(yStats){
+		for (var prodMean in this.productionMeans) {
+		    if (!this.productionMeans.hasOwnProperty(prodMean)) continue;
+				
+				this.productionMeans[prodMean].happyNY(yStats);
+		}
 
-
+		 this._processPendingBuilds(yStats.year);
+	}
 
 	/**
 	* @brief simulate a hour in a year : compute co2 and cost; tries to load the storage
 	*/
 	_runHour(out){
-		let toProduce = out.conso;
+		let toProduce = out._conso;
 		let fillingBatteries = false;
 		let produceUntill = this.productionMeansOrder.length;
 
@@ -189,12 +171,15 @@ export default class ProductionComponent{
 			let prodMean = this.productionMeans[prodMeanLabel];//get data for that prod mean
 
 			//maximum amound that this production mean can produce at this hour
-			let canProduce = prodMean.capacityAt(out.capaFactHour);
+			let canProduce = prodMean.capacityAt(out._capaFactHour);
 			if(canProduce == 0)//this energy is useless
 				continue;
 
 			//amount that this prod mean should produce
 			let production = Math.min(toProduce, canProduce);
+
+			if(!fillingBatteries)
+				out.consumedEnergy.origin[prodMeanLabel] += production;
 
 			prodMean.produce(production, out);
 
@@ -208,11 +193,11 @@ export default class ProductionComponent{
 					break;
 
 				//if we passed the storage unloading, dont try to load the storage
-				if(prodMeanIndex >= out.storageIndex)
+				if(prodMeanIndex >= out._storageIndex)
 					break;
 
 				//we will stop the prod mean loop just before unloading the batteries
-				produceUntill = out.storageIndex;
+				produceUntill = out._storageIndex;
 
 				// try to produce energy so that all batteries are full
 				toProduce = this.productionMeans.storage.maxInput();
@@ -233,7 +218,7 @@ export default class ProductionComponent{
 
 		this.productionMeans.storage.runHour(batIn);
 
-		out.capaFactHour ++;
+		out._capaFactHour ++;
 	}
 
 
@@ -277,17 +262,7 @@ export default class ProductionComponent{
 
 
 
-/*		let self = this;
-
-		self.params = {};
-		// all the coefs
-
-		for(let attrN in jsCoefs.tvi){
-			self.params[attrN] = new Yearly.Raw(0);
-			self.params[attrN].fromJSON(jsCoefs.tvi[attrN]);
-		}
-
-		// some derived quantities, might change
+/*	// some derived quantities, might change
 		self.params['pvEnergyDensity'] = new Yearly.Mult(self.params['pvEffi'], new Yearly.Constant(1000 * 63 / 210));//wh/m2
 		self.params['pvEnergyDensity'].label = "Densite energetique des panneaux solaires";
 		self.params['pvEnergyDensity'].source = "Estime via les stats des fermes solaires allemandes de berlin (irradiance similaire a la belgique)";

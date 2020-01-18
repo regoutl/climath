@@ -57,7 +57,7 @@ function unitToHuman(unit, compact = false){
 	}
 
 	if(!compact)
-		tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (nameplate) ').replace('C', 'gCO2eq');
+		tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (pic) ').replace('C', 'gCO2eq');
 	else
 		tmp = tmp.replace('N', 'Wp').replace('C', 'gCO2');
 

@@ -6,10 +6,6 @@
 	font-weight: normal;
 }
 
-.input{
-	display:none;
-}
-
 html, body{
 	width: 100%;
 	height: 100%;
@@ -29,6 +25,7 @@ header{
 	text-align: center;
 
 	border-bottom: 1px solid gray;
+	display: none;
 }
 
 h1{
@@ -49,7 +46,7 @@ h1{
 }
 
 
-#dTabBar, #dActions{
+#dLeftDock, #dRightDock{
 	width: 300px;
 	box-sizing: border-box;
 	display: flex;
@@ -57,23 +54,17 @@ h1{
 
 	flex-direction: column;
 	overflow: auto;
-}
-
-#dTabBar{
-	display: none;
+	display:none;
 }
 
 
-#dCentral{
+
+#dCentralArea{
 	flex: 1 1;
 	overflow: hidden;
 	position: relative;
 }
 
-#groundUsage{
-	position: absolute;
-	image-rendering: crisp-edges;
-}
 
 #dMovable{
 	transform-origin: 0 0;
@@ -81,16 +72,19 @@ h1{
 	position: relative;
 	width: 100px;
 	height: 100px;
+	will-change: transform;
+	filter: grayscale(1%);
+	display:none;
 }
 
-#dTabBar  > *{
+#dLeftDock  > *{
 	padding: 10px;
 	cursor: pointer;
 	border-bottom: 1px solid rgb(220, 220, 220);
 	transition: 0.2s;
 }
 
-#dTabBar  > *:hover{
+#dLeftDock  > *:hover{
 	padding-left: 12px;
 	padding-right: 8px;
 }
@@ -98,6 +92,7 @@ h1{
 
 #dPlotDisplay{
 	display:none;
+	padding: 50px;
 }
 
 #dPlotDisplay h2{
@@ -107,6 +102,8 @@ h1{
 	font-size: 10px;
 }
 
+
+/** BUILD MENU ----------------------------------*/
 #buildMenu{
 	border-top: 1px solid gray;
 	margin: 20px 0;
@@ -125,14 +122,15 @@ h1{
 
 }
 
-/** BUILD MENU ----------------------------------*/
-
 .bBuild{
 	height: 60px;
 	margin: 10px;
 	cursor: pointer;
 }
 
+#dBuildDetails{
+	display: none;
+}
 #dBuildDetails th{
 	text-align:left;
 	vertical-align: top;
@@ -155,6 +153,25 @@ canvas {
 }
 
 
+#bConfigure, #bStats, #bClosePlot{
+	position:absolute;
+	z-index: 10000;
+	top: 0;
+	left: 0;
+	cursor: pointer;
+}
+
+#bStats{
+	top: 50px;
+	display: none;
+}
+
+#bClosePlot{
+	top: 0;
+	right: 0;
+	left: auto;
+}
+
 
 .scaleInvariant{
 	position: fixed;
@@ -162,4 +179,36 @@ canvas {
 	top: 300px;
 	left: 300px;
 	z-index: 50;
+	will-change: transform;
+}
+
+
+
+/* dMainMenu ----------------------------------------- */
+
+#dMainMenu{
+	display: flex;
+
+	align-items: center;
+
+	justify-content: center;
+
+	height: 100%;
+}
+
+#dMainMenu > div{
+	display: flex;
+	flex-direction: column;
+}
+
+#dMainMenu > div > *{
+	padding: 20px;
+}
+
+#dMainMenu a{
+	cursor: pointer;
+}
+
+#dMainMenu a:hover{
+	text-decoration: underline;
 }

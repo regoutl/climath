@@ -139,8 +139,8 @@ export default class MapDrawer{
   }
 
   addNuke(pos){
-    let node = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="32px"/>');
-    node.css({top:pos.y-20, left:pos.x - 16});
+    let node = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
+    node.css({top:pos.y-10, left:pos.x - 8});
     $('#dMovable').append(node);
 
 

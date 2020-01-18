@@ -2,8 +2,8 @@ import AbstractProductionMean from './abstractproductionmean.js';
 
 /// fossil, ccgt and nuke
 export default class RegularProductionMean extends AbstractProductionMean {
-  constructor(parameters) {
-    super(parameters);
+  constructor(parameters, label) {
+    super(parameters, label);
     if (new.target === RegularProductionMean) {
       throw new TypeError("Cannot construct RegularProductionMean instances directly");
     }
@@ -20,22 +20,24 @@ export default class RegularProductionMean extends AbstractProductionMean {
   }
 
   produce(energyOut, out){
-    out.co2 += energyOut * this._currentYear.perWh.co2;
-    out.cost += energyOut * this._currentYear.perWh.cost;
+    out.co2.perWh[this.label] += energyOut * this._currentYear.perWh.co2;
+    out.cost.perWh[this.label] += energyOut * this._currentYear.perWh.cost;
   }
 
-  happyNY(year, simulateur, output){
-    output.co2 +=
-         this.capacity
-       * this.perYear.co2.at(year-1);
-    output.cost +=
+  happyNY(yStats){
+    // output.co2.perYear[this.label] +=
+    //      this.capacity
+    //    * this.perYear.co2.at(year-1);
+
+    //fixed o&m
+    yStats.cost.perYear[this.label] +=
         this.capacity
-      * this.perYear.cost.at(year-1);
+      * this.perYear.cost.at(yStats.year-1);
 
     this._currentYear =
     {perWh:
-      {co2:this.perWh.co2.at(year),
-      cost:this.perWh.cost.at(year)}};
+      {co2:this.perWh.co2.at(yStats.year),
+      cost:this.perWh.cost.at(yStats.year)}};
   }
 
   capacityAt(t){

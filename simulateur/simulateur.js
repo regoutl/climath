@@ -3,6 +3,24 @@ import MapComponent from './mapcomponent.js';
 import { quantityToHuman as valStr} from '../plot.js';
 import * as Yearly from "../timevarin.js";
 
+
+function objSum(object){
+  if(typeof object == 'number')
+    return object;
+  else if(typeof object == 'object'){
+    let ans = 0;
+    for (var k in object){
+        if (object.hasOwnProperty(k)) {
+          ans += objSum(object[k]);
+        }
+    }
+    return ans;
+  }
+  else {
+    throw 'pfff';object
+  }
+}
+
 /** @brief manages all data, but DOM unaware
 @details coordinates MapComponent and LogicalComponent
 store general values
@@ -15,7 +33,8 @@ export class Simulateur{
     this.valChangedCallbacks = valChangedCallbacks;
 
     this.totalCo2 = 0;
-    this.year = 2020;
+    //note : will we incremented at th end of this constructor
+    this.yStats= {year: 2019};
     this.money  = parameters.gameplay.initMoney;
     // they would pay 30% if all spending were only for other purposes
 		/// WARNING TODO check this number
@@ -30,6 +49,12 @@ export class Simulateur{
 
     this.costs = new Yearly.Raw(0.0);
     this.costs.unit = '€';
+
+
+
+    //like if we just finished another year
+    this._clearYearStats();
+    this._newYear();
   }
 
   get taxRate(){
@@ -49,11 +74,7 @@ export class Simulateur{
   }
 
   get year(){
-    return this._year;
-  }
-  set year(val){
-    this._year = val;
-    this.valChangedCallbacks.year(this._year);
+    return this.yStats.year;
   }
 
   get totalCo2(){
@@ -104,17 +125,18 @@ export class Simulateur{
     }
 
 
-    //try to execute it, and on success
     this.cProd.execute(this._currentBuild);
-    //save the modif on the grid
     this.cMap.build(this._bm.state,
       {shape:'circle', center:this._bm.curPos, radius:this._bm.radius});
 
     //record some stats
     let action = this._currentBuild.build || this._currentBuild.demolish;
 
-    this.co2Produced.addAt(this.year, action.co2);
-    this.costs.addAt(this.year, action.cost);
+    let recorder = this._currentBuild.type;
+    if(recorder == 'battery')
+      recorder = 'storage';
+    this.yStats.co2.build[recorder] += action.co2;
+    this.yStats.cost.build[recorder] += action.cost;
 
     //and modify the actual value
     this.money -= action.cost;
@@ -124,36 +146,128 @@ export class Simulateur{
 
   //run
   run(){
-    console.log(this.year);
-
-    let y = {co2:0, cost: 0};
-
-    //taxes
-		y.cost -= this._computeTaxIncome();
-
     // O & M (fixed & variable)
-    this.cProd.run(this.year, y);
+    this.cProd.run(this.year, this.yStats);
 
+    this._newYear();
+  }
+
+  //return a list of all the primary (yearly coefs) data there are
+  primaryDataList(){
+    let ans = [];
+
+    const prodMeans = this.cProd.productionMeans;
+
+    ans.push(prodMeans.pv.efficiency);
+    ans.push(prodMeans.pv.build.energy);
+    ans.push(prodMeans.pv.build.cost);
+    ans.push(prodMeans.pv.perYear.cost);
+    ans.push(prodMeans.nuke.build.cost);
+    ans.push(prodMeans.nuke.perWh.cost);
+    ans.push(prodMeans.nuke.perWh.co2);
+    const store = prodMeans.storage.solutions;
+
+    ans.push(store.battery.build.energy);
+    ans.push(store.battery.perYear.cost);
+
+    let countries = this.cProd.countries;
+
+    ans.push(countries.belgium.pop);
+    ans.push(countries.belgium.gdpPerCap);
+    ans.push(countries.belgium.consoPerCap);
+
+    ans.push(countries.china.elecFootprint);
+//    ans.push(countries.usa.elecFootprint);
+
+    return ans;
+  }
+
+  /** @brief compute the tax income of the previous year (called on new year)*/
+  _computeTaxIncome(){
+    let yStats = this.yStats;
+
+    yStats.taxIn = this.cProd.countries.belgium.pop.at(yStats.year - 1)
+            * this.cProd.countries.belgium.gdpPerCap.at(yStats.year - 1)
+            * (this.taxRate - this.minTaxRate);
+  }
+
+  /**@brief go to next year.
+  compute o&m, taxes of the last year
+  save stats
+  calls happy new year
+  */
+  _newYear(){
+    this.yStats.year ++;
+
+    //taxes of last year
+		this._computeTaxIncome();
+
+    //wish a happy new year to everybody
+    this.cProd.happyNY(this.yStats);
+
+    this._lotsOfSavingOfStatisticsAboutLastYearAndCallbacks();
+
+    this.money -= objSum(this.yStats.cost.perWh) + objSum(this.yStats.cost.perYear);
+    this.money += this.yStats.taxIn;
+
+
+
+    // the new year initialization------------------------
+
+    //prepare stats for the new year
+    this._clearYearStats();
+  }
+
+  _clearYearStats(){
+    let y = this.yStats.year;
+    this.yStats = {
+      year: y,
+      consumedEnergy: {//stat about energy consumtion
+        total: 0,
+        origin:{fossil: 0, pv: 0, nuke:0, storage: 0}
+      },
+      co2:{//stat about co2 emission
+  			total: 0,
+  			build:{fossil: 0, pv: 0, nuke:0, storage: 0},
+  			perWh:{fossil: 0, pv: 0, nuke:0, storage: 0}
+  		},
+      cost:{//stat about costs
+        total: 0,
+        build:{fossil: 0, pv: 0, nuke:0, storage: 0},
+  			perWh:{fossil: 0, pv: 0, nuke:0, storage: 0},
+        perYear:{fossil: 0, pv: 0, nuke:0, storage: 0}
+      },
+      taxIn:0
+    };
+
+  }
+
+  _lotsOfSavingOfStatisticsAboutLastYearAndCallbacks(){
+    let yStats = this.yStats;
+
+    //compute totals
+    yStats.consumedEnergy.total = objSum(yStats.consumedEnergy);
+    yStats.co2.total = objSum(yStats.co2);
+    yStats.cost.total = objSum(yStats.cost);
+
+
+
+    this.lastYeatStats = yStats;
 
     // save the computed result
-		this.co2Produced.addAt(this.year,  y.co2);
-		this.costs.addAt(this.year, y.cost);
-		this.money -= y.cost;
+    this.co2Produced.addAt(this.year - 1,  yStats.co2.total);
+
+    let cost = yStats.cost.total - yStats.taxIn;
+    this.costs.addAt(this.year - 1, cost);
 
     this.totalCo2 +=
       this.co2Produced.at(this.year - 1);
 
-    this.year ++;
 
-    this.valChangedCallbacks.lastYearCo2(this.co2Produced.at(this.year - 1));
+    this.valChangedCallbacks.lastYearCo2(
+      this.co2Produced.at(this.year - 1));
+    this.valChangedCallbacks.year(this.year);
   }
-
-  _computeTaxIncome(){
-    return this.cProd.countries.belgium.pop.at(this.year)
-            * this.cProd.countries.belgium.gdpPerCap.at(this.year)
-            * (this.taxRate - this.minTaxRate);
-  }
-
 }
 
 
@@ -167,15 +281,19 @@ function loadImage(src) {
   });
 }
 
-/// load all data needed for a simulater & return a promise when its ready
+/// load all data needed for a simulater &
+/// return a promise when its ready
 export function promiseSimulater(valChangedCallbacks){
   return Promise.all(
-    [fetch('res/parameters.json').then((response) => {return response.json();}),
+    [fetch('res/parameters.json')
+        .then((response) => {return response.json();}),
     // loadImage('res/landUse.png'),
     // loadImage('res/popDensity.png'),
-    fetch('res/landUse.bin').then((response) => {return response.arrayBuffer();})
+    fetch('res/landUse.bin')
+        .then((response) => {return response.arrayBuffer();})
     ])
-  .then(function(values){ //called when all simu related res are loaded
+    //called when all simu related res are loaded
+  .then(function(values){
     let parameters = values[0];
 
     let mapImgs = {
@@ -185,5 +303,8 @@ export function promiseSimulater(valChangedCallbacks){
     };
 
     return new Simulateur(parameters, mapImgs, valChangedCallbacks);
-  });
+  })
+  .catch(err => {
+    alert('loading error ' + err);
+  }) ;
 }

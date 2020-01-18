@@ -27,7 +27,7 @@ function notifyStateChanged(){
 
 
 $(function(){
-  radius = $('#BMRange').val();
+  radius = Number($('#BMRange').val());
 
   $('.bBuild').on('click', function(e){
     let t = e.currentTarget.getAttribute("data-target");
@@ -60,7 +60,7 @@ $(function(){
 
 
   $('#BMRange').on('change', function(e){
-    radius = this.value;
+    radius = Number(this.value);
     notifyStateChanged();
   });
 

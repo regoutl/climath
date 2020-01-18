@@ -8,7 +8,7 @@ export default class Fossil/* extends AbstractProductionMean*/{
   }
 
   produce(energyOut, out){
-    out.co2 += energyOut * this.footprint;
+    out.co2.perWh.fossil += energyOut * this.footprint;
   }
 
   capacityAt(t){
@@ -16,6 +16,6 @@ export default class Fossil/* extends AbstractProductionMean*/{
   }
 
   //do nothing
-  happyNY(year, simulater, output){}
+  happyNY(yStats){}
 
 }

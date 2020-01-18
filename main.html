@@ -6,48 +6,35 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-	<header>
-
+<!--	<header>
 		<h1 class="vCountryName"></h1>
-	</header>
+	</header>-->
 	<div id="dCorps">
-		<div id="dTabBar">
-			<div class="bShowPlot" data-target="chinaElecFootprint">Empreinte elec Chine : <span class="vChinaElecFootprint"></span></div>
-			<div class="bShowPlot" data-target="usaElecFootprint">Empreinte elec USA : <span class="vUsaElecFootprint"></span></div>
-
-			<div class="bShowPlot" data-target="pop">Population : <span class="vPop"></span></div>
-			<div class="bShowPlot" data-target="consoPerCap">Conso / hab : <span class="vConsoPerCap"></span></div>
-			<div class="bShowPlot" data-target="conso" title="Consomation annuelle">Consommation : <span class="vConso"></span></div>
-			<div class="bShowPlot" data-target="pvEffi" title="Proportion d'energie lumineuse convertie en energie electricique">PV efficiency : <span class="vPvEffi"></span></div>
-			<div class="bShowPlot" data-target="pvEnergyDensity" title="Capacite de production installable par km2">PV place : <span class="vPvEnergyDensity"></span></div>
-			<div class="bShowPlot" data-target="pvOnM" title="Frais d'exploitation et de maintenance par W">PV O&amp;M : <span class="vPvOnM"></span></div>
-			<div class="bShowPlot" data-target="pvFarmCapexCost" title="Cout des panneaux solaires">Cout ferme solaire  : <span class="vPvFarmCapexCost"></span></div>
-			<div class="bShowPlot" data-target="pvDeco" title="Cout de demantellement par Watt de ferme solaire">Solaire demantellement : <span class="vPvDeco"></span></div>
-			<div class="bShowPlot" data-target="pvCapexEnergy" title="Energie pour produire des panneaux solaires">Production des PV : <span class="vPvCapexEnergy"></span></div>
-			<div class="bShowPlot" data-target="nukeCapexCost" title="Cout d'installation par Watt de nucleaire">Nuke capex : <span class="vNukeCapexCost"></span></div>
-			<div class="bShowPlot" data-target="nukeDeco" title="Cout de demantellement par Watt de nucleaire">Nuke demantellement : <span class="vNukeDeco"></span></div>
-			<div class="bShowPlot" data-target="nukeOnM" title="Frais d'exploitation et de maintenance par Wh">Nuke O&amp;M : <span class="vNukeOnM"></span></div>
-			<div class="bShowPlot" data-target="nukeFootprint" title="Empreinte du nucleaire">Nuke empreinte : <span class="vNukeFootprint"></span></div>
-			<div class="bShowPlot" data-target="gdpPerCap" title="Revenu annuel moyen brut par habitant">PIB par hab : <span class="vGdpPerCap"></span></div>
-			<div class="bShowPlot" data-target="taxRate" title="Valeur de taxe">Taxe : <span class="vTaxRate"></span></div>
-			<div class="bShowPlot" data-target="gouvIncome" title="Entrees du gouvernement">Revenu grouv : <span class="vGouvIncome"></span></div>
-			<div>Intalle : <span class="vCapa"></span></div>
-			<div><span class="vMoney"></span> euros</div>
-			<div>CO2 emmit l'an passe : <span></span></div>
-
+		<div id="dLeftDock">
 		</div>
-		<div id="dCentral">
+		<div id="dCentralArea">
+			<img src="res/icons/configure.png" width="32" id="bConfigure" title="Parametres"/>
+			<img src="res/icons/stats.png" width="32" id="bStats" title="Statistiques"/>
 			<div id="dMovable"><!-- Every sub div in this is movable and scrolable. sub div should be 'pos absolute' -->
           <canvas id="top" style="z-index: 99; position: fixed;" width="1374" height="1183"></canvas>
 			</div>
 			<div id="dPlotDisplay">
+				<img src="res/icons/close.png" width="32" id="bClosePlot" title="Fermer (Esc)"/>
 				<h2>Population</h2>
 				<canvas id="cPlot" width="400" height="300"></canvas>
 				<p class="pComment"></p>
 				<p class="pSource"></p>
 			</div>
+			<div id="dMainMenu">
+				<div> <!-- the centered menu box-->
+					<h1>Transition</h1>
+					<p>Saurez vous decarbonner l'economie Belge ?</p>
+					<a id="bMenuConfigure">Personnaliser les coefficients</a>
+					<a id="bStartGame">Commencer !</a>
+				</div>
+			</div>
 		</div>
-		<div id="dActions">
+		<div id="dRightDock">
       <div id="gridLayers"></div>
 			<div>Annee <span class="vYear"></span></div>
 			<div>Budget <span class="vMoney"></span></div>
@@ -82,7 +69,7 @@
 
 
 
-	<img src="radioactive.png" id="inNuke" class="input"  crossorigin="anonymous"/>
+<!--	<img src="radioactive.png" id="inNuke" class="input"  crossorigin="anonymous"/>-->
 </body>
 <!--	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->
 <script src="res/jQuery.js"></script>
