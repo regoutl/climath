@@ -35,21 +35,6 @@ const PopDensitylegend = {
     4285327102:{min:21, max:50},
     4286709503:{min:0, max:20},
 }
-const countDensity = {
-  "0": 763983,
-  "4279314829": 23421,
-  "4279979441": 37733,
-  "4280710099": 49076,
-  "4281639415": 44879,
-  "4282890747": 116199,
-  "4284009982": 162670,
-  "4285327102": 191224,
-  "4286709503": 236257
-}//Not sure it is correct?
-
-
-const PopDensity = {
-};
 
 let gridslist = {
     groundUse: 'landUse.png',
@@ -64,25 +49,31 @@ let layerOrder = {
     'popDensity':1
 };
 
+function onload(canvas, im){
+    let ctx = canvas[0].getContext("2d");
+    return () => {
+        if(im !== undefined){ctx.drawImage(im, 0, 0);}
+        canvas.imData = ctx.getImageData(0, 0,
+                                            canvas[0].width, canvas[0].height);
+        canvas.pixVal = new Uint32Array(
+                                    canvas.imData.data.buffer);
+        ctx.clearRect(0, 0, canvas[0].width, canvas[0].height);
+        ctx.putImageData(canvas.imData,0,0);
+    }
+}
+
 function newCanvas(name, file, zindex, visible){
     let canvas = $('<canvas id="'+name+'"'
                             + ' width="1374" height="1183"></canvas>');
-    let ctx = canvas[0].getContext("2d");
-    let im = new Image();
-    im.crossOrigin = '';
-    im.onload = () => {
-        ctx.drawImage(im, 0, 0);
-        canvas.imData = ctx.getImageData(0, 0, 1374, 1183);
-        canvas.pixVal = new Uint32Array(
-                                    canvas.imData.data.buffer);
-        ctx.clearRect(0, 0,
-            canvas[0].width,
-            canvas[0].height);
-        ctx.putImageData(canvas.imData,0,0);
-    }
-    im.src = 'res/' + file;
-    canvas['Im'] = im;
-    canvas.css({'z-index':zindex, visibility: (visible?'visible':'hidden'), position: 'fixed'});
+    canvas['Im'] = new Image();
+    canvas['Im'].crossOrigin = '';
+    canvas['Im'].onload = onload(canvas, canvas['Im']);
+    canvas['Im'].src = 'res/' + file;
+    canvas.css({
+        'z-index':zindex,
+        visibility: (visible?'visible':'hidden'),
+        position: 'fixed',
+    });
     $('#dMovable').append(canvas);
     return canvas;
 }
@@ -92,19 +83,22 @@ class Grid{
 
 	constructor(){
         // create multicaneva;
-
         this.gridLoaded = 0;
         this.gridToLoad = Object.keys(gridslist).length;
 
-        this.canvas = {
-            top: $('#top'),
-        }
+        this.canvas = { top: $('#top'),};
 
         // Load each grid
         for (const [name, file] of Object.entries(gridslist)) {
-            this.canvas[name] = newCanvas(name, file, layerOrder[name], this.currentShowGrid[name]);
+            this.canvas[name] = newCanvas(
+                name,
+                file,
+                layerOrder[name],
+                this.currentShowGrid[name],
+            );
         }
 
+        onload(this.canvas.top)();
         this.canvas.top[0].getContext("2d").globalAlpha = 0.3;
         this.setGridLayerCheckbox();
 	}
@@ -171,6 +165,7 @@ class Grid{
 
     drawCircle(x,y,radius) {
         const ctx = this.canvas.top[0].getContext('2d');
+        // ctx.fillStyle = 'rgba(255,255,255,0.1)';
         ctx.clearRect(0, 0,
             this.canvas.top[0].width,
             this.canvas.top[0].height);
@@ -192,9 +187,9 @@ class Grid{
                 b = c>>16 & 0xFF,
                 g = c>>8 & 0xFF,
                 r = c & 0xFF;
-                c = {red:r, blue:b, green:g, alpha:a}
+            c = {red:r, blue:b, green:g, alpha:a};
         }
-        if(c.red === 255 && c.blue === 255 && c.green === 255 && c.alpha === 255){
+        if(c.red === 255 && c.blue === 255 && c.green===255 && c.alpha===255){
             return undefined;
         } else if(c.red === 0 && c.blue === 250){
             return {nrj:'pv', year:2000+c.green};
@@ -203,13 +198,12 @@ class Grid{
     }
 
     saveCircle(x,y,radius, nrj, year) {
-        let ctx = this.canvas['energyGrid'][0].getContext('2d');
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        // ctx.beginPath();
-        // ctx.arc(x, y, radius, 0, 2*Math.PI, true);
-        // ctx.fill();
+        // set colors
         this._setForEarch(x,y,radius, this._nrg2color(nrj, year));
+        let ctx = this.canvas['energyGrid'][0].getContext('2d');
+        // draw colors
         ctx.putImageData(this.canvas['energyGrid'].imData,0,0);
+        // cut country borders
         ctx.drawImage(this.canvas['energyGrid']['Im'], 0, 0);
     }
 
@@ -222,7 +216,6 @@ class Grid{
         for(let i=-radius; i<radius; i++){
             for(let j=-radius; j<radius; j++){
                 if(i*i+j*j<radius*radius){
-                    // this.canvas['energyGrid'].pixVal[(y+j)*1374+(x+i)] = 4279314829;
                     this.canvas['energyGrid'].pixVal[(y+j)*1374+(x+i)] = abgr;
                 }
             }
@@ -273,6 +266,47 @@ class Grid{
                     }
             });
         }
+    }
+
+    _checkGroundUsageFlags(x,y,flags){
+        let gu = this.canves.groundUse.pixVal[y*1374+x];
+        for(let c of Object.keys(flags)){
+            if(GroundUsage[c] === gu){
+                return false;
+            }
+        }
+        return true;
+    }
+    /**
+    */
+    _setPx(grid, x, y, radius, flags, value){
+        let added = {count:0};
+        for(let i=-radius; i<=radius; i++){
+            for(let j=radius; j<=radius; j++){
+                if(this._checkGroundUsageFlags(x+i,y+j, flags.groundUse)){
+                    grid[(y+j)*1374+x+i] = value;
+                    added.count++;
+                }
+            }
+        }
+        return added;
+    }
+
+    /**
+    @param position : {x: ,y: } representing the center of the circle
+    @param radius : radius to take into account around (a number in [0;+INF[)
+    @param flags.groundUse[GroundUsage] : Boolean if false,
+                                            don't consider these ground usage
+    @param flags.PopDensity : {min:0, max:Inf}
+    */
+    getAreaAndAvgIrradiance(position, radius, flags){
+        this._setPx(this.canvas.top, position.x, position.y, radius, flags,
+                                (100 << 24) + (250 << 16) + (50 << 8) + (70));
+    }
+
+    setAreaAndAvgIrradiance(position, radius, flags){
+        this._setPx(this.canvas.energyGrid,position.x, position.y, radius,
+                        flags, (100 << 24) + (250 << 16) + (50 << 8) + (70));
     }
 
 }
