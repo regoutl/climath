@@ -3,31 +3,6 @@ import {pieChart} from './piechart.js';
 import { objSum} from '../simulateur/simulateur.js';
 import { quantityToHuman as valStr} from '../plot.js';
 
-//increment every field in target by the value of the same field in source
-function incrementEach(target, source){
-  for (var k in target){
-    if(source[k] === undefined)
-      throw 'pas equivalent';
-
-    if(typeof target[k] == 'number')
-      target[k] += source[k];
-    else if(typeof target[k] == 'object')
-      incrementEach(target[k], source[k]);
-    else
-      throw 'ni obj ni nombre ?';
-  }
-}
-
-function multiplyEach(target, coef){
-  for (var k in target){
-    if(typeof target[k] == 'number')
-      target[k] *= coef;
-    else if(typeof target[k] == 'object')
-      multiplyEach(target[k], coef);
-    else
-      throw 'ni obj ni nombre ?';
-  }
-}
 
 export function setSimu(s){
   simu = s;
@@ -66,6 +41,32 @@ export function show(){
   $('#dStats').show();
 
   update();
+}
+
+//increment every field in target by the value of the same field in source
+function incrementEach(target, source){
+  for (var k in target){
+    if(source[k] === undefined)
+      throw 'pas equivalent';
+
+    if(typeof target[k] == 'number')
+      target[k] += source[k];
+    else if(typeof target[k] == 'object')
+      incrementEach(target[k], source[k]);
+    else
+      throw 'ni obj ni nombre ?';
+  }
+}
+
+function multiplyEach(target, coef){
+  for (var k in target){
+    if(typeof target[k] == 'number')
+      target[k] *= coef;
+    else if(typeof target[k] == 'object')
+      multiplyEach(target[k], coef);
+    else
+      throw 'ni obj ni nombre ?';
+  }
 }
 
 
@@ -125,7 +126,20 @@ function updateFootprint(stat){
   ctx.translate(50, 50);
   const co2 = stat.co2;
 
-  $('#dStats p')[1].innerHTML = 'Emissions moyennes : ' + valStr(co2.total, 'C');
+  const firstYearCo2 = simu.stats[0].co2;
+
+  let diminution = Math.round(100 * (1 - co2.total / firstYearCo2.total));
+  let word = '<span style="color:green">moins</span>';
+  if(diminution < 0){
+    diminution *= -1;
+    word = '<span style="color:red">plus</span>';
+  }
+  let dimTxt = 'Soit ' + diminution  + ' % de ' + word + ' que 2018';
+  if(diminution == 0)
+    dimTxt = 'Soit autant que 2018';
+
+  $('#dStats p')[1].innerHTML = 'Emissions moyennes : ' + valStr(co2.total, 'C') +
+    '<br />' + dimTxt;
 
   pieChart(ctx, {
   	"constructions":objSum(co2.build),

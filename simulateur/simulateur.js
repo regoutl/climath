@@ -50,6 +50,7 @@ export class Simulateur{
     //like if we just finished another year
     this._clearYearStats();
     this._newYear();
+    this.stats = [];
     this.run();
   }
 
@@ -154,6 +155,7 @@ export class Simulateur{
   }
 
   //return a list of all the primary (yearly coefs) data there are
+  // todo ; check dirty
   primaryDataList(){
     let ans = [];
 
