@@ -73,13 +73,34 @@ export default class MapComponent{
 
     this.energyGrid = new Uint16Array(1374 * 1183);
     this.groundUse = mapImgs.groundUse;
+    this.popDensity = mapImgs.popDensity;
 
     this.drawer = new MapDrawer({
-      energy:this.energyGrid,
-      groundUse: this.groundUse});
+        energy:this.energyGrid,
+        groundUse: this.groundUse,
+        popDensity: this.popDensity,
+    });
 
     this.buildStates = [{}];
 	}
+
+    getPopDensity(x,y,f){
+        const popDensitylegend = {
+                0:0,
+                1:1,
+                2:50,
+                3:100,
+                4:200,
+                5:500,
+                6:1000,
+                7:2000,
+                8:5000,
+            }
+        // km2 / pix
+        const kmpixratio = 30688/(1625442-54086);
+        //1.06 is a correction factor to match current population of 11.4e6 hab
+        return popDensitylegend[this.popDensity[y*1374+x]] * kmpixratio * 1.06;
+    }
 
   /** @brief convert build menu state to simu prepare capex cmd
   @param buildState :as described in   buildmenu ->  state
@@ -286,7 +307,7 @@ export default class MapComponent{
 //            pop: this._getPop[this.canvas['popDensity'].pixVal[y*1374+x]],
             nrj: this.energyGrid[y*1374+x],
             baseLandUse: this.groundUse[y*1374+x],
-            // baseLandUse: undefined,
+            pop: this.getPopDensity(x,y),
         }
 	}
 
@@ -305,80 +326,4 @@ export default class MapComponent{
         let legend = PopDensitylegend[col];
         console.log('x:'+x+' y:'+y+' v:'+col+' legend:'+JSON.stringify(legend));
     }
-
-    // // get the name of every grid
-    // listGrids(){
-    //     return Object.keys(gridslist);
-    // }
-
-
-    // _color2nrj(c){
-    //     if(!isNaN(c)){
-    //         let a = c>>24 & 0xFF,
-    //             b = c>>16 & 0xFF,
-    //             g = c>>8 & 0xFF,
-    //             r = c & 0xFF;
-    //             c = {red:r, blue:b, green:g, alpha:a}
-    //     }
-    //     if(c.red === 255 && c.blue === 255 && c.green === 255 && c.alpha === 255){
-    //         return undefined;
-    //     } else if(c.red === 0 && c.blue === 250){
-    //         return {nrj:'pv', year:2000+c.green};
-    //     }
-    //     return {};
-    // }
-
-    // saveCircle(x,y,radius, nrj, year) {
-    //     let ctx = this.canvas['energyGrid'][0].getContext('2d');
-    //     ctx.fillStyle = 'rgba(255,255,255,0.1)';
-    //     // ctx.beginPath();
-    //     // ctx.arc(x, y, radius, 0, 2*Math.PI, true);
-    //     // ctx.fill();
-    //     this._setForEarch(x,y,radius, this._nrg2color(nrj, year));
-    //     ctx.putImageData(this.canvas['energyGrid'].imData,0,0);
-    //     ctx.drawImage(this.canvas['energyGrid']['Im'], 0, 0);
-    // }
-
-  // _setForEarch(x,y,radius, color) {
-  //   let r = color.red & 0xFF,
-  //       g = color.green & 0xFF,
-  //       b = color.blue & 0xFF,
-  //       a = color.alpha & 0xFF;
-  //   const abgr = (a << 24) + (b << 16) + (g << 8) + (r);
-  //
-  //   this._forEach({radius:radius, center:{x:x, y:y}},
-  //     (x, y) => {
-  //       this.canvas['energyGrid'].pixVal[y*1374+x] = abgr;
-  //     });
-  // }
-
-
-
-    // getNRJcount(){
-    //     let count = {
-    //         pv:{},
-    //         countrysize:0,
-    //     }
-    //     for(let x=0; x<this.canvas.top[0].width; x++){
-    //         for(let y=0; y<this.canvas.top[0].height; y++){
-    //             let nrj = this._color2nrj(
-    //                         this.canvas['energyGrid'].pixVal[(y)*1374+(x)]);
-    //             if(nrj !== undefined){
-    //                 count.countrysize ++;
-    //                 if(nrj.nrj !== undefined){
-    //                     if(nrj.nrj === 'pv'){
-    //                         if(count['pv'][nrj.year] === undefined){
-    //                             count['pv'][nrj.year] = 1;
-    //                         } else {
-    //                             count['pv'][nrj.year] ++;
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return count;
-    // }
-
-
 }

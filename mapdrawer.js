@@ -57,7 +57,7 @@ function createProgram(gl, src, attribs){
 */
 
 export default class MapDrawer{
-  currentShowGrid = {'groundUse':true, 'energyGrid':true};
+  currentShowGrid = {'groundUse':true, 'energyGrid':true, 'popDensity':true};
 
   constructor(arg){
     this.nuke = [];
@@ -103,6 +103,32 @@ export default class MapDrawer{
 
     this.groundUse.update(this.groundUseSrc);
 
+    this.popDensity = new PaletteTexture(this.gl, 1);
+    this.popDensitySrc = arg.popDensity
+    // # 0 33 0 0 255
+    // # 1 255 128 252 233
+    // # 2 106 250 209 85
+    // # 3 247 190 67 207
+    // # 4 122 31 242 167
+    // # 5 46 173 83 19
+    // # 6 138 46 10 0
+
+    // this.popDensity.appendPalette(0, 0, 0);
+    // this.popDensity.appendPalette(33, 0, 0, 255);
+    this.popDensity.appendPalette(0,0,0,0);
+    this.popDensity.appendPalette(255, 255, 128);
+    this.popDensity.appendPalette(252, 233, 106);
+    this.popDensity.appendPalette(250, 209, 85 );
+    this.popDensity.appendPalette(247, 190, 67 );
+    this.popDensity.appendPalette(242, 167, 46 );
+    this.popDensity.appendPalette(207, 122, 31 );
+    this.popDensity.appendPalette(173, 83,  19 );
+    this.popDensity.appendPalette(138, 46,  10 );
+    this.popDensity.appendPalette(107,  0,   0 );
+    // this.popDensity.appendPalette(117, 209,  245,  255)
+
+    this.popDensity.update(this.popDensitySrc)
+
     this.draw();
   }
 
@@ -113,6 +139,8 @@ export default class MapDrawer{
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     this.clear();
+    if(this.currentShowGrid.popDensity)
+      this._drawTex(this.popDensity);
     if(this.currentShowGrid.groundUse)
       this._drawTex(this.groundUse);
     if(this.currentShowGrid.energyGrid)
@@ -220,7 +248,7 @@ export default class MapDrawer{
 
 
   _setGridLayerCheckbox() {
-    let layers = ['groundUse', 'energyGrid'];
+    let layers = ['popDensity', 'groundUse', 'energyGrid'];
 
     let grid = this;
     layers.forEach((m) => {

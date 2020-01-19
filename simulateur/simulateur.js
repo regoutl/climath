@@ -281,7 +281,9 @@ export function promiseSimulater(valChangedCallbacks){
     // loadImage('res/landUse.png'),
     // loadImage('res/popDensity.png'),
     fetch('res/landUse.bin')
-        .then((response) => {return response.arrayBuffer();})
+        .then((response) => {return response.arrayBuffer();}),
+    fetch('res/popDensity.bin')
+        .then(response => response.arrayBuffer()),
     ])
     //called when all simu related res are loaded
   .then(function(values){
@@ -290,7 +292,8 @@ export function promiseSimulater(valChangedCallbacks){
     let mapImgs = {
       // groundUse:values[1],
       // popDensity:values[2],
-      groundUse: new Uint8Array(values[1])
+      groundUse: new Uint8Array(values[1]),
+      popDensity: new Uint8Array(values[2]),
     };
 
     return new Simulateur(parameters, mapImgs, valChangedCallbacks);
