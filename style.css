@@ -73,6 +73,8 @@ h1{
 	border-radius: 50%;
 	z-index: 1000000000;
 	transform: translate(0, -40px);
+	cursor:pointer;
+	display:none;
 }
 
 
@@ -84,7 +86,7 @@ h1{
 }
 
 
-#dMovable{
+#dMap{
 	transform-origin: 0 0;
 	overflow: visible;
 	position: relative;

@@ -1,4 +1,4 @@
-import * as mapNav from './moveIt.js';
+import * as mapDrawer from './mapdrawer.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
 
 export function tabPlot(e){
@@ -40,8 +40,8 @@ export function tabMainMenu(){
 }
 
 export function tabGame(){
-  baseSetTab('dMovable');
-  mapNav.enableAreaMoving();
+  baseSetTab('dMap');
+  mapDrawer.enableAreaMoving();
   $('#dRightDock').css('display', 'block');
 }
 
@@ -67,7 +67,7 @@ function baseSetTab(id){
     return;
   $('#dRightDock').css('display', 'none');
   prev = current;
-  mapNav.disableAreaMoving();
+  mapDrawer.disableAreaMoving();
   $('#' + current).css('display', 'none');
   current = id;
 

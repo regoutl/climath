@@ -1,7 +1,7 @@
 
 import {pieChart} from './piechart.js';
 import { objSum} from '../simulateur/simulateur.js';
-import { quantityToHuman as valStr} from '../plot.js';
+import { quantityToHuman as valStr} from './plot.js';
 
 
 export function setSimu(s){
@@ -39,6 +39,7 @@ export function show(){
   $('#dLeftDock').show();
   $('#dCoefs').hide();
   $('#dStats').show();
+  $('#bMaskLeftDock').show();
 
   update();
 }
@@ -165,7 +166,7 @@ function   updateBudget(stat){
   const cost = stat.cost;
 
   $('#dStats p')[2].innerHTML = 'Depenses moyennes : ' + valStr(cost.total, '€') +
-    '<br />Taxes moyennes : '  + valStr(stat.taxIn, '€');
+    '<br />Taxes moyennes : '  + valStr(stat.taxes.in, '€') + ' (' + Math.round(stat.taxes.rate * 100) + ' %)';
 
   pieChart(ctx, {
   	"constructions":objSum(cost.build),

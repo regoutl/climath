@@ -1,6 +1,6 @@
 import ProductionComponent from './productioncomponent.js';
 import MapComponent from './mapcomponent.js';
-import { quantityToHuman as valStr} from '../plot.js';
+import { quantityToHuman as valStr} from '../ui/plot.js';
 import * as Yearly from "../timevarin.js";
 
 
@@ -40,25 +40,33 @@ export class Simulateur{
 		// Player controlled
 		this.taxRate = this.minTaxRate + 0.05;
 
-
+    //statistics of the previous years
     this.stats = [];
+    //static (maybe partial) of the current year. see struc in _clearYearStats
+    this.yStats = {};
 
 
 
     //like if we just finished another year
-    this.yStats = {};
     this._clearYearStats();
     this.yStats.year= 2018;
     this._newYear();
     this.stats = [];//remove the empty stat
     this.run(); //run 2019
+
+
+
+    this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
   }
 
   get taxRate(){
     return this._taxRate;
   }
   set taxRate(val){
-    this._taxRate = val;
+    this._taxRate = Number(val);
+    if(isNaN(this._taxRate))
+      throw 'NaN !!!!';
+
     this.valChangedCallbacks.taxRate(this._taxRate);
   }
 
@@ -72,14 +80,6 @@ export class Simulateur{
 
   get year(){
     return this.yStats.year;
-  }
-
-  get totalCo2(){
-    return this._totalCo2;
-  }
-  set totalCo2(val){
-    this._totalCo2 = val;
-    this.valChangedCallbacks.totalCo2(this._totalCo2);
   }
 
   /// called for each change in what to build, or where to
@@ -189,7 +189,9 @@ export class Simulateur{
   _computeTaxIncome(){
     let yStats = this.yStats;
 
-    yStats.taxIn = this.cProd.countries.belgium.pop.at(yStats.year)
+    yStats.taxes.rate = this.taxRate;
+
+    yStats.taxes.in = this.cProd.countries.belgium.pop.at(yStats.year)
             * this.cProd.countries.belgium.gdpPerCap.at(yStats.year)
             * (this.taxRate - this.minTaxRate);
   }
@@ -210,7 +212,7 @@ export class Simulateur{
     this._lotsOfSavingOfStatisticsAboutLastYearAndCallbacks();
 
     this.money -= objSum(this.yStats.cost.perWh) + objSum(this.yStats.cost.perYear);
-    this.money += this.yStats.taxIn;
+    this.money += this.yStats.taxes.in;
 
 
 
@@ -240,7 +242,7 @@ export class Simulateur{
   			perWh:{fossil: 0, pv: 0, nuke:0, storage: 0},
         perYear:{fossil: 0, pv: 0, nuke:0, storage: 0}
       },
-      taxIn:0
+      taxes:{in: 0, rate:0}
     };
     this.valChangedCallbacks.year(this.year);
   }

@@ -7,12 +7,12 @@ Copyright 2020, louis-amedee regout, charles edwin de brouwer
 
 "use strict";
 
-import * as BuildMenu from './buildmenu.js';
+import * as BuildMenu from './ui/buildmenu.js';
 
 import {Simulateur, promiseSimulater, objSum} from './simulateur/simulateur.js';
-import * as CentralArea from './centralArea.js';
+import * as CentralArea from './ui/centralArea.js';
 import * as StatDock from './ui/statdock.js';
-import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
+import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './ui/plot.js';
 
 
 function docEl(id){
@@ -57,15 +57,8 @@ $(function(){
 	.then((s) => { //when the simulater is ready
 		simu = s;
 
-		BuildMenu.setStateChangedCallback(simu.onBuildMenuStateChanged.bind(simu));
 
 
-		//on click on the grid
-		$('#dCentralArea').on('click', function(){
-			if($(this).data('moving'))
-				return;
-			simu.confirmCurrentBuild();
-		});
 
 		$('#bRunSimu').on('click', simu.run.bind(simu));
 
@@ -74,7 +67,7 @@ $(function(){
 
 		CentralArea.setSimu(simu);
 		StatDock.setSimu(simu);
-
+		BuildMenu.setSimu(simu);
 	})
 	.catch(function(err){//sth failed for the ini of simulater
 		alert(err);
@@ -99,6 +92,7 @@ $(function(){
 		$('#dLeftDock').show();
 		$('#dCoefs').show();
 		$('#dStats').hide();
+		$('#bMaskLeftDock').show();
 
 		let txt = '';
 
@@ -139,5 +133,10 @@ $(function(){
 	});
 
 	$('#bClosePlot').on('click', CentralArea.closeTabPlot);
+
+	$('#bMaskLeftDock').on('click', () =>{
+		$('#bMaskLeftDock').hide();
+		$('#dLeftDock').hide();
+	});
 
 });
