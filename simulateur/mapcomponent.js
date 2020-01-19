@@ -67,23 +67,31 @@ const countDensity = {
 const PopDensity = {
 };
 
+//Const for our current map
+const kmpixratio = 30688/(1625442-54086);
+
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
 	constructor(mapImgs){
 
-    this.energyGrid = new Uint16Array(1374 * 1183);
-    this.groundUse = mapImgs.groundUse;
-    this.popDensity = mapImgs.popDensity;
+        this.energyGrid = new Uint16Array(1374 * 1183);
+        this.groundUse = mapImgs.groundUse;
+        this.popDensity = mapImgs.popDensity;
 
-    this.drawer = new MapDrawer({
-        energy:this.energyGrid,
-        groundUse: this.groundUse,
-        popDensity: this.popDensity,
-    });
+        this.drawer = new MapDrawer({
+            energy:this.energyGrid,
+            groundUse: this.groundUse,
+            popDensity: this.popDensity,
+        });
 
-    this.buildStates = [{}];
-	}
+        this.buildStates = [{}];
+    }
 
+    /** [TODO]
+    * Should find the correction factor in fct of:
+    *       - current pop
+    *       - number of available living pixel (removing those where an explosion has occured)
+    */
     getPopDensity(x,y,f){
         const popDensitylegend = {
                 0:0,
@@ -97,7 +105,6 @@ export default class MapComponent{
                 8:5000,
             }
         // km2 / pix
-        const kmpixratio = 30688/(1625442-54086);
         //1.06 is a correction factor to match current population of 11.4e6 hab
         return popDensitylegend[this.popDensity[y*1374+x]] * kmpixratio * 1.06;
     }
@@ -216,12 +223,24 @@ export default class MapComponent{
     }
   }
 
-  /** @brief check if any nuclear central explode.
-  @details : if a central explode, must reallocate surounding pop, and estimate cost
-  */
-  testBoom(){
+    /** @brief check if any nuclear central explode.
+    @details : if a central explode, must reallocate surounding pop, and estimate cost
+    */
+    testBoom(area){
+        let cleaningcost = 150000000;
 
-  }
+        let topay = cleaningcost;
+        topay += cleaningcost;
+        this._forEach(area, (x,y) => {
+            let pix = this.getPx(x,y);
+            // pix.nrj => destroyed
+            // baseLandUse => destroyed
+            // pop => should move
+            // price per home => mean be :197.000
+            topay += 197000 * pix.pop;
+        })
+        return topay;
+    }
 
 
   /** @brief in the given area, count the valid valid pixels
@@ -317,13 +336,20 @@ export default class MapComponent{
 
 
 
-	/// set pixel x, y with value with same format as get
-	setPx(x, y, landUse){
-        // this.canvas['energyGrid'].pixVal[y*1374+x] = Number(4280501491);
-        // GroundUsage[landUse.baseLandUse];
-        // if(landUse.energyGrid === undefined){
-        // }
-	}
+    /// set pixel x, y with value with same format as get
+    setPx(x, y, changes){
+        let conv = {
+            'nrj':'energyGrid',
+            'energyGrid':'energyGrid',
+            'baseLandUse':'groundUse',
+            'groundUse':'groundUse',
+            'pop':'popDensity',
+            'popDensity':'popDensity',
+        }, maps = this;
+        Object.keys(changes).forEach(key => {
+            maps[conv[key]][y*1374+x] = changes[key];
+        });
+    }
 
     logPx(x,y){
         let col = this.canvas['popDensity'].pixVal[y*1374+x];
