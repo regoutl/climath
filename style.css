@@ -57,6 +57,24 @@ h1{
 	display:none;
 }
 
+#dLeftDock{
+	border-right: 1px solid gray;
+	position: relative;
+}
+
+#bMaskLeftDock{
+	position: absolute;
+	top: 50%;
+	left: -24px;
+	width: 40px;
+	height: 40px;
+	background:white;
+	border: 1px solid gray;
+	border-radius: 50%;
+	z-index: 1000000000;
+	transform: translate(0, -40px);
+}
+
 
 
 #dCentralArea{

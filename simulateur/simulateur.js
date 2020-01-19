@@ -32,8 +32,6 @@ export class Simulateur{
 
     this.valChangedCallbacks = valChangedCallbacks;
 
-    //note : will we incremented at th end of this constructor
-    this.yStats= {year: 2018};
     this.money  = parameters.gameplay.initMoney;
     // they would pay 30% if all spending were only for other purposes
 		/// WARNING TODO check this number
@@ -48,10 +46,12 @@ export class Simulateur{
 
 
     //like if we just finished another year
+    this.yStats = {};
     this._clearYearStats();
+    this.yStats.year= 2018;
     this._newYear();
-    this.stats = [];
-    this.run();
+    this.stats = [];//remove the empty stat
+    this.run(); //run 2019
   }
 
   get taxRate(){
@@ -185,12 +185,12 @@ export class Simulateur{
     return ans;
   }
 
-  /** @brief compute the tax income of the previous year (called on new year)*/
+  /** @brief compute the tax income of the previous year (called on new years eve)*/
   _computeTaxIncome(){
     let yStats = this.yStats;
 
-    yStats.taxIn = this.cProd.countries.belgium.pop.at(yStats.year - 1)
-            * this.cProd.countries.belgium.gdpPerCap.at(yStats.year - 1)
+    yStats.taxIn = this.cProd.countries.belgium.pop.at(yStats.year)
+            * this.cProd.countries.belgium.gdpPerCap.at(yStats.year)
             * (this.taxRate - this.minTaxRate);
   }
 
@@ -200,14 +200,13 @@ export class Simulateur{
   calls happy new year
   */
   _newYear(){
-    this.yStats.year ++;
-
     //taxes of last year
 		this._computeTaxIncome();
 
     //wish a happy new year to everybody
-    this.cProd.happyNY(this.yStats);
+    this.cProd.happyNYEve(this.yStats);
 
+    //warning : year -- todo correct
     this._lotsOfSavingOfStatisticsAboutLastYearAndCallbacks();
 
     this.money -= objSum(this.yStats.cost.perWh) + objSum(this.yStats.cost.perYear);
@@ -222,7 +221,7 @@ export class Simulateur{
   }
 
   _clearYearStats(){
-    let y = this.yStats.year;
+    let y = this.yStats.year + 1;
     this.yStats = {
       year: y,
       consumedEnergy: {//stat about energy consumtion
@@ -243,7 +242,7 @@ export class Simulateur{
       },
       taxIn:0
     };
-
+    this.valChangedCallbacks.year(this.year);
   }
 
   _lotsOfSavingOfStatisticsAboutLastYearAndCallbacks(){
@@ -254,10 +253,8 @@ export class Simulateur{
     yStats.co2.total = objSum(yStats.co2);
     yStats.cost.total = objSum(yStats.cost);
 
-
     this.stats.push(yStats);
 
-    this.valChangedCallbacks.year(this.year);
   }
 }
 

@@ -110,7 +110,7 @@ out.stats.consumedEnergy := {
 						.prepareCapex(what, beginBuildYear, this.countries);
 
 		ans.theorical = what.theorical;
-		
+
 		return ans;
 
 		// //modify the ans if unbuild
@@ -143,11 +143,11 @@ out.stats.consumedEnergy := {
 		return true;
 	}
 
-	happyNY(yStats){
+	happyNYEve(yStats){
 		for (var prodMean in this.productionMeans) {
 		    if (!this.productionMeans.hasOwnProperty(prodMean)) continue;
 
-				this.productionMeans[prodMean].happyNY(yStats);
+				this.productionMeans[prodMean].happyNYEve(yStats);
 		}
 
 		 this._processPendingBuilds(yStats.year);
@@ -225,7 +225,7 @@ out.stats.consumedEnergy := {
 
 	_processPendingBuilds(year){
 		let a =this.pendingBuilds.peek();
-		while(a && a.build.end == year){
+		while(a && a.build.end == year+1){
 			this._processBuild(this.pendingBuilds.pop());
 
 			a =this.pendingBuilds.peek();

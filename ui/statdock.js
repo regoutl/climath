@@ -134,12 +134,12 @@ function updateFootprint(stat){
     diminution *= -1;
     word = '<span style="color:red">plus</span>';
   }
-  let dimTxt = 'Soit ' + diminution  + ' % de ' + word + ' que 2018';
+  let dimTxt = diminution  + ' % de ' + word;
   if(diminution == 0)
-    dimTxt = 'Soit autant que 2018';
+    dimTxt = 'autant';
 
   $('#dStats p')[1].innerHTML = 'Emissions moyennes : ' + valStr(co2.total, 'C') +
-    '<br />' + dimTxt;
+    '<br />Soit ' + dimTxt + ' que ' + simu.stats[0].year;
 
   pieChart(ctx, {
   	"constructions":objSum(co2.build),

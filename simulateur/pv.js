@@ -22,7 +22,7 @@ export default class Pv extends IntermittentProductionMean{
                     this.capacity);
   }
 
-  happyNY(yStats){
+  happyNYEve(yStats){
     //do power decline
     this.capacity = 0;
 
