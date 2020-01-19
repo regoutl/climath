@@ -71,7 +71,7 @@ export default class Storage /*extends AbstractProductionMean*/{
     return ans;
   }
 
-  happyNY(yStats){
+  happyNYEve(yStats){
     let devices = this.devices;
 
     let sumCapa = 0;

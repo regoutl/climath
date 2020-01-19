@@ -1,6 +1,6 @@
 "use strict";
 
-import * as Yearly from "./timevarin.js"
+import * as Yearly from "../timevarin.js"
 
 const PlotLeftMargin = 60.5;
 

@@ -1,7 +1,7 @@
 "use strict";
 
-import MapDrawer from '../mapdrawer.js';
-import PaletteTexture from '../palettetexture.js';
+import MapDrawer from '../ui/mapdrawer.js';
+import PaletteTexture from '../ui/palettetexture.js';
 
 /*const GroundUsage = {
     city: 4280501491,
@@ -128,22 +128,26 @@ export default class MapComponent{
     //exemple code
     let ans = {};
 
-    ans.theorical = (area.center === undefined || this.getPx(area.center.x, area.center.y).baseLandUse == GroundUsage.out);
+    ans.theorical = (area.center === undefined);
 
     let validPixels = area.radius * area.radius * 3.14;
 
     if(!ans.theorical){
-      if(buildState.type != 'nuke')
+      if(buildState.type != 'nuke'){
         this.drawer.drawCircle(area.center.x, area.center.y, area.radius);
-      else {
 
+        //count the valid pixels
+        validPixels = this._countPvArea(area);
       }
-      //count the valid pixels
-      validPixels = this._countPvArea(area);
+      else {
+        //for nuke, cursor must be valid
+        ans.theorical = this.getPx(area.center.x, area.center.y).baseLandUse == GroundUsage.out;
+        this.drawer.drawNukeCursor(area.center);
+      }
     }
     else {
       //clear cursor
-      this.drawer.drawCircle( -10,  -10, 0);
+      this.drawer.clearCursor();
 
     }
 
@@ -243,7 +247,7 @@ export default class MapComponent{
   }
 
 
-  /** @brief will call f for each pixel in the given area */
+  /** @brief will call f(x, y) for each pixel in the given area */
   _forEach(area, f){
     const radius = area.radius;
     const radius2 = radius*radius;

@@ -55,7 +55,7 @@ export default class AbstractProductionMean{
   produce(amount, output){throw 'pure virtual';}
 
   //O & M. Called right after the new year, for the previous year
-  happyNY(yStats){throw 'pure virtual';}
+  happyNYEve(yStats){throw 'pure virtual';}
 
   /// expand capacity
   capex(param){throw 'pure virtual';  }

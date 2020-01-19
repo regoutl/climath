@@ -24,7 +24,7 @@ export default class RegularProductionMean extends AbstractProductionMean {
     out.cost.perWh[this.label] += energyOut * this._currentYear.perWh.cost;
   }
 
-  happyNY(yStats){
+  happyNYEve(yStats){
     // output.co2.perYear[this.label] +=
     //      this.capacity
     //    * this.perYear.co2.at(year-1);
@@ -32,12 +32,12 @@ export default class RegularProductionMean extends AbstractProductionMean {
     //fixed o&m
     yStats.cost.perYear[this.label] +=
         this.capacity
-      * this.perYear.cost.at(yStats.year-1);
+      * this.perYear.cost.at(yStats.year);
 
     this._currentYear =
     {perWh:
-      {co2:this.perWh.co2.at(yStats.year),
-      cost:this.perWh.cost.at(yStats.year)}};
+      {co2:this.perWh.co2.at(yStats.year+1),
+      cost:this.perWh.cost.at(yStats.year+1)}};
   }
 
   capacityAt(t){

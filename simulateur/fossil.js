@@ -16,6 +16,6 @@ export default class Fossil/* extends AbstractProductionMean*/{
   }
 
   //do nothing
-  happyNY(yStats){}
+  happyNYEve(yStats){}
 
 }

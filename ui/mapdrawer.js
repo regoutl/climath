@@ -51,7 +51,7 @@ function createProgram(gl, src, attribs){
     'z-index':zindex,
     visibility: (visible?'visible':'hidden'),
     position: 'fixed'});
-  $('#dMovable').append(canvas);
+  $('#dMap').append(canvas);
   return canvas;
 }
 */
@@ -75,7 +75,7 @@ export default class MapDrawer{
     this.c.css({
       'z-index':10,
       position: 'fixed'});
-    $('#dMovable').append(this.c);
+    $('#dMap').append(this.c);
 
     this.gl = this.c[0].getContext("webgl");
 
@@ -130,6 +130,15 @@ export default class MapDrawer{
     this.popDensity.update(this.popDensitySrc)
 
     this.draw();
+
+
+    //represent the nursor for nuke
+    this._nukeCursorNode = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
+    this._nukeCursorNode.css('display', 'none');
+    $('#dMap').append(this._nukeCursorNode);
+
+
+    this._initEvents();
   }
 
   /** @brief draw the currenty visible layers*/
@@ -165,14 +174,58 @@ export default class MapDrawer{
     ctx.arc(x, y, radius, 0, 2*Math.PI, true);
     ctx.fill();
   }
+  drawNukeCursor(pos){
+    this._nukeCursorNode.css({top:pos.y-10, left:pos.x - 8, display: 'block'});
+  }
+  clearCursor(){
+    const ctx = this.canvas.top[0].getContext('2d');
+    ctx.clearRect(0, 0,
+        this.canvas.top[0].width,
+        this.canvas.top[0].height);
+    //clear nuke cursor
+    this._nukeCursorNode.css({ display: 'none'});
+  }
 
   addNuke(pos){
     let node = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
     node.css({top:pos.y-10, left:pos.x - 8});
-    $('#dMovable').append(node);
+    $('#dMap').append(node);
 
 
     this.nuke.push({pos:pos, node:node});
+  }
+
+
+  //call
+  on(eventType, callback){
+    if(this._eventCallback[eventType] !== null)
+      throw 'un seul a la fois';
+
+    this._eventCallback[eventType] = callback;
+  }
+
+
+  _initEvents(){
+    this._eventCallback = {click:null, pointerleave:null,mousemove:null};
+
+    let self = this;
+    $(function(){
+      //on click on the grid
+      $('#dCentralArea').on('click', function(){
+        if($(this).data('moving'))
+          return;
+        self._eventCallback['click']();
+      });
+
+      $('#top').on('pointerleave', function(){
+        self._eventCallback['pointerleave']();
+      });
+
+      $('#top').on('mousemove', function(evt){
+        self._eventCallback['mousemove'](evt);
+      });
+    });
+
   }
 
   _createProg(){
@@ -275,5 +328,75 @@ export default class MapDrawer{
       return {red:255, green:255, blue:255, alpha:100};
   }
 
-
 };
+
+
+
+
+let mousePos = {x: 0, y:0};
+let transform = {x: -0, y: -0, scale:0.64};
+$('#dMap').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
+
+let dCentral = $("#dCentralArea");
+dCentral.data('moving', false);
+
+/// view control facilities----------------------------------------------------
+export function enableAreaMoving(){
+  dCentral.on("wheel", onWheel);
+  dCentral.on("mousedown", onMouseDown);
+  $('body').on("mouseup", onMouseUp);
+}
+
+export function disableAreaMoving(){
+  dCentral.off("wheel", onWheel);
+  dCentral.off("mousedown", onMouseDown);
+  $('body').off("mouseup", onMouseUp);
+}
+
+function onWheel(e){
+  var curX = e.originalEvent.pageX - dCentral.offset().left;
+  var curY = e.originalEvent.pageY - dCentral.offset().top;
+
+
+  var origin = {x: (curX  / transform.scale- transform.x), y: (curY  / transform.scale- transform.y)}
+
+  if(e.originalEvent.deltaY > 0){
+    transform.scale *= 0.8;
+  }
+  else{
+    transform.scale /= 0.8;
+  }
+
+  //bounds
+  transform.scale = Math.max(transform.scale, Math.pow(0.8, 4)); //unzoom
+  transform.scale = Math.min(transform.scale, Math.pow(1/0.8, 8));//zoom
+
+  transform.x = curX / transform.scale - origin.x;
+  transform.y = curY / transform.scale - origin.y;
+
+
+  $('#dMap').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
+  $('.scaleInvariant').css('transform', 'scale(' + (1/transform.scale) + ')');
+}
+
+function onMouseDown(e){
+  mousePos.x = e.screenX;
+  mousePos.y = e.screenY;
+
+  $('body').mousemove(function(e){
+    transform.x += (e.screenX - mousePos.x) / transform.scale;
+    transform.y += (e.screenY - mousePos.y) / transform.scale;
+
+    mousePos.x = e.screenX;
+    mousePos.y = e.screenY;
+    dCentral.data('moving', true);
+
+    $('#dMap').css('transform', 'scale(' + transform.scale + ') translate(' + transform.x + 'px,' + transform.y + 'px)');
+  });
+}
+function onMouseUp(e){
+  setTimeout(() => {
+    dCentral.data('moving', false);
+  }, 1);
+  $('body').off('mousemove');
+}

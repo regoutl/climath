@@ -16,8 +16,21 @@ let stateChangedCallback = undefined;
 /** @brief set the callback function to be called each time
             the state or radius changes
 */
-export function setStateChangedCallback(callback){
-  stateChangedCallback = callback;
+export function setSimu(simu){
+  stateChangedCallback =  simu.onBuildMenuStateChanged.bind(simu);
+
+  simu.cMap.drawer.on('mousemove',function(evt){
+    curPos = {x: evt.offsetX, y: evt.offsetY};
+
+    notifyStateChanged();
+  });
+
+  simu.cMap.drawer.on('pointerleave', function(evt){
+    curPos = undefined;
+
+    notifyStateChanged();
+  });
+
 }
 
 function notifyStateChanged(){
@@ -63,20 +76,6 @@ $(function(){
     radius = Number(this.value);
     notifyStateChanged();
   });
-
-
-  $('#top').on('mousemove', function(evt){
-    curPos = {x: evt.offsetX, y: evt.offsetY};
-
-    notifyStateChanged();
-  });
-
-  $('#top').on('pointerleave', function(evt){
-    curPos = undefined;
-
-    notifyStateChanged();
-  });
-
 });
 
 

@@ -1,7 +1,7 @@
 
 import {pieChart} from './piechart.js';
 import { objSum} from '../simulateur/simulateur.js';
-import { quantityToHuman as valStr} from '../plot.js';
+import { quantityToHuman as valStr} from './plot.js';
 
 
 export function setSimu(s){
@@ -39,6 +39,7 @@ export function show(){
   $('#dLeftDock').show();
   $('#dCoefs').hide();
   $('#dStats').show();
+  $('#bMaskLeftDock').show();
 
   update();
 }
@@ -134,12 +135,12 @@ function updateFootprint(stat){
     diminution *= -1;
     word = '<span style="color:red">plus</span>';
   }
-  let dimTxt = 'Soit ' + diminution  + ' % de ' + word + ' que 2018';
+  let dimTxt = diminution  + ' % de ' + word;
   if(diminution == 0)
-    dimTxt = 'Soit autant que 2018';
+    dimTxt = 'autant';
 
   $('#dStats p')[1].innerHTML = 'Emissions moyennes : ' + valStr(co2.total, 'C') +
-    '<br />' + dimTxt;
+    '<br />Soit ' + dimTxt + ' que ' + simu.stats[0].year;
 
   pieChart(ctx, {
   	"constructions":objSum(co2.build),
@@ -165,7 +166,7 @@ function   updateBudget(stat){
   const cost = stat.cost;
 
   $('#dStats p')[2].innerHTML = 'Depenses moyennes : ' + valStr(cost.total, '€') +
-    '<br />Taxes moyennes : '  + valStr(stat.taxIn, '€');
+    '<br />Taxes moyennes : '  + valStr(stat.taxes.in, '€') + ' (' + Math.round(stat.taxes.rate * 100) + ' %)';
 
   pieChart(ctx, {
   	"constructions":objSum(cost.build),
