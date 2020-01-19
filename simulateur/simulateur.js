@@ -4,7 +4,7 @@ import { quantityToHuman as valStr} from '../plot.js';
 import * as Yearly from "../timevarin.js";
 
 
-function objSum(object){
+export function objSum(object){
   if(typeof object == 'number')
     return object;
   else if(typeof object == 'object'){
@@ -32,9 +32,8 @@ export class Simulateur{
 
     this.valChangedCallbacks = valChangedCallbacks;
 
-    this.totalCo2 = 0;
     //note : will we incremented at th end of this constructor
-    this.yStats= {year: 2019};
+    this.yStats= {year: 2018};
     this.money  = parameters.gameplay.initMoney;
     // they would pay 30% if all spending were only for other purposes
 		/// WARNING TODO check this number
@@ -44,17 +43,14 @@ export class Simulateur{
 		this.taxRate = this.minTaxRate + 0.05;
 
 
-    this.co2Produced = new Yearly.Raw(0.0);
-    this.co2Produced.unit = 'C';
-
-    this.costs = new Yearly.Raw(0.0);
-    this.costs.unit = '€';
+    this.stats = [];
 
 
 
     //like if we just finished another year
     this._clearYearStats();
     this._newYear();
+    this.run();
   }
 
   get taxRate(){
@@ -121,6 +117,11 @@ export class Simulateur{
 
     if(this._currentBuild.build.cost > this._money){
       console.log('no enough cash');
+      return false;
+    }
+
+    if(this._currentBuild.theorical){
+      console.log('invalid');
       return false;
     }
 
@@ -229,7 +230,8 @@ export class Simulateur{
       co2:{//stat about co2 emission
   			total: 0,
   			build:{fossil: 0, pv: 0, nuke:0, storage: 0},
-  			perWh:{fossil: 0, pv: 0, nuke:0, storage: 0}
+  			perWh:{fossil: 0, pv: 0, nuke:0, storage: 0},
+        perYear:{fossil: 0, pv: 0, nuke:0, storage: 0}
   		},
       cost:{//stat about costs
         total: 0,
@@ -251,21 +253,8 @@ export class Simulateur{
     yStats.cost.total = objSum(yStats.cost);
 
 
+    this.stats.push(yStats);
 
-    this.lastYeatStats = yStats;
-
-    // save the computed result
-    this.co2Produced.addAt(this.year - 1,  yStats.co2.total);
-
-    let cost = yStats.cost.total - yStats.taxIn;
-    this.costs.addAt(this.year - 1, cost);
-
-    this.totalCo2 +=
-      this.co2Produced.at(this.year - 1);
-
-
-    this.valChangedCallbacks.lastYearCo2(
-      this.co2Produced.at(this.year - 1));
     this.valChangedCallbacks.year(this.year);
   }
 }

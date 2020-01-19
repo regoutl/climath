@@ -73,7 +73,6 @@ out.stats.consumedEnergy := {
 		for(let i = 0; i < 8760; i++){
 			this._runHour(out);
 		}
-
 	}
 
 
@@ -110,7 +109,8 @@ out.stats.consumedEnergy := {
 			ans = this.productionMeans[what.type]
 						.prepareCapex(what, beginBuildYear, this.countries);
 
-
+		ans.theorical = what.theorical;
+		
 		return ans;
 
 		// //modify the ans if unbuild
@@ -146,7 +146,7 @@ out.stats.consumedEnergy := {
 	happyNY(yStats){
 		for (var prodMean in this.productionMeans) {
 		    if (!this.productionMeans.hasOwnProperty(prodMean)) continue;
-				
+
 				this.productionMeans[prodMean].happyNY(yStats);
 		}
 

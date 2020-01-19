@@ -9,11 +9,11 @@ Copyright 2020, louis-amedee regout, charles edwin de brouwer
 
 import * as BuildMenu from './buildmenu.js';
 
-import {Simulateur, promiseSimulater} from './simulateur/simulateur.js';
+import {Simulateur, promiseSimulater, objSum} from './simulateur/simulateur.js';
 import * as CentralArea from './centralArea.js';
+import * as StatDock from './ui/statdock.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './plot.js';
 
-import {pieChart} from './ui/piechart.js';
 
 function docEl(id){
 	return document.getElementById(id);
@@ -35,7 +35,7 @@ $(function(){
 		year: function(year){
 			$('.vYear').text(year);
 			if(simu)
-				leftDockStats();
+				StatDock.update();
 		},
 		totalCo2: function(co2){
 			let strco2Total = valStr(co2, 'C');
@@ -73,6 +73,7 @@ $(function(){
 
 
 		CentralArea.setSimu(simu);
+		StatDock.setSimu(simu);
 
 	})
 	.catch(function(err){//sth failed for the ini of simulater
@@ -80,7 +81,7 @@ $(function(){
 	});
 
 	$('#bConfigure,#bMenuConfigure').on("click", leftDockCoefs);
-	$('#bStats').on("click", leftDockStats);
+	$('#bStats').on("click", StatDock.show);
 
 
 	$('#iTaxRate').on('input', function(e){
@@ -96,6 +97,8 @@ $(function(){
 
 	function leftDockCoefs(){
 		$('#dLeftDock').show();
+		$('#dCoefs').show();
+		$('#dStats').hide();
 
 		let txt = '';
 
@@ -113,68 +116,11 @@ $(function(){
 			txt += '</span></div>';
 		});
 
-		$('#dLeftDock').html(txt);
+		$('#dCoefs').html(txt);
 
 		$('.bShowPlot').on('click', CentralArea.tabPlot);
 	}
 
-	function leftDockStats(){
-		$('#dLeftDock').show();
-		let txt = '';
-
-		// //consumed energy origin :
-		// //spendings
-		// //co2
-		//
-		// txt += valStr( consumed.total, 'Wh');
-		//
-		//
-		// ['fossil', 'pv', 'nuke', 'storage'].forEach(e =>{
-		// 	txt += '<br />' + e + valStr(consumed.origin[e], 'Wh');
-		// });
-		// txt += '<br />';
-		//
-		// txt += '<br />co2 : ' + valStr( simu.lastYeatStats.co2.total, 'C');
-		//
-		// txt += '<br />';
-		//
-		// let costs =  simu.lastYeatStats.cost;
-		// txt += '<br />cost : ' + valStr(costs.total, '€');
-		// ['fossil', 'pv', 'nuke', 'storage'].forEach(e =>{
-		// 	if(costs.perWh[e] > 0)
-		// 		txt += '<br />Frais variables ' + e + ' ' + valStr(costs.perWh[e], '€');
-		// 	if(costs.perYear[e] > 0)
-		// 		txt += '<br />Frais fixes ' + e + ' ' + valStr(costs.perYear[e], '€');
-		// 	if(costs.build[e] > 0)
-		// 		txt += '<br />Construction ' + e + ' ' + valStr(costs.build[e], '€');
-		// });
-
-		$('#dLeftDock').html(txt);
-
-		//electricity origin
-		let myPie = $('<canvas width="100" height="100"></canvas>');
-
-		let ctx = myPie[0].getContext("2d");
-		ctx.translate(50, 50);
-		const consumed = simu.lastYeatStats.consumedEnergy;
-		pieChart(ctx, consumed.origin, {nuke: 'yellow', pv:'blue', fossil:'red', storage:'rgb(0, 255, 250)'});
-
-		$('#dLeftDock').append('<h2>Origine de l energie</h2>');
-		$('#dLeftDock').append(myPie);
-
-		$('#dLeftDock').append('<h2>Empreinte carbonne</h2>');
-
-		$('#dLeftDock').append('<h2>Budget</h2>');
-		//should do a function
-		// myPie = $('<canvas width="100" height="100"></canvas>');
-		//
-		// let ctx = myPie[0].getContext("2d");
-		// ctx.translate(50, 50);
-		// pieChart(ctx, consumed.origin, {nuke: 'yellow', pv:'blue', fossil:'red', storage:'rgb(0, 255, 250)'});
-		//
-		// $('#dLeftDock').append('<h2>Origine de l energie</h2>');
-		// $('#dLeftDock').append(myPie);
-	}
 
 
 	$('#bStartGame').on('click', () => {

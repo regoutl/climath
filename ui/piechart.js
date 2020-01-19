@@ -11,12 +11,20 @@ export    function pieChart(ctx, values, palette){
   let sum = 0;
   vals.forEach(it => {  sum += it[1];});
 
-  let angle = 0;
+  // ctx.strokeStyle = 'white';
+  // ctx.lineWidth = '2';
+  ctx.font = "14px Arial";
+
+  let angle = -3.14 / 2;
   vals.forEach((it, index) => {
     let importance = it[1] / sum * 2 * Math.PI;
-    console.log(it[0], it[1], importance);
     ctx.beginPath();
-    ctx.arc(0, 0, 50, angle, angle + importance);
+
+
+    let a = angle;
+    let b = angle + importance - 0.01;
+    b = Math.max(b, a);
+    ctx.arc(0, 0, 50, a, b);
     ctx.lineTo(0, 0);
     angle += importance;
     if(palette === undefined)
@@ -24,5 +32,16 @@ export    function pieChart(ctx, values, palette){
     else
       ctx.fillStyle   = palette[it[0]];
     ctx.fill();
+
+    let perc = Math.round(it[1] / sum * 100);
+    if(index < 4 && perc >= 1){
+      ctx.fillRect(60, -38 + 18 * index, 8, 8);
+      ctx.fillStyle   = 'black';
+      perc = String(perc);
+      if(perc.length < 2)
+        perc = " " + perc;
+
+      ctx.fillText(perc + " % : " +it[0] , 75, -30 + 18 * index);
+    }
   });
 }

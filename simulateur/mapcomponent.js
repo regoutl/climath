@@ -107,7 +107,7 @@ export default class MapComponent{
     //exemple code
     let ans = {};
 
-    ans.theorical = (area.center === undefined);
+    ans.theorical = (area.center === undefined || this.getPx(area.center.x, area.center.y).baseLandUse == GroundUsage.out);
 
     let validPixels = area.radius * area.radius * 3.14;
 
