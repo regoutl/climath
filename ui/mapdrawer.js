@@ -31,115 +31,80 @@ function createProgram(gl, src, attribs){
     return program;
 }
 
-
-/*function newCanvas(name, im, zindex, visible){
-  let yo;
-  let canvas = $(
-    '<canvas id="'+name
-                          + '" width="1374" height="1183"></canvas>');
-  let ctx = canvas[0].getContext("2d");
-  ctx.drawImage(im, 0, 0);
-  canvas.imData = ctx.getImageData(0, 0, 1374, 1183);
-  canvas.pixVal = new Uint32Array(
-                              canvas.imData.data.buffer);
-  ctx.clearRect(0, 0,
-      canvas[0].width,
-      canvas[0].height);
-  ctx.putImageData(canvas.imData,0,0);
-  canvas['Im'] = im;
-  canvas.css({
-    'z-index':zindex,
-    visibility: (visible?'visible':'hidden'),
-    position: 'fixed'});
-  $('#dMap').append(canvas);
-  return canvas;
-}
-*/
-
 export default class MapDrawer{
-  currentShowGrid = {'groundUse':true, 'energyGrid':true, 'popDensity':true};
+    currentShowGrid = {'groundUse':true, 'energyGrid':true, 'popDensity':true};
 
-  constructor(arg){
-    this.nuke = [];
+    constructor(arg){
+        this.nuke = [];
 
-    this.canvas = {
-        top: $('#top'),
+        this.canvas = {
+            top: $('#top'),
+        }
+
+        this.canvas.top[0].getContext("2d").globalAlpha = 0.6;
+
+
+        this._setGridLayerCheckbox();
+
+        this.c = $('<canvas id="wololo" width="1374" height="1183"></canvas>');
+        this.c.css({
+          'z-index':10,
+          position: 'fixed'});
+        $('#dMap').append(this.c);
+
+        this.gl = this.c[0].getContext("webgl");
+
+        this._createProg();
+
+
+        this.energy = new PaletteTexture(this.gl, 2);
+        this.energySrc = arg.energy;
+        this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
+        this.energy.update(this.energySrc);
+
+        this.groundUse = new PaletteTexture(this.gl, 1);
+        this.groundUseSrc = arg.groundUse;
+
+        this.groundUse.appendPalette(0, 0, 0, 0); //exterior
+        this.groundUse.appendPalette(120, 120, 120);//airport
+        this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
+        this.groundUse.appendPalette(59, 85, 48/*52, 76, 45*/); //forest
+        this.groundUse.appendPalette(120, 120, 97); //indus
+        this.groundUse.appendPalette(137, 141, 131); // city
+        this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
+        this.groundUse.appendPalette(100, 140, 146);//water
+        this.groundUse.appendPalette(52, 76, 45); //forest2
+        this.groundUse.appendPalette(0, 0, 0); //?
+
+        this.groundUse.update(this.groundUseSrc);
+
+        this.popDensity = new PaletteTexture(this.gl, 1);
+        this.popDensitySrc = arg.popDensity
+
+        this.popDensity.appendPalette(0,0,0,0);       //out of country
+        this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
+        this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
+        this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
+        this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
+        this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
+        this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
+        this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
+        this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
+        this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
+
+        this.popDensity.update(this.popDensitySrc)
+
+        this.draw();
+
+
+        //represent the nursor for nuke
+        this._nukeCursorNode = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
+        this._nukeCursorNode.css('display', 'none');
+        $('#dMap').append(this._nukeCursorNode);
+
+
+        this._initEvents();
     }
-
-    this.canvas.top[0].getContext("2d").globalAlpha = 0.6;
-
-
-    this._setGridLayerCheckbox();
-
-    this.c = $('<canvas id="wololo" width="1374" height="1183"></canvas>');
-    this.c.css({
-      'z-index':10,
-      position: 'fixed'});
-    $('#dMap').append(this.c);
-
-    this.gl = this.c[0].getContext("webgl");
-
-    this._createProg();
-
-
-    this.energy = new PaletteTexture(this.gl, 2);
-    this.energySrc = arg.energy;
-    this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
-    this.energy.update(this.energySrc);
-
-    this.groundUse = new PaletteTexture(this.gl, 1);
-    this.groundUseSrc = arg.groundUse;
-
-    this.groundUse.appendPalette(0, 0, 0, 0); //exterior
-    this.groundUse.appendPalette(120, 120, 120);//airport
-    this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
-    this.groundUse.appendPalette(59, 85, 48/*52, 76, 45*/); //forest
-    this.groundUse.appendPalette(120, 120, 97); //indus
-    this.groundUse.appendPalette(137, 141, 131); // city
-    this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
-    this.groundUse.appendPalette(100, 140, 146);//water
-    this.groundUse.appendPalette(52, 76, 45); //forest2
-    this.groundUse.appendPalette(0, 0, 0); //?
-
-    this.groundUse.update(this.groundUseSrc);
-
-    this.popDensity = new PaletteTexture(this.gl, 1);
-    this.popDensitySrc = arg.popDensity
-    // # 0 33 0 0 255
-    // # 1 255 128 252 233
-    // # 2 106 250 209 85
-    // # 3 247 190 67 207
-    // # 4 122 31 242 167
-    // # 5 46 173 83 19
-    // # 6 138 46 10 0
-
-    // this.popDensity.appendPalette(0, 0, 0);
-    // this.popDensity.appendPalette(33, 0, 0, 255);
-    this.popDensity.appendPalette(0,0,0,0);
-    this.popDensity.appendPalette(255, 255, 128);
-    this.popDensity.appendPalette(252, 233, 106);
-    this.popDensity.appendPalette(250, 209, 85 );
-    this.popDensity.appendPalette(247, 190, 67 );
-    this.popDensity.appendPalette(242, 167, 46 );
-    this.popDensity.appendPalette(207, 122, 31 );
-    this.popDensity.appendPalette(173, 83,  19 );
-    this.popDensity.appendPalette(138, 46,  10 );
-    this.popDensity.appendPalette(107,  0,   0 );
-    // this.popDensity.appendPalette(117, 209,  245,  255)
-
-    this.popDensity.update(this.popDensitySrc)
-
-    this.draw();
-
-
-    //represent the nursor for nuke
-    this._nukeCursorNode = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
-    this._nukeCursorNode.css('display', 'none');
-    $('#dMap').append(this._nukeCursorNode);
-
-
-    this._initEvents();
-  }
 
   /** @brief draw the currenty visible layers*/
   draw(){
