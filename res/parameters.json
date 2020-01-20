@@ -309,9 +309,5 @@
 			"label":"Revenu annuel moyen brut par habitant"
 		}
 	}
-},
-"gameplay":{
-	"minTaxRate": 0.398,
-	"initMoney":10000000000
 }
 }

@@ -1,5 +1,6 @@
 import ProductionComponent from './productioncomponent.js';
 import MapComponent from './mapcomponent.js';
+import HydroComponent from './hydrocomponent.js';
 import { quantityToHuman as valStr} from '../ui/plot.js';
 import * as Yearly from "../timevarin.js";
 
@@ -26,17 +27,20 @@ export function objSum(object){
 store general values
 */
 export class Simulateur{
-  constructor(parameters, mapImgs, valChangedCallbacks){
-    this.cMap = new MapComponent(mapImgs);
-		this.cProd = new ProductionComponent(parameters);
+  constructor(createInfo, valChangedCallbacks){
+    this.cMap = new MapComponent(createInfo.map);
+		this.cProd = new ProductionComponent(createInfo.production);
+    this.cHydro = new HydroComponent(createInfo.hydro);
 
     this.valChangedCallbacks = valChangedCallbacks;
 
-    this.money  = parameters.gameplay.initMoney;
+
+
+    this.money  = createInfo.gameplay.initMoney;
     // they would pay 30% if all spending were only for other purposes
 		/// WARNING TODO check this number
 		// minimum tax level. const.
-		this.minTaxRate = parameters.gameplay.minTaxRate;
+		this.minTaxRate = createInfo.gameplay.minTaxRate;
 		// Player controlled
 		this.taxRate = this.minTaxRate + 0.05;
 
@@ -57,6 +61,8 @@ export class Simulateur{
 
 
     this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
+
+
   }
 
   get taxRate(){
@@ -95,6 +101,13 @@ export class Simulateur{
     //ask the grid about ground usage aso
     let build = this.cMap.prepareBuild(state,
       {shape:'circle', center:curPos, radius:radius});
+
+    if(build.type == 'nuke' && !build.theorical){
+      // console.log(this.cHydro.canBuildNukeHere(curPos));
+      build.theorical = !this.cHydro.canBuildNukeHere(curPos);
+    }
+
+    // this.cMap.drawer.testNukeCan(this.cHydro);
 
     //ask the simu what would happend on build
     this._currentBuild = this.cProd.prepareCapex(build, this.year);
@@ -274,25 +287,43 @@ function loadImage(src) {
 /// load all data needed for a simulater &
 /// return a promise when its ready
 export function promiseSimulater(valChangedCallbacks){
-  return Promise.all(
-    [fetch('res/parameters.json')
+  return Promise.all([
+    fetch('res/parameters.json')
         .then((response) => {return response.json();}),
     // loadImage('res/landUse.png'),
     // loadImage('res/popDensity.png'),
     fetch('res/landUse.bin')
+        .then((response) => {return response.arrayBuffer();}),
+    fetch('hydro/poolStations.bin')
+        .then((response) => {return response.arrayBuffer();}),
+    fetch('hydro/pools.json')
+        .then((response) => {return response.json();}),
+    fetch('hydro/poolMap.bin')
         .then((response) => {return response.arrayBuffer();})
     ])
     //called when all simu related res are loaded
   .then(function(values){
-    let parameters = values[0];
+    let simuCreateInfo = {};
 
-    let mapImgs = {
+    simuCreateInfo.production = values[0];
+
+    simuCreateInfo.map = {
       // groundUse:values[1],
       // popDensity:values[2],
       groundUse: new Uint8Array(values[1])
     };
 
-    return new Simulateur(parameters, mapImgs, valChangedCallbacks);
+    simuCreateInfo.hydro = {
+      stations: new Float32Array(values[2]),
+      pools:{map:new Uint8Array(values[4]), links:values[3]}
+    };
+
+    simuCreateInfo.gameplay = {
+      "minTaxRate": 0.398,
+      "initMoney":10000000000
+    };
+
+    return new Simulateur(simuCreateInfo, valChangedCallbacks);
   })
   .catch(err => {
     alert('loading error ' + err);

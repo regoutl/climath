@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 from struct import pack
 from tqdm import tqdm
 
-im = Image.open("manuWater.png")
+im = Image.open("flowmap.png")
 
 pix = im.load()
 
@@ -21,7 +21,7 @@ for x in tqdm(range(im.width)):
 
 im.close()
 
-with open("manuWater.bin", "wb") as fout:
+with open("flowmap.bin", "wb") as fout:
     fout.write(outBytes)
 
 print('done')

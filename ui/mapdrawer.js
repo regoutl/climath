@@ -159,6 +159,25 @@ export default class MapDrawer{
     this.draw();
   }
 
+  // testNukeCan(cHydro){
+  //   const ctx = this.cTop[0].getContext('2d');
+  //   ctx.clearRect(0, 0,
+  //       this.cTop[0].width,
+  //       this.cTop[0].height);
+  //
+  //   let d = ctx.getImageData(0, 0,
+  //       this.cTop[0].width,
+  //       this.cTop[0].height);
+  //
+  //   let pix = d.data;
+  //
+  //   for(let x = 0; x < this.cTop[0].width; x++)
+  //     for(let y = 0; y < this.cTop[0].height; y++){
+  //       pix[(x + y * this.cTop[0].width) * 4 + 3] = cHydro.canBuildNukeHere({x:x,y:y}) ? 64: 0;
+  //     }
+  //   ctx.putImageData(d, 0, 0);
+  // }
+
   addNuke(pos){
     let node = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
     node.css({top:pos.y-10, left:pos.x - 8});
@@ -273,19 +292,19 @@ export default class MapDrawer{
     this.groundUse.update(this.groundUseSrc);
 
     let self = this;
-    fetch('hydro/manuWater.bin')
+    fetch('hydro/flowmap.bin')
     .then((response) => {return response.arrayBuffer();})
     .then((waterData) => {
       self.water = new PaletteTexture(self.gl, 1);
       self.water.appendPalette(0, 0, 255, 0); // j'ai  presque honte
       for(let i = 1; i < 256; i++)
-        self.water.appendPalette(0, 0, 255, i); // j'ai  presque honte
+        self.water.appendPalette(100, 140, 246, i); // j'ai  presque honte
 
       let arr= new Uint8Array(waterData);
       self.water.update(arr);
     })
-    .catch(()=>{
-      alert('prob load water');
+    .catch((e)=>{
+      alert('prob load water ' +e);
     });
   }
 

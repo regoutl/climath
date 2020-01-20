@@ -237,18 +237,18 @@ export function simplex(obj, constrains){
     let pivotIndex = 0;
     for(; pivotIndex < nVar && obj[pivotIndex] <= 0; pivotIndex++);
 
-    console.log('iteration :');
-    //show
-    let line = '';
-    for(let i = 0; i < nVar + 1; i++)
-      line += ' ' + obj[i];
-    console.log(line);
-    for(let j = 0; j < nConstrains; j++){
-      line = '';
-      for(let i = 0; i < nVar + 1; i++)
-        line += ' ' + constrains[j * (nVar + 1) + i];
-      console.log(line);
-    }
+    // console.log('iteration :');
+    // //show
+    // let line = '';
+    // for(let i = 0; i < nVar + 1; i++)
+    //   line += ' ' + obj[i];
+    // console.log(line);
+    // for(let j = 0; j < nConstrains; j++){
+    //   line = '';
+    //   for(let i = 0; i < nVar + 1; i++)
+    //     line += ' ' + constrains[j * (nVar + 1) + i];
+    //   console.log(line);
+    // }
 
 
     if(pivotIndex == nVar) //done !

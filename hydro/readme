@@ -1,4 +1,4 @@
-map coord => real coord :
+hydro map coord => real coord :
 
-1) scale := width = 1374 (respect prop)
+1) scale := width = 1374 (respect prop)    eq : * 1.836
 2) translate (8, 63)
