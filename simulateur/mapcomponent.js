@@ -3,30 +3,6 @@
 import MapDrawer from '../ui/mapdrawer.js';
 import PaletteTexture from '../ui/palettetexture.js';
 
-/*const GroundUsage = {
-    city: 4280501491,
-    4280501491: 'city',
-	forest: 4281658024,
-    4281658024: 'forest',
-	forest2: 4280130122,
-    4280130122: 'forest',
-	water: 4293456303,
-    4293456303: 'water',
-	field: 4289722111,
-    4289722111: 'field',
-    field2: 4283949556,
-    4283949556: 'field',
-    industry: 4291845525,
-    4291845525: 'industry',
-	airport: 4291940334,
-    4291940334: 'airport',
-	heath: 4294014481,
-    4294014481: 'heath',
-
-    solarpanel:4294040525,
-    4294040525:'solarpanel',
-};
-*/
 const GroundUsage = {
   out: 0,
   airport: 1,

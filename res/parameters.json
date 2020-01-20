@@ -198,10 +198,16 @@
 				"deconstructionRatio":0.05
 			},
 			"onm":{
-				"years":[0.006],
-				"unit":"€/S",
-				"source":"a checker (moodle QEE projet V2)",
-				"comment": "A checker",
+				"years":[380, 380, 380, 380, 380,
+								 380, 380, 380, 380, 380,
+							 	 380, 380, 380, 380, 380,
+								 380, 380, 380, 380],
+ 			  "in2050": 156,
+				"valMul":0.0011,
+				"ctrlPts": [{"x": 2018, "y": 380}, {"x": 2021, "y": 180}],
+				"unit":"€/Sy",
+				"source":"https://www.nrel.gov/docs/fy19osti/73222.pdf",
+				"comment": "Battery cost projections for 4-hour lithium-ion systems. ",
 				"label":"Frais (fixes) d'exploitation et de maintenance des batteries"
 			},
 			"energyDensity":{

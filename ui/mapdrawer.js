@@ -32,6 +32,16 @@ function createProgram(gl, src, attribs){
 }
 
 
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+		img.crossOrigin = '';
+    img.addEventListener("load", () => resolve(img));
+    img.addEventListener("error", err => reject(err));
+    img.src = src;
+  });
+}
+
 /*function newCanvas(name, im, zindex, visible){
   let yo;
   let canvas = $(
@@ -57,16 +67,18 @@ function createProgram(gl, src, attribs){
 */
 
 export default class MapDrawer{
-  currentShowGrid = {'groundUse':true, 'energyGrid':true};
+  currentShowGrid = {'groundUse':true, 'energyGrid':true, 'flows':false};
 
   constructor(arg){
     this.nuke = [];
 
-    this.canvas = {
-        top: $('#top'),
-    }
+    this.cTop = $('<canvas width="1374" height="1183"></canvas>');
+    this.cTop.css({
+      'z-index': 99, position: 'fixed'
+    });
+    $('#dMap').append(this.cTop);
 
-    this.canvas.top[0].getContext("2d").globalAlpha = 0.6;
+    this.cTop[0].getContext("2d").globalAlpha = 0.6;
 
 
     this._setGridLayerCheckbox();
@@ -77,31 +89,13 @@ export default class MapDrawer{
       position: 'fixed'});
     $('#dMap').append(this.c);
 
-    this.gl = this.c[0].getContext("webgl");
+    this.gl = this.c[0].getContext("webgl", { alpha: false });
 
     this._createProg();
 
-
-    this.energy = new PaletteTexture(this.gl, 2);
     this.energySrc = arg.energy;
-    this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
-    this.energy.update(this.energySrc);
-
-    this.groundUse = new PaletteTexture(this.gl, 1);
     this.groundUseSrc = arg.groundUse;
-
-    this.groundUse.appendPalette(0, 0, 0, 0); //exterior
-    this.groundUse.appendPalette(120, 120, 120);//airport
-    this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
-    this.groundUse.appendPalette(59, 85, 48/*52, 76, 45*/); //forest
-    this.groundUse.appendPalette(120, 120, 97); //indus
-    this.groundUse.appendPalette(137, 141, 131); // city
-    this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
-    this.groundUse.appendPalette(100, 140, 146);//water
-    this.groundUse.appendPalette(52, 76, 45); //forest2
-    this.groundUse.appendPalette(0, 0, 0); //?
-
-    this.groundUse.update(this.groundUseSrc);
+    this._initTextures();
 
     this.draw();
 
@@ -121,11 +115,16 @@ export default class MapDrawer{
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    gl.clearColor(1, 1, 1, 1);
     this.clear();
     if(this.currentShowGrid.groundUse)
       this._drawTex(this.groundUse);
     if(this.currentShowGrid.energyGrid)
       this._drawTex(this.energy);
+
+    if(this.water && (this._nukeCursorNode.css('display') == 'block' ||this.currentShowGrid.flows))
+      this._drawTex(this.water);
   }
 
   /** @brief update the given layer*/
@@ -137,10 +136,10 @@ export default class MapDrawer{
 
   /** @brief draw a cursor */
   drawCircle(x,y,radius) {
-    const ctx = this.canvas.top[0].getContext('2d');
+    const ctx = this.cTop[0].getContext('2d');
     ctx.clearRect(0, 0,
-        this.canvas.top[0].width,
-        this.canvas.top[0].height);
+        this.cTop[0].width,
+        this.cTop[0].height);
 
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2*Math.PI, true);
@@ -148,14 +147,16 @@ export default class MapDrawer{
   }
   drawNukeCursor(pos){
     this._nukeCursorNode.css({top:pos.y-10, left:pos.x - 8, display: 'block'});
+    this.draw();
   }
   clearCursor(){
-    const ctx = this.canvas.top[0].getContext('2d');
+    const ctx = this.cTop[0].getContext('2d');
     ctx.clearRect(0, 0,
-        this.canvas.top[0].width,
-        this.canvas.top[0].height);
+        this.cTop[0].width,
+        this.cTop[0].height);
     //clear nuke cursor
     this._nukeCursorNode.css({ display: 'none'});
+    this.draw();
   }
 
   addNuke(pos){
@@ -189,11 +190,11 @@ export default class MapDrawer{
         self._eventCallback['click']();
       });
 
-      $('#top').on('pointerleave', function(){
+      self.cTop.on('pointerleave', function(){
         self._eventCallback['pointerleave']();
       });
 
-      $('#top').on('mousemove', function(evt){
+      self.cTop.on('mousemove', function(evt){
         self._eventCallback['mousemove'](evt);
       });
     });
@@ -221,7 +222,6 @@ export default class MapDrawer{
 
     void main() {
         vec2 palXY = texture2D(u_image, v_texcoord).ra * 255.0;
-        palXY.y = 0.0;
         gl_FragColor = texture2D(u_palette, (palXY + vec2(0.5)) / 256.0);
     }
     `;
@@ -252,6 +252,43 @@ export default class MapDrawer{
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   }
 
+  _initTextures(){
+    this.energy = new PaletteTexture(this.gl, 2);
+    this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
+    this.energy.update(this.energySrc);
+
+    this.groundUse = new PaletteTexture(this.gl, 1);
+
+    this.groundUse.appendPalette(0, 0, 0, 0); //exterior
+    this.groundUse.appendPalette(120, 120, 120);//airport
+    this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
+    this.groundUse.appendPalette(59, 85, 48/*52, 76, 45*/); //forest
+    this.groundUse.appendPalette(120, 120, 97); //indus
+    this.groundUse.appendPalette(137, 141, 131); // city
+    this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
+    this.groundUse.appendPalette(100, 140, 146);//water
+    this.groundUse.appendPalette(52, 76, 45); //forest2
+    this.groundUse.appendPalette(0, 0, 0); //?
+
+    this.groundUse.update(this.groundUseSrc);
+
+    let self = this;
+    fetch('hydro/manuWater.bin')
+    .then((response) => {return response.arrayBuffer();})
+    .then((waterData) => {
+      self.water = new PaletteTexture(self.gl, 1);
+      self.water.appendPalette(0, 0, 255, 0); // j'ai  presque honte
+      for(let i = 1; i < 256; i++)
+        self.water.appendPalette(0, 0, 255, i); // j'ai  presque honte
+
+      let arr= new Uint8Array(waterData);
+      self.water.update(arr);
+    })
+    .catch(()=>{
+      alert('prob load water');
+    });
+  }
+
   clear(){
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
   }
@@ -273,7 +310,7 @@ export default class MapDrawer{
 
 
   _setGridLayerCheckbox() {
-    let layers = ['groundUse', 'energyGrid'];
+    let layers = ['energyGrid', 'flows'];
 
     let grid = this;
     layers.forEach((m) => {

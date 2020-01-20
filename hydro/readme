@@ -1,0 +1,4 @@
+map coord => real coord :
+
+1) scale := width = 1374 (respect prop)
+2) translate (8, 63)
