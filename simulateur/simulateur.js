@@ -273,33 +273,20 @@ export class Simulateur{
   }
 }
 
-
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-		img.crossOrigin = '';
-    img.addEventListener("load", () => resolve(img));
-    img.addEventListener("error", err => reject(err));
-    img.src = src;
-  });
-}
-
 /// load all data needed for a simulater &
 /// return a promise when its ready
 export function promiseSimulater(valChangedCallbacks){
   return Promise.all([
     fetch('res/parameters.json')
-        .then((response) => {return response.json();}),
-    // loadImage('res/landUse.png'),
-    // loadImage('res/popDensity.png'),
+        .then((response) => response.json()),
     fetch('res/landUse.bin')
-        .then((response) => {return response.arrayBuffer();}),
+        .then((response) => response.arrayBuffer()),
     fetch('hydro/poolStations.bin')
-        .then((response) => {return response.arrayBuffer();}),
+        .then((response) => response.arrayBuffer()),
     fetch('hydro/pools.json')
-        .then((response) => {return response.json();}),
+        .then((response) => response.json()),
     fetch('hydro/poolMap.bin')
-        .then((response) => {return response.arrayBuffer();}),
+        .then((response) => response.arrayBuffer()),
     fetch('res/popDensity.bin')
         .then(response => response.arrayBuffer())
     ])

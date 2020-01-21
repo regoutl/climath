@@ -31,41 +31,6 @@ function createProgram(gl, src, attribs){
     return program;
 }
 
-
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-		img.crossOrigin = '';
-    img.addEventListener("load", () => resolve(img));
-    img.addEventListener("error", err => reject(err));
-    img.src = src;
-  });
-}
-
-/*function newCanvas(name, im, zindex, visible){
-  let yo;
-  let canvas = $(
-    '<canvas id="'+name
-                          + '" width="1374" height="1183"></canvas>');
-  let ctx = canvas[0].getContext("2d");
-  ctx.drawImage(im, 0, 0);
-  canvas.imData = ctx.getImageData(0, 0, 1374, 1183);
-  canvas.pixVal = new Uint32Array(
-                              canvas.imData.data.buffer);
-  ctx.clearRect(0, 0,
-      canvas[0].width,
-      canvas[0].height);
-  ctx.putImageData(canvas.imData,0,0);
-  canvas['Im'] = im;
-  canvas.css({
-    'z-index':zindex,
-    visibility: (visible?'visible':'hidden'),
-    position: 'fixed'});
-  $('#dMap').append(canvas);
-  return canvas;
-}
-*/
-
 export default class MapDrawer{
   currentShowGrid = {'groundUse':true, 'energyGrid':true, 'flows':false, 'popDensity':true};
     constructor(arg){
@@ -91,7 +56,7 @@ export default class MapDrawer{
 
 
 		this.gl = this.c[0].getContext("webgl", { alpha: false });
-		
+
         this._createProg();
 
 
@@ -317,7 +282,7 @@ export default class MapDrawer{
 
 	this.popDensity.update(this.popDensitySrc)
 
-        
+
     let self = this;
     fetch('hydro/flowmap.bin')
     .then((response) => {return response.arrayBuffer();})
