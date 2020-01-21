@@ -89,7 +89,7 @@ function plainTextEuro(amound){
 		coef = 0.001;
 		unit = 'miles';
 	}
-	else if(Math.abs(amound) >= 1);
+	else if(Math.abs(amound) >= 1){}
 	else if(Math.abs(amound) >= 0.01){
 		coef = 100;
 		unit = 'cent';
