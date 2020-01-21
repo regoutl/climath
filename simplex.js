@@ -297,9 +297,10 @@ export function simplex(obj, constrains){
     throw 'ca fait bcp d iteration ca. pe un ctcle => sol pe pas opti';
 
   //read the solution
-  // let optimum = -obj[nVar];
+  let optimum = -obj[nVar];
 
-  let ans = new Float32Array(nVar);
+  let ans = new Float32Array(nVar + 1);
+  ans[nVar] = optimum;
 
   for(let i = 0; i < nVar; i++){
     if(obj[i] >= 0){

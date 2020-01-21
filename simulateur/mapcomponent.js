@@ -75,16 +75,12 @@ export default class MapComponent{
           Then return what would theorically happend if it was
                set ans.theorical = true
 
-        if problem with build state, can return undefined or throw
-
     @note for now, only build is considered. no rebuild. no deconstruction
-    @note for points (ex, nuke central), area is still send as circle,
-        but radius can be ignored
+    @note for points (ex, nuke central), area is still send as circle, but radius can be ignored
     @warning ans.area (if any) unit : m2
     **/
-    prepareBuild(buildState, area){
-        //exemple code
-        let ans = {};
+    prepareBuild(ans, buildState, area){
+        ans.theorical = (area.center === undefined);
 
         ans.theorical = (area.center === undefined);
 
@@ -119,7 +115,6 @@ export default class MapComponent{
 
         return ans;
     }
-
 
     /**   @brief : like prepareBuild BUT saves the action
     @return void

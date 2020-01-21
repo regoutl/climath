@@ -17,36 +17,6 @@ logImage = image.copy() # Image.new('RGBA', (image.width , image.height))
 
 pix = image.load()
 
-# #expand every pool by a radius
-#
-# expand = int(input("Pixel d'agrandissement :"))
-#
-# for it in tqdm(range(expand)):
-#     cpy = image.copy()
-#     cpyPix = cpy.load()
-#
-#     dirs = [(0, 1), (1, 0), (-1, 0), (0, -1)]
-#
-#     for x in range(1, image.width - 1):
-#         for y in range(1, image.height - 1):
-#             (r, g,b,a) = cpyPix[x, y]
-#             if(a != 255):
-#                 prop = 0
-#                 propCount = 0
-#                 for (dx, dy) in dirs:
-#                     (r, g,b,a) = cpyPix[x +dx, y+dy]
-#
-#                     if(a == 255):
-#                         if(cpyPix[x +dx, y+dy] != prop): #new prop diff old prop
-#                             propCount += 1
-#                         prop = cpyPix[x +dx, y+dy]
-#
-#                 if propCount == 1:
-#                     pix[x, y] = cpyPix[x +dx, y+dy]
-
-
-
-
 d = ImageDraw.Draw(logImage)
 dic = {}
 counter = 0
@@ -75,20 +45,20 @@ for x in tqdm(range(image.width)):
             counter += 1
         outBytes[x+y*image.width] = dic[pix[x, y]]
 
-if(counter != 86):
+if(counter != 85):
     print("pas le bon nombre de pools () :/")
     print(counter)
     raise Exception()
 
 
-pos = open('hydroFinalAll365.csv', 'r').read().split('\n')[0:5]
+pos = open('hydroFinalAll365NoBlank.csv', 'r').read().split('\n')[0:5]
 xs = pos[2].split(',')
 ys = pos[3].split(',')
 station = pos[1].split(',')
 rivers = pos[4].split(',')
 avg = pos[0].split(',')
 
-#for each station
+
 for i in range(1, len(xs) - 1):
     if(avg[i] == 'I' ):
         continue
@@ -159,6 +129,7 @@ for i in range(1, len(xs) - 1):
 
 
     pools[index]["data col"] = i
+#	d.text((int(xs[i]), int(ys[i])), avg[i]	, fill=(255 * (i % 3),255 * ((i+1) % 3),255 * ((i+2) % 3),255))
 
 
 #col(i, j) == 1 iff cols i touch col j. 0 if i or j == 0
@@ -214,18 +185,25 @@ logImage.save('poolsLog.png')
 with open("poolMap.bin", "wb") as fout:
     fout.write(outBytes)
 
+
+#pools json output ---------------------------------------------
+
 json = '['
+
 
 for meIndex, p in enumerate(pools[1:]):
     json += '{'
 
     if(p["data col"] > 0):
         json += '"dataColIndex":' + str(p["data col"] - 1) + ','
-        json += '"river":"' + rivers[p["data col"]] + '",'
 
     if("flowToward" in p):
-        json += '"dstPool":' + str(p["flowToward"]-1) + ','
+        json += '"dstPool":' + str(p["flowToward"]-1).lower().capitalize() + ','
 
+    if(p["data col"] > 0):
+        json += '"river":"' + rivers[p["data col"]].lower().capitalize() + '",'
+    else:
+        json += '"river":"Ca s\'appelle cmt deja ce pipi ?",'
 
     srcs = []
     for bIndex, b in enumerate(pools[1:]):
@@ -253,6 +231,9 @@ with open("pools.json", "w") as fout:
 
 
 
+
+#pool station csv to bin ---------------------------------------------
+
 realNbStation = 0
 for v in avg:
     try:
@@ -262,10 +243,8 @@ for v in avg:
         pass
 
 
-data = open('hydroFinalAll365.csv', 'r').read().split('\n')[5:-1]
+data = open('hydroFinalAll365NoBlank.csv', 'r').read().split('\n')[5:-1]
 
-# print(realNbStation )
-# print(realNbStation * len(data) * 4)
 outStations = bytearray(realNbStation * len(data) * 4)
 
 if(len(data) != 365 * 19):
@@ -276,7 +255,8 @@ for l in tqdm(data):
     vals = l.split(',')[1:realNbStation+1]
     for v in vals:
         if(len(v) == 0 or v == '?'):
-            v = -1.0
+            print '\n\nblank in the data ! at line ', i / 4 / realNbStation, 'col', (i // 4) % realNbStation + 1
+            raise Exception('wathever')
         struct.pack_into("f", outStations, i, float(v))
 
         i += 4
@@ -292,6 +272,6 @@ print('pools.json updated ! ')
 
 print('\n\npoolStations.bin updated ! \n' +
         ' Format : row major, float ' + str(realNbStation) + ' x ' + str(365 * 19) +
-        '\n Unit : m3/sec, daily data, all year 365 days\n WARNING : -1 on missing data' +
+        '\n Unit : m3/sec, daily data, all year 365 days' +
         '\n\n'
         )

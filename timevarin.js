@@ -38,7 +38,7 @@ export class Raw{
 
 		this.nowCtrl = {x: this.histoUntill, y: k};
 		/// value in 2050
-		this.endVal = 0.5*k;
+		this.endVal = k;
 		this.endCtrl = {x: 2050, y: k};
 
 		this.updatePredi();

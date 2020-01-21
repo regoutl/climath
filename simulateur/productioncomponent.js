@@ -17,7 +17,7 @@ export default class ProductionComponent{
 	 * 					if uint8Array, value will be divided by 255. length must be a multiple of 8760 (hourly data)
 	 * 					if undefined, set to 1.0
 	 */
-	constructor(parameters){
+	constructor(parameters, hydroComponent){
 		this._initCountries(parameters.countries);
 
 		//sorted by priority (higher production mean will produce at max capa first)
@@ -29,7 +29,7 @@ export default class ProductionComponent{
 
 		this.productionMeans = {
 			pv: new Pv(parameters.energies.pv),
-		  nuke: new Nuke(parameters.energies.nuke),
+		  nuke: new Nuke(parameters.energies.nuke, hydroComponent),
 			storage: new Storage(parameters.energies.storage),
 			// ccgt: new Ccgt(parameters),
 		  fossil: new Fossil(parameters.energies.fossil),
@@ -79,9 +79,9 @@ out.stats.consumedEnergy := {
 
 
 	/** @brief get the data about an installation
-	 * @param what.type : pv or nuke. required.
-	 * IF what.type == pv => check PV.prepareCapex
-	 * IF what.type == batter => check Storage.prepareCapex
+	 * @param build.type : pv or nuke. required.
+	 * IF build.type == pv => check PV.prepareCapex
+	 * IF build.type == battery => check Storage.prepareCapex
 	 *
 	 * @param beginBuildYear year of the build (of the click). default value : current year.
 	 * @note for demolish, still pass the year of the beginning of the construction.
@@ -100,18 +100,14 @@ out.stats.consumedEnergy := {
 	 * 			}
 	 * ENDIF
 	 */
-	prepareCapex(what, beginBuildYear){
-
-		let ans;
+	prepareBuild(build){
+		let what = build;
 		if(what.type == 'battery')
-			ans = this.productionMeans.storage.prepareCapex(what, beginBuildYear, this.countries);
+			this.productionMeans.storage.prepareCapex(build, this.countries);
 		else
-			ans = this.productionMeans[what.type]
-						.prepareCapex(what, beginBuildYear, this.countries);
+			this.productionMeans[build.type]
+						.prepareCapex(build, this.countries);
 
-		ans.theorical = what.theorical;
-
-		return ans;
 
 		// //modify the ans if unbuild
 		// if(ans.nameplate.at(ans.build.end) < 0){

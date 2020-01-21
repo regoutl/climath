@@ -45,6 +45,7 @@ $(function(){
   $('.bBuild').on('click', function(e){
     let t = e.currentTarget.getAttribute("data-target");
 
+    //double click on same tab : close it
     if(state && state.type == t){
       state = undefined;
       $('#dBuildDetails').hide();
@@ -52,6 +53,7 @@ $(function(){
       notifyStateChanged();
       return;
     }
+
 
     if(t == 'pv'){
       $('#BMRange').attr({min:1, max:100});
@@ -138,5 +140,11 @@ export function displayStat(cmd){
   else {
     $('.vBMStorageCapacity').parent().hide();
   }
+
+
+  $('.vBMRiver').html(cmd.river ? cmd.river : "Aucune");
+  $('.vBMCoolingWaterRate').html(cmd.coolingWaterRate ? valStr(cmd.coolingWaterRate, "m3/s") : "0");
+
+
 
 }

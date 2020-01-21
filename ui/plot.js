@@ -12,10 +12,12 @@ export function quantityToHuman(value, unit, compact = false){
 
 	let yolo = 1000;
 	if(unit.length >= 2 && !isNaN(Number(unit[1]))){
-		if(unit[1] != '2')
+		if(unit[1] == '2')
+			yolo *= yolo; // square it
+		else if(unit[1] == '3')
+			yolo = yolo*yolo*yolo; // square it
+		else
 			throw 'aie';
-
-		yolo *= yolo; // square it
 	}
 
 	let divider = Math.pow(yolo, Math.floor(Math.log(value) / Math.log(yolo)));

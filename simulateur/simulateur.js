@@ -26,8 +26,8 @@ store general values
 export class Simulateur{
     constructor(createInfo, valChangedCallbacks){
         this.cMap = new MapComponent(createInfo.map);
-        this.cProd = new ProductionComponent(createInfo.production);
         this.cHydro = new HydroComponent(createInfo.hydro);
+        this.cProd = new ProductionComponent(createInfo.production, this.cHydro);
 
         this.valChangedCallbacks = valChangedCallbacks;
 
@@ -75,29 +75,35 @@ export class Simulateur{
     get year(){return this.yStats.year;}
 
     /// called for each change in what to build, or where to
-    onBuildMenuStateChanged(state, curPos, radius){
-        // nothin to build, skip
-        if(state === undefined)
+    onBuildMenuStateChanged(buildMenuState, curPos, radius){
+    // nothin to build, skip
+        if(buildMenuState === undefined)
             return;
 
-        state.year = this.year;
-        this._bm = {state:state, curPos:curPos, radius:radius};
+        this._bm = {state:buildMenuState, curPos:curPos, radius:radius};
+
+        //reset the current build
+        this._currentBuild = {};
+
+        // this._currentBuild._bm = {state:buildMenuState, curPos:curPos, radius:radius};
+
+        // this._currentBuild.currentYear = year;
+        this._currentBuild.build= {begin: this.year};
+        this._currentBuild.pos = curPos;
 
         //ask the grid about ground usage aso
-        let build = this.cMap.prepareBuild(state,
-                        {shape:'circle', center:curPos, radius:radius});
+        this.cMap.prepareBuild(this._currentBuild, buildMenuState,
+            {shape:'circle', center:curPos, radius:radius});
 
-        if(build.type == 'nuke' && !build.theorical){
-            build.theorical = !this.cHydro.canBuildNukeHere(curPos);
-        }
 
-        //ask the simu what would happend on build
-        this._currentBuild = this.cProd.prepareCapex(build, this.year);
+        // console.log(this._currentBuild.nameplate.at(this._currentBuild.build.end));
+        this.cProd.prepareBuild(this._currentBuild);
+
 
         if(this._currentBuild.build){
-            this._currentBuild.build.can =
-                    this._currentBuild.build.cost < this._money;
+            this._currentBuild.build.can = this._currentBuild.build.cost < this._money;
         }
+
 
         return this._currentBuild;
     }
@@ -105,22 +111,21 @@ export class Simulateur{
     //called on click on the map
     confirmCurrentBuild(){
         // only build in present
-        if(this._currentBuild === undefined ||
-                    this._currentBuild.build.begin != this.year){
-            console.log('can only build in present');
-            return;
+        if(this._currentBuild === undefined
+            || this._currentBuild.build.begin != this.year){
+                console.log('can only build in present');
+                return;
         }
 
         if(this._currentBuild.build.cost > this._money){
-            console.log('no enough cash');
-            return false;
+          console.log('no enough cash');
+          return false;
         }
 
         if(this._currentBuild.theorical){
-            console.log('invalid');
-            return false;
+          console.log('invalid');
+          return false;
         }
-
 
         this.cProd.execute(this._currentBuild);
         this.cMap.build(this._bm.state,
@@ -139,8 +144,7 @@ export class Simulateur{
         this.money -= action.cost;
 
         this._currentBuild = undefined;
-    } // END OF Simulateur.confirmCurrentBuild()
-
+    }
     //run
     run(){
         // O & M (fixed & variable)

@@ -58,6 +58,8 @@ export default class MapDrawer{
 
         this.gl = this.c[0].getContext("webgl", { alpha: false });
 
+        this.gl = this.c[0].getContext("webgl", { alpha: false });
+
         this._createProg();
 
         this.energy = new PaletteTexture(this.gl, 2);
@@ -69,13 +71,14 @@ export default class MapDrawer{
         this.popDensitySrc = arg.popDensity
         this._initTextures();
 
-        this.draw();
 
         //represent the nursor for nuke
         this._nukeCursorNode = $('<img src="res/icons/nuke.png" ' +
             ' class="scaleInvariant energyRelated" width="16px"/>');
         this._nukeCursorNode.css('display', 'none');
         $('#dMap').append(this._nukeCursorNode);
+
+        this.draw();
 
         this._initEvents();
     } // END OF MapDrawer.constructor()
@@ -91,13 +94,15 @@ export default class MapDrawer{
         this.clear();
         if(this.currentShowGrid.popDensity)
             this._drawTex(this.popDensity);
-        if(this.currentShowGrid.groundUse)
+        else
             this._drawTex(this.groundUse);
+
         if(this.currentShowGrid.energyGrid)
             this._drawTex(this.energy);
-        if(this.water && (this._nukeCursorNode.css('display') == 'block'
-                            || this.currentShowGrid.flows ))
-            this._drawTex(this.water);
+
+        if((this._nukeCursorNode.css('display') == 'block'
+            || this.currentShowGrid.flows) && this.water)
+                this._drawTex(this.water);
     }
 
     /** @brief update the given layer*/
@@ -110,7 +115,9 @@ export default class MapDrawer{
     /** @brief draw a cursor */
     drawCircle({center:{x,y},radius}) {
         const ctx = this.cTop[0].getContext('2d');
-        ctx.clearRect(0, 0, this.cTop[0].width, this.cTop[0].height);
+        ctx.clearRect(0, 0,
+            this.cTop[0].width,
+            this.cTop[0].height);
 
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2*Math.PI, true);
@@ -121,16 +128,14 @@ export default class MapDrawer{
         this._nukeCursorNode.css({
             top:pos.y-10,
             left:pos.x - 8,
-            display: 'block'
+            display: 'block',
         });
         this.draw();
     }
 
     clearCursor(){
         const ctx = this.cTop[0].getContext('2d');
-        ctx.clearRect(0, 0,
-            this.cTop[0].width,
-            this.cTop[0].height);
+        ctx.clearRect(0, 0, this.cTop[0].width, this.cTop[0].height);
         //clear nuke cursor
         this._nukeCursorNode.css({display: 'none'});
         this.draw();
@@ -232,17 +237,16 @@ export default class MapDrawer{
 
         // Setup a unit quad
         let positions = [
-              1,  1,
-             -1,  1,
-             -1, -1,
-              1,  1,
-             -1, -1,
-              1, -1,
+             1,  1,
+            -1,  1,
+            -1, -1,
+             1,  1,
+            -1, -1,
+             1, -1,
         ];
         this.vertBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions),
-            gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
         gl.enableVertexAttribArray(0);
         gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     }
@@ -268,26 +272,26 @@ export default class MapDrawer{
         this.groundUse.update(this.groundUseSrc);
 
 
-        this.popDensity = new PaletteTexture(this.gl, 1);
+    	this.popDensity = new PaletteTexture(this.gl, 1);
 
-        this.popDensity.appendPalette(0,0,0,0);       //out of country
-        this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
-        this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
-        this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
-        this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
-        this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
-        this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
-        this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
-        this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
-        this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
+    	this.popDensity.appendPalette(0,0,0,0);       //out of country
+    	this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
+    	this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
+    	this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
+    	this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
+    	this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
+    	this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
+    	this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
+    	this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
+    	this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
 
-        this.popDensity.update(this.popDensitySrc)
+    	this.popDensity.update(this.popDensitySrc)
 
 
         let self = this;
         fetch('hydro/flowmap.bin')
-        .then(response => response.arrayBuffer())
-        .then(waterData => {
+        .then((response) => {return response.arrayBuffer();})
+        .then((waterData) => {
             self.water = new PaletteTexture(self.gl, 1);
             self.water.appendPalette(0, 0, 255, 0); // j'ai  presque honte
             for(let i = 1; i < 256; i++)
@@ -296,7 +300,9 @@ export default class MapDrawer{
             let arr= new Uint8Array(waterData);
             self.water.update(arr);
         })
-        .catch((e)=>alert('prob load water ' +e));
+        .catch((e)=>{
+            alert('prob load water ' +e);
+        });
     }
 
     clear(){
@@ -320,7 +326,7 @@ export default class MapDrawer{
 
 
     _setGridLayerCheckbox() {
-        let layers = ['popDensity', 'groundUse','energyGrid', 'flows'];
+        let layers = ['popDensity', 'energyGrid', 'flows'];
 
         let grid = this;
         layers.forEach((m) => {
@@ -335,7 +341,7 @@ export default class MapDrawer{
                 grid.draw();
                 if($(this).val() == 'energyGrid'){
                     $('.energyRelated').css({
-                        'opacity': $(this).is(':checked') ? 1.0: 0
+                        'opacity': $(this).is(':checked') ? 1.0: 0,
                     });
                 }
             });

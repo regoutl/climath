@@ -49,12 +49,9 @@ export default class Pv extends IntermittentProductionMean{
   * 						default val = 1
   * @todo:		@param what.seller : {sunPower ,Panasonic, JinkoSolar}. set above params (see parameters.json)
 **/
-  prepareCapex(what, beginBuildYear, countries){
-    let ans = {};
-    ans.type = 'pv';
-    ans.build = {};
-    ans.build.begin = beginBuildYear;
-    ans.build.end = this.build.delay + beginBuildYear;
+  prepareCapex(what, countries){
+    let ans = what;
+    ans.build.end = this.build.delay + ans.build.begin;
 
     //check for parameters
     if(what.area === undefined)
@@ -71,6 +68,7 @@ export default class Pv extends IntermittentProductionMean{
     if(what.priceMul === undefined)
       what.priceMul = 1;
 
+
     let initNameplate
         = what.area
           * this.efficiency.at(ans.build.begin)
@@ -80,9 +78,6 @@ export default class Pv extends IntermittentProductionMean{
                                     initNameplate,
                                     what.powerDecline);
     ans.nameplate.unit = 'N';
-
-
-    ans.area = what.area;
 
 
     ans.build.co2 = what.area // m2
@@ -96,8 +91,6 @@ export default class Pv extends IntermittentProductionMean{
     ans.perYear = {cost: this.perYear.cost.at(ans.build.end) * what.area, co2: 0};
     ans.perWh = {cost: 0, co2: 0};
     ans.avgCapacityFactor = 0.12; //todo : do a real computation ?
-
-    return ans;
   }
 
   //note : must be called when simu.year = cmd.build.end
