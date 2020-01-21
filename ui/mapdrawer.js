@@ -67,47 +67,55 @@ function loadImage(src) {
 */
 
 export default class MapDrawer{
-  currentShowGrid = {'groundUse':true, 'energyGrid':true, 'flows':false};
-
-  constructor(arg){
-    this.nuke = [];
-
-    this.cTop = $('<canvas width="1374" height="1183"></canvas>');
-    this.cTop.css({
-      'z-index': 99, position: 'fixed'
-    });
-    $('#dMap').append(this.cTop);
-
-    this.cTop[0].getContext("2d").globalAlpha = 0.6;
+  currentShowGrid = {'groundUse':true, 'energyGrid':true, 'flows':false, 'popDensity':true};
+    constructor(arg){
+        this.nuke = [];
 
 
-    this._setGridLayerCheckbox();
 
-    this.c = $('<canvas id="wololo" width="1374" height="1183"></canvas>');
-    this.c.css({
-      'z-index':10,
-      position: 'fixed'});
-    $('#dMap').append(this.c);
+		this.cTop = $('<canvas width="1374" height="1183"></canvas>');
+		this.cTop.css({
+		  'z-index': 99, position: 'fixed'
+		});
+		$('#dMap').append(this.cTop);
 
-    this.gl = this.c[0].getContext("webgl", { alpha: false });
+		this.cTop[0].getContext("2d").globalAlpha = 0.6;
 
-    this._createProg();
+        this._setGridLayerCheckbox();
 
-    this.energySrc = arg.energy;
-    this.groundUseSrc = arg.groundUse;
-    this._initTextures();
-
-    this.draw();
-
-
-    //represent the nursor for nuke
-    this._nukeCursorNode = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
-    this._nukeCursorNode.css('display', 'none');
-    $('#dMap').append(this._nukeCursorNode);
+        this.c = $('<canvas id="wololo" width="1374" height="1183"></canvas>');
+        this.c.css({
+          'z-index':10,
+          position: 'fixed'});
+        $('#dMap').append(this.c);
 
 
-    this._initEvents();
-  }
+		this.gl = this.c[0].getContext("webgl", { alpha: false });
+		
+        this._createProg();
+
+
+        this.energy = new PaletteTexture(this.gl, 2);
+        this.energySrc = arg.energy;
+        this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
+        this.energy.update(this.energySrc);
+
+		this.energySrc = arg.energy;
+		this.groundUseSrc = arg.groundUse;
+		this.popDensitySrc = arg.popDensity
+		this._initTextures();
+
+        this.draw();
+
+
+        //represent the nursor for nuke
+        this._nukeCursorNode = $('<img src="res/icons/nuke.png" class="scaleInvariant energyRelated" width="16px"/>');
+        this._nukeCursorNode.css('display', 'none');
+        $('#dMap').append(this._nukeCursorNode);
+
+
+        this._initEvents();
+    }
 
   /** @brief draw the currenty visible layers*/
   draw(){
@@ -118,6 +126,8 @@ export default class MapDrawer{
 
     gl.clearColor(1, 1, 1, 1);
     this.clear();
+    if(this.currentShowGrid.popDensity)
+      this._drawTex(this.popDensity);
     if(this.currentShowGrid.groundUse)
       this._drawTex(this.groundUse);
     if(this.currentShowGrid.energyGrid)
@@ -291,6 +301,23 @@ export default class MapDrawer{
 
     this.groundUse.update(this.groundUseSrc);
 
+
+	this.popDensity = new PaletteTexture(this.gl, 1);
+
+	this.popDensity.appendPalette(0,0,0,0);       //out of country
+	this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
+	this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
+	this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
+	this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
+	this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
+	this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
+	this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
+	this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
+	this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
+
+	this.popDensity.update(this.popDensitySrc)
+
+        
     let self = this;
     fetch('hydro/flowmap.bin')
     .then((response) => {return response.arrayBuffer();})
@@ -329,7 +356,7 @@ export default class MapDrawer{
 
 
   _setGridLayerCheckbox() {
-    let layers = ['energyGrid', 'flows'];
+    let layers = ['popDensity', 'energyGrid', 'flows'];
 
     let grid = this;
     layers.forEach((m) => {

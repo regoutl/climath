@@ -57,7 +57,22 @@
 				"in2050":26,
 				"comment":"Inclut le carburant",
 				"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf"
-			}
+			},
+            "disaster":{
+                "label":"Frais de nettoyage du terrain apres un incident nucléaire",
+                "unit":"€/Wh",
+                "year":[150000000]
+            },
+            "relocate":{
+                "label":"Frais de relogement et de dédomagement des personnes vivants à proximiter d'une centrale nucléaire aillant eu un incident.",
+                "unit":"€/h",
+                "year":[197000]
+            },
+            "disasterradius":{
+                "label":"Rayon affecter par un incident nucléaire.",
+                "unit":"km",
+                "year":[50]
+            }
 		},
 
 		"deconstructionRatio":0.15,
