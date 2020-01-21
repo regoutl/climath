@@ -142,8 +142,23 @@ export function displayStat(cmd){
   }
 
 
-  $('.vBMRiver').html(cmd.river ? cmd.river : "Aucune");
-  $('.vBMCoolingWaterRate').html(cmd.coolingWaterRate ? valStr(cmd.coolingWaterRate, "m3/s") : "0");
+  if(cmd.river){
+    $('.vBMRiver').html(cmd.river);
+
+    $('.vBMRiver').parent().show();
+  }
+  else {
+    $('.vBMRiver').parent().hide();
+  }
+
+  if(cmd.coolingWaterRate){
+    $('.vBMCoolingWaterRate').html(valStr(cmd.coolingWaterRate, "m3/s"));
+
+    $('.vBMCoolingWaterRate').parent().show();
+  }
+  else {
+    $('.vBMCoolingWaterRate').parent().hide();
+  }
 
 
 
