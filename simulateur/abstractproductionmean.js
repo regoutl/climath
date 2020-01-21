@@ -61,5 +61,5 @@ export default class AbstractProductionMean{
   capex(param){throw 'pure virtual';  }
 
 
-  prepareCapex(param, beginBuildYear, countries){throw 'pure virtual';  }
+  prepareCapex(param, countries){throw 'pure virtual';  }
 }

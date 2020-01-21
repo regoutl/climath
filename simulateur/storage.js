@@ -133,16 +133,14 @@ export default class Storage /*extends AbstractProductionMean*/{
   @return ans.type = 'storage'
   @return ans.
 */
-  prepareCapex(what, beginBuildYear, countries){
-    let ans = {};
-
+  prepareCapex(what, countries){
     if(what.type != 'battery')
       throw 'only bat supported';
     if(what.volume === undefined)
       throw 'need volume';
 
     what.storageCapacity
-      = what.volume * this.solutions.battery.energyDensity.at(beginBuildYear);
+      = what.volume * this.solutions.battery.energyDensity.at(what.build.begin);
 
     if(what.priceMul === undefined)
       what.priceMul = 1;
@@ -155,16 +153,8 @@ export default class Storage /*extends AbstractProductionMean*/{
     if(what.selfDischarge1Month === undefined)
       what.selfDischarge1Month = 0.98;
 
-    ans.storageCapacity = what.storageCapacity;
-    ans.type = what.type;
-
-    ans.capaDecline10Years = what.capaDecline10Years;
-    ans.selfDischarge1Month = what.selfDischarge1Month;
-    ans.roundTrip = what.roundTrip;
-
-    ans.build = {};
-    ans.build.begin = beginBuildYear;
-    ans.build.end = beginBuildYear + this.solutions.battery.build.delay;
+      let ans = what;
+    ans.build.end = ans.build.begin + this.solutions.battery.build.delay;
     ans.build.co2 = what.storageCapacity // S
         * this.solutions.battery.build.energy.at(ans.build.begin)  // wH / S
         * countries[what.madeIn].elecFootprint.at(ans.build.begin); // C / Wh
@@ -177,7 +167,6 @@ export default class Storage /*extends AbstractProductionMean*/{
 
     ans.perYear = {cost: this.solutions.battery.perYear.cost.at(ans.build.end) * ans.storageCapacity, co2: 0};
 
-    return ans;
   }
 
   //note : must be called when simu.year = cmd.build.end

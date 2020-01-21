@@ -67,7 +67,7 @@ function loadImage(src) {
 */
 
 export default class MapDrawer{
-  currentShowGrid = {'groundUse':true, 'energyGrid':true, 'flows':false, 'popDensity':true};
+  currentShowGrid = {'energyGrid':true, 'flows':false, 'popDensity':false};
     constructor(arg){
         this.nuke = [];
 
@@ -91,7 +91,7 @@ export default class MapDrawer{
 
 
 		this.gl = this.c[0].getContext("webgl", { alpha: false });
-		
+
         this._createProg();
 
 
@@ -105,7 +105,6 @@ export default class MapDrawer{
 		this.popDensitySrc = arg.popDensity
 		this._initTextures();
 
-        this.draw();
 
 
         //represent the nursor for nuke
@@ -113,6 +112,7 @@ export default class MapDrawer{
         this._nukeCursorNode.css('display', 'none');
         $('#dMap').append(this._nukeCursorNode);
 
+        this.draw();
 
         this._initEvents();
     }
@@ -128,8 +128,9 @@ export default class MapDrawer{
     this.clear();
     if(this.currentShowGrid.popDensity)
       this._drawTex(this.popDensity);
-    if(this.currentShowGrid.groundUse)
+    else
       this._drawTex(this.groundUse);
+      
     if(this.currentShowGrid.energyGrid)
       this._drawTex(this.energy);
 
@@ -317,7 +318,7 @@ export default class MapDrawer{
 
 	this.popDensity.update(this.popDensitySrc)
 
-        
+
     let self = this;
     fetch('hydro/flowmap.bin')
     .then((response) => {return response.arrayBuffer();})

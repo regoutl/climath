@@ -107,10 +107,7 @@ export default class MapComponent{
   @note for points (ex, nuke central), area is still send as circle, but radius can be ignored
   @warning ans.area (if any) unit : m2
   **/
-  prepareBuild(buildState, area){
-    //exemple code
-    let ans = {};
-
+  prepareBuild(ans, buildState, area){
     ans.theorical = (area.center === undefined);
 
     let validPixels = area.radius * area.radius * 3.14;
@@ -147,7 +144,6 @@ export default class MapComponent{
       throw 'to do';
     }
 
-    return ans;
   }
 
 
@@ -303,7 +299,6 @@ export default class MapComponent{
 	/// }
 	getPx(x, y){
         return {
-//            pop: this._getPop[this.canvas['popDensity'].pixVal[y*1374+x]],
             nrj: this.energyGrid[y*1374+x],
             baseLandUse: this.groundUse[y*1374+x],
             pop: this.getPopDensity(x,y),

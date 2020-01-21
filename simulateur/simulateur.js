@@ -29,8 +29,8 @@ store general values
 export class Simulateur{
   constructor(createInfo, valChangedCallbacks){
     this.cMap = new MapComponent(createInfo.map);
-		this.cProd = new ProductionComponent(createInfo.production);
     this.cHydro = new HydroComponent(createInfo.hydro);
+		this.cProd = new ProductionComponent(createInfo.production, this.cHydro);
 
     this.valChangedCallbacks = valChangedCallbacks;
 
@@ -89,32 +89,36 @@ export class Simulateur{
   }
 
   /// called for each change in what to build, or where to
-  onBuildMenuStateChanged(state, curPos, radius){
+  onBuildMenuStateChanged(buildMenuState, curPos, radius){
     // nothin to build, skip
-    if(state === undefined)
+    if(buildMenuState === undefined)
       return;
 
-    state.year = this.year;
+    this._bm = {state:buildMenuState, curPos:curPos, radius:radius};
 
-    this._bm = {state:state, curPos:curPos, radius:radius};
+    //reset the current build
+    this._currentBuild = {};
+
+    // this._currentBuild._bm = {state:buildMenuState, curPos:curPos, radius:radius};
+
+    //
+//    this._currentBuild.currentYear = year;
+    this._currentBuild.build= {begin: this.year};
+    this._currentBuild.pos = curPos;
 
     //ask the grid about ground usage aso
-    let build = this.cMap.prepareBuild(state,
+    this.cMap.prepareBuild(this._currentBuild, buildMenuState,
       {shape:'circle', center:curPos, radius:radius});
 
-    if(build.type == 'nuke' && !build.theorical){
-      // console.log(this.cHydro.canBuildNukeHere(curPos));
-      build.theorical = !this.cHydro.canBuildNukeHere(curPos);
-    }
 
-    // this.cMap.drawer.testNukeCan(this.cHydro);
+      // console.log(this._currentBuild.nameplate.at(this._currentBuild.build.end));
+    this.cProd.prepareBuild(this._currentBuild);
 
-    //ask the simu what would happend on build
-    this._currentBuild = this.cProd.prepareCapex(build, this.year);
 
     if(this._currentBuild.build){
 			this._currentBuild.build.can = this._currentBuild.build.cost < this._money;
 		}
+
 
     return this._currentBuild;
   }
