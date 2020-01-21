@@ -108,7 +108,7 @@ export default class MapDrawer{
     }
 
     /** @brief draw a cursor */
-    drawCircle(x,y,radius) {
+    drawCircle({center:{x,y},radius}) {
         const ctx = this.cTop[0].getContext('2d');
         ctx.clearRect(0, 0, this.cTop[0].width, this.cTop[0].height);
 
