@@ -117,10 +117,10 @@ export default class MapDrawer{
 
     /** @brief draw a cursor */
     drawCircle({center:{x,y},radius}) {
-        const ctx = this.cTop[0].getContext('2d');
+        const ctx = this.ctxTop;
         ctx.clearRect(0, 0,
-            this.cTop[0].width,
-            this.cTop[0].height);
+            this.ctxTop.canvas.width,
+            this.ctxTop.canvas.height);
 
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2*Math.PI, true);
@@ -265,14 +265,14 @@ export default class MapDrawer{
 
         this.groundUse.appendPalette(0, 0, 0, 0); //exterior
         this.groundUse.appendPalette(120, 120, 120);//airport
-        this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
+        this.groundUse.appendPalette(100, 140, 146);//water
         this.groundUse.appendPalette(59, 85, 48/*52, 76, 45*/); //forest
         this.groundUse.appendPalette(120, 120, 97); //indus
-        this.groundUse.appendPalette(137, 141, 131); // city
+        this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
         this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
-        this.groundUse.appendPalette(100, 140, 146);//water
-        this.groundUse.appendPalette(52, 76, 45); //forest2
         this.groundUse.appendPalette(0, 0, 0); //?
+        this.groundUse.appendPalette(137, 141, 131); // city
+        this.groundUse.appendPalette(52, 76, 45); //forest2
 
         this.groundUse.update(this.groundUseSrc);
 
