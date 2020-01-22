@@ -28,10 +28,22 @@ const popDensitylegend = {
 }
 
 //Const for our current map
-const kmpixratio = 30688/(1625442-54086);
+const kmpixratio = 30688/(1625442-854086);
 const nuclearDisasterRadius = 50/*pix*/;
 const meanCostToRelocate = 197000;
 const cleaningcost = 150000000;
+const totalpop = 11.4e6;
+let densityMapPixPerCol = {// is it correct ?
+    0:854086,
+    1:223678,
+    2:171151,
+    3:141713,
+    4:100527,
+    5:38765,
+    6:42552,
+    7:32710,
+    8:20260,
+};
 
 const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
 
@@ -61,11 +73,11 @@ export default class MapComponent{
     getPopDensity(x,y){
         // km2 / pix
         //1.06 is a correction factor to match current population of 11.4e6 hab
+        let popfactor = totalpop / (kmpixratio*
+            Object.keys(popDensitylegend).reduce((a,key) =>
+                a+(densityMapPixPerCol[key]*popDensitylegend[key])
+            , 0));
         let popDensity = popDensitylegend[this.popDensity[y*1374+x]];
-        if(isNaN(popDensity)){
-            console.log(this.popDensity);
-            throw 'not a number';
-        }
         return Math.floor(popDensity * kmpixratio * 1.06);
     }
 
@@ -318,11 +330,11 @@ export default class MapComponent{
             'popDensity':'popDensity',
         }, maps = this;
         Object.keys(changes).forEach(key => {
-            let type = typeof maps[conv[key]];
-            maps[conv[key]][y*1374+x] = changes[key];
-            if(type !== typeof maps[conv[key]]){
-                log('type change '+type+ ' !== '+typeof maps[conv[key]]);
+            if(conv[key] == 'popDensity'){
+                densityMapPixPerCol[maps[conv[key]][y*1374+x]] -= 1;
+                densityMapPixPerCol[changes[key]] += 1;
             }
+            maps[conv[key]][y*1374+x] = changes[key];
         });
     }
 }
