@@ -271,6 +271,8 @@ export function promiseSimulater(valChangedCallbacks){
     fetch('hydro/poolMap.bin')
         .then((response) => response.arrayBuffer()),
     fetch('res/popDensity.bin')
+        .then(response => response.arrayBuffer()),
+    fetch('hydro/sea.bin')
         .then(response => response.arrayBuffer())
     ])
     //called when all simu related res are loaded
@@ -287,6 +289,7 @@ export function promiseSimulater(valChangedCallbacks){
         simuCreateInfo.hydro = {
             stations: new Float32Array(values[2]),
             pools:{map:new Uint8Array(values[4]), links:values[3]},
+            sea:new Uint8Array(values[6]),
         };
 
         simuCreateInfo.gameplay = {

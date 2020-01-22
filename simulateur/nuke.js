@@ -8,9 +8,6 @@ export default class Nuke extends RegularProductionMean{
   constructor(parameters, hydroComponent){
     super(parameters, 'nuke');
 
-    // this capacity was already there, and we dont have hydro data about it
-    // -> will be ignored in all hydro computation but still produces
-    this.outOfMapCapacity = this.capacity;
 
     this.primEnergyEffi = parameters.primEnEfficiency;
 
@@ -18,6 +15,11 @@ export default class Nuke extends RegularProductionMean{
       throw "need one ";
 
     this.cHydro = hydroComponent;
+
+    //add the 'existing centrals'
+    // => we dont have hydro data about it => mark it as 'under sea level'
+    // -> will be ignored in all hydro computation but still produces
+    this.cHydro.flowsIndependentCapacity += this._capacityFactor * this.capacity;
   }
 
 
@@ -29,7 +31,7 @@ export default class Nuke extends RegularProductionMean{
   capacityAt(t){
     if(t % 24 == 0){
       // compute capa
-      this._todayMaxWh = this.cHydro.getNukeCapaLimitForDay(t / 24) + this.outOfMapCapacity *24;
+      this._todayMaxWh = this.cHydro.getNukeCapaLimitForDay(t / 24);
      // this._todayMaxWh = Infinity;
     }
 

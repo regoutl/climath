@@ -146,26 +146,6 @@ export default class MapDrawer{
         this.draw();
     }
 
-  // testNukeCan(cHydro){
-  //   const ctx = this.cTop[0].getContext('2d');
-  //   ctx.clearRect(0, 0,
-  //       this.cTop[0].width,
-  //       this.cTop[0].height);
-  //
-  //   let d = ctx.getImageData(0, 0,
-  //       this.cTop[0].width,
-  //       this.cTop[0].height);
-  //
-  //   let pix = d.data;
-  //
-  //   for(let x = 0; x < this.cTop[0].width; x++)
-  //     for(let y = 0; y < this.cTop[0].height; y++){
-  //       pix[(x + y * this.cTop[0].width) * 4 + 3] =
-  //            cHydro.canBuildNukeHere({x:x,y:y}) ? 64: 0;
-  //     }
-  //   ctx.putImageData(d, 0, 0);
-  // }
-
     addNuke(pos){
         let node = $('<img src="res/icons/nuke.png" '
                     + 'class="scaleInvariant energyRelated" width="16px"/>');
@@ -277,24 +257,24 @@ export default class MapDrawer{
         this.groundUse.update(this.groundUseSrc);
 
 
-    	this.popDensity = new PaletteTexture(this.gl, 1);
+      	this.popDensity = new PaletteTexture(this.gl, 1);
 
-    	this.popDensity.appendPalette(0,0,0,0);       //out of country
-    	this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
-    	this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
-    	this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
-    	this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
-    	this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
-    	this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
-    	this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
-    	this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
-    	this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
+      	this.popDensity.appendPalette(0,0,0,0);       //out of country
+      	this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
+      	this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
+      	this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
+      	this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
+      	this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
+      	this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
+      	this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
+      	this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
+      	this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
 
-    	this.popDensity.update(this.popDensitySrc)
+      	this.popDensity.update(this.popDensitySrc);
 
 
         let self = this;
-        fetch('hydro/flowmap.bin')
+        fetch('hydro/flowdisplay.bin')
         .then((response) => {return response.arrayBuffer();})
         .then((waterData) => {
             self.water = new PaletteTexture(self.gl, 1);

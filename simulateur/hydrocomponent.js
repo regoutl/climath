@@ -13,6 +13,10 @@ export default class HydroComponent{
 
     this.pools =  createInfo.pools.links;
     this.flows = {data: createInfo.stations, nCol:0, nRow: 0};
+    this.sea = createInfo.sea;
+
+    if(this.sea.length != 349 * 177)
+      throw 'prob taille';
 
     //count the columns
     for(let p of this.pools)
@@ -26,48 +30,38 @@ export default class HydroComponent{
     this.central = [];
 
     this._rdyProb = {obj: null, constrains:null, dirty: true, relevantPoolIndices:null};
+
+    this.flowsIndependentCapacity = 0;
   }
 
 
-  //check distance river
-  canBuildNukeHere(pos){
-    //to hydro pos
-    pos = this._regToHydroCoord(pos);
-
-    if(pos.x < 0 || pos.y < 0 || pos.x >= 748 || pos.y >= 631)
-      return false;
-
-    let poolIndex = this.poolMap[pos.x + pos.y * 748];
-
-    return poolIndex > 0;
-  }
-
-  getRiverNameAt(pos){
-    pos = this._regToHydroCoord(pos);
-
-    if(pos.x < 0 || pos.y < 0 || pos.x >= 748 || pos.y >= 631)
-      return false;
-
-    let poolIndex = this.poolMap[pos.x + pos.y * 748]-1;
-    if(poolIndex == -1)
-      return undefined;
-    return this.pools[poolIndex].river;
-  }
 
   prepareBuild(build){
+
     if(!build.theorical){
       //to hydro pos
       let pos = this._regToHydroCoord(build.pos);
 
+      let underSeaLevel =
+        pos.x >= 0 && pos.y >= 0 &&   //in the sea box
+        pos.x < 349 && pos.y < 177 &&
+        this.sea[pos.x + pos.y * 349] == 1; //the sea box is 1
+
       if(pos.x < 0 || pos.y < 0 || pos.x >= 748 || pos.y >= 631)
         return false;
 
-      let poolIndex = this.poolMap[pos.x + pos.y * 748] - 1;
-      build.theorical = poolIndex == -1;
-      if(poolIndex > -1){
 
+      let poolIndex = this.poolMap[pos.x + pos.y * 748] - 1;
+      build.theorical = poolIndex == -1 && !underSeaLevel;
+      if(poolIndex > -1){
         build.river = this.pools[poolIndex].river;
         build.hydro = {_poolIndex: poolIndex};
+      }
+
+      if(underSeaLevel){
+        build.hydro = {_underSeaLvx: true};
+
+        build.river = "Mer";
       }
     }
 
@@ -85,6 +79,13 @@ export default class HydroComponent{
   }
 
   capex(build){
+    let avgProd = build.nameplate.at(build.build.begin) * build.avgCapacityFactor;
+
+    if(build.hydro._underSeaLvx){
+      this.flowsIndependentCapacity += avgProd;
+      return;
+    }
+
     let waterVapoNrg = 2250; // J / g
     let waterTCapa = 4185; // J/ kg / K
     let waterInitTemp = 20;
@@ -96,7 +97,7 @@ export default class HydroComponent{
 
     this.central.push({
       pool: build.hydro._poolIndex,
-      capa: build.nameplate.at(build.build.begin) * build.avgCapacityFactor,
+      capa: avgProd,
       m3perJ: heatPerEnProduced / jToVapM3
     });
 
@@ -105,7 +106,7 @@ export default class HydroComponent{
 
   getNukeCapaLimitForDay(day){
     if(this.central.length == 0)
-      return 0;
+      return this.flowsIndependentCapacity * 24;
 
     //  console.log('evaporate ' + this.m3perWh * energyOut / 3600 + 'm3/s');
     if(this._rdyProb.dirty)
@@ -137,7 +138,7 @@ export default class HydroComponent{
     // console.log('raw sol', opti);
     // console.log(valStr(opti[opti.length-1], 'W'));
 
-    return opti[opti.length-1] * 24;
+    return (opti[opti.length-1] + this.flowsIndependentCapacity) * 24;
   }
 
   _regToHydroCoord(input){
