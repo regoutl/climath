@@ -107,9 +107,10 @@ export default class MapDrawer{
 
     /** @brief update the given layer*/
     update(layerName){
-        if(layerName != 'energy')
-            throw 'olala';
-        this.energy.update(this.energySrc);
+        // if(layerName != 'energy')
+        //     throw 'olala';
+        // this.energy.update(this.energySrc);
+        this[layerName].update(this[layerName+'Src']);
     }
 
     /** @brief draw a cursor */

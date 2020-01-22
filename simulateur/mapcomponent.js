@@ -4,8 +4,8 @@ import MapDrawer from '../ui/mapdrawer.js';
 import PaletteTexture from '../ui/palettetexture.js';
 
 const GroundUsage = {
-    out: 0,
-    airport: 1,
+    out:0,
+    airport:1,
     field:2,
     forest:3,
     industry:4,
@@ -13,7 +13,7 @@ const GroundUsage = {
     field2:6,
     water:7,
     forest2:8,
-    unknown: 9,
+    unknown:9,
 }
 const popDensitylegend = {
     0:0,
@@ -29,17 +29,22 @@ const popDensitylegend = {
 
 //Const for our current map
 const kmpixratio = 30688/(1625442-54086);
+const nuclearDisasterRadius = 50/*pix*/;
+const meanCostToRelocate = 197000;
+const cleaningcost = 150000000;
+
+const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
 
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
     constructor(mapImgs){
-
+        this._nukeCentrals = [];
         this.energyGrid = new Uint16Array(1374 * 1183);
         this.groundUse = mapImgs.groundUse;
         this.popDensity = mapImgs.popDensity;
 
         this.drawer = new MapDrawer({
-            energy:this.energyGrid,
+            energy: this.energyGrid,
             groundUse: this.groundUse,
             popDensity: this.popDensity,
         });
@@ -56,7 +61,12 @@ export default class MapComponent{
     getPopDensity(x,y){
         // km2 / pix
         //1.06 is a correction factor to match current population of 11.4e6 hab
-        return popDensitylegend[this.popDensity[y*1374+x]] * kmpixratio * 1.06;
+        let popDensity = popDensitylegend[this.popDensity[y*1374+x]];
+        if(isNaN(popDensity)){
+            console.log(this.popDensity);
+            throw 'not a number';
+        }
+        return Math.floor(popDensity * kmpixratio * 1.06);
     }
 
     /** @brief convert build menu state to simu prepare capex cmd
@@ -82,14 +92,11 @@ export default class MapComponent{
     prepareBuild(ans, buildState, area){
         ans.theorical = (area.center === undefined);
 
-        ans.theorical = (area.center === undefined);
-
         let validPixels = area.radius * area.radius * 3.14;
 
         if(!ans.theorical){
             if(buildState.type != 'nuke'){
                 this.drawer.drawCircle(area);
-
                 //count the valid pixels
                 validPixels = this._countPvArea(area);
             } else{
@@ -97,6 +104,7 @@ export default class MapComponent{
                 let pixel = this.getPx(area.center.x, area.center.y);
                 ans.theorical = pixel.baseLandUse == GroundUsage.out;
                 this.drawer.drawNukeCursor(area.center);
+                ans.pop_affected = this._simulateBoom(area).pop_affected;
             }
         } else{
             //clear cursor
@@ -152,6 +160,10 @@ export default class MapComponent{
         this.drawer.draw();
         } else if(buildState.type == 'nuke'){
             this.drawer.addNuke(area.center);
+            this._nukeCentrals.push({
+                loc: area.center,
+                dangerRadius: nuclearDisasterRadius,
+            });
         } else{
             throw 'to do';
         }
@@ -161,22 +173,66 @@ export default class MapComponent{
         @details : if a central explode, must reallocate surounding pop,
                         and estimate cost
     */
-    testBoom(area){
-        let cleaningcost = 150000000;
+    testBoom(){
+        let exploded = [];
+        let stat = this._nukeCentrals.reduce((tot, central, i) => {
+            if(rand()%nukeExplosionPeriod === 0){
+                console.log({
+                    center:central.loc,
+                    radius:central.dangerRadius
+                });
+                let expl = this._simulateBoom({
+                    center:central.loc,
+                    radius:central.dangerRadius
+                }, true);
+                tot.cost += expl.cost;
+                tot.pop_affected += expl.pop_affected;
+                exploded.push(i);
+            }
+            return tot;
+        },{cost:0, pop_affected:0});
 
+        exploded.forEach((index, i) => {
+            this._nukeCentrals.splice(index-i, 1);
+        });
+
+        return stat;
+    }
+
+    _simulateBoom(area, set){
+        set = set || false;
         let topay = cleaningcost;
-        topay += cleaningcost;
+        let pop_affected = 0;
+        area.radius = nuclearDisasterRadius;
         this._forEach(area, (x,y) => {
             let pix = this.getPx(x,y);
             // pix.nrj => destroyed
             // baseLandUse => destroyed
             // pop => should move
             // price per home => mean be :197.000
-            topay += 197000 * pix.pop;
+            // topay += 197000 * pix.pop;
+            pop_affected += pix.pop;
+            if(set){
+                this.setPx(x, y, {
+                    baseLandUse:0,
+                    nrj:0,
+                    pop:0,
+                })
+            }
         })
-        return topay;
+        if(set){
+            ['energy','groundUse','popDensity'].forEach((layer, i) => {
+                this.drawer.update(layer);
+            });
+            this.drawer.draw();
+        }
+        topay += pop_affected * meanCostToRelocate
+        // TODO reallocate pop
+        return {
+            pop_affected: pop_affected,
+            cost: topay,
+        };
     }
-
 
     /** @brief in the given area, count the valid valid pixels
     @note area is as defined in prepareBuild
@@ -201,31 +257,16 @@ export default class MapComponent{
 
 
     /** @brief will call f(x, y) for each pixel in the given area */
-    _forEach(area, f){
-        const radius = area.radius;
+    _forEach({center:{x:x, y:y}, radius:radius}, f){
         const radius2 = radius*radius;
-        const x = area.center.x;
-        const y = area.center.y;
 
+                //         bound   ,no outside       recenter
         let box = {
-            minX: area.center.x-radius,
-            minY: area.center.y-radius,
-            maxX: area.center.x+radius,
-            maxY: area.center.y+radius,
+            minX: Math.max(x-radius,    0)             -x,
+            minY: Math.max(y-radius,    0)             -y,
+            maxX: Math.min(x+radius, 1374)             -x,
+            maxY: Math.min(y+radius, 1183)             -y,
         };
-
-        //no outside
-        box.minX = Math.max(box.minX, 0);
-        box.minY = Math.max(box.minY, 0);
-
-        box.maxX = Math.min(box.maxX, 1374);
-        box.maxY = Math.min(box.maxY, 1183);
-
-        //re center it
-        box.minX -= x;
-        box.minY -= y;
-        box.maxX -= x;
-        box.maxY -= y;
 
         for(let i = box.minX; i < box.maxX; i++){
             const i2 = i*i;
@@ -277,7 +318,11 @@ export default class MapComponent{
             'popDensity':'popDensity',
         }, maps = this;
         Object.keys(changes).forEach(key => {
+            let type = typeof maps[conv[key]];
             maps[conv[key]][y*1374+x] = changes[key];
+            if(type !== typeof maps[conv[key]]){
+                log('type change '+type+ ' !== '+typeof maps[conv[key]]);
+            }
         });
     }
 }

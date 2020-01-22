@@ -143,6 +143,7 @@ export function displayStat(cmd){
 
 
   $('.vBMRiver').html(cmd.river ? cmd.river : "Aucune");
+  $('.vBMPop').html(cmd.pop_affected ? cmd.pop_affected : "-");
   $('.vBMCoolingWaterRate').html(cmd.coolingWaterRate ? valStr(cmd.coolingWaterRate, "m3/s") : "0");
 
 
