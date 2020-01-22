@@ -254,7 +254,7 @@ i = 0
 for l in tqdm(data):
     vals = l.split(',')[1:realNbStation+1]
     for v in vals:
-        if(len(v) == 0 or v == '?'):
+        if(len(v) == 0 or v == '?' or v < 0):
             print '\n\nblank in the data ! at line ', i / 4 / realNbStation, 'col', (i // 4) % realNbStation + 1
             raise Exception('wathever')
         struct.pack_into("f", outStations, i, float(v))

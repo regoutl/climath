@@ -98,6 +98,11 @@ export function displayStat(cmd){
       if(cmd[fieldName].co2 != 0)
         lines.push(valStr(cmd[fieldName].co2 * mul, 'C'));
 
+      if(fieldName == 'build'){
+        let delay = cmd[fieldName].end - cmd[fieldName].begin;
+        lines.push(delay + ' an' + ((delay > 1) ? 's':''));
+      }
+
     }
     if(lines.length > 0){
       $('.vBM' + cap).parent().show();
@@ -142,9 +147,23 @@ export function displayStat(cmd){
   }
 
 
-  $('.vBMRiver').html(cmd.river ? cmd.river : "Aucune");
-  $('.vBMPop').html(cmd.pop_affected ? cmd.pop_affected : "-");
-  $('.vBMCoolingWaterRate').html(cmd.coolingWaterRate ? valStr(cmd.coolingWaterRate, "m3/s") : "0");
+  if(cmd.river){
+    $('.vBMRiver').html(cmd.river);
+
+    $('.vBMRiver').parent().show();
+  }
+  else {
+    $('.vBMRiver').parent().hide();
+  }
+
+  if(cmd.coolingWaterRate){
+    $('.vBMCoolingWaterRate').html(valStr(cmd.coolingWaterRate, "m3/s"));
+
+    $('.vBMCoolingWaterRate').parent().show();
+  }
+  else {
+    $('.vBMCoolingWaterRate').parent().hide();
+  }
 
 
 

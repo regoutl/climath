@@ -33,19 +33,23 @@ function createProgram(gl, src, attribs){
 
 export default class MapDrawer{
     currentShowGrid = {
-        'groundUse':true,
         'energyGrid':true,
         'flows':false,
         'popDensity':true,
     };
+
     constructor(arg){
+        //array of positions of the nuke centrals
         this.nuke = [];
 
-        this.cTop = $('<canvas width="1374" height="1183"></canvas>');
-        this.cTop.css({'z-index': 99, position: 'fixed'});
-        $('#dMap').append(this.cTop);
+    		let cTop = $('<canvas width="1374" height="1183"></canvas>');
+    		cTop.css({
+    		  'z-index': 99, position: 'fixed'
+    		});
+    		$('#dMap').append(cTop);
 
-        this.cTop[0].getContext("2d").globalAlpha = 0.6;
+    		this.ctxTop = cTop[0].getContext("2d");
+        this.ctxTop.globalAlpha = 0.6;
 
         this._setGridLayerCheckbox();
 
@@ -58,18 +62,16 @@ export default class MapDrawer{
 
         this.gl = this.c[0].getContext("webgl", { alpha: false });
 
-        this.gl = this.c[0].getContext("webgl", { alpha: false });
+    		this.gl = this.c[0].getContext("webgl", { alpha: false });
 
         this._createProg();
 
-        this.energy = new PaletteTexture(this.gl, 2);
-        this.energySrc = arg.energy;
-        this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
-        this.energy.update(this.energySrc);
 
-        this.groundUseSrc = arg.groundUse;
-        this.popDensitySrc = arg.popDensity
-        this._initTextures();
+        this.energySrc = arg.energy;
+    		this.groundUseSrc = arg.groundUse;
+    		this.popDensitySrc = arg.popDensity
+    		this._initTextures();
+
 
 
         //represent the nursor for nuke
@@ -107,18 +109,18 @@ export default class MapDrawer{
 
     /** @brief update the given layer*/
     update(layerName){
-        // if(layerName != 'energy')
-        //     throw 'olala';
+        if(this[layerName+'Src'] === undefined)
+            throw 'olala';
         // this.energy.update(this.energySrc);
         this[layerName].update(this[layerName+'Src']);
     }
 
     /** @brief draw a cursor */
     drawCircle({center:{x,y},radius}) {
-        const ctx = this.cTop[0].getContext('2d');
+        const ctx = this.ctxTop;
         ctx.clearRect(0, 0,
-            this.cTop[0].width,
-            this.cTop[0].height);
+            this.ctxTop.canvas.width,
+            this.ctxTop.canvas.height);
 
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2*Math.PI, true);
@@ -135,10 +137,12 @@ export default class MapDrawer{
     }
 
     clearCursor(){
-        const ctx = this.cTop[0].getContext('2d');
-        ctx.clearRect(0, 0, this.cTop[0].width, this.cTop[0].height);
+        const ctx = this.ctxTop;
+        ctx.clearRect(0, 0,
+            ctx.canvas.width,
+            ctx.canvas.height);
         //clear nuke cursor
-        this._nukeCursorNode.css({display: 'none'});
+        this._nukeCursorNode.css({ display: 'none'});
         this.draw();
     }
 
@@ -192,12 +196,12 @@ export default class MapDrawer{
                 self._eventCallback['click']();
             });
 
-            self.cTop.on('pointerleave', function(){
-                self._eventCallback['pointerleave']();
+            $(self.ctxTop.canvas).on('pointerleave', function(){
+              self._eventCallback['pointerleave']();
             });
 
-            self.cTop.on('mousemove', function(evt){
-                self._eventCallback['mousemove'](evt);
+            $(self.ctxTop.canvas).on('mousemove', function(evt){
+              self._eventCallback['mousemove'](evt);
             });
         });
     }
@@ -261,14 +265,14 @@ export default class MapDrawer{
 
         this.groundUse.appendPalette(0, 0, 0, 0); //exterior
         this.groundUse.appendPalette(120, 120, 120);//airport
-        this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
+        this.groundUse.appendPalette(100, 140, 146);//water
         this.groundUse.appendPalette(59, 85, 48/*52, 76, 45*/); //forest
         this.groundUse.appendPalette(120, 120, 97); //indus
-        this.groundUse.appendPalette(137, 141, 131); // city
+        this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
         this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
-        this.groundUse.appendPalette(100, 140, 146);//water
-        this.groundUse.appendPalette(52, 76, 45); //forest2
         this.groundUse.appendPalette(0, 0, 0); //?
+        this.groundUse.appendPalette(137, 141, 131); // city
+        this.groundUse.appendPalette(52, 76, 45); //forest2
 
         this.groundUse.update(this.groundUseSrc);
 

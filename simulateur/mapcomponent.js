@@ -6,14 +6,14 @@ import PaletteTexture from '../ui/palettetexture.js';
 const GroundUsage = {
     out:0,
     airport:1,
-    field:2,
+    water:2,
     forest:3,
     industry:4,
-    city:5,
+    field:5,
     field2:6,
-    water:7,
-    forest2:8,
-    unknown:9,
+    unknown:7,
+    city:8,
+    forest2:9,
 }
 const popDensitylegend = {
     0:0,
