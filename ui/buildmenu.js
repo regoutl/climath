@@ -98,6 +98,11 @@ export function displayStat(cmd){
       if(cmd[fieldName].co2 != 0)
         lines.push(valStr(cmd[fieldName].co2 * mul, 'C'));
 
+      if(fieldName == 'build'){
+        let delay = cmd[fieldName].end - cmd[fieldName].begin;
+        lines.push(delay + ' an' + ((delay > 1) ? 's':''));
+      }
+
     }
     if(lines.length > 0){
       $('.vBM' + cap).parent().show();

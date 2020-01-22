@@ -68,18 +68,19 @@ function loadImage(src) {
 
 export default class MapDrawer{
   currentShowGrid = {'energyGrid':true, 'flows':false, 'popDensity':false};
+
     constructor(arg){
+        //array of positions of the nuke centrals
         this.nuke = [];
 
+    		let cTop = $('<canvas width="1374" height="1183"></canvas>');
+    		cTop.css({
+    		  'z-index': 99, position: 'fixed'
+    		});
+    		$('#dMap').append(cTop);
 
-
-		this.cTop = $('<canvas width="1374" height="1183"></canvas>');
-		this.cTop.css({
-		  'z-index': 99, position: 'fixed'
-		});
-		$('#dMap').append(this.cTop);
-
-		this.cTop[0].getContext("2d").globalAlpha = 0.6;
+    		this.ctxTop = cTop[0].getContext("2d");
+        this.ctxTop.globalAlpha = 0.6;
 
         this._setGridLayerCheckbox();
 
@@ -90,20 +91,15 @@ export default class MapDrawer{
         $('#dMap').append(this.c);
 
 
-		this.gl = this.c[0].getContext("webgl", { alpha: false });
+    		this.gl = this.c[0].getContext("webgl", { alpha: false });
 
         this._createProg();
 
 
-        this.energy = new PaletteTexture(this.gl, 2);
         this.energySrc = arg.energy;
-        this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
-        this.energy.update(this.energySrc);
-
-		this.energySrc = arg.energy;
-		this.groundUseSrc = arg.groundUse;
-		this.popDensitySrc = arg.popDensity
-		this._initTextures();
+    		this.groundUseSrc = arg.groundUse;
+    		this.popDensitySrc = arg.popDensity
+    		this._initTextures();
 
 
 
@@ -130,7 +126,7 @@ export default class MapDrawer{
       this._drawTex(this.popDensity);
     else
       this._drawTex(this.groundUse);
-      
+
     if(this.currentShowGrid.energyGrid)
       this._drawTex(this.energy);
 
@@ -147,10 +143,10 @@ export default class MapDrawer{
 
   /** @brief draw a cursor */
   drawCircle(x,y,radius) {
-    const ctx = this.cTop[0].getContext('2d');
+    const ctx = this.ctxTop;
     ctx.clearRect(0, 0,
-        this.cTop[0].width,
-        this.cTop[0].height);
+        ctx.canvas.width,
+        ctx.canvas.height);
 
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2*Math.PI, true);
@@ -161,10 +157,10 @@ export default class MapDrawer{
     this.draw();
   }
   clearCursor(){
-    const ctx = this.cTop[0].getContext('2d');
+    const ctx = this.ctxTop;
     ctx.clearRect(0, 0,
-        this.cTop[0].width,
-        this.cTop[0].height);
+        ctx.canvas.width,
+        ctx.canvas.height);
     //clear nuke cursor
     this._nukeCursorNode.css({ display: 'none'});
     this.draw();
@@ -220,11 +216,11 @@ export default class MapDrawer{
         self._eventCallback['click']();
       });
 
-      self.cTop.on('pointerleave', function(){
+      $(self.ctxTop.canvas).on('pointerleave', function(){
         self._eventCallback['pointerleave']();
       });
 
-      self.cTop.on('mousemove', function(evt){
+      $(self.ctxTop.canvas).on('mousemove', function(evt){
         self._eventCallback['mousemove'](evt);
       });
     });
@@ -289,16 +285,16 @@ export default class MapDrawer{
 
     this.groundUse = new PaletteTexture(this.gl, 1);
 
-    this.groundUse.appendPalette(0, 0, 0, 0); //exterior
+    this.groundUse.appendPalette(0, 0, 0, 0); //exterior - ok
     this.groundUse.appendPalette(120, 120, 120);//airport
-    this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
+    this.groundUse.appendPalette(100, 140, 146);//water - ok
     this.groundUse.appendPalette(59, 85, 48/*52, 76, 45*/); //forest
     this.groundUse.appendPalette(120, 120, 97); //indus
-    this.groundUse.appendPalette(137, 141, 131); // city
-    this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
-    this.groundUse.appendPalette(100, 140, 146);//water
-    this.groundUse.appendPalette(52, 76, 45); //forest2
+    this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field - probablement ok
+    this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
     this.groundUse.appendPalette(0, 0, 0); //?
+    this.groundUse.appendPalette(137, 141, 131); // city
+    this.groundUse.appendPalette(52, 76, 45); //forest2
 
     this.groundUse.update(this.groundUseSrc);
 

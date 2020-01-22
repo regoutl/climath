@@ -57,6 +57,10 @@ h1{
 	display:none;
 }
 
+#dRightDock{
+	border-left: 1px solid gray;
+
+}
 #dLeftDock{
 	border-right: 1px solid gray;
 	position: relative;
