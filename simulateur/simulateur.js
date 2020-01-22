@@ -221,23 +221,28 @@ export class Simulateur{
 
     _clearYearStats(){
         let y = this.yStats.year + 1;
+
+        function nrgs(){
+          return {fossil: 0, pv: 0, nuke:0, storage: 0, ccgt: 0};
+        }
+
         this.yStats = {
             year: y,
             consumedEnergy: {//stat about energy consumtion
                 total: 0,
-                origin:{fossil: 0, pv: 0, nuke:0, storage: 0},
+                origin:nrgs(),
             },
             co2:{//stat about co2 emission
                 total: 0,
-                build:{fossil: 0, pv: 0, nuke:0, storage: 0},
-                perWh:{fossil: 0, pv: 0, nuke:0, storage: 0},
-                perYear:{fossil: 0, pv: 0, nuke:0, storage: 0},
+                build:nrgs(),
+                perWh:nrgs(),
+                perYear:nrgs(),
             },
             cost:{//stat about costs
                 total: 0,
-                build:{fossil: 0, pv: 0, nuke:0, storage: 0},
-                perWh:{fossil: 0, pv: 0, nuke:0, storage: 0},
-                perYear:{fossil: 0, pv: 0, nuke:0, storage: 0},
+                build:nrgs(),
+                perWh:nrgs(),
+                perYear:nrgs(),
             },
             taxes:{in: 0, rate:0},
         };
@@ -246,6 +251,10 @@ export class Simulateur{
 
     _lotsOfSavingOfStatisticsAboutLastYearAndCallbacks(){
         let yStats = this.yStats;
+
+
+        // console.log('fossil ', valStr(yStats.co2.perWh.fossil, 'C'));
+        // console.log('ccgt ', valStr(yStats.co2.perWh.ccgt, 'C'));
 
         //compute totals
         yStats.consumedEnergy.total = objSum(yStats.consumedEnergy);

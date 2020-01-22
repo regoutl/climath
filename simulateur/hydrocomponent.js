@@ -104,15 +104,16 @@ export default class HydroComponent{
     this._rdyProb.dirty = true;
   }
 
-  getNukeCapaLimitForDay(day){
+  ///a preiod is a group of 5 periods. period index := day index / 5
+  getNukeCapaLimitForPeriod(period){
     if(this.central.length == 0)
-      return this.flowsIndependentCapacity * 24;
+      return this.flowsIndependentCapacity * 24 * 5;
 
     //  console.log('evaporate ' + this.m3perWh * energyOut / 3600 + 'm3/s');
     if(this._rdyProb.dirty)
       this._prepareProblem();
 
-    day %= this.flows.nRow;
+    period %= this.flows.nRow;
 
     const nVarPlus1 = this._rdyProb.obj.length;
 
@@ -122,7 +123,7 @@ export default class HydroComponent{
     //set the <= nominal flow   -  min flow
     for(let j = 0; j < this._rdyProb.relevantPoolIndices.length; j++) {
       this._rdyProb.constrains[workingIndice] =
-        this._nominalFlow(this._rdyProb.relevantPoolIndices[j], day);// - minFlow[j]; //= nominalFlow_j - minFlow_j
+        this._nominalFlow(this._rdyProb.relevantPoolIndices[j], period);// - minFlow[j]; //= nominalFlow_j - minFlow_j
       workingIndice += nVarPlus1;
   	}
 
@@ -138,7 +139,7 @@ export default class HydroComponent{
     // console.log('raw sol', opti);
     // console.log(valStr(opti[opti.length-1], 'W'));
 
-    return (opti[opti.length-1] + this.flowsIndependentCapacity) * 24;
+    return (opti[opti.length-1] + this.flowsIndependentCapacity) * 24 * 5;
   }
 
   _regToHydroCoord(input){
@@ -201,11 +202,11 @@ export default class HydroComponent{
     return source == dst;
   }
 
-  // return m3/s. day must be in [0, this.flows.nRows]
-  _nominalFlow(pool, day){
+  // return m3/s. period must be in [0, this.flows.nRows]
+  _nominalFlow(pool, period){
 
     if(this.pools[pool].dataColIndex !== undefined)
-      return this.flows.data[day * this.flows.nCol + this.pools[pool].dataColIndex];
+      return this.flows.data[period * this.flows.nCol + this.pools[pool].dataColIndex];
     else{ //sum of parents
       let ans = 0;
       // //debug :
@@ -213,7 +214,7 @@ export default class HydroComponent{
       //   throw 'need data';
 
       for(let i = 0; i < this.pools[pool].srcPool.length; i++)
-        ans += this._nominalFlow(this.pools[pool].srcPool[i], day);
+        ans += this._nominalFlow(this.pools[pool].srcPool[i], period);
       return ans;
     }
   }

@@ -9,8 +9,6 @@ export default class Nuke extends RegularProductionMean{
     super(parameters, 'nuke');
 
 
-    this.primEnergyEffi = parameters.primEnEfficiency;
-
     if(hydroComponent === undefined || ! hydroComponent instanceof HydroComponent)
       throw "need one ";
 
@@ -26,16 +24,15 @@ export default class Nuke extends RegularProductionMean{
   produce(energyOut, out){
     super.produce(energyOut, out);
 
-    this._todayMaxWh -= energyOut;
+    this._periodMaxWh -= energyOut;
   }
   capacityAt(t){
-    if(t % 24 == 0){
+    if(t % (24*5) == 0){
       // compute capa
-      this._todayMaxWh = this.cHydro.getNukeCapaLimitForDay(t / 24);
-     // this._todayMaxWh = Infinity;
+      this._periodMaxWh = this.cHydro.getNukeCapaLimitForPeriod(t / (24*5));
     }
 
-    return  Math.min(this._todayMaxWh, super.capacityAt(t));
+    return  Math.min(this._periodMaxWh, super.capacityAt(t));
   }
 
   prepareCapex(what, countries){

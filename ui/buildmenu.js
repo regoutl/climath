@@ -33,7 +33,7 @@ export function setSimu(simu){
 
 }
 
-function notifyStateChanged(){
+export function notifyStateChanged(){
   if(stateChangedCallback)
     displayStat(stateChangedCallback(state, curPos, radius));
 }

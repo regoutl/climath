@@ -6,6 +6,7 @@ import Pv from './pv.js';
 import Fossil from './fossil.js';
 import Storage from './storage.js';
 import Nuke from './nuke.js';
+import Ccgt from './ccgt.js';
 
 /// note : all years are assumed to be 365 days long
 /** @brief compute the hourly demand meeting and building*/
@@ -22,7 +23,7 @@ export default class ProductionComponent{
 
 		//sorted by priority (higher production mean will produce at max capa first)
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
-		this.productionMeansOrder = ['pv', 'nuke', 'storage'/*, 'ccgt'*/, 'fossil'];
+		this.productionMeansOrder = ['pv', 'nuke', 'storage', 'ccgt', 'fossil'];
 
 		// top := next to be finished build
 		this.pendingBuilds = new PriorityQueue((a, b) => a.build.end < b.build.end);
@@ -31,19 +32,10 @@ export default class ProductionComponent{
 			pv: new Pv(parameters.energies.pv),
 		  nuke: new Nuke(parameters.energies.nuke, hydroComponent),
 			storage: new Storage(parameters.energies.storage),
-			// ccgt: new Ccgt(parameters),
+			ccgt: new Ccgt(parameters.energies.ccgt),
 		  fossil: new Fossil(parameters.energies.fossil),
 		};
 	}
-
-/*
-	_initCCGT(){
-		this.productionMeans.ccgt={
-			co2PerWh:new Yearly.Constant(0.2), /// g co2 eq / watt
-			onmPerWh: this.params.ccgtOnM, /// todo: check this value
-		};
-	}
-*/
 
 	/// simulate using the coefs for the given year
 	/// simulation is done hour by hour
@@ -108,16 +100,6 @@ out.stats.consumedEnergy := {
 			this.productionMeans[build.type]
 						.prepareCapex(build, this.countries);
 
-
-		// //modify the ans if unbuild
-		// if(ans.nameplate.at(ans.build.end) < 0){
-		// 	ans.demolish = {};
-		//
-		// 	ans.demolish.co2 = 0; //unbuild produces no co2
-		// 	ans.demolish.cost =   -ans.build.cost * this.productionMeans[ans.type].deconstructionRatio;
-		//
-		// 	ans.build = undefined;
-		// }
 	}
 
 	/** @brief build stuff. vals is the object returned by capexStat

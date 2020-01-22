@@ -38,8 +38,10 @@ $(function(){
 		},
 		year: function(year){
 			$('.vYear').text(year);
-			if(simu)
+			if(simu){
 				StatDock.update();
+				BuildMenu.notifyStateChanged();
+			}
 		},
 		totalCo2: function(co2){
 			let strco2Total = valStr(co2, 'C');

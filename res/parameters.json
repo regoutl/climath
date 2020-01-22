@@ -2,16 +2,31 @@
 "energies":{
 	"ccgt":{
 		"build":{
+			"cost":{
+				"label":"Frais d'installation du gaz",
+				"source":"https://www.spglobal.com/platts/en/market-insights/latest-news/electric-power/081115-combined-cycle-gas-fired-unit-costs-coming-in-below-expectations-duke",
+				"unit":"€/N",
+				"years":[6.04]
+			},
 			"time": 1
 		},
+		"primEnEfficiency":0.65,
 		"deconstructionRatio":0.05,
-		"onm":{
-			"label":"Frais (variables) d'exploitation et de maintenance des centrales gaz",
-			"unit":"€/Wh",
-			"years":[10],
-			"valMul":0.000001,
-			"in2050":10,
-			"source":"todo ; find the correct value"
+		"perWh":{
+			"cost":{
+				"label":"Frais (variables) d'exploitation et de maintenance des centrales gaz",
+				"unit":"€/Wh",
+				"years":[10],
+				"valMul":0.000001,
+				"in2050":10,
+				"source":"todo ; find the correct value"
+			},
+			"co2":{
+				"label":"Empreinte des centrales gaz",
+				"unit":"C/Wh",
+				"years":[0.2],
+				"source":"todo ; find the correct value"
+			}
 		},
 		"init":{
 			"_capacityunit":"W",
@@ -32,7 +47,7 @@
 	"nuke":{
 		"build":{
 			"cost":{
-				"label":"Frais d'installation",
+				"label":"Frais d'installation du nucleaire",
 				"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf",
 				"unit":"€/N",
 				"years":[4.43],

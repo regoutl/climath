@@ -3,11 +3,12 @@ import {pieChart} from './piechart.js';
 import { objSum} from '../simulateur/simulateur.js';
 import { quantityToHuman as valStr} from './plot.js';
 
-
+/// shoud be called after simu was constructed. Setup a few things
 export function setSimu(s){
   simu = s;
 }
 
+/// should be called each new year.
 export function update(){
   if(simu.stats.length == 0)
     return;
@@ -35,6 +36,7 @@ export function update(){
   updateBudget(sumStat);
 }
 
+/// show the dock
 export function show(){
   $('#dLeftDock').show();
   $('#dCoefs').hide();
@@ -44,7 +46,7 @@ export function show(){
   update();
 }
 
-//increment every field in target by the value of the same field in source
+//increment every field in target object by the value of the same field in source
 function incrementEach(target, source){
   for (var k in target){
     if(source[k] === undefined)
@@ -106,6 +108,14 @@ let simu;
 
 
 
+let palette =     {nuke: 'yellow',
+    pv:'rgb(70, 85,180)',
+    fossil:'rgb(255, 124, 84)',
+    storage:'rgb(0, 255, 250)',
+    constructions:'red',
+    ccgt:'rgb(169, 202, 250)',
+  };
+
 function updateOri(stat){
   //electricity origin
   let ctx = cStatEnergyOri.getContext("2d");
@@ -113,11 +123,7 @@ function updateOri(stat){
   ctx.translate(50, 50);
   const consumed = stat.consumedEnergy;
   $('#dStats p')[0].innerHTML = 'Demande moyenne : ' + valStr(consumed.total, 'Wh');
-  pieChart(ctx, consumed.origin,
-    {nuke: 'yellow',
-    pv:'blue',
-    fossil:'rgb(255, 124, 84)',
-    storage:'rgb(0, 255, 250)'});
+  pieChart(ctx, consumed.origin,palette);
   ctx.translate(-50, -50);
 }
 
@@ -148,13 +154,8 @@ function updateFootprint(stat){
   	"pv":co2.perYear.pv + co2.perWh.pv,
   	"fossil":co2.perYear.fossil + co2.perWh.fossil,
   	"storage":co2.perYear.storage + co2.perWh.storage,
-  }, {
-  	constructions:'red',
-  	nuke: 'yellow',
-  	pv:'blue',
-    fossil:'rgb(255, 124, 84)',
-  	storage:'rgb(0, 255, 250)'
-  });
+    "ccgt":co2.perYear.ccgt + co2.perWh.ccgt,
+  }, palette );
   ctx.translate(-50, -50);
 }
 
@@ -174,13 +175,8 @@ function   updateBudget(stat){
   	"pv":cost.perYear.pv + cost.perWh.pv,
   	"fossil":cost.perYear.fossil + cost.perWh.fossil,
   	"storage":cost.perYear.storage + cost.perWh.storage,
-  }, {
-  	constructions:'red',
-  	nuke: 'yellow',
-  	pv:'blue',
-    fossil:'rgb(255, 124, 84)',
-  	storage:'rgb(0, 255, 250)'
-  });
+    "ccgt":cost.perYear.ccgt + cost.perWh.ccgt,
+  }, palette );
   ctx.translate(-50, -50);
 
 }

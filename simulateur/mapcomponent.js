@@ -107,15 +107,15 @@ export default class MapComponent{
         let validPixels = area.radius * area.radius * 3.14;
 
         if(!ans.theorical){
+            this.drawer.drawCursor(buildState.type, area.center, area.radius);
+
             if(buildState.type != 'nuke'){
-                this.drawer.drawCircle(area);
                 //count the valid pixels
                 validPixels = this._countPvArea(area);
             } else{
                 //for nuke, cursor must be valid
                 let pixel = this.getPx(area.center.x, area.center.y);
                 ans.theorical = pixel.baseLandUse == GroundUsage.out;
-                this.drawer.drawNukeCursor(area.center);
                 ans.pop_affected = this._simulateBoom(area).pop_affected;
             }
         } else{
@@ -130,6 +130,8 @@ export default class MapComponent{
             ans.volume = validPixels * 200 * 200 * 5; //m3
         else if(buildState.type == 'nuke')
             ans.nameplate = 3000000000; //Watt
+        else if(buildState.type == 'ccgt')
+            ans.nameplate = 1600000000; //Watt
         else
             throw 'to do';
 
@@ -153,7 +155,7 @@ export default class MapComponent{
             this.buildStates.push(buildState);
 
             let r, g, b;
-            if(buildState.type == 'pv'){r = 0; g = 0; b = 250;}
+            if(buildState.type == 'pv'){r = 70; g = 85; b = 130;}
             if(buildState.type == 'battery'){r = 0; g = 255; b = 250;}
 
 
@@ -170,8 +172,8 @@ export default class MapComponent{
 
         this.drawer.update('energy');
         this.drawer.draw();
-        } else if(buildState.type == 'nuke'){
-            this.drawer.addNuke(area.center);
+      } else if(buildState.type == 'nuke' || buildState.type == 'ccgt'){
+            this.drawer.addItem(buildState.type, area.center);
             this._nukeCentrals.push({
                 loc: area.center,
                 dangerRadius: nuclearDisasterRadius,

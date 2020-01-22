@@ -1,46 +1,16 @@
 import PaletteTexture from './palettetexture.js';
 
-function createShader (gl, sourceCode, type) {
-    // Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
-    let shader = gl.createShader( type );
-    gl.shaderSource( shader, sourceCode );
-    gl.compileShader( shader );
-
-    if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS) ) {
-        let info = gl.getShaderInfoLog( shader );
-        throw 'Could not compile WebGL program. \n\n' + info;
-    }
-    return shader;
-}
-
-function createProgram(gl, src, attribs){
-    let program = gl.createProgram();
-
-    // Attach pre-existing shaders
-    gl.attachShader(program, createShader(gl, src[0], gl.VERTEX_SHADER));
-    gl.attachShader(program,  createShader(gl, src[1], gl.FRAGMENT_SHADER));
-
-    gl.bindAttribLocation(program, 0, 'a_position');
-
-    gl.linkProgram(program);
-
-    if ( !gl.getProgramParameter( program, gl.LINK_STATUS) ) {
-        const info = gl.getProgramInfoLog(program);
-        throw 'Could not compile WebGL program. \n\n' + info;
-    }
-    return program;
-}
 
 export default class MapDrawer{
     currentShowGrid = {
         'energyGrid':true,
         'flows':false,
-        'popDensity':true,
+        'popDensity':false,
     };
 
     constructor(arg){
-        //array of positions of the nuke centrals
-        this.nuke = [];
+        //array of positions of ponctual stuff (nuke, ccgt, ...). format : type, pos, and node (DOM node)
+        this.items = [];
 
     		let cTop = $('<canvas width="1374" height="1183"></canvas>');
     		cTop.css({
@@ -75,17 +45,21 @@ export default class MapDrawer{
 
 
         //represent the nursor for nuke
-        this._nukeCursorNode = $('<img src="res/icons/nuke.png" ' +
-            ' class="scaleInvariant energyRelated" width="16px"/>');
-        this._nukeCursorNode.css('display', 'none');
-        $('#dMap').append(this._nukeCursorNode);
+        this._itemCursorNode = $('<img src="res/icons/nuke.png" ' +
+            ' class="scaleInvariant energyRelated" width="24px"/>');
+        this._itemCursorNode.css('display', 'none');
+        $('#dMap').append(this._itemCursorNode);
+
+        this.currentCursor = null;
 
         this.draw();
 
         this._initEvents();
     } // END OF MapDrawer.constructor()
 
-    /** @brief draw the currenty visible layers*/
+    /** @brief draw the currenty visible layers.
+    @note if nuke cursor, draw flows
+    */
     draw(){
         let gl = this.gl;
 
@@ -102,7 +76,7 @@ export default class MapDrawer{
         if(this.currentShowGrid.energyGrid)
             this._drawTex(this.energy);
 
-        if((this._nukeCursorNode.css('display') == 'block'
+        if((this.currentCursor == 'nuke' || this.currentCursor == 'ccgt'
             || this.currentShowGrid.flows) && this.water)
                 this._drawTex(this.water);
     }
@@ -115,44 +89,63 @@ export default class MapDrawer{
         this[layerName].update(this[layerName+'Src']);
     }
 
-    /** @brief draw a cursor */
-    drawCircle({center:{x,y},radius}) {
+
+    /// @brief draws a cursor of the given type at the given location.
+    /// radius can be ommited
+    drawCursor(type, pos, radius){
+      if(type == 'pv' || type == 'battery'){
         const ctx = this.ctxTop;
         ctx.clearRect(0, 0,
             this.ctxTop.canvas.width,
             this.ctxTop.canvas.height);
 
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2*Math.PI, true);
+        ctx.arc(pos.x, pos.y, radius, 0, 2*Math.PI, true);
         ctx.fill();
-    }
 
-    drawNukeCursor(pos){
-        this._nukeCursorNode.css({
-            top:pos.y-10,
-            left:pos.x - 8,
+      }
+      else if(type == 'nuke' || type == 'ccgt'){
+        this._itemCursorNode.css({
+            top:pos.y-15,
+            left:pos.x - 12,
             display: 'block',
         });
+      }
+      else {
+        throw 'to do';
+      }
+
+      //cursor type changed
+      if(this.currentCursor != type){
+        this.currentCursor = type;
+
+        this._itemCursorNode.attr('src', 'res/icons/' + type + '.png');
+
         this.draw();
+      }
     }
 
     clearCursor(){
+        this.currentCursor = null;
         const ctx = this.ctxTop;
         ctx.clearRect(0, 0,
             ctx.canvas.width,
             ctx.canvas.height);
         //clear nuke cursor
-        this._nukeCursorNode.css({ display: 'none'});
+        this._itemCursorNode.css({ display: 'none'});
         this.draw();
     }
 
-    addNuke(pos){
-        let node = $('<img src="res/icons/nuke.png" '
-                    + 'class="scaleInvariant energyRelated" width="16px"/>');
-        node.css({top:pos.y-10, left:pos.x - 8});
+    addItem(type, pos){
+        if(type != 'nuke' && type != 'ccgt')
+            throw 'to do';
+
+        let node = $('<img src="res/icons/' + type + '.png" '
+                    + 'class="scaleInvariant energyRelated" width="24px"/>');
+        node.css({top:pos.y-15, left:pos.x - 12});
         $('#dMap').append(node);
 
-        this.nuke.push({pos:pos, node:node});
+        this.items.push({type: type, pos:pos, node:node});
     }
 
     //call
@@ -250,7 +243,7 @@ export default class MapDrawer{
         this.groundUse.appendPalette(120, 120, 97); //indus
         this.groundUse.appendPalette(114, 122, 74/*183, 191, 154*/);//field
         this.groundUse.appendPalette(89, 109, 44/*120, 124, 74*/); //field
-        this.groundUse.appendPalette(0, 0, 0); //?
+        this.groundUse.appendPalette(114, 122, 74); //?
         this.groundUse.appendPalette(137, 141, 131); // city
         this.groundUse.appendPalette(52, 76, 45); //forest2
 
@@ -413,4 +406,39 @@ function onMouseDown(e){
 function onMouseUp(e){
     setTimeout(() => dCentral.data('moving', false), 1);
     $('body').off('mousemove');
+}
+
+
+
+
+
+function createShader (gl, sourceCode, type) {
+    // Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
+    let shader = gl.createShader( type );
+    gl.shaderSource( shader, sourceCode );
+    gl.compileShader( shader );
+
+    if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS) ) {
+        let info = gl.getShaderInfoLog( shader );
+        throw 'Could not compile WebGL program. \n\n' + info;
+    }
+    return shader;
+}
+
+function createProgram(gl, src, attribs){
+    let program = gl.createProgram();
+
+    // Attach pre-existing shaders
+    gl.attachShader(program, createShader(gl, src[0], gl.VERTEX_SHADER));
+    gl.attachShader(program,  createShader(gl, src[1], gl.FRAGMENT_SHADER));
+
+    gl.bindAttribLocation(program, 0, 'a_position');
+
+    gl.linkProgram(program);
+
+    if ( !gl.getProgramParameter( program, gl.LINK_STATUS) ) {
+        const info = gl.getProgramInfoLog(program);
+        throw 'Could not compile WebGL program. \n\n' + info;
+    }
+    return program;
 }

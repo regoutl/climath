@@ -267,28 +267,37 @@ for v in avg:
 
 data = open('hydroFinalAll365NoBlank.csv', 'r').read().split('\n')[5:-1]
 
-outStations = bytearray(realNbStation * len(data) * 4)
+outStations = bytearray(realNbStation * len(data) * 4 / 5)
 
 if(len(data) != 365 * 19):
-    raise Exception('not 18 years at 365 days', len(data), 365*19)
+    raise Exception('not 19 years at 365 days', len(data), 365*19)
 
-i = 0
+
+lineId = 0
 for l in tqdm(data):
     vals = l.split(',')[1:realNbStation+1]
+    col = 0
     for v in vals:
         if(len(v) == 0 or v == '?' or v < 0):
-            print '\n\nblank in the data ! at line ', i / 4 / realNbStation, 'col', (i // 4) % realNbStation + 1
+            print '\n\nblank in the data ! at line ', lineId, 'col', col
             raise Exception('wathever')
-        struct.pack_into("f", outStations, i, float(v))
 
-        i += 4
+        index = (lineId // 5) * realNbStation + col
+
+        current = float(struct.unpack_from("f", outStations, index * 4)[0])
+
+        current += float(v) / 5
+        struct.pack_into("f", outStations, index * 4, float(current))
+
+        col += 1
+    lineId += 1
 
 with open("poolStations.bin", "wb") as fout:
     fout.write(outStations)
 
 print('\n\npoolStations.bin updated ! \n' +
         ' Format : row major, float ' + str(realNbStation) + ' x ' + str(365 * 19) +
-        '\n Unit : m3/sec, daily data, all year 365 days' +
+        '\n Unit : m3/sec, avg per 5 days, all year 365 days (-> 73 periods)' +
         '\n\n'
         )
 

@@ -8,15 +8,14 @@ export default class RegularProductionMean extends AbstractProductionMean {
       throw new TypeError("Cannot construct RegularProductionMean instances directly");
     }
 
+    this.primEnergyEffi = parameters.primEnEfficiency;
 
     //note : fossil fuel have unlimited installed capacity
     this.capacity = parameters.init.capacity *
                       parameters.init._capacityvalMul; //W installed
 
     //capacity factor
-    if(parameters.capacityFactor === undefined)
-      this._capacityFactor = 1.0;
-    this._capacityFactor = parameters.capacityFactor;
+    this._capacityFactor = parameters.capacityFactor ? parameters.capacityFactor: 1;
   }
 
   produce(energyOut, out){
