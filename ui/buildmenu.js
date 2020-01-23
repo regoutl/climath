@@ -146,6 +146,21 @@ export function displayStat(cmd){
     $('.vBMStorageCapacity').parent().hide();
   }
 
+  if(cmd.pop_affected){
+    $('.vBMPop').html(valStr(cmd.pop_affected, 'h'));
+    $('.vBMPop').parent().show();
+  }
+  else {
+    $('.vBMPop').parent().hide();
+  }
+
+  if(cmd.expl_cost){
+    $('.vBMExplCost').html(valStr(cmd.expl_cost, '€'));
+    $('.vBMExplCost').parent().show();
+  }
+  else {
+    $('.vBMExplCost').parent().hide();
+  }
 
   if(cmd.river){
     $('.vBMRiver').html(cmd.river);

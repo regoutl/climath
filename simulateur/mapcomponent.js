@@ -116,7 +116,9 @@ export default class MapComponent{
                 //for nuke, cursor must be valid
                 let pixel = this.getPx(area.center.x, area.center.y);
                 ans.theorical = pixel.baseLandUse == GroundUsage.out;
-                ans.pop_affected = this._simulateBoom(area).pop_affected;
+                let expl = this._simulateBoom(area);
+                ans.pop_affected = expl.pop_affected;
+                ans.expl_cost = expl.cost;
             }
         } else{
             //clear cursor
