@@ -147,9 +147,13 @@ h1{
 }
 
 .bBuild{
-	height: 60px;
+	height: 40px;
 	margin: 10px;
 	cursor: pointer;
+}
+
+.bBuild:hover{
+	transform: scale(1.2);
 }
 
 #dBuildDetails{
@@ -212,10 +216,11 @@ canvas {
 
 #dMainMenu{
 	display: flex;
+	flex-direction: column;
 
 	align-items: center;
 
-	justify-content: center;
+	justify-content: space-between;
 
 	height: 100%;
 }
@@ -235,4 +240,9 @@ canvas {
 
 #dMainMenu a:hover{
 	text-decoration: underline;
+}
+
+#author{
+	padding: 10px;
+	font-size: 0.8em;
 }

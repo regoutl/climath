@@ -282,7 +282,7 @@ export function promiseSimulater(valChangedCallbacks){
     fetch('res/popDensity.bin')
         .then(response => response.arrayBuffer()),
     fetch('hydro/sea.bin')
-        .then(response => response.arrayBuffer())
+        .then(response => response.arrayBuffer()),
     ])
     //called when all simu related res are loaded
     .then(function(values){
