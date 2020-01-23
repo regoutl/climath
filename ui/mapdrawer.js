@@ -152,11 +152,11 @@ export default class MapDrawer{
         if(type != 'nuke' && type != 'ccgt')
             throw 'to do';
 
-        let id = this.item.findIndex(v => v.type === type && v.pos.x === pos.x
+        let id = this.items.findIndex(v => v.type === type && v.pos.x === pos.x
             && v.pos.y === pos.y);
 
-        this.item[id].node.remove(); //rm from html
-        this.item.splice(id, 1);
+        this.items[id].node.remove(); //rm from html
+        this.items.splice(id, 1);
     }
 
     //call

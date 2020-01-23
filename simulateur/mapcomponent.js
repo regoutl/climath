@@ -50,7 +50,7 @@ const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
     constructor(mapImgs){
-        this._nukeCentrals = [];
+        this._centrals = [];
         this.energyGrid = new Uint16Array(1374 * 1183);
         this.groundUse = mapImgs.groundUse;
         this.popDensity = mapImgs.popDensity;
@@ -176,7 +176,8 @@ export default class MapComponent{
         this.drawer.draw();
       } else if(buildState.type == 'nuke' || buildState.type == 'ccgt'){
             this.drawer.addItem(buildState.type, area.center);
-            this._nukeCentrals.push({
+            this._centrals.push({
+                type: buildState.type,
                 loc: area.center,
                 dangerRadius: nuclearDisasterRadius,
             });
@@ -190,38 +191,39 @@ export default class MapComponent{
                         and estimate cost
     */
     testBoom(){
-        let exploded = [];
-        let stat = this._nukeCentrals.reduce((tot, central, i) => {
-            if(rand()%nukeExplosionPeriod === 0){
-                console.log({
-                    center:central.loc,
-                    radius:central.dangerRadius
-                });
-                let expl = this._simulateBoom({
-                    center:central.loc,
-                    radius:central.dangerRadius
-                }, true);
-                tot.cost += expl.cost;
-                tot.pop_affected += expl.pop_affected;
-                exploded.push(i);
+        let stat = this._centrals.reduce((tot, central, i) => {
+            if(central.type === 'nuke'){
+                if(rand()%nukeExplosionPeriod === 0){
+                    let expl = this._simulateBoom({
+                        center:central.loc,
+                        radius:central.dangerRadius
+                    }, true);
+                    tot.cost += expl.cost;
+                    tot.pop_affected += expl.pop_affected;
+                }
             }
             return tot;
-        },{cost:0, pop_affected:0});
-
-        exploded.forEach((index, i) => {
-            this._nukeCentrals.splice(index-i, 1);
-        });
-
+        }, {cost:0, pop_affected:0});
+        this._centrals.filter(e => e !== -1)
         return stat;
+    }
+
+    _rmCentral(id){
+        this.drawer.rmItem(this._centrals[id].type, this._centrals[id].loc);
+        // this._centrals.splice(id, 1);
+        this._centrals[id] = -1;
     }
 
     _simulateBoom(area, set){
         set = set || false;
         let topay = cleaningcost;
         let pop_affected = 0;
+        let affected_central = 0;
         area.radius = nuclearDisasterRadius;
         this._forEach(area, (x,y) => {
             let pix = this.getPx(x,y);
+            let sameloc = v => v !== -1 && v.loc.x === x && v.loc.y === y;
+            let central_id = this._centrals.findIndex(sameloc);
             // pix.nrj => destroyed
             // baseLandUse => destroyed
             // pop => should move
@@ -234,6 +236,11 @@ export default class MapComponent{
                     nrj:0,
                     pop:0,
                 })
+                if(central_id !== -1){
+                    this._rmCentral(central_id);
+                }
+            } else{
+                affected_central += central_id !== -1 ? 1:0;
             }
         })
         if(set){
@@ -247,6 +254,7 @@ export default class MapComponent{
         return {
             pop_affected: pop_affected,
             cost: topay,
+            affected_central: affected_central,
         };
     }
 

@@ -147,6 +147,7 @@ export class Simulateur{
     }
     //run
     run(){
+        console.log(this.cMap.testBoom());
         // O & M (fixed & variable)
         this.cProd.run(this.year, this.yStats);
 
