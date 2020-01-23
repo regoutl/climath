@@ -245,6 +245,12 @@ export default class MapDrawer{
         this.energy.appendPalette(0, 0, 0, 0);//index 0 is transparent
         this.energy.update(this.energySrc);
 
+        this._initTexGroundUse();
+        this._initTexPopDensity();
+        this._initTexFlows();
+    }
+
+    _initTexGroundUse(){
         this.groundUse = new PaletteTexture(this.gl, 1);
 
         this.groundUse.appendPalette(0, 0, 0, 0); //exterior
@@ -259,24 +265,25 @@ export default class MapDrawer{
         this.groundUse.appendPalette(52, 76, 45); //forest2
 
         this.groundUse.update(this.groundUseSrc);
+    }
+    _initTexPopDensity(){
+        this.popDensity = new PaletteTexture(this.gl, 1);
 
+        this.popDensity.appendPalette(0,0,0,0);       //out of country
+        this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
+        this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
+        this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
+        this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
+        this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
+        this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
+        this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
+        this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
+        this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
 
-      	this.popDensity = new PaletteTexture(this.gl, 1);
+        this.popDensity.update(this.popDensitySrc);
 
-      	this.popDensity.appendPalette(0,0,0,0);       //out of country
-      	this.popDensity.appendPalette(255, 255, 128); // 0-20 h/km2
-      	this.popDensity.appendPalette(252, 233, 106); // 21-50 h/km2
-      	this.popDensity.appendPalette(250, 209, 85 ); // 51-100 h/km2
-      	this.popDensity.appendPalette(247, 190, 67 ); // 101-200 h/km2
-      	this.popDensity.appendPalette(242, 167, 46 ); // 201-500 h/km2
-      	this.popDensity.appendPalette(207, 122, 31 ); // 501-1k h/km2
-      	this.popDensity.appendPalette(173, 83,  19 ); // 1k1-2k h/km2
-      	this.popDensity.appendPalette(138, 46,  10 ); // 5k1-5k h/km2
-      	this.popDensity.appendPalette(107,  0,   0 ); // 5k1-50k h/km2
-
-      	this.popDensity.update(this.popDensitySrc);
-
-
+    }
+    _initTexFlows(){
         let self = this;
         fetch('hydro/flowdisplay.bin')
         .then((response) => {return response.arrayBuffer();})
@@ -292,6 +299,7 @@ export default class MapDrawer{
         .catch((e)=>{
             alert('prob load water ' +e);
         });
+
     }
 
     clear(){
