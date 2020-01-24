@@ -3,39 +3,22 @@ import * as Yearly from "../timevarin.js";
 
 
 export default class Wind extends IntermittentProductionMean{
-  constructor(parameters) {
+  constructor(parameters, simu) {
     super(parameters, 'wind');
 
-    /// store pv with same stat. only used for yearly capacity update
-    /// store, for each (powerDeclinePerYears) the installed capacity
-    this.groups= new Map();
-    this.area= parameters.init.area; ///m2 installed. usefull for o&m compute
+    this.simu = simu;
 
     this.efficiency = new Yearly.Raw(0);
     this.efficiency.fromJSON(parameters.efficiency);
 
-    this.build.energy = new Yearly.Raw(0);
-    this.build.energy.fromJSON(parameters.build.energy);
-
-    /// initial capacity is not null, create groups that match its spec
-    this.groups.set(Math.pow(parameters.init.powerDecline25Years, 1/25.0),
-                    this.capacity);
+    // this.build.energy = new Yearly.Raw(0);
+    // this.build.energy.fromJSON(parameters.build.energy);
   }
 
   happyNYEve(yStats){
-    //do power decline
-    this.capacity = 0;
-
-    this.groups.forEach( (value, key, map) => {
-      value *= key;
-      map.set(key, value);
-      this.capacity += value;
-    });
-
-
     //compute fixed o & M
-    yStats.cost.perYear.pv +=
-          this.area * this.perYear.cost.at(yStats.year); // pv
+    yStats.cost.perYear.wind +=
+          this.capacity * this.perYear.cost.at(yStats.year); // wind
   }
 
 /**
@@ -49,68 +32,58 @@ export default class Wind extends IntermittentProductionMean{
   * 						default val = 1
   * @todo:		@param what.seller : {sunPower ,Panasonic, JinkoSolar}. set above params (see parameters.json)
 **/
-  prepareCapex(what, countries){
-    let ans = what;
-    ans.build.end = this.build.delay + ans.build.begin;
+  prepareCapex(buildInfo, countries){
+    buildInfo.build.end = this.build.delay + buildInfo.build.begin;
 
-    //check for parameters
-    if(what.area === undefined)
-      throw 'must define an area';
+    if(buildInfo.input.height === undefined){
+        buildInfo.input.height = 50;
+        console.log('set default height');
+    }
 
-    if(what.effiMul === undefined)
-      what.effiMul = 1;
-    if(what.madeIn === undefined)
-      what.madeIn = 'china';
-    if(what.installedIn === undefined)
-      what.installedIn = 'belgium';
-    if(what.powerDecline === undefined)
-      what.powerDecline = 1;
-    if(what.priceMul === undefined)
-      what.priceMul = 1;
+    let a = this.simu.cMap.reduceIf(['area', 'windPower50'],
+                                    {center: buildInfo.input.curPos, radius: buildInfo.input.radius},
+                                    ['buildable']);
+    let area = a[0];
+    let windPower = a[1];
+    let windPowerDensity = windPower / area;
+    if(area == 0)
+        windPowerDensity = 0;
 
+    //src : https://en.wikipedia.org/wiki/Belwind (offshore, @95m  :/)
+    const maxWindTurbinePerSquareMeter = 4.23e-6; //todo : check for onshore
+
+    const rotorRadius = 45.0;
+
+    let count = area * maxWindTurbinePerSquareMeter;
+
+    let section = count * rotorRadius * rotorRadius * 3.14; //m2
 
     let initNameplate
-        = what.area
-          * this.efficiency.at(ans.build.begin)
-          * countries[what.installedIn].irradiance
-          * what.effiMul;
-    ans.nameplate = new Yearly.Expo(ans.build.end,
-                                    initNameplate,
-                                    what.powerDecline);
-    ans.nameplate.unit = 'N';
+        = section * windPowerDensity
+          * this.efficiency.at(buildInfo.build.begin);
+    buildInfo.nameplate = new Yearly.Raw(initNameplate);
+    buildInfo.nameplate.unit = 'N';
 
 
-    ans.build.co2 = what.area // m2
-        * this.build.energy.at(ans.build.begin)  // wH / m2
-        * countries[what.madeIn].elecFootprint.at(ans.build.begin); // C / Wh
-    ans.build.cost  = what.area * what.priceMul * // m2
-        this.build.cost.at(ans.build.begin);  // eur/m2
+    buildInfo.build.co2 = 0; // C / Wh
+    buildInfo.build.cost  = initNameplate * // W
+        this.build.cost.at(buildInfo.build.begin);  // eur/W
 
-    ans.pm = this;
+    buildInfo.pm = this;
 
-    ans.perYear = {cost: this.perYear.cost.at(ans.build.end) * what.area, co2: 0};
-    ans.perWh = {cost: 0, co2: 0};
-    ans.avgCapacityFactor = 0.12; //todo : do a real computation ?
+    buildInfo.perYear = {cost: this.perYear.cost.at(buildInfo.build.end) * initNameplate, co2: 0};
+    buildInfo.perWh = {cost: 0, co2: 0};
+    buildInfo.avgCapacityFactor = 0.229; //todo : do a real computation ?
   }
 
   //note : must be called when simu.year = cmd.build.end
   capex(build){
-    if(build.type != 'pv')
-      throw 'PV.capex; build.type != pv';
-
-    this.area += build.area;
+    if(build.type != 'wind')
+      throw 'wind.capex; build.type != wind';
 
     let nameplate = build.nameplate.at(build.build.end);
 
     this.capacity += nameplate;
-
-  	let powerDecline = build.nameplate.rate;
-
-  	if(!this.groups.has(powerDecline))
-  		this.groups.set(powerDecline, nameplate);
-  	else
-  		this.groups.set(powerDecline,
-                      this.groups.get(powerDecline) + nameplate);
   }
 
 

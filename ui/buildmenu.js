@@ -113,7 +113,7 @@ export function displayStat(cmd){
     }
   });
 
-  $('.vBMBuildCost').css('color', (cmd.build.can) ? 'black': 'red');
+  // $('.vBMBuildCost').css('color', (cmd.build.can) ? 'black': 'red');
 
   if(cmd.area){
     $('.vBMArea').parent().show();

@@ -4,7 +4,8 @@ import * as Yearly from "../timevarin.js";
 
 /// technically subclass of AbstractProductionMean
 export default class Storage /*extends AbstractProductionMean*/{
-  constructor(parameters){
+  constructor(parameters, simu){
+    this.simu = simu;
 
     /** array (sorted by priority) of storage means
      * struct StorageMeanSpec{()
@@ -133,35 +134,39 @@ export default class Storage /*extends AbstractProductionMean*/{
   @return ans.type = 'storage'
   @return ans.
 */
-  prepareCapex(what, countries){
-    if(what.type != 'battery')
+  prepareCapex(build, countries){
+    if(build.type != 'battery')
       throw 'only bat supported';
-    if(what.volume === undefined)
-      throw 'need volume';
 
-    what.storageCapacity
-      = what.volume * this.solutions.battery.energyDensity.at(what.build.begin);
+    let a = this.simu.cMap.reduceIf(['area'],
+                                    {center: build.input.curPos, radius: build.input.radius},
+                                    ['buildable']);
+    let volume = a[0] * 5; //5 is a coef that should be controllable by the user. height of the battery
 
-    if(what.priceMul === undefined)
-      what.priceMul = 1;
-    if(what.madeIn === undefined)
-      what.madeIn = 'china';
-    if(what.roundTrip === undefined)
-      what.roundTrip = 0.9;
-    if(what.capaDecline10Years === undefined)
-      what.capaDecline10Years = 0.75;
-    if(what.selfDischarge1Month === undefined)
-      what.selfDischarge1Month = 0.98;
 
-      let ans = what;
+    build.storageCapacity
+      = volume * this.solutions.battery.energyDensity.at(build.build.begin);
+
+    if(build.priceMul === undefined)
+      build.priceMul = 1;
+    if(build.madeIn === undefined)
+      build.madeIn = 'china';
+    if(build.roundTrip === undefined)
+      build.roundTrip = 0.9;
+    if(build.capaDecline10Years === undefined)
+      build.capaDecline10Years = 0.75;
+    if(build.selfDischarge1Month === undefined)
+      build.selfDischarge1Month = 0.98;
+
+    let ans = build;
     ans.build.end = ans.build.begin + this.solutions.battery.build.delay;
-    ans.build.co2 = what.storageCapacity // S
+    ans.build.co2 = build.storageCapacity // S
         * this.solutions.battery.build.energy.at(ans.build.begin)  // wH / S
-        * countries[what.madeIn].elecFootprint.at(ans.build.begin); // C / Wh
+        * countries[build.madeIn].elecFootprint.at(ans.build.begin); // C / Wh
 
-    ans.build.cost = what.storageCapacity // S
+    ans.build.cost = build.storageCapacity // S
         * this.solutions.battery.build.cost.at(ans.build.begin)
-        * what.priceMul;
+        * build.priceMul;
 
     ans.pm = this;
 

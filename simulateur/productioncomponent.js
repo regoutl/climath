@@ -7,6 +7,7 @@ import Fossil from './fossil.js';
 import Storage from './storage.js';
 import Nuke from './nuke.js';
 import Ccgt from './ccgt.js';
+import Wind from './wind.js';
 
 /// note : all years are assumed to be 365 days long
 /** @brief compute the hourly demand meeting and building*/
@@ -18,22 +19,23 @@ export default class ProductionComponent{
 	 * 					if uint8Array, value will be divided by 255. length must be a multiple of 8760 (hourly data)
 	 * 					if undefined, set to 1.0
 	 */
-	constructor(parameters, hydroComponent){
+	constructor(parameters, simu){
 		this._initCountries(parameters.countries);
 
 		//sorted by priority (higher production mean will produce at max capa first)
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
-		this.productionMeansOrder = ['pv', 'nuke', 'storage', 'ccgt', 'fossil'];
+		this.productionMeansOrder = ['pv', 'wind', 'nuke', 'storage', 'ccgt', 'fossil'];
 
 		// top := next to be finished build
 		this.pendingBuilds = new PriorityQueue((a, b) => a.build.end < b.build.end);
 
 		this.productionMeans = {
-			pv: new Pv(parameters.energies.pv),
-		  nuke: new Nuke(parameters.energies.nuke, hydroComponent),
-			storage: new Storage(parameters.energies.storage),
-			ccgt: new Ccgt(parameters.energies.ccgt),
-		  fossil: new Fossil(parameters.energies.fossil),
+			pv: new Pv(parameters.energies.pv, simu),
+			wind: new Wind(parameters.energies.wind, simu),
+		  nuke: new Nuke(parameters.energies.nuke, simu),
+			storage: new Storage(parameters.energies.storage, simu),
+			ccgt: new Ccgt(parameters.energies.ccgt, simu),
+		  fossil: new Fossil(parameters.energies.fossil, simu),
 		};
 	}
 
@@ -102,7 +104,7 @@ out.stats.consumedEnergy := {
 
 	}
 
-	/** @brief build stuff. vals is the object returned by capexStat
+	/** @brief build stuff. cmd is the object returned by prepareBuild
 	 *  @ex capex(prepareCapex({type:pv, area:10})) // build 10 m2 of pv
 	 * @note : the build begin year must be the current one
 	 @return true on success.

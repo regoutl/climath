@@ -27,12 +27,23 @@ const popDensitylegend = {
     8:5000,
 }
 
+const plank = 200;
+const pixelArea = plank * plank;
+
 //Const for our current map
 const kmpixratio = 30688/(1625442-854086);
 const nuclearDisasterRadius = 50/*pix*/;
+const nuclearDisasterArea = nuclearDisasterRadius * nuclearDisasterRadius * 3.14; /*same unit power 2*/
 const meanCostToRelocate = 197000;
 const cleaningcost = 150000000;
 const totalpop = 11.4e6;
+const nPixInCountry = 30600e6 / pixelArea;
+const averagePopDensity = totalpop / nPixInCountry;
+
+const avgIrradiance =  300; //W/m2 @see parameters.countries.belgium.irradiance
+const avgWindPowerDensity50 = 400; //W/m2 @see wind map
+const avgPopDensity = totalpop / 30600e6; // average pop/m2
+
 let densityMapPixPerCol = {// is it correct ?
     0:854086,
     1:223678,
@@ -54,14 +65,16 @@ export default class MapComponent{
         this.energyGrid = new Uint16Array(1374 * 1183);
         this.groundUse = mapImgs.groundUse;
         this.popDensity = mapImgs.popDensity;
+        this.windPowDens = mapImgs.windPowDens;
 
         this.drawer = new MapDrawer({
             energy: this.energyGrid,
             groundUse: this.groundUse,
             popDensity: this.popDensity,
+            windPowDens: this.windPowDens,
         });
 
-        this.buildStates = [{}];
+        // this.buildInfos = [{}];
     }
 
     /** [TODO]
@@ -81,62 +94,115 @@ export default class MapComponent{
         return Math.floor(popDensity * kmpixratio * 1.06);
     }
 
-    /** @brief convert build menu state to simu prepare capex cmd
-    @param buildState :as described in   buildmenu ->  state
-    @param area :  {shape: (circle|...)}
-        IF area.shape == cicle THEN area := {center, radius} (unit pix)
-        IF area.center === undefined THEN areaInvalid
+    updateCursor(buildInput){
+      let theorical = (buildInput.curPos === undefined);
 
-    @return a cmd as described in Simulateur.prepareCapex
-    @details
-        called on mouse move and on build state change
+      if(!theorical){
+          this.drawer.drawCursor(buildInput.state.type, buildInput.curPos, buildInput.radius);
+      } else{
+          //clear cursor
+          this.drawer.clearCursor();
+      }
 
-        draw the cursor
+    }
 
-        areaInvalid means that the cursor is not in the map.
-          Then return what would theorically happend if it was
-               set ans.theorical = true
 
-    @note for now, only build is considered. no rebuild. no deconstruction
-    @note for points (ex, nuke central), area is still send as circle, but radius can be ignored
-    @warning ans.area (if any) unit : m2
-    **/
-    prepareBuild(ans, buildState, area){
-        ans.theorical = (area.center === undefined);
+    /** @brief return the sum of values over an area satisfaying criterions
 
-        let validPixels = area.radius * area.radius * 3.14;
+    @param field : array of string, describing which values to sum.
+              Accepted : 'area', 'radiantFlux', 'windPower50', 'population'
+    @param area : object {center: , radius: }.
+    @param conditions : array of string, describing which conditions must be satisfied
+              Accepted : 'buildable' : the area is either a field / forest
 
-        if(!ans.theorical){
-            this.drawer.drawCursor(buildState.type, area.center, area.radius);
+    @return array of the requested field sums, in the same order as fields
 
-            if(buildState.type != 'nuke'){
-                //count the valid pixels
-                validPixels = this._countPvArea(area);
-            } else{
-                //for nuke, cursor must be valid
-                let pixel = this.getPx(area.center.x, area.center.y);
-                ans.theorical = pixel.baseLandUse == GroundUsage.out;
-                ans.pop_affected = this._simulateBoom(area).pop_affected;
+    @note if the area is invalid (aka curPos is undefined) :
+          - condition buildable always succeed
+          - specific values are replaced by their averages :
+              - irradiance by average irradiance
+              - etc
+    @note conditions can be undefined. treated as 'no condition'
+
+    @note pixels out of country always fail the condition test
+
+    @warning this function modifies 'fields' and 'conditions'
+    */
+    reduceIf(fields, area, conditions){
+        if(area.center == undefined){
+            let A = area.radius * area.radius * 3.14 * pixelArea;
+            for(let i = 0; i < fields.length; i++){
+                if(fields[i] == 'area')
+                    fields[i] = A;
+                else if(fields[i] == 'radiantFlux')
+                    fields[i] = A * avgIrradiance;
+                else if(fields[i] == 'population')
+                    fields[i] = A * avgPopDensity;
+                else if(fields[i] == 'windPower50')
+                    fields[i] = A * avgWindPowerDensity50;
+                else
+                    throw 'to do';
             }
-        } else{
-            //clear cursor
-            this.drawer.clearCursor();
+
+            return fields;
         }
 
-        ans.type = buildState.type;
-        if(buildState.type == 'pv')
-            ans.area = validPixels * 200 * 200; //m2
-        else if(buildState.type == 'battery')
-            ans.volume = validPixels * 200 * 200 * 5; //m3
-        else if(buildState.type == 'nuke')
-            ans.nameplate = 3000000000; //Watt
-        else if(buildState.type == 'ccgt')
-            ans.nameplate = 1600000000; //Watt
-        else
-            throw 'to do';
+        if( conditions === undefined)
+            conditions = [];
 
-        return ans;
+        if(conditions.length == 0)
+            conditions = ['inCountry'];
+
+        const nField = fields.length;
+        const nCond = conditions.length;
+
+        if(nCond > 1)
+            throw 'todo : de comment the loop in f'
+
+        for(let i = 0; i < nCond; i++)
+            conditions[i] = 'is' + conditions[i].charAt(0).toUpperCase() + conditions[i].substring(1);
+
+        for(let i = 0; i < nField; i++)
+            fields[i] = fields[i] + 'At';
+
+        let f = (x, y) => {
+            // for(let i = 0; i < nCond; i++){
+                if(!this[conditions[0]](x, y))
+                    return;
+            // }
+
+            for(let i = 0; i < nField; i++){
+                f.ans[i] += this[fields[i]](x, y);
+            }
+        }
+
+        f.ans = [];
+        for(let i = 0; i < nField; i++)
+            f.ans.push(0);
+
+        this._forEach(area, f);
+        return f.ans;
     }
+
+    areaAt(x, y){return pixelArea;}
+    radiantFluxAt(x, y){return avgIrradiance * pixelArea;}
+    windPower50At(x, y){return this.windPowDens.at50[x + y * 1374] * 8.0 * pixelArea;}
+    populationAt(x, y){return this.getPopDensity(x, y) * pixelArea;}
+
+    isInCountry(x, y){
+        const pix = this.getPx(x, y);
+        const lu = pix.baseLandUse;
+        return lu != GroundUsage.out;
+    }
+    isBuildable(x, y){
+        const pix = this.getPx(x, y);
+        const lu = pix.baseLandUse;
+        return (lu == GroundUsage.field || lu == GroundUsage.field2
+            || lu == GroundUsage.forest || lu == GroundUsage.forest2)
+            && pix.nrj == 0;
+    }
+
+
 
     /**   @brief : like prepareBuild BUT saves the action
     @return void
@@ -147,21 +213,19 @@ export default class MapComponent{
 
         must succeed !
     **/
-    build(buildState, area){
-        //exemple code
-        //this.saveCircle(area.center.x, area.center.y, area.radius, 'pv');
+    build(buildInfo){
+        if(buildInfo.type == 'pv' || buildInfo.type == 'battery'|| buildInfo.type == 'wind'){
+            // this.buildInfos.push(buildInfo.input.state);
 
-        if(buildState.type == 'pv' || buildState.type == 'battery'){
-            this.buildStates.push(buildState);
-
-            let r, g, b;
-            if(buildState.type == 'pv'){r = 70; g = 85; b = 130;}
-            if(buildState.type == 'battery'){r = 0; g = 255; b = 250;}
+            let r, g, b, a = 255;
+            if(buildInfo.type == 'pv'){r = 70; g = 85; b = 130;}
+            if(buildInfo.type == 'battery'){r = 0; g = 255; b = 250;}
+            if(buildInfo.type == 'wind'){r = 255; g = 255; b = 250; a = 128}
 
 
-            let buildIndex = this.drawer.energy.appendPalette(r, g, b);
+            let buildIndex = this.drawer.energy.appendPalette(r, g, b, a);
 
-            this._forEach(area, (x, y) => {
+            this._forEach({center: buildInfo.input.curPos, radius: buildInfo.input.radius}, (x, y) => {
                 const pix = this.getPx(x, y);
                 const lu = pix.baseLandUse;
                 if((lu == GroundUsage.field || lu == GroundUsage.field2
@@ -172,10 +236,10 @@ export default class MapComponent{
 
         this.drawer.update('energy');
         this.drawer.draw();
-      } else if(buildState.type == 'nuke' || buildState.type == 'ccgt'){
-            this.drawer.addItem(buildState.type, area.center);
+      } else if(buildInfo.type == 'nuke' || buildInfo.type == 'ccgt'){
+            this.drawer.addItem(buildInfo.type, buildInfo.input.curPos);
             this._nukeCentrals.push({
-                loc: area.center,
+                loc: buildInfo.input.curPos,
                 dangerRadius: nuclearDisasterRadius,
             });
         } else{
@@ -248,27 +312,6 @@ export default class MapComponent{
         };
     }
 
-    /** @brief in the given area, count the valid valid pixels
-    @note area is as defined in prepareBuild
-    @note a pixel oriented south can be counted as 'more than a pixel'
-    @note area must be valid
-    @return area (float) pixels
-    */
-    _countPvArea(area){
-        let counter = (x, y) => {
-            const pix = this.getPx(x, y);
-            const lu = pix.baseLandUse;
-            if((lu == GroundUsage.field || lu == GroundUsage.field2
-                || lu == GroundUsage.forest || lu == GroundUsage.forest2)
-                && pix.nrj == 0)
-                    counter.area ++;
-            };
-        counter.area = 0;
-
-        this._forEach(area, counter);
-        return counter.area;
-    }
-
 
     /** @brief will call f(x, y) for each pixel in the given area */
     _forEach({center:{x:x, y:y}, radius:radius}, f){
@@ -320,6 +363,7 @@ export default class MapComponent{
             pop: this.getPopDensity(x,y),
         }
     }
+
 
     /// set pixel x, y with value with same format as get
     setPx(x, y, changes){
