@@ -81,6 +81,14 @@ export default class MapComponent{
         return Math.floor(popDensity * kmpixratio * 1.06);
     }
 
+    getNrj(x,y){
+        return this.energyGrid[y*1374+x];
+    }
+
+    getGroundUse(x,y){
+        return this.groundUse[y*1374+x];
+    }
+
     /** @brief convert build menu state to simu prepare capex cmd
     @param buildState :as described in   buildmenu ->  state
     @param area :  {shape: (circle|...)}
@@ -114,7 +122,8 @@ export default class MapComponent{
                 validPixels = this._countPvArea(area);
             } else{
                 //for nuke, cursor must be valid
-                let pixel = this.getPx(area.center.x, area.center.y);
+                const x = area.center.x, y = area.center.y;
+                const baseLandUse = this.getGroundUse(x,y);
                 ans.theorical = pixel.baseLandUse == GroundUsage.out;
                 let expl = this._simulateBoom(area);
                 ans.pop_affected = expl.pop_affected;
@@ -164,11 +173,11 @@ export default class MapComponent{
             let buildIndex = this.drawer.energy.appendPalette(r, g, b);
 
             this._forEach(area, (x, y) => {
-                const pix = this.getPx(x, y);
-                const lu = pix.baseLandUse;
+                const nrj = this.getNrj(x,y);
+                const lu = this.getGroundUse(x,y);
                 if((lu == GroundUsage.field || lu == GroundUsage.field2
                     || lu == GroundUsage.forest || lu == GroundUsage.forest2)
-                    && pix.nrj == 0)
+                    && nrj == 0)
                         this.energyGrid[x + y * 1374] = buildIndex;
             });
 
@@ -221,15 +230,9 @@ export default class MapComponent{
         let affected_central = 0;
         area.radius = nuclearDisasterRadius;
         this._forEach(area, (x,y) => {
-            let pix = this.getPx(x,y);
             let sameloc = v => v !== -1 && v.loc.x === x && v.loc.y === y;
             let central_id = this._centrals.findIndex(sameloc);
-            // pix.nrj => destroyed
-            // baseLandUse => destroyed
-            // pop => should move
-            // price per home => mean be :197.000
-            // topay += 197000 * pix.pop;
-            pop_affected += pix.pop;
+            pop_affected += this.getPopDensity(x,y);
             if(set){
                 this.setPx(x, y, {
                     baseLandUse:0,
@@ -266,11 +269,11 @@ export default class MapComponent{
     */
     _countPvArea(area){
         let counter = (x, y) => {
-            const pix = this.getPx(x, y);
-            const lu = pix.baseLandUse;
+            const nrj = this.getNrj(x,y);
+            const lu = this.getGroundUse(x,y);
             if((lu == GroundUsage.field || lu == GroundUsage.field2
                 || lu == GroundUsage.forest || lu == GroundUsage.forest2)
-                && pix.nrj == 0)
+                && nrj == 0)
                     counter.area ++;
             };
         counter.area = 0;
@@ -300,34 +303,6 @@ export default class MapComponent{
                     f(xi, y+j);
                 }
             }
-        }
-    }
-
-    /// return the land use at a given pixel.
-    /// faire l'ajoute des pv
-    /// ans format : pop  => int,
-    ///              solar => {//can be undefined
-    ///                     efficiency multiplicator
-    ///                     powerdelcine per year
-    ///                     installation Capacity
-    ///              },
-    ///              nuke => { //can be undefined
-    ///              }
-    ///              bat => { //can be undefined
-    ///              }
-    /// baseLandUse => { //undefined = out of country
-    ///     City,
-    ///     Field
-    ///     Forest
-    ///     Water
-    ///     economicalInterestArea
-    ///     Airport
-    /// }
-    getPx(x, y){
-        return {
-            nrj: this.energyGrid[y*1374+x],
-            baseLandUse: this.groundUse[y*1374+x],
-            pop: this.getPopDensity(x,y),
         }
     }
 
