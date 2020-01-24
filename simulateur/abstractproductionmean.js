@@ -60,6 +60,8 @@ export default class AbstractProductionMean{
   /// expand capacity
   capex(param){throw 'pure virtual';  }
 
+  /** @brief delete the given amount of this energy, that was build with the buildInfo */
+  delete(buildInfo, amount){throw 'pure virtual';  }
 
   prepareCapex(param, countries){throw 'pure virtual';  }
 }

@@ -82,6 +82,8 @@ export default class Storage /*extends AbstractProductionMean*/{
       devices[i].stored = Math.min(devices[i].stored, devices[i].storageCapacity);
     }
 
+    // console.log(sumCapa);
+
     //todo : check O & M : here, it decreases every year
     yStats.cost.perYear.storage += sumCapa * this.solutions.battery.perYear.cost.at(yStats.year);
   }
@@ -135,55 +137,60 @@ export default class Storage /*extends AbstractProductionMean*/{
   @return ans.
 */
   prepareCapex(build, countries){
-    if(build.type != 'battery')
+    build.pm = this;
+
+    let parameters = build.parameters;
+    let info = build.info;
+
+    if(parameters.type != 'battery')
       throw 'only bat supported';
 
-    let a = this.simu.cMap.reduceIf(['area'],
-                                    {center: build.input.curPos, radius: build.input.radius},
+    if(parameters.height === undefined)
+        parameters.height = 5;//5 is a coef that should be controllable by the user. height of the battery
+
+    let a = this.simu.cMap.reduceIf(['area'], build.area,
                                     ['buildable']);
-    let volume = a[0] * 5; //5 is a coef that should be controllable by the user. height of the battery
+    let volume = a[0] * parameters.height;
 
 
-    build.storageCapacity
-      = volume * this.solutions.battery.energyDensity.at(build.build.begin);
+    info.storageCapacity
+      = volume * this.solutions.battery.energyDensity.at(info.build.begin);
 
-    if(build.priceMul === undefined)
-      build.priceMul = 1;
-    if(build.madeIn === undefined)
-      build.madeIn = 'china';
-    if(build.roundTrip === undefined)
-      build.roundTrip = 0.9;
-    if(build.capaDecline10Years === undefined)
-      build.capaDecline10Years = 0.75;
-    if(build.selfDischarge1Month === undefined)
-      build.selfDischarge1Month = 0.98;
+    if(parameters.priceMul === undefined)
+      parameters.priceMul = 1;
+    if(parameters.madeIn === undefined)
+      parameters.madeIn = 'china';
+    if(parameters.roundTrip === undefined)
+      parameters.roundTrip = 0.9;
+    if(parameters.capaDecline10Years === undefined)
+      parameters.capaDecline10Years = 0.75;
+    if(parameters.selfDischarge1Month === undefined)
+      parameters.selfDischarge1Month = 0.98;
 
-    let ans = build;
-    ans.build.end = ans.build.begin + this.solutions.battery.build.delay;
-    ans.build.co2 = build.storageCapacity // S
-        * this.solutions.battery.build.energy.at(ans.build.begin)  // wH / S
-        * countries[build.madeIn].elecFootprint.at(ans.build.begin); // C / Wh
+    info.build.end = info.build.begin + this.solutions.battery.build.delay;
+    info.build.co2 = info.storageCapacity // S
+        * this.solutions.battery.build.energy.at(info.build.begin)  // wH / S
+        * countries[parameters.madeIn].elecFootprint.at(info.build.begin); // C / Wh
 
-    ans.build.cost = build.storageCapacity // S
-        * this.solutions.battery.build.cost.at(ans.build.begin)
-        * build.priceMul;
+    info.build.cost = info.storageCapacity // S
+        * this.solutions.battery.build.cost.at(info.build.begin)
+        * parameters.priceMul;
 
-    ans.pm = this;
 
-    ans.perYear = {cost: this.solutions.battery.perYear.cost.at(ans.build.end) * ans.storageCapacity, co2: 0};
+    info.perYear = {cost: this.solutions.battery.perYear.cost.at(info.build.end) * info.storageCapacity, co2: 0};
 
   }
 
   //note : must be called when simu.year = cmd.build.end
   capex(build){
-    if(build.type != 'battery')
+    if(build.info.type != 'battery')
       throw 'storage.capex; build.type != battery';
 
 
-    let hourlySelfDischarge = Math.pow( build.selfDischarge1Month, 1/730.0);
-    let yearlyCapaDecl = Math.pow( build.capaDecline10Years, 1/10.0);
+    let hourlySelfDischarge = Math.pow( build.parameters.selfDischarge1Month, 1/730.0);
+    let yearlyCapaDecl = Math.pow( build.parameters.capaDecline10Years, 1/10.0);
 
-    let loadCoef = Math.sqrt(build.roundTrip);
+    let loadCoef = Math.sqrt(build.parameters.roundTrip);
 
     //find a suitable devices
     let i = 0;
@@ -202,7 +209,8 @@ export default class Storage /*extends AbstractProductionMean*/{
                           invloadCoef: 1/loadCoef,
                           selfDischarge: hourlySelfDischarge});
 
-    this.devices[i].storageCapacity += build.storageCapacity;
+    this.devices[i].storageCapacity += build.info.storageCapacity;
+
   }
 
 }

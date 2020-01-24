@@ -60,7 +60,9 @@ const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
 
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
-    constructor(mapImgs){
+    constructor(mapImgs, simu){
+        this.simu = simu;
+
         this._centrals = [];
         this.energyGrid = new Uint16Array(1374 * 1183);
         this.groundUse = mapImgs.groundUse;
@@ -75,7 +77,7 @@ export default class MapComponent{
             windPowDens: this.windPowDens,
         });
 
-        // this.buildInfos = [{}];
+        this.buildParameters = [{}];// first one is the null build
     }
 
     /** [TODO]
@@ -101,17 +103,6 @@ export default class MapComponent{
 
     getGroundUse(x,y){
         return this.groundUse[y*1374+x];
-    }
-
-    updateCursor(buildInput){
-      let theorical = (buildInput.curPos === undefined);
-
-      if(!theorical){
-          this.drawer.drawCursor(buildInput.state.type, buildInput.curPos, buildInput.radius);
-      } else{
-          //clear cursor
-          this.drawer.clearCursor();
-      }
     }
 
 
@@ -155,30 +146,13 @@ export default class MapComponent{
             return fields;
         }
 
-        if( conditions === undefined)
-            conditions = [];
-
-        if(conditions.length == 0)
-            conditions = ['inCountry'];
 
         const nField = fields.length;
-        const nCond = conditions.length;
-
-        if(nCond > 1)
-            throw 'todo : de comment the loop in f'
-
-        for(let i = 0; i < nCond; i++)
-            conditions[i] = 'is' + conditions[i].charAt(0).toUpperCase() + conditions[i].substring(1);
 
         for(let i = 0; i < nField; i++)
             fields[i] = fields[i] + 'At';
 
         let f = (x, y) => {
-            // for(let i = 0; i < nCond; i++){
-                if(!this[conditions[0]](x, y))
-                    return;
-            // }
-
             for(let i = 0; i < nField; i++){
                 f.ans[i] += this[fields[i]](x, y);
             }
@@ -188,7 +162,7 @@ export default class MapComponent{
         for(let i = 0; i < nField; i++)
             f.ans.push(0);
 
-        this._forEach(area, f);
+        this._forEachIf(area, f, conditions);
         return f.ans;
     }
 
@@ -210,48 +184,51 @@ export default class MapComponent{
     }
 
 
+    /** @brief delete energies in the given area.
+    @todo filter
+    */
+    delete(area, filter){
+        /// step 1 : list everything (pv, storage, wind)
+        let pixList = {};
+        this._forEach(area, (x, y) => {
+            let buildId = this.getNrj(x,y);
+            if(buildId == 0) //skip the null build
+                return;
+            if(pixList[buildId] === undefined)
+                pixList[buildId] = 0;
+            pixList[buildId]++;
+            this.energyGrid[x + y * 1374] = 0;
+        });
 
-    /**   @brief : like prepareBuild BUT saves the action
-    @return void
-    @details
-        called on click
-
-        will only be called if prepareBuild(...).theorical != True
-
-        must succeed !
-    **/
-    build(buildInfo){
-        if(buildInfo.type == 'pv' || buildInfo.type == 'battery'|| buildInfo.type == 'wind'){
-            // this.buildInfos.push(buildInfo.input.state);
-
-            let r, g, b, a = 255;
-            if(buildInfo.type == 'pv'){r = 70; g = 85; b = 130;}
-            if(buildInfo.type == 'battery'){r = 0; g = 255; b = 250;}
-            if(buildInfo.type == 'wind'){r = 255; g = 255; b = 250; a = 128}
+        for (let [buildInfoIndex, pixCount] of Object.entries(pixList)) {
+            let bm = this.buildInfos[buildInfoIndex];
+            this.simu._c(bm.type).delete(gm, pixCount * pixelArea);
+        }
+    }
 
 
-            let buildIndex = this.drawer.energy.appendPalette(r, g, b, a);
+    build(build){
+        if(['pv', 'battery', 'wind'].includes(build.info.type) ){
+            this.buildParameters.push(build.parameters);
 
-            this._forEach({center: buildInfo.input.curPos, radius: buildInfo.input.radius}, (x, y) => {
-                const nrj = this.getNrj(x,y);
-                const lu = this.getGroundUse(x,y);
-                if((lu == GroundUsage.field || lu == GroundUsage.field2
-                    || lu == GroundUsage.forest || lu == GroundUsage.forest2)
-                    && nrj == 0)
-                        this.energyGrid[x + y * 1374] = buildIndex;
-            });
+            let buildIndex = this.drawer.appendEnergyPalette(build.info.type);
 
-        this.drawer.update('energy');
-        this.drawer.draw();
-      } else if(buildInfo.type == 'nuke' || buildInfo.type == 'ccgt'){
-            this.drawer.addItem(buildInfo.type, buildInfo.input.curPos);
+            this._forEachIf(build.area, (x, y) => {
+                this.energyGrid[x + y * 1374] = buildIndex;
+            }, ["buildable"]);
+
+            this.drawer.update('energy');
+            this.drawer.draw();
+        }
+        else if(['ccgt', 'nuke'].includes(build.info.type)){
+            this.drawer.addItem(build.info.type, build.area.center);
             this._centrals.push({
-                type:buildInfo.type,
-                loc: buildInfo.input.curPos,
-                dangerRadius: nuclearDisasterRadius,
+                type:build.info.type,
+                loc: build.area.center
             });
-        } else{
-            throw 'to do';
+        }
+        else {
+          throw 'todo';
         }
     }
 
@@ -345,6 +322,33 @@ export default class MapComponent{
         }
     }
 
+    _forEachIf(area, callback, conditions){
+        if( conditions === undefined)
+            conditions = [];
+
+        if(conditions.length == 0)
+            conditions = ['inCountry'];
+
+        const nCond = conditions.length;
+
+        if(nCond > 1)
+            throw 'todo : de comment the loop in f'
+
+        for(let i = 0; i < nCond; i++)
+            conditions[i] = 'is' + conditions[i].charAt(0).toUpperCase() + conditions[i].substring(1);
+
+        let fun = (x, y) => {
+          // for(let i = 0; i < nCond; i++){
+              if(!this[conditions[0]](x, y))
+                  return;
+          // }
+
+            callback(x, y);
+        }
+
+        this._forEach(area, fun);
+    }
+
     /// set pixel x, y with value with same format as get
     setPx(x, y, changes){
         let conv = {
@@ -372,11 +376,6 @@ export default class MapComponent{
     poolIndexAt(p){
       //to hydro pos
       let pos = this._regToHydroCoord(p);
-
-      // if(pos.x >= 0 && pos.y >= 0 &&   //in the sea box
-      //   pos.x < 349 && pos.y < 177 &&
-      //   this.sea[pos.x + pos.y * 349] == 1) //the sea box is 1
-      //     return 255;
 
       if(pos.x < 0 || pos.y < 0 || pos.x >= 748 || pos.y >= 631)
         return null;

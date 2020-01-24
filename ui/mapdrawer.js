@@ -90,6 +90,18 @@ export default class MapDrawer{
         this[layerName].update(this[layerName+'Src']);
     }
 
+    appendEnergyPalette(type){
+      let r, g, b, a = 255;
+      if(type == 'pv'){r = 70; g = 85; b = 130;}
+      else if(type == 'battery'){r = 0; g = 255; b = 250;}
+      else if(type == 'wind'){r = 255; g = 255; b = 250; a = 128}
+      else {
+        throw 'todo';
+      }
+
+      return this.energy.appendPalette(r, g, b, a);
+
+    }
 
     /// @brief draws a cursor of the given type at the given location.
     /// radius can be ommited

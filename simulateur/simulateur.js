@@ -1,6 +1,7 @@
 import ProductionComponent from './productioncomponent.js';
 import MapComponent from './mapcomponent.js';
 import HydroComponent from './hydrocomponent.js';
+import BuildScheduler from './buildScheduler.js';
 import { quantityToHuman as valStr} from '../ui/plot.js';
 import * as Yearly from "../timevarin.js";
 
@@ -25,9 +26,10 @@ store general values
 */
 export class Simulateur{
     constructor(createInfo, valChangedCallbacks){
-        this.cMap = new MapComponent(createInfo.map);
+        this.cMap = new MapComponent(createInfo.map, this);
         this.cHydro = new HydroComponent(createInfo.hydro);
         this.cProd = new ProductionComponent(createInfo.production, this);
+        this.cScheduler = new BuildScheduler();
 
         this.valChangedCallbacks = valChangedCallbacks;
 
@@ -82,55 +84,61 @@ export class Simulateur{
         if(buildMenuState === undefined)
             return;
 
-        // this._bm = {state:buildMenuState, curPos:curPos, radius:radius};
+        buildMenuState.year = this.year;
 
         //reset the current build
         this._currentBuild = {};
 
-        this._currentBuild.input = {state:buildMenuState, curPos:curPos, radius:radius};
+        this._currentBuild.parameters = buildMenuState;
+        this._currentBuild.area =  {center:curPos, radius:radius};
 
-        // this._currentBuild.currentYear = year;
-        this._currentBuild.build= {begin: this.year};
-        // this._currentBuild.pos = curPos;
-        this._currentBuild.type = buildMenuState.type;
+        this._currentBuild.info = {type: buildMenuState.type, build:{begin: this.year}};
 
-        this.cMap.updateCursor(this._currentBuild.input);
-
-        this.cProd.prepareBuild(this._currentBuild);
+        this._c(buildMenuState.type).prepareCapex(this._currentBuild, this.cProd.countries);
 
         return this._currentBuild;
+    }
+
+    /** @brief return requested component (ex : pv -> pv, battery -> storage) */
+    _c(type){
+        if(type == 'battery')
+            return this.cProd.productionMeans.storage;
+        else {
+            return this.cProd.productionMeans[type];
+        }
     }
 
     //called on click on the map
     confirmCurrentBuild(){
         // only build in present
         if(this._currentBuild === undefined
-            || this._currentBuild.build.begin != this.year){
+            || this._currentBuild.info.build.begin != this.year){
                 console.log('can only build in present');
                 return;
         }
 
-        if(this._currentBuild.build.cost > this._money){
+        if(this._currentBuild.info.build.cost > this._money){
           console.log('no enough cash');
           return false;
         }
 
-        if(this._currentBuild.input.curPos === undefined)
+        if(this._currentBuild.area.center === undefined)
             return;
 
-        if(this._currentBuild.theorical){
+        if(this._currentBuild.info.theorical){
           console.log('invalid');
           return false;
         }
 
-        this.cProd.execute(this._currentBuild);
+        this.cScheduler.push(this._currentBuild);
+        // this.cProd.execute(this._currentBuild);
 
         this.cMap.build(this._currentBuild);
 
         //record some stats
-        let action = this._currentBuild.build || this._currentBuild.demolish;
+        let action = this._currentBuild.info.build /*|| this._currentBuild.demolish*/;
 
-        let recorder = this._currentBuild.type;
+        let recorder = this._currentBuild.parameters.type;
         if(recorder == 'battery')
             recorder = 'storage';
         this.yStats.co2.build[recorder] += action.co2;
@@ -201,7 +209,12 @@ export class Simulateur{
         this._computeTaxIncome();
 
         //wish a happy new year to everybody
-        this.cProd.happyNYEve(this.yStats);
+        // this.cProd.happyNYEve(this.yStats);
+      	for (var prodMean in this.cProd.productionMeans) {
+
+    				this.cProd.productionMeans[prodMean].happyNYEve(this.yStats);
+    		}
+        this.cScheduler.happyNYEve(this.yStats);
 
         //warning : year -- todo correct
         this._lotsOfSavingOfStatisticsAboutLastYearAndCallbacks();

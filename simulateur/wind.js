@@ -32,16 +32,21 @@ export default class Wind extends IntermittentProductionMean{
   * 						default val = 1
   * @todo:		@param what.seller : {sunPower ,Panasonic, JinkoSolar}. set above params (see parameters.json)
 **/
-  prepareCapex(buildInfo, countries){
-    buildInfo.build.end = this.build.delay + buildInfo.build.begin;
+  prepareCapex(build, countries){
+    build.pm = this;
 
-    if(buildInfo.input.height === undefined){
-        buildInfo.input.height = 50;
-        console.log('set default height');
+
+    let parameters = build.parameters;
+    let info = build.info;
+
+    info.build.end = this.build.delay + info.build.begin;
+
+    if(parameters.height === undefined){
+        parameters.height = 50;
+        // console.log('set default height');
     }
 
-    let a = this.simu.cMap.reduceIf(['area', 'windPower50'],
-                                    {center: buildInfo.input.curPos, radius: buildInfo.input.radius},
+    let a = this.simu.cMap.reduceIf(['area', 'windPower50'], build.area,
                                     ['buildable']);
     let area = a[0];
     let windPower = a[1];
@@ -60,30 +65,30 @@ export default class Wind extends IntermittentProductionMean{
 
     let initNameplate
         = section * windPowerDensity
-          * this.efficiency.at(buildInfo.build.begin);
-    buildInfo.nameplate = new Yearly.Raw(initNameplate);
-    buildInfo.nameplate.unit = 'N';
+          * this.efficiency.at(info.build.begin);
+    info.nameplate = new Yearly.Raw(initNameplate);
+    info.nameplate.unit = 'N';
 
 
-    buildInfo.build.co2 = 0; // C / Wh
-    buildInfo.build.cost  = initNameplate * // W
-        this.build.cost.at(buildInfo.build.begin);  // eur/W
+    info.build.co2 = 0; // C / Wh
+    info.build.cost  = initNameplate * // W
+        this.build.cost.at(info.build.begin);  // eur/W
 
-    buildInfo.pm = this;
 
-    buildInfo.perYear = {cost: this.perYear.cost.at(buildInfo.build.end) * initNameplate, co2: 0};
-    buildInfo.perWh = {cost: 0, co2: 0};
-    buildInfo.avgCapacityFactor = 0.229; //todo : do a real computation ?
+    info.perYear = {cost: this.perYear.cost.at(info.build.end) * initNameplate, co2: 0};
+    info.perWh = {cost: 0, co2: 0};
+    info.avgCapacityFactor = 0.229; //todo : do a real computation ?
   }
 
   //note : must be called when simu.year = cmd.build.end
   capex(build){
-    if(build.type != 'wind')
-      throw 'wind.capex; build.type != wind';
+    if(build.info.type != 'wind')
+      throw 'wind.capex; build.info.type != wind';
 
-    let nameplate = build.nameplate.at(build.build.end);
+    let nameplate = build.info.nameplate.at(build.info.build.end);
 
     this.capacity += nameplate;
+
   }
 
 

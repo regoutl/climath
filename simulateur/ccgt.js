@@ -12,44 +12,49 @@ export default class Ccgt extends RegularProductionMean{
   }
 
   prepareCapex(build, countries){
-    build.build.end = this.build.delay + build.build.begin;
+    build.pm = this;
+
+    let parameters = build.parameters;
+    let info = build.info;
+
+    info.build.end = this.build.delay + info.build.begin;
 
 
 
     let nameplate;
     //check for parameters
-    if(build.input.nameplate === undefined)
+    if(parameters.nameplate === undefined)
 //      throw 'must define a nameplate';
         nameplate = 1.6e9;
         // console.log('set default nameplate');
 
-    build.nameplate = new Yearly.Raw(nameplate);
-    build.nameplate.unit = 'N';
+    info.nameplate = new Yearly.Raw(nameplate);
+    info.nameplate.unit = 'N';
 
-    build.build.co2 = nameplate // m2
-        * this.build.co2.at(build.build.begin);
+    info.build.co2 = nameplate // m2
+        * this.build.co2.at(info.build.begin);
 
-    build.build.cost  = nameplate * // w
-        this.build.cost.at(build.build.begin);  // eur/w
+    info.build.cost  = nameplate * // w
+        this.build.cost.at(info.build.begin);  // eur/w
 
 
-    build.pm = this;
+    info.pm = this;
 
-    build.perYear = {cost: this.perYear.cost.at(build.build.end) * nameplate, co2: 0};
-    build.perWh = {
-      cost: this.perWh.cost.at(build.build.end),
-      co2:  this.perWh.co2.at(build.build.end)};
-    build.avgCapacityFactor = this._capacityFactor;
+    info.perYear = {cost: this.perYear.cost.at(info.build.end) * nameplate, co2: 0};
+    info.perWh = {
+      cost: this.perWh.cost.at(info.build.end),
+      co2:  this.perWh.co2.at(info.build.end)};
+    info.avgCapacityFactor = this._capacityFactor;
 
-    build.primEnergyEffi = this.primEnergyEffi;
+    info.primEnergyEffi = this.primEnergyEffi;
   }
 
   //note : must be called when simu.year = cmd.build.end
   capex(build){
-    if(build.type != 'ccgt')
-      throw 'ccgt.capex; build.type != ccgt';
+    if(build.info.type != 'ccgt')
+      throw 'ccgt.capex; build.info.type != ccgt';
 
-    let nameplate = build.nameplate.at(build.build.end);
+    let nameplate = build.info.nameplate.at(build.info.build.end);
 
     this.capacity += nameplate;
   }

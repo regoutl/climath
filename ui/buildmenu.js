@@ -13,10 +13,14 @@ export let curPos = undefined;
 
 let stateChangedCallback = undefined;
 
+let simu = null;
+
 /** @brief set the callback function to be called each time
             the state or radius changes
 */
-export function setSimu(simu){
+export function setSimu(s){
+  simu = s;
+
   stateChangedCallback =  simu.onBuildMenuStateChanged.bind(simu);
 
   simu.cMap.drawer.on('mousemove',function(evt){
@@ -81,9 +85,11 @@ $(function(){
 });
 
 
-export function displayStat(cmd){
-  if(cmd === undefined)
+export function displayStat(build){
+  if(build === undefined)
     return;
+
+    let cmd = build.info;
 
   ['build', 'perYear', 'perWh'].forEach( fieldName => {
     let cap = fieldName.substr(0, 1).toUpperCase() + fieldName.substr(1);
@@ -182,4 +188,16 @@ export function displayStat(cmd){
 
 
 
+  //maybe move it
+
+  //defines a cursor
+  let theorical = (build.area.center === undefined);
+
+  if(!theorical){
+      simu.cMap.drawer.drawCursor(build.parameters.type, build.area.center, build.area.radius);
+  } else{
+      //clear cursor
+      simu.cMap.drawer.clearCursor();
+  }
+  // simu.cMap.drawer.updateCursor(build.input);
 }

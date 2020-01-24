@@ -52,64 +52,66 @@ export default class Pv extends IntermittentProductionMean{
   * @todo:		@param what.seller : {sunPower ,Panasonic, JinkoSolar}. set above params (see parameters.json)
 **/
   prepareCapex(build, countries){
-    build.build.end = this.build.delay + build.build.begin;
+    build.pm = this;
+
+
+    let parameters = build.parameters;
+    let info = build.info;
+    info.build.end = this.build.delay + info.build.begin;
 
 
 
-    let a = this.simu.cMap.reduceIf(['area', 'radiantFlux'],
-                                    {center: build.input.curPos, radius: build.input.radius},
-                                    ['buildable']);
+    let a = this.simu.cMap.reduceIf(['area', 'radiantFlux'], build.area, ['buildable']);
     let area = a[0];
-    build.area = area;
+    info.area = area;
     let radiantFlux  = a[1];
 
-    if(build.input.effiMul === undefined)
-      build.input.effiMul = 1;
-    if(build.input.madeIn === undefined)
-      build.input.madeIn = 'china';
-    if(build.input.installedIn === undefined)
-      build.input.installedIn = 'belgium';
-    if(build.input.powerDecline === undefined)
-      build.input.powerDecline = 1;
-    if(build.input.priceMul === undefined)
-      build.input.priceMul = 1;
+    if(parameters.effiMul === undefined)
+      parameters.effiMul = 1;
+    if(parameters.madeIn === undefined)
+      parameters.madeIn = 'china';
+    if(parameters.installedIn === undefined)
+      parameters.installedIn = 'belgium';
+    if(parameters.powerDecline === undefined)
+      parameters.powerDecline = 1;
+    if(parameters.priceMul === undefined)
+      parameters.priceMul = 1;
 
 
     let initNameplate
         = radiantFlux
-          * this.efficiency.at(build.build.begin)
-          * build.input.effiMul;
-    build.nameplate = new Yearly.Expo(build.build.end,
+          * this.efficiency.at(info.build.begin)
+          * parameters.effiMul;
+    info.nameplate = new Yearly.Expo(info.build.end,
                                     initNameplate,
-                                    build.input.powerDecline);
-    build.nameplate.unit = 'N';
+                                    parameters.powerDecline);
+    info.nameplate.unit = 'N';
 
 
-    build.build.co2 = area // m2
-        * this.build.energy.at(build.build.begin)  // wH / m2
-        * countries[build.input.madeIn].elecFootprint.at(build.build.begin); // C / Wh
-    build.build.cost  = area * build.input.priceMul * // m2
-        this.build.cost.at(build.build.begin);  // eur/m2
+    info.build.co2 = area // m2
+        * this.build.energy.at(info.build.begin)  // wH / m2
+        * countries[parameters.madeIn].elecFootprint.at(info.build.begin); // C / Wh
+    info.build.cost  = area * parameters.priceMul * // m2
+        this.build.cost.at(info.build.begin);  // eur/m2
 
-    build.pm = this;
 
-    build.perYear = {cost: this.perYear.cost.at(build.build.end) * area, co2: 0};
-    build.perWh = {cost: 0, co2: 0};
-    build.avgCapacityFactor = 0.12; //todo : do a real computation ?
+    info.perYear = {cost: this.perYear.cost.at(info.build.end) * area, co2: 0};
+    info.perWh = {cost: 0, co2: 0};
+    info.avgCapacityFactor = 0.12; //todo : do a real computation ?
   }
 
   //note : must be called when simu.year = cmd.build.end
-  capex(buildInfo){
-    if(buildInfo.type != 'pv')
-      throw 'PV.capex; buildInfo.type != pv';
+  capex(build){
+    if(build.info.type != 'pv')
+      throw 'PV.capex; build.Info.type != pv';
 
-    this.area += buildInfo.area;
+    this.area += build.info.area;
 
-    let nameplate = buildInfo.nameplate.at(buildInfo.build.end);
+    let nameplate = build.info.nameplate.at(build.info.build.end);
 
     this.capacity += nameplate;
 
-  	let powerDecline = buildInfo.nameplate.rate;
+  	let powerDecline = build.info.nameplate.rate;
 
   	if(!this.groups.has(powerDecline))
   		this.groups.set(powerDecline, nameplate);

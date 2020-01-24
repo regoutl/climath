@@ -1,7 +1,6 @@
 "use strict";
 
 import * as Yearly from "../timevarin.js";
-import PriorityQueue from '../res/priorityqueue.js';
 import Pv from './pv.js';
 import Fossil from './fossil.js';
 import Storage from './storage.js';
@@ -26,8 +25,6 @@ export default class ProductionComponent{
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
 		this.productionMeansOrder = ['pv', 'wind', 'nuke', 'storage', 'ccgt', 'fossil'];
 
-		// top := next to be finished build
-		this.pendingBuilds = new PriorityQueue((a, b) => a.build.end < b.build.end);
 
 		this.productionMeans = {
 			pv: new Pv(parameters.energies.pv, simu),
@@ -69,69 +66,6 @@ out.stats.consumedEnergy := {
 		}
 	}
 
-
-
-
-	/** @brief get the data about an installation
-	 * @param build.type : pv or nuke. required.
-	 * IF build.type == pv => check PV.prepareCapex
-	 * IF build.type == battery => check Storage.prepareCapex
-	 *
-	 * @param beginBuildYear year of the build (of the click). default value : current year.
-	 * @note for demolish, still pass the year of the beginning of the construction.
-	 *
-	 * @returns : check the specialized functions. but always returns
-	 * IF nameplate > 0
-	 * 			{build.co2  	  : co2 for the build
-	 * 			build.cost      : cost of the build
-	 * 			build.begin		: year of the beginning of the build (@see param startBuildYear)
-	 * 			build.end		: year of the 1st production
-	 * 			}
-	 * ELSE
-	 * 			{demolish.co2  	  : co2 for the demolish
-	 * 			demolish.cost      : cost of the demolish
-	 * 			nameplate : (Yearly value) peak watt production (will be negative)
-	 * 			}
-	 * ENDIF
-	 */
-	prepareBuild(build){
-		let what = build;
-		if(what.type == 'battery')
-			this.productionMeans.storage.prepareCapex(build, this.countries);
-		else
-			this.productionMeans[build.type]
-						.prepareCapex(build, this.countries);
-
-	}
-
-	/** @brief build stuff. cmd is the object returned by prepareBuild
-	 *  @ex capex(prepareCapex({type:pv, area:10})) // build 10 m2 of pv
-	 * @note : the build begin year must be the current one
-	 @return true on success.
-	 */
-	execute(cmd){
-		if(!cmd)
-			return;
-
-		if(cmd.build){
-			this.pendingBuilds.push(cmd);
-		}
-		else if(cmd.demolish)
-			this._processBuild(cmd);
-
-
-		return true;
-	}
-
-	happyNYEve(yStats){
-		for (var prodMean in this.productionMeans) {
-		    if (!this.productionMeans.hasOwnProperty(prodMean)) continue;
-
-				this.productionMeans[prodMean].happyNYEve(yStats);
-		}
-
-		 this._processPendingBuilds(yStats.year);
-	}
 
 	/**
 	* @brief simulate a hour in a year : compute co2 and cost; tries to load the storage
@@ -203,20 +137,6 @@ out.stats.consumedEnergy := {
 
 
 
-	_processPendingBuilds(year){
-		let a =this.pendingBuilds.peek();
-		while(a && a.build.end == year+1){
-			this._processBuild(this.pendingBuilds.pop());
-
-			a =this.pendingBuilds.peek();
-		}
-	}
-
-	_processBuild(build){
-
-		build.pm.capex(build);
-
-	}
 
 	/// private function. init a lot of thing based on parametesr.json
 	_initCountries(countries){
@@ -260,5 +180,4 @@ out.stats.consumedEnergy := {
 		self.params['pvDeco'].label = "Couts de démantèlement du photovoltaique";
 		self.params['pvDeco'].source = "https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf";*/
 	}
-
 }
