@@ -95,6 +95,14 @@ export default class MapComponent{
         return Math.floor(popDensity * kmpixratio * 1.06);
     }
 
+    getNrj(x,y){
+        return this.energyGrid[y*1374+x];
+    }
+
+    getGroundUse(x,y){
+        return this.groundUse[y*1374+x];
+    }
+
     updateCursor(buildInput){
       let theorical = (buildInput.curPos === undefined);
 
@@ -104,7 +112,6 @@ export default class MapComponent{
           //clear cursor
           this.drawer.clearCursor();
       }
-
     }
 
 
@@ -191,16 +198,15 @@ export default class MapComponent{
     populationAt(x, y){return this.getPopDensity(x, y) * pixelArea;}
 
     isInCountry(x, y){
-        const pix = this.getPx(x, y);
-        const lu = pix.baseLandUse;
+        const lu = this.getGroundUse(x, y);
         return lu != GroundUsage.out;
     }
     isBuildable(x, y){
-        const pix = this.getPx(x, y);
-        const lu = pix.baseLandUse;
+        const lu = this.getGroundUse(x, y);
+        const nrj = this.getNrj(x,y);
         return (lu == GroundUsage.field || lu == GroundUsage.field2
             || lu == GroundUsage.forest || lu == GroundUsage.forest2)
-            && pix.nrj == 0;
+            && nrj == 0;
     }
 
 
@@ -227,11 +233,11 @@ export default class MapComponent{
             let buildIndex = this.drawer.energy.appendPalette(r, g, b, a);
 
             this._forEach({center: buildInfo.input.curPos, radius: buildInfo.input.radius}, (x, y) => {
-                const pix = this.getPx(x, y);
-                const lu = pix.baseLandUse;
+                const nrj = this.getNrj(x,y);
+                const lu = this.getGroundUse(x,y);
                 if((lu == GroundUsage.field || lu == GroundUsage.field2
                     || lu == GroundUsage.forest || lu == GroundUsage.forest2)
-                    && pix.nrj == 0)
+                    && nrj == 0)
                         this.energyGrid[x + y * 1374] = buildIndex;
             });
 
@@ -239,11 +245,11 @@ export default class MapComponent{
         this.drawer.draw();
       } else if(buildInfo.type == 'nuke' || buildInfo.type == 'ccgt'){
             this.drawer.addItem(buildInfo.type, buildInfo.input.curPos);
-            // this._nukeCentrals.push({
-            //     type:buildInfo.type,
-            //     loc: buildInfo.input.curPos,
-            //     dangerRadius: nuclearDisasterRadius,
-            // });
+            this._centrals.push({
+                type:buildInfo.type,
+                loc: buildInfo.input.curPos,
+                dangerRadius: nuclearDisasterRadius,
+            });
         } else{
             throw 'to do';
         }
@@ -284,15 +290,9 @@ export default class MapComponent{
         let affected_central = 0;
         area.radius = nuclearDisasterRadius;
         this._forEach(area, (x,y) => {
-            let pix = this.getPx(x,y);
             let sameloc = v => v !== -1 && v.loc.x === x && v.loc.y === y;
             let central_id = this._centrals.findIndex(sameloc);
-            // pix.nrj => destroyed
-            // baseLandUse => destroyed
-            // pop => should move
-            // price per home => mean be :197.000
-            // topay += 197000 * pix.pop;
-            pop_affected += pix.pop;
+            pop_affected += this.getPopDensity(x,y);
             if(set){
                 this.setPx(x, y, {
                     baseLandUse:0,
@@ -344,35 +344,6 @@ export default class MapComponent{
             }
         }
     }
-
-    /// return the land use at a given pixel.
-    /// faire l'ajoute des pv
-    /// ans format : pop  => int,
-    ///              solar => {//can be undefined
-    ///                     efficiency multiplicator
-    ///                     powerdelcine per year
-    ///                     installation Capacity
-    ///              },
-    ///              nuke => { //can be undefined
-    ///              }
-    ///              bat => { //can be undefined
-    ///              }
-    /// baseLandUse => { //undefined = out of country
-    ///     City,
-    ///     Field
-    ///     Forest
-    ///     Water
-    ///     economicalInterestArea
-    ///     Airport
-    /// }
-    getPx(x, y){
-        return {
-            nrj: this.energyGrid[y*1374+x],
-            baseLandUse: this.groundUse[y*1374+x],
-            pop: this.getPopDensity(x,y),
-        }
-    }
-
 
     /// set pixel x, y with value with same format as get
     setPx(x, y, changes){

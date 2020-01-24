@@ -47,7 +47,6 @@ export default class Nuke extends RegularProductionMean{
     if(buildInfo.input.nameplate === undefined)
 //      throw 'must define a nameplate';
         nameplate = 3e9;
-        console.log('set default nameplate');
 
     buildInfo.nameplate = new Yearly.Raw(nameplate);
     buildInfo.nameplate.unit = 'N';

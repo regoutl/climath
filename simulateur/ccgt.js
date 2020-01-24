@@ -21,7 +21,7 @@ export default class Ccgt extends RegularProductionMean{
     if(build.input.nameplate === undefined)
 //      throw 'must define a nameplate';
         nameplate = 1.6e9;
-        console.log('set default nameplate');
+        // console.log('set default nameplate');
 
     build.nameplate = new Yearly.Raw(nameplate);
     build.nameplate.unit = 'N';
