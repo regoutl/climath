@@ -2,10 +2,11 @@ import PaletteTexture from './palettetexture.js';
 
 
 export default class MapDrawer{
+    currentShowBase = 'groundUse';//or popDensity or windPowDens
+
     currentShowGrid = {
         'energyGrid':true,
         'flows':false,
-        'popDensity':false,
     };
 
     constructor(arg){
@@ -39,7 +40,8 @@ export default class MapDrawer{
 
         this.energySrc = arg.energy;
     		this.groundUseSrc = arg.groundUse;
-    		this.popDensitySrc = arg.popDensity
+        this.popDensitySrc = arg.popDensity;
+        this.windPowDensSrcs = arg.windPowDens;//note : dic of {at50: array, at100: array, ...}
     		this._initTextures();
 
 
@@ -68,10 +70,9 @@ export default class MapDrawer{
 
         gl.clearColor(1, 1, 1, 1);
         this.clear();
-        if(this.currentShowGrid.popDensity)
-            this._drawTex(this.popDensity);
-        else
-            this._drawTex(this.groundUse);
+
+
+        this._drawTex(this[this.currentShowBase]);
 
         if(this.currentShowGrid.energyGrid)
             this._drawTex(this.energy);
@@ -93,7 +94,7 @@ export default class MapDrawer{
     /// @brief draws a cursor of the given type at the given location.
     /// radius can be ommited
     drawCursor(type, pos, radius){
-      if(type == 'pv' || type == 'battery'){
+      if(type == 'pv' || type == 'battery' || type == 'wind'){
         const ctx = this.ctxTop;
         ctx.clearRect(0, 0,
             this.ctxTop.canvas.width,
@@ -248,6 +249,7 @@ export default class MapDrawer{
         this._initTexGroundUse();
         this._initTexPopDensity();
         this._initTexFlows();
+        this._initWindPowDens();
     }
 
     _initTexGroundUse(){
@@ -301,6 +303,73 @@ export default class MapDrawer{
         });
 
     }
+    _initWindPowDens(){
+      this.windPowDensAt50 = new PaletteTexture(this.gl, 1);
+
+      this.windPowDensAt50.appendPalette( 255 , 255 ,  255 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 197 , 233 ,  250 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 178 , 226 ,  249 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 141 , 204 ,  238 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 123 , 187 ,  229 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 106 , 173 ,  220 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 90 , 158 ,  212 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 72 , 142 ,  202 );
+      for(let i =0; i< 3 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 72 , 150 ,  173 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 72 , 158 ,  148 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 73 , 165 ,  124 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 73 , 173 ,  99 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 73 , 181 ,  70 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 111 , 192 ,  75 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 145 , 202 ,  79 );
+      for(let i =0; i< 2 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 178 , 211 ,  83 );
+      for(let i =0; i< 3 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 212 , 221 ,  87 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 250 , 232 ,  92 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 249 , 208 ,  82 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 248 , 184 ,  73 );
+      for(let i =0; i< 6 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 247 , 160 ,  63 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 246 , 137 ,  53 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 245 , 106 ,  41 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 238 , 92 ,  41 );
+      for(let i =0; i< 6 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 232 , 78 ,  41 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 226 , 63 ,  40 );
+      for(let i =0; i< 5 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 211 , 31 ,  40 );
+      for(let i =0; i< 12 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 199 , 35 ,  52 );
+      for(let i =0; i< 11 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 188 , 39 ,  65 );
+      for(let i =0; i< 12 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 176 , 43 ,  77 );
+      for(let i =0; i< 11 ;i++)this.windPowDensAt50.appendPalette(0, 0, 0, 0);
+      this.windPowDensAt50.appendPalette( 165 , 47 ,  90 );
+
+      this.windPowDensAt50.update(this.windPowDensSrcs.at50);
+    }
 
     clear(){
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
@@ -323,25 +392,44 @@ export default class MapDrawer{
 
 
     _setGridLayerCheckbox() {
-        let layers = ['popDensity', 'energyGrid', 'flows'];
-
         let grid = this;
+        let bases = ['groundUse', 'popDensity', 'windPowDensAt50'];
+        bases.forEach((m) => {
+            let radiobutton = $('<label><input type="radio" name="showBase"' +
+                ' value="'+ m + '"' +
+                (this.currentShowBase == m ? 'checked':'') + '> ' +
+                m + '</label><br>');
+            $('#gridLayers').append(radiobutton);
+        });
+
+        $('#gridLayers input:radio').on('change',
+        function() {
+            grid.currentShowBase = $(this).val();
+            grid.draw();
+        });
+
+
+
+        let layers = ['energyGrid', 'flows'];
+
         layers.forEach((m) => {
             let checkbox = $('<label>' + '<input type="checkbox"'+
                 'name="' + m + '"' + ' value="'+ m + '"' +
                 (this.currentShowGrid[m] ? 'checked':'') + '> ' +
                 m + '</label><br>');
             $('#gridLayers').append(checkbox);
-            $('#gridLayers input:checkbox').on('change',
-            function() {
-                grid.currentShowGrid[$(this).val()] = $(this).is(':checked');
-                grid.draw();
-                if($(this).val() == 'energyGrid'){
-                    $('.energyRelated').css({
-                        'opacity': $(this).is(':checked') ? 1.0: 0,
-                    });
-                }
-            });
+        });
+
+
+        $('#gridLayers input:checkbox').on('change',
+        function() {
+            grid.currentShowGrid[$(this).val()] = $(this).is(':checked');
+            grid.draw();
+            if($(this).val() == 'energyGrid'){
+                $('.energyRelated').css({
+                    'opacity': $(this).is(':checked') ? 1.0: 0,
+                });
+            }
         });
     }
 

@@ -27,7 +27,7 @@ export class Simulateur{
     constructor(createInfo, valChangedCallbacks){
         this.cMap = new MapComponent(createInfo.map);
         this.cHydro = new HydroComponent(createInfo.hydro);
-        this.cProd = new ProductionComponent(createInfo.production, this.cHydro);
+        this.cProd = new ProductionComponent(createInfo.production, this);
 
         this.valChangedCallbacks = valChangedCallbacks;
 
@@ -68,6 +68,8 @@ export class Simulateur{
 
     get money(){return this._money;}
     set money(val){
+        if(isNaN(val))
+          throw 'nan';
         this._money = val;
         this.valChangedCallbacks.money(this._money);
     }
@@ -80,30 +82,26 @@ export class Simulateur{
         if(buildMenuState === undefined)
             return;
 
-        this._bm = {state:buildMenuState, curPos:curPos, radius:radius};
+        // this._bm = {state:buildMenuState, curPos:curPos, radius:radius};
 
         //reset the current build
         this._currentBuild = {};
 
-        // this._currentBuild._bm = {state:buildMenuState, curPos:curPos, radius:radius};
+        this._currentBuild.input = {state:buildMenuState, curPos:curPos, radius:radius};
 
         // this._currentBuild.currentYear = year;
         this._currentBuild.build= {begin: this.year};
-        this._currentBuild.pos = curPos;
+        // this._currentBuild.pos = curPos;
+        this._currentBuild.type = buildMenuState.type;
 
         //ask the grid about ground usage aso
-        this.cMap.prepareBuild(this._currentBuild, buildMenuState,
-            {shape:'circle', center:curPos, radius:radius});
+//        this.cMap.prepareBuild(this._currentBuild, buildMenuState,
+//            {shape:'circle', center:curPos, radius:radius});
 
+        this.cMap.updateCursor(this._currentBuild.input);
 
         // console.log(this._currentBuild.nameplate.at(this._currentBuild.build.end));
         this.cProd.prepareBuild(this._currentBuild);
-
-
-        if(this._currentBuild.build){
-            this._currentBuild.build.can = this._currentBuild.build.cost < this._money;
-        }
-
 
         return this._currentBuild;
     }
@@ -128,8 +126,8 @@ export class Simulateur{
         }
 
         this.cProd.execute(this._currentBuild);
-        this.cMap.build(this._bm.state,
-            {shape:'circle', center:this._bm.curPos, radius:this._bm.radius});
+
+        this.cMap.build(this._currentBuild);
 
         //record some stats
         let action = this._currentBuild.build || this._currentBuild.demolish;
@@ -224,7 +222,7 @@ export class Simulateur{
         let y = this.yStats.year + 1;
 
         function nrgs(){
-          return {fossil: 0, pv: 0, nuke:0, storage: 0, ccgt: 0};
+          return {fossil: 0, pv: 0, nuke:0, storage: 0, ccgt: 0, wind: 0};
         }
 
         this.yStats = {
@@ -266,6 +264,10 @@ export class Simulateur{
     }
 }
 
+
+
+
+
 /// load all data needed for a simulater &
 /// return a promise when its ready
 export function promiseSimulater(valChangedCallbacks){
@@ -284,6 +286,8 @@ export function promiseSimulater(valChangedCallbacks){
         .then(response => response.arrayBuffer()),
     fetch('hydro/sea.bin')
         .then(response => response.arrayBuffer()),
+    fetch('res/windPowDens50.bin')
+        .then(response => response.arrayBuffer()),
     ])
     //called when all simu related res are loaded
     .then(function(values){
@@ -294,6 +298,7 @@ export function promiseSimulater(valChangedCallbacks){
         simuCreateInfo.map = {
             groundUse: new Uint8Array(values[1]),
             popDensity: new Uint8Array(values[5]),
+            windPowDens:{at50:new Uint8Array(values[7])},
         };
 
         simuCreateInfo.hydro = {

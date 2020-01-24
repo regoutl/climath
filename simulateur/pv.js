@@ -3,8 +3,10 @@ import * as Yearly from "../timevarin.js";
 
 
 export default class Pv extends IntermittentProductionMean{
-  constructor(parameters) {
+  constructor(parameters, simu) {
     super(parameters, 'pv');
+
+    this.simu = simu;
 
     /// store pv with same stat. only used for yearly capacity update
     /// store, for each (powerDeclinePerYears) the installed capacity
@@ -49,62 +51,65 @@ export default class Pv extends IntermittentProductionMean{
   * 						default val = 1
   * @todo:		@param what.seller : {sunPower ,Panasonic, JinkoSolar}. set above params (see parameters.json)
 **/
-  prepareCapex(what, countries){
-    let ans = what;
-    ans.build.end = this.build.delay + ans.build.begin;
+  prepareCapex(build, countries){
+    build.build.end = this.build.delay + build.build.begin;
 
-    //check for parameters
-    if(what.area === undefined)
-      throw 'must define an area';
 
-    if(what.effiMul === undefined)
-      what.effiMul = 1;
-    if(what.madeIn === undefined)
-      what.madeIn = 'china';
-    if(what.installedIn === undefined)
-      what.installedIn = 'belgium';
-    if(what.powerDecline === undefined)
-      what.powerDecline = 1;
-    if(what.priceMul === undefined)
-      what.priceMul = 1;
+
+    let a = this.simu.cMap.reduceIf(['area', 'radiantFlux'],
+                                    {center: build.input.curPos, radius: build.input.radius},
+                                    ['buildable']);
+    let area = a[0];
+    build.area = area;
+    let radiantFlux  = a[1];
+
+    if(build.input.effiMul === undefined)
+      build.input.effiMul = 1;
+    if(build.input.madeIn === undefined)
+      build.input.madeIn = 'china';
+    if(build.input.installedIn === undefined)
+      build.input.installedIn = 'belgium';
+    if(build.input.powerDecline === undefined)
+      build.input.powerDecline = 1;
+    if(build.input.priceMul === undefined)
+      build.input.priceMul = 1;
 
 
     let initNameplate
-        = what.area
-          * this.efficiency.at(ans.build.begin)
-          * countries[what.installedIn].irradiance
-          * what.effiMul;
-    ans.nameplate = new Yearly.Expo(ans.build.end,
+        = radiantFlux
+          * this.efficiency.at(build.build.begin)
+          * build.input.effiMul;
+    build.nameplate = new Yearly.Expo(build.build.end,
                                     initNameplate,
-                                    what.powerDecline);
-    ans.nameplate.unit = 'N';
+                                    build.input.powerDecline);
+    build.nameplate.unit = 'N';
 
 
-    ans.build.co2 = what.area // m2
-        * this.build.energy.at(ans.build.begin)  // wH / m2
-        * countries[what.madeIn].elecFootprint.at(ans.build.begin); // C / Wh
-    ans.build.cost  = what.area * what.priceMul * // m2
-        this.build.cost.at(ans.build.begin);  // eur/m2
+    build.build.co2 = area // m2
+        * this.build.energy.at(build.build.begin)  // wH / m2
+        * countries[build.input.madeIn].elecFootprint.at(build.build.begin); // C / Wh
+    build.build.cost  = area * build.input.priceMul * // m2
+        this.build.cost.at(build.build.begin);  // eur/m2
 
-    ans.pm = this;
+    build.pm = this;
 
-    ans.perYear = {cost: this.perYear.cost.at(ans.build.end) * what.area, co2: 0};
-    ans.perWh = {cost: 0, co2: 0};
-    ans.avgCapacityFactor = 0.12; //todo : do a real computation ?
+    build.perYear = {cost: this.perYear.cost.at(build.build.end) * area, co2: 0};
+    build.perWh = {cost: 0, co2: 0};
+    build.avgCapacityFactor = 0.12; //todo : do a real computation ?
   }
 
   //note : must be called when simu.year = cmd.build.end
-  capex(build){
-    if(build.type != 'pv')
-      throw 'PV.capex; build.type != pv';
+  capex(buildInfo){
+    if(buildInfo.type != 'pv')
+      throw 'PV.capex; buildInfo.type != pv';
 
-    this.area += build.area;
+    this.area += buildInfo.area;
 
-    let nameplate = build.nameplate.at(build.build.end);
+    let nameplate = buildInfo.nameplate.at(buildInfo.build.end);
 
     this.capacity += nameplate;
 
-  	let powerDecline = build.nameplate.rate;
+  	let powerDecline = buildInfo.nameplate.rate;
 
   	if(!this.groups.has(powerDecline))
   		this.groups.set(powerDecline, nameplate);

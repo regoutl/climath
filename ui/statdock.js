@@ -83,7 +83,8 @@ $(function(){
   $('#dStats select').on('change', update);
 
   $('#dStats').css({
-    padding: '10px'
+    padding: '10px',
+    background: 'rgb(245, 245, 245)'
   });
 
   $('#dStats p').css({
@@ -114,6 +115,7 @@ let palette =     {nuke: 'yellow',
     storage:'rgb(0, 255, 250)',
     constructions:'red',
     ccgt:'rgb(169, 202, 250)',
+    wind: 'white',
   };
 
 function updateOri(stat){
@@ -155,6 +157,7 @@ function updateFootprint(stat){
   	"fossil":co2.perYear.fossil + co2.perWh.fossil,
   	"storage":co2.perYear.storage + co2.perWh.storage,
     "ccgt":co2.perYear.ccgt + co2.perWh.ccgt,
+    "ccgt":co2.perYear.wind + co2.perWh.wind,
   }, palette );
   ctx.translate(-50, -50);
 }
@@ -176,6 +179,7 @@ function   updateBudget(stat){
   	"fossil":cost.perYear.fossil + cost.perWh.fossil,
   	"storage":cost.perYear.storage + cost.perWh.storage,
     "ccgt":cost.perYear.ccgt + cost.perWh.ccgt,
+    "ccgt":cost.perYear.wind + cost.perWh.wind,
   }, palette );
   ctx.translate(-50, -50);
 

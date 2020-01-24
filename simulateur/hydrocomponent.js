@@ -6,7 +6,7 @@ import {Plot, canvasEnablePloting, quantityToHuman as valStr} from '../ui/plot.j
 @note : maybe move it to nuke component (as it is the only user) ?
 */
 export default class HydroComponent{
-  constructor(createInfo){
+    constructor(createInfo){
     this.poolMap = createInfo.pools.map;
     if(this.poolMap.length != 748 * 631)
       throw 'prob taille';
@@ -34,50 +34,48 @@ export default class HydroComponent{
     this.flowsIndependentCapacity = 0;
   }
 
+    // todo : move to map
+    /** @brief return the pool index at the given pixel.
+    Null if no pool here
+    1000 if sea
 
-
-  prepareBuild(build){
-
-    if(!build.theorical){
+    */
+    poolIndexAt(p){
       //to hydro pos
-      let pos = this._regToHydroCoord(build.pos);
+      let pos = this._regToHydroCoord(p);
 
-      let underSeaLevel =
-        pos.x >= 0 && pos.y >= 0 &&   //in the sea box
+      if(pos.x >= 0 && pos.y >= 0 &&   //in the sea box
         pos.x < 349 && pos.y < 177 &&
-        this.sea[pos.x + pos.y * 349] == 1; //the sea box is 1
+        this.sea[pos.x + pos.y * 349] == 1) //the sea box is 1
+          return 1000;
 
       if(pos.x < 0 || pos.y < 0 || pos.x >= 748 || pos.y >= 631)
-        return false;
+        return null;
 
-
-      let poolIndex = this.poolMap[pos.x + pos.y * 748] - 1;
-      build.theorical = poolIndex == -1 && !underSeaLevel;
-      if(poolIndex > -1){
-        build.river = this.pools[poolIndex].river;
-        build.hydro = {_poolIndex: poolIndex};
-      }
-
-      if(underSeaLevel){
-        build.hydro = {_underSeaLvx: true};
-
-        build.river = "Mer";
-      }
+      let ans = this.poolMap[pos.x + pos.y * 748] - 1
+      if(ans < 0)
+          return null;
+      return ans;
     }
 
-    const waterVapoNrg = 2250; // J / g
-    const waterTCapa = 4185; // J/ kg / K
-    const waterInitTemp = 20;
-    const jToVapM3 = (100 - waterInitTemp) * 1000 *waterTCapa + waterVapoNrg * 1000000;
-    // let whToVapM3 = jToVapM3 / 3600;//wh/m3
+    poolName(index){
+        if(index == 1000)
+            return 'Mer';
+        else
+            return this.pools[index].river;
+    }
 
-    const primEnergyPerProduced = 1 / build.primEnergyEffi;
-    const heatPerEnProduced = primEnergyPerProduced * (1 - build.primEnergyEffi); //
 
-    build.coolingWaterRate = build.nameplate.at(build.build.begin) * build.avgCapacityFactor *
-      heatPerEnProduced / jToVapM3;
-  }
+    addCentral(pool, avgProd, m3PerJ){
+        this.central.push({
+          pool: pool,
+          capa: avgProd,
+          m3perJ: m3perJ
+        });
 
+        this._rdyProb.dirty = true;
+
+    }
   capex(build){
     let avgProd = build.nameplate.at(build.build.begin) * build.avgCapacityFactor;
 

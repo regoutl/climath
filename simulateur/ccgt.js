@@ -11,34 +11,37 @@ export default class Ccgt extends RegularProductionMean{
 
   }
 
-  prepareCapex(what, countries){
-    let ans = what;
-    ans.build.end = this.build.delay + ans.build.begin;
+  prepareCapex(build, countries){
+    build.build.end = this.build.delay + build.build.begin;
 
+
+
+    let nameplate;
     //check for parameters
-    if(what.nameplate === undefined)
-      throw 'must define a nameplate';
+    if(build.input.nameplate === undefined)
+//      throw 'must define a nameplate';
+        nameplate = 1.6e9;
+        console.log('set default nameplate');
 
-    let nameplate = what.nameplate;
-    ans.nameplate = new Yearly.Raw(what.nameplate);
-    ans.nameplate.unit = 'N';
+    build.nameplate = new Yearly.Raw(nameplate);
+    build.nameplate.unit = 'N';
 
-    ans.build.co2 = nameplate // m2
-        * this.build.co2.at(ans.build.begin);
+    build.build.co2 = nameplate // m2
+        * this.build.co2.at(build.build.begin);
 
-    ans.build.cost  = nameplate * // w
-        this.build.cost.at(ans.build.begin);  // eur/w
+    build.build.cost  = nameplate * // w
+        this.build.cost.at(build.build.begin);  // eur/w
 
 
-    ans.pm = this;
+    build.pm = this;
 
-    ans.perYear = {cost: this.perYear.cost.at(ans.build.end) * nameplate, co2: 0};
-    ans.perWh = {
-      cost: this.perWh.cost.at(ans.build.end),
-      co2:  this.perWh.co2.at(ans.build.end)};
-    ans.avgCapacityFactor = this._capacityFactor;
+    build.perYear = {cost: this.perYear.cost.at(build.build.end) * nameplate, co2: 0};
+    build.perWh = {
+      cost: this.perWh.cost.at(build.build.end),
+      co2:  this.perWh.co2.at(build.build.end)};
+    build.avgCapacityFactor = this._capacityFactor;
 
-    ans.primEnergyEffi = this.primEnergyEffi;
+    build.primEnergyEffi = this.primEnergyEffi;
   }
 
   //note : must be called when simu.year = cmd.build.end
