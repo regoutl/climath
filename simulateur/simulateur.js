@@ -94,13 +94,8 @@ export class Simulateur{
         // this._currentBuild.pos = curPos;
         this._currentBuild.type = buildMenuState.type;
 
-        //ask the grid about ground usage aso
-//        this.cMap.prepareBuild(this._currentBuild, buildMenuState,
-//            {shape:'circle', center:curPos, radius:radius});
-
         this.cMap.updateCursor(this._currentBuild.input);
 
-        // console.log(this._currentBuild.nameplate.at(this._currentBuild.build.end));
         this.cProd.prepareBuild(this._currentBuild);
 
         return this._currentBuild;
@@ -119,6 +114,9 @@ export class Simulateur{
           console.log('no enough cash');
           return false;
         }
+
+        if(this._currentBuild.input.curPos === undefined)
+            return;
 
         if(this._currentBuild.theorical){
           console.log('invalid');
@@ -284,8 +282,8 @@ export function promiseSimulater(valChangedCallbacks){
         .then((response) => response.arrayBuffer()),
     fetch('res/popDensity.bin')
         .then(response => response.arrayBuffer()),
-    fetch('hydro/sea.bin')
-        .then(response => response.arrayBuffer()),
+    // fetch('hydro/sea.bin')
+    //     .then(response => response.arrayBuffer()),
     fetch('res/windPowDens50.bin')
         .then(response => response.arrayBuffer()),
     ])
@@ -298,13 +296,13 @@ export function promiseSimulater(valChangedCallbacks){
         simuCreateInfo.map = {
             groundUse: new Uint8Array(values[1]),
             popDensity: new Uint8Array(values[5]),
-            windPowDens:{at50:new Uint8Array(values[7])},
+            windPowDens:{at50:new Uint8Array(values[6])},
+            pools: new Uint8Array(values[4]),
         };
 
         simuCreateInfo.hydro = {
             stations: new Float32Array(values[2]),
-            pools:{map:new Uint8Array(values[4]), links:values[3]},
-            sea:new Uint8Array(values[6]),
+            pools:{links:values[3]},
         };
 
         simuCreateInfo.gameplay = {

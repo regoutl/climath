@@ -147,7 +147,7 @@ export function displayStat(cmd){
   }
 
   if(cmd.pop_affected){
-    $('.vBMPop').html(valStr(cmd.pop_affected, 'h'));
+    $('.vBMPop').html(valStr(cmd.pop_affected, 'H', false));
     $('.vBMPop').parent().show();
   }
   else {

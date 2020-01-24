@@ -19,7 +19,9 @@ export default class Nuke extends RegularProductionMean{
     //add the 'existing centrals'
     // => we dont have hydro data about it => mark it as 'under sea level'
     // -> will be ignored in all hydro computation but still produces
-    this.simu.cHydro.flowsIndependentCapacity += this._capacityFactor * this.capacity;
+    this.simu.cHydro.addCentral(254,
+                                this.capacity * this._capacityFactor,
+                                0);
   }
 
 
@@ -31,7 +33,7 @@ export default class Nuke extends RegularProductionMean{
   capacityAt(t){
     if(t % (24*5) == 0){
       // compute capa
-      this._periodMaxWh = this.simu.cHydro.getNukeCapaLimitForPeriod(t / (24*5));
+        this._periodMaxWh = this.simu.cHydro.getNukeCapaLimitForPeriod(t / (24*5));
     }
 
     return  Math.min(this._periodMaxWh, super.capacityAt(t));
@@ -87,7 +89,7 @@ export default class Nuke extends RegularProductionMean{
                                                     {center: buildInfo.input.curPos, radius: nuclearDisasterRadius});
 
     if(buildInfo.input.curPos !== undefined)    {
-        let pool = this.simu.cHydro.poolIndexAt(buildInfo.input.curPos);
+        let pool = this.simu.cMap.poolIndexAt(buildInfo.input.curPos);
 
         if(pool == null){
             buildInfo.theorical = true;
@@ -100,7 +102,6 @@ export default class Nuke extends RegularProductionMean{
         if(!this.simu.cMap.isInCountry(buildInfo.input.curPos.x, buildInfo.input.curPos.y))
             buildInfo.theorical = true;
     }
-    // this.simu.cHydro.prepareBuild(buildInfo);
   }
 
   //note : must be called when simu.year = buildInfo.build.end
@@ -115,9 +116,6 @@ export default class Nuke extends RegularProductionMean{
                                   nameplate * this._capacityFactor,
                                   buildInfo._m3PerJ);
 
-
-      // this.simu.cMap.drawer.addItem(buildInfo.type, buildInfo.input.curPos);
-      // console.log('ok');
   }
 
 }

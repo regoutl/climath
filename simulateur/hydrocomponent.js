@@ -7,16 +7,16 @@ import {Plot, canvasEnablePloting, quantityToHuman as valStr} from '../ui/plot.j
 */
 export default class HydroComponent{
     constructor(createInfo){
-    this.poolMap = createInfo.pools.map;
-    if(this.poolMap.length != 748 * 631)
-      throw 'prob taille';
+    // this.poolMap = createInfo.pools.map;
+    // if(this.poolMap.length != 748 * 631)
+    //   throw 'prob taille';
 
     this.pools =  createInfo.pools.links;
     this.flows = {data: createInfo.stations, nCol:0, nRow: 0};
-    this.sea = createInfo.sea;
+    // this.sea = createInfo.sea;
 
-    if(this.sea.length != 349 * 177)
-      throw 'prob taille';
+    // if(this.sea.length != 349 * 177)
+    //   throw 'prob taille';
 
     //count the columns
     for(let p of this.pools)
@@ -35,38 +35,26 @@ export default class HydroComponent{
   }
 
     // todo : move to map
-    /** @brief return the pool index at the given pixel.
-    Null if no pool here
-    1000 if sea
-
-    */
-    poolIndexAt(p){
-      //to hydro pos
-      let pos = this._regToHydroCoord(p);
-
-      if(pos.x >= 0 && pos.y >= 0 &&   //in the sea box
-        pos.x < 349 && pos.y < 177 &&
-        this.sea[pos.x + pos.y * 349] == 1) //the sea box is 1
-          return 1000;
-
-      if(pos.x < 0 || pos.y < 0 || pos.x >= 748 || pos.y >= 631)
-        return null;
-
-      let ans = this.poolMap[pos.x + pos.y * 748] - 1
-      if(ans < 0)
-          return null;
-      return ans;
-    }
 
     poolName(index){
-        if(index == 1000)
+        if(index == 254)
             return 'Mer';
         else
             return this.pools[index].river;
     }
 
 
-    addCentral(pool, avgProd, m3PerJ){
+    addCentral(pool, avgProd, m3perJ){
+        if(pool > 254)
+            throw 'pool 255 does not exist. did you mean sea := 254 ?';
+
+        //central in the sea
+        if(pool == 254){
+            this.flowsIndependentCapacity += avgProd;
+            return;
+        }
+
+
         this.central.push({
           pool: pool,
           capa: avgProd,
@@ -74,33 +62,8 @@ export default class HydroComponent{
         });
 
         this._rdyProb.dirty = true;
-
-    }
-  capex(build){
-    let avgProd = build.nameplate.at(build.build.begin) * build.avgCapacityFactor;
-
-    if(build.hydro._underSeaLvx){
-      this.flowsIndependentCapacity += avgProd;
-      return;
     }
 
-    let waterVapoNrg = 2250; // J / g
-    let waterTCapa = 4185; // J/ kg / K
-    let waterInitTemp = 20;
-    let jToVapM3 = (100 - waterInitTemp) * 1000 *waterTCapa + waterVapoNrg * 1000000;
-    // let whToVapM3 = jToVapM3 / 3600;//wh/m3
-
-    let primEnergyPerProduced = 1 / build.primEnergyEffi;
-    let heatPerEnProduced = primEnergyPerProduced * (1 - build.primEnergyEffi); //
-
-    this.central.push({
-      pool: build.hydro._poolIndex,
-      capa: avgProd,
-      m3perJ: heatPerEnProduced / jToVapM3
-    });
-
-    this._rdyProb.dirty = true;
-  }
 
   ///a preiod is a group of 5 periods. period index := day index / 5
   getNukeCapaLimitForPeriod(period){
@@ -140,9 +103,6 @@ export default class HydroComponent{
     return (opti[opti.length-1] + this.flowsIndependentCapacity) * 24 * 5;
   }
 
-  _regToHydroCoord(input){
-    return {x : Math.floor((input.x - 8) / 1.836),   y: Math.floor((input.y - 63) / 1.836)};
-  }
 
   _prepareProblem(){
     const nCentral = this.central.length;

@@ -66,6 +66,7 @@ export default class MapComponent{
         this.groundUse = mapImgs.groundUse;
         this.popDensity = mapImgs.popDensity;
         this.windPowDens = mapImgs.windPowDens;
+        this.poolMap = mapImgs.pools;
 
         this.drawer = new MapDrawer({
             energy: this.energyGrid,
@@ -238,11 +239,11 @@ export default class MapComponent{
         this.drawer.draw();
       } else if(buildInfo.type == 'nuke' || buildInfo.type == 'ccgt'){
             this.drawer.addItem(buildInfo.type, buildInfo.input.curPos);
-            this._nukeCentrals.push({
-                type:buildInfo.type,
-                loc: buildInfo.input.curPos,
-                dangerRadius: nuclearDisasterRadius,
-            });
+            // this._nukeCentrals.push({
+            //     type:buildInfo.type,
+            //     loc: buildInfo.input.curPos,
+            //     dangerRadius: nuclearDisasterRadius,
+            // });
         } else{
             throw 'to do';
         }
@@ -390,5 +391,31 @@ export default class MapComponent{
             }
             maps[conv[key]][y*1374+x] = changes[key];
         });
+    }
+
+
+    /** @brief return the pool index at the given pixel.
+    Null if no pool here
+    254 if sea
+    */
+    poolIndexAt(p){
+      //to hydro pos
+      let pos = this._regToHydroCoord(p);
+
+      // if(pos.x >= 0 && pos.y >= 0 &&   //in the sea box
+      //   pos.x < 349 && pos.y < 177 &&
+      //   this.sea[pos.x + pos.y * 349] == 1) //the sea box is 1
+      //     return 255;
+
+      if(pos.x < 0 || pos.y < 0 || pos.x >= 748 || pos.y >= 631)
+        return null;
+
+      let ans = this.poolMap[pos.x + pos.y * 748] - 1
+      if(ans < 0)
+          return null;
+      return ans;
+    }
+    _regToHydroCoord(input){
+      return {x : Math.floor((input.x - 8) / 1.836),   y: Math.floor((input.y - 63) / 1.836)};
     }
 }

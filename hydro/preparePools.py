@@ -171,13 +171,35 @@ for it in range(100):
 
 logImage.save('poolsLog.png')
 
+#sea update----------------------------------------------
+seaImg = Image.open("sea.png")
+seaPix = seaImg.load()
+
+if(seaImg.width != 349 or seaImg.height != 177):
+    print "\n\nSea wrong size\n\n"
+    raise Exception()
+
+for x in tqdm(range(seaImg.width)):
+    for y in range(seaImg.height):
+        (r, g, b, a ) =  seaPix[x, y]
+        if a > 128:
+            outBytes[x+y*image.width] = 255
+
+# print('\n\nsea.bin updated ! \n' +
+#         ' Format : row major, uint8 349 x 177' +
+#         ' 1 = in the sea, 0 = out' +
+#         '\n\n'
+#         )
+
 with open("poolMap.bin", "wb") as fout:
     fout.write(outBytes)
 
 
 print('\n\npoolsMap.bin updated ! \n' +
         ' Warning : in poolMap.bin, indices start at 1 (0 := out of pool). \n' +
-        ' Format : row major, 1 octet per pix, ' + str(image.width) + ' x ' + str(image.height)+ '\n\n'
+        ' Format : row major, 1 octet per pix, ' + str(image.width) + ' x ' + str(image.height)+
+        '\n Note : 255 := sea' +
+        '\n\n'
         )
 
 #pools json output ---------------------------------------------
@@ -298,32 +320,5 @@ with open("poolStations.bin", "wb") as fout:
 print('\n\npoolStations.bin updated ! \n' +
         ' Format : row major, float ' + str(realNbStation) + ' x ' + str(365 * 19) +
         '\n Unit : m3/sec, avg per 5 days, all year 365 days (-> 73 periods)' +
-        '\n\n'
-        )
-
-
-#sea update----------------------------------------------
-image = Image.open("sea.png")
-outBytes = bytearray(image.width * image.height)
-pix = image.load()
-
-if(image.width != 349 or image.height != 177):
-    print "\n\nSea wrong size\n\n"
-    raise Exception()
-
-for x in tqdm(range(image.width)):
-    for y in range(image.height):
-        (r, g, b, a ) =  pix[x, y]
-        outBytes[x+y*image.width] = 1 if a > 128 else 0
-
-with open("sea.bin", "wb") as fout:
-    fout.write(outBytes)
-
-
-
-
-print('\n\nsea.bin updated ! \n' +
-        ' Format : row major, uint8 349 x 177' +
-        ' 1 = in the sea, 0 = out' +
         '\n\n'
         )
