@@ -187,7 +187,7 @@ export default class MapComponent{
     /** @brief delete energies in the given area.
     @todo filter
     */
-    delete(area, filter){
+    demolish(area, filter){
         /// step 1 : list everything (pv, storage, wind)
         let pixList = {};
         this._forEach(area, (x, y) => {
@@ -200,10 +200,14 @@ export default class MapComponent{
             this.energyGrid[x + y * 1374] = 0;
         });
 
-        for (let [buildInfoIndex, pixCount] of Object.entries(pixList)) {
-            let bm = this.buildInfos[buildInfoIndex];
-            this.simu._c(bm.type).delete(gm, pixCount * pixelArea);
+        for (let [buildParamIndex, pixCount] of Object.entries(pixList)) {
+            let bm = this.buildParameters[buildParamIndex];
+            this.simu._c(bm.type).demolish(gm, pixCount * pixelArea);
         }
+
+
+        // centrals-----------------------------
+        throw 'todo : centrals'
     }
 
 

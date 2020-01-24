@@ -121,4 +121,8 @@ export default class Pv extends IntermittentProductionMean{
   }
 
 
+  demolish(buildParameters, area){
+      
+  }
+
 }
