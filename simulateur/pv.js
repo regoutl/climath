@@ -60,6 +60,8 @@ export default class Pv extends IntermittentProductionMean{
     info.build.end = this.build.delay + info.build.begin;
 
 
+    parameters.extraSumDemolish = 'radiantFlux';
+
 
     let a = this.simu.cMap.reduceIf(['area', 'radiantFlux'], build.area, ['buildable']);
     let area = a[0];
@@ -121,8 +123,16 @@ export default class Pv extends IntermittentProductionMean{
   }
 
 
-  demolish(buildParameters, area){
-      
+  /**
+  @param buildParameters is exactly the same as what was send to capex as build.buildParameters
+   @param demolishData : {
+  area:     area to deconstruct m2,
+  extra:    the result, over the area to demolish of reduce(parameters.extraSumDemolish)
+  }
+  @return demolition cost
+  */
+  demolish(buildParameters, demolishData){
+
   }
 
 }

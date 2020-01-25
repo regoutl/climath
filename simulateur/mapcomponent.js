@@ -185,29 +185,47 @@ export default class MapComponent{
 
 
     /** @brief delete energies in the given area.
+    @return cost
     @todo filter
+
     */
     demolish(area, filter){
+        let totalCost = 0;
+
         /// step 1 : list everything (pv, storage, wind)
-        let pixList = {};
+        let dataPerBuildId = {};
         this._forEach(area, (x, y) => {
             let buildId = this.getNrj(x,y);
             if(buildId == 0) //skip the null build
                 return;
-            if(pixList[buildId] === undefined)
-                pixList[buildId] = 0;
-            pixList[buildId]++;
+            if(dataPerBuildId[buildId] === undefined){
+              dataPerBuildId[buildId] = {pixCount: 0};
+              if(this.buildParameters[buildId].extraSumDemolish){
+                  dataPerBuildId[buildId].label = this.buildParameters[buildId].extraSumDemolish + 'At';
+                  dataPerBuildId[buildId].extra = 0;
+              }
+            }
+            dataPerBuildId[buildId].pixCount++;
+            if(dataPerBuildId[buildId].label)
+              dataPerBuildId[buildId].extra += this[dataPerBuildId[buildId].label](x, y);
+
             this.energyGrid[x + y * 1374] = 0;
         });
 
-        for (let [buildParamIndex, pixCount] of Object.entries(pixList)) {
+        for (let [buildParamIndex, demolishData] of Object.entries(pixList)) {
             let bm = this.buildParameters[buildParamIndex];
-            this.simu._c(bm.type).demolish(gm, pixCount * pixelArea);
+            totalCost += this.simu._c(bm.type) //find the relevant component
+                            .demolish(bm, {    //old build parameters
+                                area: demolishData.pixCount * pixelArea,  //area
+                                extra:demolishData.extra});               //component specific data
         }
 
 
         // centrals-----------------------------
         throw 'todo : centrals'
+
+
+        return totalCost;
     }
 
 
