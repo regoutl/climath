@@ -93,18 +93,6 @@
 		"deconstructionRatio":0.15,
 		"maxCentralSize":1600,
 		"note":"a verifier (maxCentralSize)",
-		"water":{
-			"unit":"L/Wh",
-			"source":"https://www.youtube.com/watch?v=HMystmGbctw",
-			"through":{
-				"withdrawal": 0.175,
-				"consumption": 0
-			},
-			"loop":{
-				"withdrawal": 0.0125,
-				"consumption": 0.006
-			}
-		},
 		"primEnEfficiency":0.4,
 		"init":{
 			"_capacityunit":"W",

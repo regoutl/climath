@@ -2,11 +2,14 @@
 
 import * as Yearly from "../timevarin.js";
 import Pv from './pv.js';
-import Fossil from './fossil.js';
+// import Fossil from './fossil.js';
 import Storage from './storage.js';
-import Nuke from './nuke.js';
-import Ccgt from './ccgt.js';
+// import Nuke from './nuke.js';
+// import Ccgt from './ccgt.js';
 import Wind from './wind.js';
+
+import ThermicCentral from './thermiccentral.js';
+
 
 /// note : all years are assumed to be 365 days long
 /** @brief compute the hourly demand meeting and building*/
@@ -23,16 +26,17 @@ export default class ProductionComponent{
 
 		//sorted by priority (higher production mean will produce at max capa first)
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
-		this.productionMeansOrder = ['pv', 'wind', 'nuke', 'storage', 'ccgt', 'fossil'];
+		this.productionMeansOrder = ['pv', 'wind', 'storage', 'centrals'];
 
 
 		this.productionMeans = {
 			pv: new Pv(parameters.energies.pv, simu),
 			wind: new Wind(parameters.energies.wind, simu),
-		  nuke: new Nuke(parameters.energies.nuke, simu),
+		  // nuke: new Nuke(parameters.energies.nuke, simu),
 			storage: new Storage(parameters.energies.storage, simu),
-			ccgt: new Ccgt(parameters.energies.ccgt, simu),
-		  fossil: new Fossil(parameters.energies.fossil, simu),
+			// ccgt: new Ccgt(parameters.energies.ccgt, simu),
+		  // fossil: new Fossil(parameters.energies.fossil, simu),
+			centrals : new ThermicCentral(parameters.energies, simu),
 		};
 	}
 
@@ -92,7 +96,7 @@ out.stats.consumedEnergy := {
 			//amount that this prod mean should produce
 			let production = Math.min(toProduce, canProduce);
 
-			if(!fillingBatteries)
+			if(!fillingBatteries && prodMeanLabel != 'centrals')
 				out.consumedEnergy.origin[prodMeanLabel] += production;
 
 			prodMean.produce(production, out);

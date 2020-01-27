@@ -103,9 +103,10 @@ export class Simulateur{
     _c(type){
         if(type == 'battery')
             return this.cProd.productionMeans.storage;
-        else {
+        else if(['nuke', 'fossil', 'ccgt', 'fusion'].includes(type))
+            return this.cProd.productionMeans.centrals;
+        else
             return this.cProd.productionMeans[type];
-        }
     }
 
     //called on click on the map
@@ -151,7 +152,7 @@ export class Simulateur{
     }
     //run
     run(){
-        console.log(this.cMap.testBoom());
+        // console.log(this.cMap.testBoom());
         // O & M (fixed & variable)
         this.cProd.run(this.year, this.yStats);
 
@@ -233,7 +234,7 @@ export class Simulateur{
         let y = this.yStats.year + 1;
 
         function nrgs(){
-          return {fossil: 0, pv: 0, nuke:0, storage: 0, ccgt: 0, wind: 0};
+          return {fossil: 0, pv: 0, nuke:0, storage: 0, ccgt: 0, wind: 0, fusion: 0};
         }
 
         this.yStats = {

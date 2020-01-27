@@ -4,10 +4,23 @@ import * as Yearly from "../timevarin.js"
 
 const PlotLeftMargin = 60.5;
 
-export function quantityToHuman(value, unit, compact = false){
+/** option.compact : bool, true if you want the most compact possible. default true
+options.mag int [-3, 5] : force mag order. 1 => k aso. default : auto detect.
+*/
+export function quantityToHuman(value, unit, options){
+	if(options === undefined){
+		options = {};
+	}
+	if(typeof options != 'object'){
+		throw 'bad options';
+	}
+
+	if(options.compact === undefined)
+		options.compact = false;
+
 	if(unit == '%')
 		return Math.round(value * 1000) / 10 + ' %';
-	if(unit == '€' && !compact)
+	if(unit == '€' && !options.compact)
 		return plainTextEuro(value);
 
 	let yolo = 1000;
@@ -20,9 +33,13 @@ export function quantityToHuman(value, unit, compact = false){
 			throw 'aie';
 	}
 
-	let divider = Math.pow(yolo, Math.floor(Math.log(value) / Math.log(yolo)));
+	let mag = Math.floor(Math.log(value) / Math.log(yolo));
+	if(options.mag !== undefined)
+		mag = options.mag;
+
+	let divider = Math.pow(yolo, mag);
 	let suffix = '';
-	switch(Math.floor(Math.log(value) / Math.log(yolo))){
+	switch(mag){
 		case 0: break;
 		case 1: suffix = 'k'; break;
 		case 2: suffix = 'M'; break;
@@ -46,7 +63,7 @@ export function quantityToHuman(value, unit, compact = false){
 		div = 0;
 
 
-	return div + ' ' + unitToHuman(suffix + unit, compact);
+	return div + ' ' + unitToHuman(suffix + unit, options.compact);
 }
 
 function unitToHuman(unit, compact = false){

@@ -47,7 +47,6 @@ h1{
 
 
 #dLeftDock, #dRightDock{
-	width: 300px;
 	box-sizing: border-box;
 	display: flex;
 	min-height: 0;
@@ -59,9 +58,11 @@ h1{
 
 #dRightDock{
 	border-left: 1px solid gray;
+	width: 350px;
 
 }
 #dLeftDock{
+	width: 300px;
 	border-right: 1px solid gray;
 	position: relative;
 }
@@ -184,13 +185,13 @@ canvas {
 #bConfigure, #bStats, #bClosePlot{
 	position:absolute;
 	z-index: 10000;
-	top: 0;
+	top: 10px;
 	left: 0;
 	cursor: pointer;
 }
 
 #bStats{
-	top: 50px;
+	top: 60px;
 	display: none;
 }
 

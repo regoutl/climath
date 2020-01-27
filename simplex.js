@@ -1,4 +1,4 @@
-export class Matrix{
+class Matrix{
   constructor(rows, columns = 1, arr){
     rows = Number(rows);
     columns = Number(columns);
@@ -72,7 +72,7 @@ s.t. A'x' = B'
 s.t. x' >= 0
 x' := [x, s]'
 */
-export function stdToCan(problemStd){
+function stdToCan(problemStd){
   let iA = problemStd.A;
   let iB = problemStd.B;
   let iC = problemStd.C;
@@ -98,7 +98,7 @@ max C'x
 s.t Ax = B
 x >= 0
 */
-export function solveCan(problem){
+function solveCan(problem){
   let iA = problem.A;
   let iB = problem.B;
   let iC = problem.C;
@@ -280,6 +280,9 @@ export function simplex(obj, constrains){
       if(r == minIndex) continue;
 
       let itsCoef = - constrains[r* (nVar + 1) +  pivotIndex];
+
+      if(itsCoef == 0)
+          continue;
 
       for(let i = 0; i < nVar + 1; i++)
         constrains[r* (nVar + 1) +  i] += itsCoef * constrains[minIndex* (nVar + 1) + i];

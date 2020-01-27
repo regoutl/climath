@@ -79,7 +79,7 @@ $(function(){
 		alert(err);
 	});
 
-	$('#bConfigure,#bMenuConfigure').on("click", leftDockCoefs);
+	$('#bConfigure').on("click", leftDockCoefs);
 	$('#bStats').on("click", StatDock.show);
 
 
@@ -93,8 +93,16 @@ $(function(){
 	let gameStarted = false;
 
 
+	let promptUseDockCoef;
+
+
 
 	function leftDockCoefs(){
+		if(promptUseDockCoef !== undefined){
+				promptUseDockCoef.remove();
+				localStorage.setItem('doNotShowAgainPersonlizeCoefsTest', 1);
+		}
+
 		$('#dLeftDock').show();
 		$('#dCoefs').show();
 		$('#dStats').hide();
@@ -123,15 +131,70 @@ $(function(){
 
 
 
-	$('#bStartGame').on('click', () => {
-		gameStarted = true;
-		CentralArea.tabGame();
-		$('#bStats').css('display', 'block');
-	});
-	//skip click tmp todo : remove
-	gameStarted = true;
+	// $('#bStartGame').on('click', () => {
+	// 	gameStarted = true;
+	// 	CentralArea.tabGame();
+	// 	$('#bStats').css('display', 'block');
+	// });
+	// //skip click tmp todo : remove
+	// gameStarted = true;
 	CentralArea.tabGame();
 	$('#bStats').css('display', 'block');
+
+	if(false &&!localStorage.getItem('doNotShowAgainPersonlizeCoefs')){
+			promptUseDockCoef = $('<div>Vous pouvez modifier les coefficients avant de commencer !</div>');
+
+			promptUseDockCoef.css({
+				position:'absolute',
+				'z-index': 10000,
+				top: '10px',
+				left: '50px',
+				padding: '7px 13px',
+				background: 'white',
+				'border-radius':'5px',
+				'box-shadow':'0px 0px 5px black',
+			});
+
+			let arrow = $('<div></div>');
+
+			arrow.css({
+					position: 'absolute',
+					'z-index': 10001,
+					width: '10px',
+					height: '10px',
+					background: 'white',
+					transform: 'translate(-18px, 5px) rotate(45deg)',
+					'box-shadow':'0px 0px 5px black',
+			});
+			promptUseDockCoef.prepend(arrow);
+
+			let arrowCache = $('<div></div>');
+			arrowCache.css({
+					position: 'absolute',
+					'z-index': 10002,
+					width: '13px',
+					height: '22px',
+					background: 'white',
+					transform: 'translate(-13px, -1px) ',
+			});
+			promptUseDockCoef.prepend(arrowCache);
+
+			let dismiss = $('<input type="button" value="ok" />');
+
+			dismiss.css({
+					'margin-left': '10px'
+			});
+
+			dismiss.on('click', () => {
+					promptUseDockCoef.remove();
+					localStorage.setItem('doNotShowAgainPersonlizeCoefsTest', 1);
+			});
+
+			promptUseDockCoef.append(dismiss);
+
+
+			$('#dCentralArea').prepend(promptUseDockCoef);
+	}
 
 	$(document).on('keydown', function(e){
 	  if(e.keyCode == 27)

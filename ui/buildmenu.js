@@ -153,7 +153,7 @@ export function displayStat(build){
   }
 
   if(cmd.pop_affected){
-    $('.vBMPop').html(valStr(cmd.pop_affected, 'H', false));
+    $('.vBMPop').html(valStr(cmd.pop_affected, 'H', {compact: false}));
     $('.vBMPop').parent().show();
   }
   else {
@@ -178,7 +178,7 @@ export function displayStat(build){
   }
 
   if(cmd.coolingWaterRate){
-    $('.vBMCoolingWaterRate').html(valStr(cmd.coolingWaterRate, "m3/s"));
+    $('.vBMCoolingWaterRate').html(valStr(cmd.coolingWaterRate, "m3/s", {mag: 0}));
 
     $('.vBMCoolingWaterRate').parent().show();
   }
