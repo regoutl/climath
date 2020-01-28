@@ -247,12 +247,21 @@
 		"build":{
 			"time": 1,
 			"cost":{
-				"label":"Cout d'installation des eoliennes (terrestre, @50m)",
-				"unit":"€/N",
+				"label":"Cout d'installation par eolienne (terrestre, @50m)",
+				"unit":"€/i",
 				"years":[10],
+				"valMul":1000000,
 				"source":"",
 				"comment":""
 			}
+		},
+		"density":{
+			"label":"Eolienne (terrestre, @50m) par km2",
+			"unit":"i/m2",
+			"years":[4.23],
+			"valMul":1e-6,
+			"source":"",
+			"comment":""
 		},
 		"init":{
 			"_capacityunit":"W",

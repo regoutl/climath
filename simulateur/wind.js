@@ -11,6 +11,8 @@ export default class Wind extends IntermittentProductionMean{
     this.efficiency = new Yearly.Raw(0);
     this.efficiency.fromJSON(parameters.efficiency);
 
+    this.density =new Yearly.Raw( parameters.density);
+
     // this.build.energy = new Yearly.Raw(0);
     // this.build.energy.fromJSON(parameters.build.energy);
   }
@@ -57,7 +59,7 @@ export default class Wind extends IntermittentProductionMean{
         windPowerDensity = 0;
 
     //src : https://en.wikipedia.org/wiki/Belwind (offshore, @95m  :/)
-    const maxWindTurbinePerSquareMeter = 4.23e-6; //todo : check for onshore
+    const maxWindTurbinePerSquareMeter = this.density.at(info.build.begin); //todo : check for onshore
 
     const rotorRadius = 45.0;
 
@@ -73,8 +75,8 @@ export default class Wind extends IntermittentProductionMean{
 
 
     info.build.co2 = 0; // C / Wh
-    info.build.cost  = initNameplate * // W
-        this.build.cost.at(info.build.begin);  // eur/W
+    info.build.cost  = count * // item
+        this.build.cost.at(info.build.begin);  // eur/item
 
 
     info.perYear = {cost: this.perYear.cost.at(info.build.end) * initNameplate, co2: 0};

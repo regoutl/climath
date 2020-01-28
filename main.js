@@ -15,7 +15,7 @@ import * as StatDock from './ui/statdock.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './ui/plot.js';
 
 
-
+//window.location.hash : get anchor
 
 
 

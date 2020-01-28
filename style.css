@@ -165,6 +165,10 @@ h1{
 	vertical-align: top;
 }
 
+.bmInf{
+	height: 12px;
+}
+
 
 #pv-radius{
     position: relative;

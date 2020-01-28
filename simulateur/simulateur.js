@@ -185,6 +185,12 @@ export class Simulateur{
         ans.push(store.battery.build.energy);
         ans.push(store.battery.perYear.cost);
 
+        const wind = prodMeans.wind;
+        ans.push(wind.efficiency);
+        ans.push(wind.build.cost);
+        ans.push(wind.perYear.cost);
+        ans.push(wind.density);
+
         const countries = this.cProd.countries;
         ans.push(countries.belgium.pop);
         ans.push(countries.belgium.gdpPerCap);

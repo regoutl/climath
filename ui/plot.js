@@ -4,7 +4,7 @@ import * as Yearly from "../timevarin.js"
 
 const PlotLeftMargin = 60.5;
 
-/** option.compact : bool, true if you want the most compact possible. default true
+/** option.compact : bool, true if you want the most compact possible. default false
 options.mag int [-3, 5] : force mag order. 1 => k aso. default : auto detect.
 */
 export function quantityToHuman(value, unit, options){
@@ -76,7 +76,7 @@ function unitToHuman(unit, compact = false){
 	}
 
 	if(!compact)
-		tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (pic) ').replace('C', 'gCO2eq');
+		tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('i', 'item').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (pic) ').replace('C', 'gCO2eq');
 	else
 		tmp = tmp.replace('N', 'Wp').replace('C', 'gCO2');
 

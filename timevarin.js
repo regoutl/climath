@@ -19,7 +19,7 @@ function bezier(first, control1, control2, end, t){
 export class Raw{
 	constructor(k){
 		if(k === undefined)
-			k = 0;
+			throw 'k should not be undefined';
 		let json;
 		if(typeof k == 'object'){
 			json = k;
