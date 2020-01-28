@@ -120,7 +120,7 @@ $(function(){
 			if(unit == '')
 				unit = '%';
 
-			txt += valStr(yearly.at(simu.year), unit, true);
+			txt += valStr(yearly.at(simu.year), unit);
 			txt += '</span></div>';
 		});
 

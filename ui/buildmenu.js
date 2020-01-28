@@ -84,6 +84,19 @@ $(function(){
   });
 });
 
+function setOrHide(selector, val, unit, opt){
+    if(val){
+        let txt = (unit) ? valStr(val, unit, opt) : val;
+
+      $(selector).html(txt);
+
+      $(selector).parent().show();
+    }
+    else {
+      $(selector).parent().hide();
+    }
+
+}
 
 export function displayStat(build){
   if(build === undefined)
@@ -177,14 +190,8 @@ export function displayStat(build){
     $('.vBMRiver').parent().hide();
   }
 
-  if(cmd.coolingWaterRate){
-    $('.vBMCoolingWaterRate').html(valStr(cmd.coolingWaterRate, "m3/s", {mag: 0}));
-
-    $('.vBMCoolingWaterRate').parent().show();
-  }
-  else {
-    $('.vBMCoolingWaterRate').parent().hide();
-  }
+  setOrHide('.vBMCoolingWaterRate', cmd.coolingWaterRate, "m3/s", {mag: 0});
+  setOrHide('.vBMTheoReason', cmd.theorical);
 
 
 

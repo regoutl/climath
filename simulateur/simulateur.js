@@ -96,6 +96,14 @@ export class Simulateur{
 
         this._c(buildMenuState.type).prepareCapex(this._currentBuild, this.cProd.countries);
 
+        if(this._currentBuild.info.build.cost > this._money){
+            this._currentBuild.info.theorical = "cash";
+        }
+
+        if(this._currentBuild.info.build.begin != this.year){
+            this._currentBuild.info.theorical = "present";
+        }
+
         return this._currentBuild;
     }
 
@@ -112,22 +120,15 @@ export class Simulateur{
     //called on click on the map
     confirmCurrentBuild(){
         // only build in present
-        if(this._currentBuild === undefined
-            || this._currentBuild.info.build.begin != this.year){
-                console.log('can only build in present');
-                return;
+        if(this._currentBuild === undefined){
+            return;
         }
 
-        if(this._currentBuild.info.build.cost > this._money){
-          console.log('no enough cash');
-          return false;
-        }
-
+        // dirty fix for click on buttons part of central area
         if(this._currentBuild.area.center === undefined)
             return;
 
         if(this._currentBuild.info.theorical){
-          console.log('invalid');
           return false;
         }
 
@@ -169,9 +170,16 @@ export class Simulateur{
         ans.push(prodMeans.pv.build.energy);
         ans.push(prodMeans.pv.build.cost);
         ans.push(prodMeans.pv.perYear.cost);
-        ans.push(prodMeans.nuke.build.cost);
-        ans.push(prodMeans.nuke.perWh.cost);
-        ans.push(prodMeans.nuke.perWh.co2);
+
+        let nuke = prodMeans.centrals.nuke;
+        ans.push(nuke.build.cost);
+        ans.push(nuke.perWh.cost);
+        ans.push(nuke.perWh.co2);
+
+        let ccgt = prodMeans.centrals.ccgt;
+        ans.push(ccgt.build.cost);
+        ans.push(ccgt.perWh.cost);
+        ans.push(ccgt.perWh.co2);
 
         const store = prodMeans.storage.solutions;
         ans.push(store.battery.build.energy);

@@ -116,6 +116,7 @@ let palette =     {nuke: 'yellow',
     constructions:'red',
     ccgt:'rgb(169, 202, 250)',
     wind: 'white',
+    fusion: 'green',
   };
 
 function updateOri(stat){
@@ -157,7 +158,8 @@ function updateFootprint(stat){
   	"fossil":co2.perYear.fossil + co2.perWh.fossil,
   	"storage":co2.perYear.storage + co2.perWh.storage,
     "ccgt":co2.perYear.ccgt + co2.perWh.ccgt,
-    "ccgt":co2.perYear.wind + co2.perWh.wind,
+    "wind":co2.perYear.wind + co2.perWh.wind,
+    "fusion":co2.perYear.fusion + co2.perWh.fusion,
   }, palette );
   ctx.translate(-50, -50);
 }
@@ -179,7 +181,8 @@ function   updateBudget(stat){
   	"fossil":cost.perYear.fossil + cost.perWh.fossil,
   	"storage":cost.perYear.storage + cost.perWh.storage,
     "ccgt":cost.perYear.ccgt + cost.perWh.ccgt,
-    "ccgt":cost.perYear.wind + cost.perWh.wind,
+    "wind":cost.perYear.wind + cost.perWh.wind,
+    "fusion":cost.perYear.fusion + cost.perWh.fusion,
   }, palette );
   ctx.translate(-50, -50);
 

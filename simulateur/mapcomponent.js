@@ -242,7 +242,7 @@ export default class MapComponent{
             this.drawer.update('energy');
             this.drawer.draw();
         }
-        else if(['ccgt', 'nuke'].includes(build.info.type)){
+        else if(['ccgt', 'nuke', 'fusion'].includes(build.info.type)){
             this.drawer.addItem(build.info.type, build.area.center);
             this._centrals.push({
                 type:build.info.type,

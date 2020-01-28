@@ -77,7 +77,7 @@ export default class MapDrawer{
         if(this.currentShowGrid.energyGrid)
             this._drawTex(this.energy);
 
-        if((this.currentCursor == 'nuke' || this.currentCursor == 'ccgt'
+        if((this.currentCursor == 'nuke' || this.currentCursor == 'ccgt' || this.currentCursor == 'fusion'
             || this.currentShowGrid.flows) && this.water)
                 this._drawTex(this.water);
     }
@@ -117,7 +117,7 @@ export default class MapDrawer{
         ctx.fill();
 
       }
-      else if(type == 'nuke' || type == 'ccgt'){
+      else if(type == 'nuke' || type == 'ccgt' || type == 'fusion'){
         this._itemCursorNode.css({
             top:pos.y-15,
             left:pos.x - 12,
@@ -150,7 +150,7 @@ export default class MapDrawer{
     }
 
     addItem(type, pos){
-        if(type != 'nuke' && type != 'ccgt')
+        if(type != 'nuke' && type != 'ccgt' && type != 'fusion')
             throw 'to do';
 
         let node = $('<img src="res/icons/' + type + '.png" '

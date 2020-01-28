@@ -1,9 +1,18 @@
-import RegularProductionMean from './regularproductionmean.js';
 import * as Yearly from "../timevarin.js";
+import AbstractProductionMean from './abstractproductionmean.js';
 
-class Kind extends RegularProductionMean{
+class Kind extends AbstractProductionMean{
     constructor(parameters, label){
         super(parameters, label);
+
+        this.primEnergyEffi = parameters.primEnEfficiency;
+
+        this.capacity = parameters.init.capacity *
+                          parameters.init._capacityvalMul; //W installed
+
+        //capacity factor
+        this._capacityFactor = parameters.capacityFactor ? parameters.capacityFactor: 1;
+
     }
 }
 
@@ -19,10 +28,11 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
 
         this.nuke = new Kind(parameters.nuke, 'nuke');
         this.ccgt = new Kind(parameters.ccgt, 'ccgt');
-        // this.fusion = new Kind(parameters.fusion, 'fusion');
+        this.fusion = new Kind(parameters.fusion, 'fusion');
 
         this.nuke.defaultNameplate = 3e9;
         this.ccgt.defaultNameplate = 1.6e9;
+        this.fusion.defaultNameplate = 3e9;
         this.fossilFootprint = parameters.fossil.footprint;
 
         this.centrals.push({
@@ -60,21 +70,17 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
 
     /// produces the given energy amount.
     /// update output : incease output.co2 and output.cost
-    produce(amount, output){
-        this.hourlyDemand[this.hourlyDemandCur++] = amount;
+    produce(amount, output, hourIndex){
+        if(hourIndex === undefined)
+            throw 'need hour index';
+        this.hourlyDemand[hourIndex] += amount;
     }
 
     //O & M. Called right before the new year, for the ending year
     happyNYEve(yStats){
-        this.nuke.happyNYEve(yStats);
-        this.ccgt.happyNYEve(yStats);
+        // this.nuke.happyNYEve(yStats); //todo : add fixed o n m
+        // this.ccgt.happyNYEve(yStats);
 
-        if(this.hourlyDemandCur != 8760){
-            console.log('hum, pas 8760h cette annee ? (normal en an 0)')
-            this.hourlyDemandCur = 0;
-            return;
-        }
-        this.hourlyDemandCur = 0;
 
 
         let productions = yearlyProductions(this.hourlyDemand,
@@ -92,8 +98,11 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
 
         // let values = [0, 5, 10, 8, 4, 9, 1, 2, 0];
         // console.log(romberg(values));
-    }
 
+
+        //reset the demand to 0
+        this.hourlyDemand.fill(0);
+    }
 
     prepareCapex(build){
         let parameters = build.parameters;
@@ -125,8 +134,6 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         info.build.cost  = nameplate * // w
             this[parameters.type].build.cost.at(info.build.begin);  // eur/w
 
-
-        info.pm = this;
 
         info.perYear = {
             cost: this[parameters.type].perYear.cost.at(info.build.end) * nameplate,
@@ -163,7 +170,7 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
             let pool = this.simu.cMap.poolIndexAt(build.area.center);
 
             if(pool == null){
-                info.theorical = true;
+                info.theorical = "water";
             }
             else{
                 info._poolIndex = pool;
@@ -171,9 +178,8 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
             }
 
             if(!this.simu.cMap.isInCountry(build.area.center.x, build.area.center.y))
-                info.theorical = true;
+                info.theorical = "wrong space";
         }
-
     }
 
     /// expand capacity
@@ -276,7 +282,7 @@ function simulateDay(a, consumptions, water, centrals){
 }
 
 
-/** @param consumptions : 8740 x Watts needed
+/** @param consumptions : 8760 x Watts needed
 @param water : {dayOffset, hydroComp}
 @param centrals : {i:{prodMax, co2PerWh, m3PerWh, pool}}
 
@@ -286,7 +292,7 @@ function yearlyProductions(consumptions, water, centrals){
     let lp = initLp(water.hydroComp, centrals);
 
 
-    const nPieces = 64;
+    const nPieces = 128;
 
     let evals = [];
     for(let i = 0; i <= nPieces; i++){
@@ -312,7 +318,7 @@ function yearlyProductions(consumptions, water, centrals){
     return productions;
 }
 
-//return the romberg integral of unit spaced points
+//return the romberg integral of unit spaced samples
 function romberg(values){
     let estimates = [];
     for(let i = 1; i <= values.length; i *= 2)

@@ -297,6 +297,50 @@
 				"density":309200
 			}
 		}
+	},
+
+	"fusion":{
+		"build":{
+			"cost":{
+				"label":"Frais d'installation de la fusion",
+				"source":"?",
+				"unit":"€/N",
+				"years":[6.43],
+				"in2050":6.43,
+				"comment":"A determiner"
+			},
+			"co2":{
+				"label":"Empreinte carbone construction de la fusion",
+				"unit":"C/N",
+				"years":[0.12],
+				"in2050":0.12,
+				"source":"?",
+				"comment":"A determiner"
+			},
+			"time": 8
+		},
+		"perWh":{
+			"cost":{
+				"label":"Frais (variables) d'exploitation et de maintenance de la fusion",
+				"unit":"€/Wh",
+				"years":[36],
+				"valMul":0.000001,
+				"in2050":36,
+				"comment":"A determiner",
+				"source":"?"
+			}
+		},
+
+		"deconstructionRatio":0.05,
+		"maxCentralSize":3000,
+		"note":"a verifier (maxCentralSize)",
+		"primEnEfficiency":0.4,
+		"init":{
+			"_capacityunit":"W",
+			"_capacityvalMul":1000000000,
+			"capacity":0
+		},
+		"capacityFactor": 0.9
 	}
 },
 "water":{

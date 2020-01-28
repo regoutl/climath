@@ -99,7 +99,7 @@ out.stats.consumedEnergy := {
 			if(!fillingBatteries && prodMeanLabel != 'centrals')
 				out.consumedEnergy.origin[prodMeanLabel] += production;
 
-			prodMean.produce(production, out);
+			prodMean.produce(production, out, out._capaFactHour % 8760);
 
 			// decrease the leftover envergy needed by how much this enegry produces
 			toProduce -= production;
@@ -113,6 +113,8 @@ out.stats.consumedEnergy := {
 				//if we passed the storage unloading, dont try to load the storage
 				if(prodMeanIndex >= out._storageIndex)
 					break;
+
+				// alert('bat');
 
 				//we will stop the prod mean loop just before unloading the batteries
 				produceUntill = out._storageIndex;
