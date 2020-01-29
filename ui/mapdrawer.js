@@ -71,7 +71,6 @@ export default class MapDrawer{
         gl.clearColor(1, 1, 1, 1);
         this.clear();
 
-
         this._drawTex(this[this.currentShowBase]);
 
         if(this.currentShowGrid.energyGrid)
@@ -406,42 +405,88 @@ export default class MapDrawer{
     _setGridLayerCheckbox() {
         let grid = this;
         let bases = ['groundUse', 'popDensity', 'windPowDensAt50'];
-        bases.forEach((m) => {
-            let radiobutton = $('<label><input type="radio" name="showBase"' +
-                ' value="'+ m + '"' +
-                (this.currentShowBase == m ? 'checked':'') + '> ' +
-                m + '</label><br>');
-            $('#gridLayers').append(radiobutton);
-        });
+        let name2icon = {
+            'groundUse':'groundUse.jpg',
+            'popDensity':'pop.png',
+            'windPowDensAt50':'windbis.jpeg',
+            'energyGrid':'electricEnergy.png',
+            'flows':'flows.png',
+        }
+        // // RADIO Btn
+        // bases.forEach((m) => {
+        //     let radiobutton = $('<label><input type="radio" name="showBase"' +
+        //         ' value="'+ m + '"' +
+        //         (this.currentShowBase == m ? 'checked':'') + '> ' +
+        //         m + '</label><br>');
+        //     $('#gridLayers').append(radiobutton);
+        // });
+        //
+        // $('#gridLayers input:radio').on('change',
+        // function() {
+        //     grid.currentShowBase = $(this).val();
+        //     grid.draw();
+        // });
 
-        $('#gridLayers input:radio').on('change',
-        function() {
-            grid.currentShowBase = $(this).val();
+        let setFilter = (m, grey) => $(name2id(m)).css({
+            filter: grey?'grayscale(100%)':'none'
+        });
+        let name2id = name => '#MapLayerButton'+name;
+        // MAP Btn
+        let setPos = (m, i, yOffser=20) => {
+            $(name2id(m)).css({
+                top: (yOffser+20+35*i)+'px',
+                left: $('body').width() - $('#dRightDock').width() -32 -10,
+            });
+        }
+
+        let showAllBases = selected => {
+            bases.forEach(m => setFilter(m, m !== selected))
+            grid.currentShowBase = selected;
             grid.draw();
-        });
+        }
 
+        bases.forEach((m,i) => {
+            let imbutton = $('<img src="res/icons/'+name2icon[m]+
+            '" id="'+name2id(m).substr(1)+'" title="'+m+'" class="mapButton" />');
+            imbutton.on('click',e => showAllBases(e.currentTarget.title));
+            $('#MapLayers').append(imbutton);
+            setPos(m,i);
+            setFilter(m, m !== grid.currentShowBase)
+        });
 
 
         let layers = ['energyGrid', 'flows'];
-
-        layers.forEach((m) => {
-            let checkbox = $('<label>' + '<input type="checkbox"'+
-                'name="' + m + '"' + ' value="'+ m + '"' +
-                (this.currentShowGrid[m] ? 'checked':'') + '> ' +
-                m + '</label><br>');
-            $('#gridLayers').append(checkbox);
-        });
-
-
-        $('#gridLayers input:checkbox').on('change',
-        function() {
-            grid.currentShowGrid[$(this).val()] = $(this).is(':checked');
-            grid.draw();
-            if($(this).val() == 'energyGrid'){
-                $('.energyRelated').css({
-                    'opacity': $(this).is(':checked') ? 1.0: 0,
-                });
-            }
+        // // CHECKBOX
+        // layers.forEach((m) => {
+        //     let checkbox = $('<label>' + '<input type="checkbox"'+
+        //         'name="' + m + '"' + ' value="'+ m + '"' +
+        //         (this.currentShowGrid[m] ? 'checked':'') + '> ' +
+        //         m + '</label><br>');
+        //     $('#gridLayers').append(checkbox);
+        // });
+        //
+        //
+        // $('#gridLayers input:checkbox').on('change',
+        // function() {
+        //     grid.currentShowGrid[$(this).val()] = $(this).is(':checked');
+        //     grid.draw();
+        //     if($(this).val() == 'energyGrid'){
+        //         $('.energyRelated').css({
+        //             'opacity': $(this).is(':checked') ? 1.0: 0,
+        //         });
+        //     }
+        // });
+        layers.forEach((m,i) => {
+            let imbutton = $('<img src="res/icons/'+name2icon[m]+
+            '" id="'+name2id(m).substr(1)+'" title="'+m+'" class="mapButton" />');
+            imbutton.on('click',e => {
+                grid.currentShowGrid[m] = !grid.currentShowGrid[m];
+                grid.draw();
+                setFilter(m, !grid.currentShowGrid[m])
+            });
+            $('#MapLayers').append(imbutton);
+            setPos(m,i,bases.length*35+50+10*i);
+            setFilter(m, !grid.currentShowGrid[m])
         });
     }
 

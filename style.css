@@ -186,6 +186,14 @@ canvas {
 }
 
 
+.mapButton{
+    position:absolute;
+    z-index: 10000;
+    cursor: pointer;
+    width: 32px;
+    border-radius: 16px;
+}
+
 .mainButton{
 	position:absolute;
 	z-index: 10000;
