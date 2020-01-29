@@ -481,6 +481,11 @@ export default class MapDrawer{
             '" id="'+name2id(m).substr(1)+'" title="'+m+'" class="mapButton" />');
             imbutton.on('click',e => {
                 grid.currentShowGrid[m] = !grid.currentShowGrid[m];
+                if(m == 'energyGrid'){
+                    $('.energyRelated').css({
+                        'opacity': grid.currentShowGrid[m] ? 1.0: 0,
+                    });
+                }
                 grid.draw();
                 setFilter(m, !grid.currentShowGrid[m])
             });
