@@ -45,6 +45,12 @@ export default class AbstractProductionMean{
       if(parameters.perWh.co2)
         this.perWh.co2 =  new Yearly.Raw(parameters.perWh.co2);
     }
+
+    if(parameters.deconstructionRatio)
+        this.demolishRatio = parameters.deconstructionRatio;
+    else {
+        throw 'need a deconstructionRatio';
+    }
   }
 
   /// return the amount that this can produce at current time t

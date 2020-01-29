@@ -136,11 +136,10 @@ export default class Storage /*extends AbstractProductionMean*/{
   @return ans.type = 'storage'
   @return ans.
 */
-  prepareCapex(build, countries){
+  prepareCapex(build){
     build.pm = this;
 
     let parameters = build.parameters;
-    let info = build.info;
 
     if(parameters.type != 'battery')
       throw 'only bat supported';
@@ -150,11 +149,6 @@ export default class Storage /*extends AbstractProductionMean*/{
 
     let a = this.simu.cMap.reduceIf(['area'], build.area,
                                     ['buildable']);
-    let volume = a[0] * parameters.height;
-
-
-    info.storageCapacity
-      = volume * this.solutions.battery.energyDensity.at(info.build.begin);
 
     if(parameters.priceMul === undefined)
       parameters.priceMul = 1;
@@ -167,50 +161,112 @@ export default class Storage /*extends AbstractProductionMean*/{
     if(parameters.selfDischarge1Month === undefined)
       parameters.selfDischarge1Month = 0.98;
 
-    info.build.end = info.build.begin + this.solutions.battery.build.delay;
-    info.build.co2 = info.storageCapacity // S
-        * this.solutions.battery.build.energy.at(info.build.begin)  // wH / S
-        * countries[parameters.madeIn].elecFootprint.at(info.build.begin); // C / Wh
-
-    info.build.cost = info.storageCapacity // S
-        * this.solutions.battery.build.cost.at(info.build.begin)
-        * parameters.priceMul;
-
-
-    info.perYear = {cost: this.solutions.battery.perYear.cost.at(info.build.end) * info.storageCapacity, co2: 0};
-
+      this._prepareCapex(build, a[0]);
   }
 
-  //note : must be called when simu.year = cmd.build.end
-  capex(build){
-    if(build.info.type != 'battery')
-      throw 'storage.capex; build.type != battery';
+    _prepareCapex(build, area){
+        const parameters = build.parameters; //leave this const
+        let info = build.info;
 
 
-    let hourlySelfDischarge = Math.pow( build.parameters.selfDischarge1Month, 1/730.0);
-    let yearlyCapaDecl = Math.pow( build.parameters.capaDecline10Years, 1/10.0);
+        let volume = area * parameters.height;
 
-    let loadCoef = Math.sqrt(build.parameters.roundTrip);
+        const initStorageCapa = volume * this.solutions.battery.energyDensity.at(info.build.begin);
 
-    //find a suitable devices
-    let i = 0;
-    for(; i < this.devices.length; i++){
-      if(this.devices[i].storageCapaDecline == yearlyCapaDecl
-        && this.devices[i].selfDischarge == hourlySelfDischarge
-        && this.devices[i].loadCoef == loadCoef)
-        break;
+        const yearlyCapaDecl = Math.pow( build.parameters.capaDecline10Years, 1/10.0);
+
+        info.storageCapacity   =   new Yearly.Expo(info.build.end,
+                                            initStorageCapa,
+                                            yearlyCapaDecl);
+
+        let countries = this.simu.cProd.countries;
+
+        info.build.end = info.build.begin + this.solutions.battery.build.delay;
+        info.build.co2 = initStorageCapa // S
+          * this.solutions.battery.build.energy.at(info.build.begin)  // wH / S
+          * countries[parameters.madeIn].elecFootprint.at(info.build.begin); // C / Wh
+
+        info.build.cost = initStorageCapa // S
+          * this.solutions.battery.build.cost.at(info.build.begin)
+          * parameters.priceMul;
+
+
+        info.perYear = {cost: this.solutions.battery.perYear.cost.at(info.build.end) * initStorageCapa, co2: 0};
     }
 
-    if(i == this.devices.length)
-      this.devices.push({ storageCapacity: 0,
-                          stored:0,
-                          storageCapaDecline: yearlyCapaDecl,
-                          'loadCoef': loadCoef,
-                          invloadCoef: 1/loadCoef,
-                          selfDischarge: hourlySelfDischarge});
+    //note : must be called when simu.year = cmd.build.end
+    capex(build){
+        if(build.info.type != 'battery')
+            throw 'storage.capex; build.type != battery';
 
-    this.devices[i].storageCapacity += build.info.storageCapacity;
+        let deviceGroupIndex = this._findSuitableDeviceGroup(build.parameters, true);
 
-  }
+        this.devices[deviceGroupIndex].storageCapacity += build.info.storageCapacity.at(build.info.build.end);
+    }
+
+    //find a device group suitable for the build specified. (same selfDischarge, capa decline and round trip)
+    //if none found -> creates one if in can, else throw
+    _findSuitableDeviceGroup(buildParameters, canCreate){
+        if(canCreate === undefined)
+            throw 'plz specify this';
+
+        let hourlySelfDischarge = Math.pow( buildParameters.selfDischarge1Month, 1/730.0);
+        let yearlyCapaDecl = Math.pow( buildParameters.capaDecline10Years, 1/10.0);
+
+        let loadCoef = Math.sqrt(buildParameters.roundTrip);
+
+        //find a suitable devices
+        let i = 0;
+        for(; i < this.devices.length; i++){
+        if(this.devices[i].storageCapaDecline == yearlyCapaDecl
+              && this.devices[i].selfDischarge == hourlySelfDischarge
+              && this.devices[i].loadCoef == loadCoef)
+            return i;
+        }
+
+        if(!canCreate)
+            throw 'no suitable device group found';
+
+        this.devices.push({ storageCapacity: 0,
+                            stored:0,
+                            storageCapaDecline: yearlyCapaDecl,
+                            'loadCoef': loadCoef,
+                            invloadCoef: 1/loadCoef,
+                            selfDischarge: hourlySelfDischarge});
+        return this.devices.length - 1;
+    }
+
+    costOfDemolish(demolish){
+        //get all the build informations
+        this._prepareCapex(demolish, demolish.reductions.area);
+
+        return demolish.info.build.cost * this.demolishRatio;
+    }
+
+    /** same as pv.demolish BUT demolish.reductions.extra is undefined
+    */
+    demolish(demolish){
+        //get all the build informations
+        this._prepareCapex(demolish, demolish.reductions.area);
+
+        //not build yet -> this a job for the scheduled build queue
+        /** reflexion : as (pv, wind, storage) are build in a year,
+        why not pre-remove the surface, and let the scheduled build happend normally ?
+
+        To investigate
+        */
+        if(demolish.info.build.end < demolish.year)
+            return 0;
+
+
+        let devGrp = this._findSuitableDeviceGroup(demolish.parameters, false);
+
+        this.devices[devGrp].storageCapacity -= demolish.info.storageCapacity.at(demolish.year);
+        this.devices[devGrp].stored = Math.min(this.devices[devGrp].stored, this.devices[devGrp].storageCapacity);
+
+
+
+        return demolish.info.build.cost * this.demolishRatio;
+    }
 
 }

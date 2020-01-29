@@ -244,6 +244,7 @@
 			"comment": "",
 			"label":"Efficacite des eoliennes"
 		},
+		"deconstructionRatio":0.05,
 		"build":{
 			"time": 1,
 			"cost":{

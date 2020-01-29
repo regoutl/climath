@@ -214,15 +214,20 @@ export default class MapComponent{
 
         for (let [buildParamIndex, demolishData] of Object.entries(pixList)) {
             let bm = this.buildParameters[buildParamIndex];
-            totalCost += this.simu._c(bm.type) //find the relevant component
-                            .demolish(bm, {    //old build parameters
+            totalCost += this.simu.demolish(bm, {    //old build parameters
                                 area: demolishData.pixCount * pixelArea,  //area
                                 extra:demolishData.extra});               //component specific data
         }
 
 
         // centrals-----------------------------
-        throw 'todo : centrals'
+        for(let c in this.centrals){
+            if(areaContains(area, this.centrals[c].loc)){
+                this.simu.demolish({type: 'central', id:this.centrals[c].id});
+                delete  this.centrals[c];
+            }
+        }
+        // throw 'todo : centrals'
 
 
         return totalCost;
@@ -245,7 +250,7 @@ export default class MapComponent{
         else if(['ccgt', 'nuke', 'fusion'].includes(build.info.type)){
             this.drawer.addItem(build.info.type, build.area.center);
             this._centrals.push({
-                type:build.info.type,
+                id:  build.info.centralId,
                 loc: build.area.center
             });
         }
@@ -410,4 +415,12 @@ export default class MapComponent{
     _regToHydroCoord(input){
       return {x : Math.floor((input.x - 8) / 1.836),   y: Math.floor((input.y - 63) / 1.836)};
     }
+}
+
+
+function areaContains(area, pt){
+    let dx = area.center.x - pt.x;
+    let dy = area.center.y - pt.y;
+
+    return dx*dx + dy*dy <= area.radius * area.radius;
 }

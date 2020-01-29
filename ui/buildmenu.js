@@ -134,14 +134,6 @@ export function displayStat(build){
 
   // $('.vBMBuildCost').css('color', (cmd.build.can) ? 'black': 'red');
 
-  if(cmd.area){
-    $('.vBMArea').parent().show();
-    $('.vBMArea').text(valStr(cmd.area, 'm2'));
-  }
-  else {
-    $('.vBMArea').parent().hide();
-
-  }
 
   if(cmd.nameplate){
     $('.vBMNameplate').parent().show();
@@ -152,44 +144,23 @@ export function displayStat(build){
 
     $('.vBMNameplate').html(lines.join('<br />'));
   }
-  else {
+  else {//  $('.vBMStorageCapacity').parent().toogle(cmd.storageCapacity);
     $('.vBMNameplate').parent().hide();
   }
 
-//  $('.vBMStorageCapacity').parent().toogle(cmd.storageCapacity);
-  if(cmd.storageCapacity){
-    $('.vBMStorageCapacity').html(valStr(cmd.storageCapacity, 'S'));
-    $('.vBMStorageCapacity').parent().show();
-  }
-  else {
-    $('.vBMStorageCapacity').parent().hide();
-  }
+  setOrHide('.vBMArea', cmd.area, 'm2');
 
-  if(cmd.pop_affected){
-    $('.vBMPop').html(valStr(cmd.pop_affected, 'H', {compact: false}));
-    $('.vBMPop').parent().show();
-  }
-  else {
-    $('.vBMPop').parent().hide();
-  }
+    if(cmd.storageCapacity)
+        setOrHide('.vBMStorageCapacity', cmd.storageCapacity.at(cmd.build.end), 'S');
+    else
+        setOrHide('.vBMStorageCapacity');
 
-  if(cmd.expl_cost){
-    $('.vBMExplCost').html(valStr(cmd.expl_cost, '€'));
-    $('.vBMExplCost').parent().show();
-  }
-  else {
-    $('.vBMExplCost').parent().hide();
-  }
 
-  if(cmd.river){
-    $('.vBMRiver').html(cmd.river);
+  setOrHide('.vBMPop', cmd.pop_affected, 'H', {compact: false});
+  setOrHide('.vBMExplCost', cmd.expl_cost, '€');
 
-    $('.vBMRiver').parent().show();
-  }
-  else {
-    $('.vBMRiver').parent().hide();
-  }
 
+  setOrHide('.vBMRiver', cmd.river);
   setOrHide('.vBMCoolingWaterRate', cmd.coolingWaterRate, "m3/s", {mag: 0});
   setOrHide('.vBMTheoReason', cmd.theorical);
 

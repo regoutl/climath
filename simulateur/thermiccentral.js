@@ -13,6 +13,7 @@ class Kind extends AbstractProductionMean{
         //capacity factor
         this._capacityFactor = parameters.capacityFactor ? parameters.capacityFactor: 1;
 
+        // this.demolishRatio = 0.15;
     }
 }
 
@@ -21,7 +22,7 @@ const nuclearDisasterRadius = 50/*pix*/;
 export default class ThermicCentral /*extends AbstractProductionMean*/{
     constructor(parameters, simu){
         this.simu = simu;
-        this.centrals = [];
+        this.centrals = {};
 
         this.hourlyDemand = new Float32Array(8760);
         this.hourlyDemandCur = 0;
@@ -35,15 +36,15 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         this.fusion.defaultNameplate = 3e9;
         this.fossilFootprint = parameters.fossil.footprint;
 
-        this.centrals.push({
+        this.centrals.fossil = {
             prodMax: Infinity,
             co2PerWh:parameters.fossil.footprint,
             m3PerJ: 0,
             pool: 254, // whatever pool
             costPerWh: 0,
             type: 'fossil',
-        });
-        this.centrals.push( {
+        };
+        this.centrals.beginNuke = {
             prodMax: parameters.nuke.init.capacity *
                               parameters.nuke.init._capacityvalMul,
             co2PerWh:this.nuke.perWh.co2.at(2019),
@@ -51,8 +52,8 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
             pool: 254, // whatever pool
             costPerWh: this.nuke.perWh.cost.at(2019),
             type: 'nuke',
-        });
-        this.centrals.push({
+        } ;
+        this.centrals.beginCcgt = {
             prodMax: parameters.ccgt.init.capacity *
                               parameters.ccgt.init._capacityvalMul,
             co2PerWh:this.ccgt.perWh.co2.at(2019),
@@ -60,9 +61,9 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
             pool: 254, // whatever pool
             costPerWh: this.ccgt.perWh.cost.at(2019),
             type: 'ccgt',
-        });
+        };
 
-        // this.nextCentralIndex = 3;
+        this.nextCentralName = 0;
     }
 
     /// this component includes petrol, so infinite
@@ -81,24 +82,24 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         // this.nuke.happyNYEve(yStats); //todo : add fixed o n m
         // this.ccgt.happyNYEve(yStats);
 
-
+        //convert the dic to an array for yearly prod
+        let centArr = [];
+        for(let c in this.centrals){
+            centArr.push(this.centrals[c]);
+        }
 
         let productions = yearlyProductions(this.hourlyDemand,
                                             {dayOffset: rand() % 100 * 365,
                                             hydroComp: this.simu.cHydro},
-                                            this.centrals);
+                                            centArr);
 
 
-        for(let i = 0; i < this.centrals.length; i++){
-            let type = this.centrals[i].type;
-            yStats.co2.perWh[type] += productions[i] * this.centrals[i].co2PerWh;
-            yStats.cost.perWh[type] += productions[i] * this.centrals[i].costPerWh;
+        for(let i = 0; i < centArr.length; i++){
+            let type = centArr[i].type;
+            yStats.co2.perWh[type] += productions[i] * centArr[i].co2PerWh;
+            yStats.cost.perWh[type] += productions[i] * centArr[i].costPerWh;
             yStats.consumedEnergy.origin[type] += productions[i];
         }
-
-        // let values = [0, 5, 10, 8, 4, 9, 1, 2, 0];
-        // console.log(romberg(values));
-
 
         //reset the demand to 0
         this.hourlyDemand.fill(0);
@@ -131,8 +132,7 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         info.build.co2 = nameplate // m2
             * this[parameters.type].build.co2.at(info.build.begin);
 
-        info.build.cost  = nameplate * // w
-            this[parameters.type].build.cost.at(info.build.begin);  // eur/w
+        info.build.cost  =  this._computeBuildCost(build);
 
 
         info.perYear = {
@@ -159,7 +159,7 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         info._m3PerJ = heatPerEnProduced / jToVapM3;
         info.coolingWaterRate = nameplate * info.avgCapacityFactor * info._m3PerJ;
 
-
+        info.centralId = this.nextCentralName;
 
         if(parameters.type == 'nuke'){
             info.pop_affected = this.simu.cMap.reduceIf(['population'],
@@ -181,6 +181,10 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
                 info.theorical = "wrong space";
         }
     }
+    _computeBuildCost(build){
+        return build.parameters.nameplate * // w
+            this[build.parameters.type].build.cost.at(build.info.build.begin);  // eur/w
+    }
 
     /// expand capacity
     capex(build){
@@ -192,20 +196,41 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
 
         let nameplate = build.info.nameplate.at(build.info.build.end);
 
-        this.centrals.push({
+        if(info.centralId in this.centrals)
+            throw 'appeler prepareCapex a chaque fois svp';
+
+        this.centrals[info.centralId] = {
             prodMax: nameplate * this[parameters.type]._capacityFactor,
             co2PerWh:info.perWh.co2,
             m3PerJ: info._m3PerJ,
-            pool: info._poolIndex, // whatever pool
+            pool: info._poolIndex,
             costPerWh: info.perWh.cost,
             type: parameters.type,
-        });
-        // this.simu.cHydro.addCentral(build.info._poolIndex,
-        //                             nameplate * this._capacityFactor,
-        //                             build.info._m3PerJ);
+            demolishCost: info.build.cost * this[parameters.type].demolishRatio,
+        };
 
+        this.nextCentralName++;
     }
 
+    /** same input as pv.demolish. return the cost of demolition. Dont apply the demoliton*/
+    costOfDemolish(demolish){
+        return this._computeBuildCost(demolish) * this.demolishRatio;
+    }
+
+    /**
+    demolish the given central.
+    @warning the central must exist (build complete)
+    @return demolition cost
+    */
+    demolish(centralId){
+        if(!centralId in this.centrals)
+            throw 'no in';
+
+        let cost = this.centrals[centralId].demolishCost;
+
+        delete this.centrals[centralId];
+        return cost;
+    }
 }
 
 

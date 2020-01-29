@@ -94,7 +94,7 @@ export class Simulateur{
 
         this._currentBuild.info = {type: buildMenuState.type, build:{begin: this.year}};
 
-        this._c(buildMenuState.type).prepareCapex(this._currentBuild, this.cProd.countries);
+        this._c(buildMenuState.type).prepareCapex(this._currentBuild);
 
         if(this._currentBuild.info.build.cost > this._money){
             this._currentBuild.info.theorical = "cash";
@@ -132,7 +132,11 @@ export class Simulateur{
           return false;
         }
 
-        this.cScheduler.push(this._currentBuild);
+        this.cScheduler.push({
+            year: this._currentBuild.info.build.end,
+            action: 'build',
+            data: this._currentBuild
+        });
         // this.cProd.execute(this._currentBuild);
 
         this.cMap.build(this._currentBuild);
@@ -225,10 +229,9 @@ export class Simulateur{
 
         //wish a happy new year to everybody
         // this.cProd.happyNYEve(this.yStats);
-      	for (var prodMean in this.cProd.productionMeans) {
-
-    				this.cProd.productionMeans[prodMean].happyNYEve(this.yStats);
-    		}
+      	for (let prodMean in this.cProd.productionMeans) {
+			this.cProd.productionMeans[prodMean].happyNYEve(this.yStats);
+		}
         this.cScheduler.happyNYEve(this.yStats);
 
         //warning : year -- todo correct
@@ -242,6 +245,67 @@ export class Simulateur{
 
         //prepare stats for the new year
         this._clearYearStats();
+    }
+
+
+    /** @brief demolish prod means that were build via constructionParameters
+
+    @param constructionParameters : {}.
+        for non centrals : exactly build.parameters,
+        for centrals : {type: 'central', id} id : central id
+    @param deconstructionParameters : {} depends on the type
+        for pv : {area, extra} area : area to demolish, extra : radiant flux on that area
+        for wind : {area, extra} area : area to demolish, extra : wind power on that area
+        for storage : {area}
+        for centrals : undefined
+
+    @return cost of the demolition.
+
+    @note scheduledConstructions are also affected. demolishion of a partial construction still cost the full price
+    */
+    demolish(constructionParameters, deconstructionParameters){
+        if(constructionParameters.type == 'central'){
+            //check the schedule for the central
+             //note that it's fine to iterate over a priority queue, as long as you dont modify the priority of an item
+            for(let scheduled of this.cScheduler.pendingBuilds._heap){
+                if(scheduled.type == 'build' && scheduled.action.centralId === constructionParameters.id){
+                    //found the central !
+                    scheduled.action = null; //cancel the build action
+                    return this.cProd.productionMeans.centrals.costOfDemolish(scheduled.data);
+                }
+            }
+
+            //the central was not in the schedule, pass it to the component
+            return this.cProd.productionMeans.centrals.demolish(constructionParameters.id);
+        }
+        else if(['pv', 'storage', 'wind'].includes(constructionParameters.type)){
+            let currentDemolish = {
+                parameters: constructionParameters,
+                reductions:deconstructionParameters,
+                info:{type: constructionParameters.type, build:{begin: constructionParameters.year}},
+                year: this.year,
+                pm: this.cProd.productionMeans[constructionParameters.type]
+            };
+
+            let constructionFinishYear = currentDemolish.pm.endOfBuild(currentDemolish);
+
+            if(this.year < constructionFinishYear){
+                this.cScheduler.push({
+                    year: constructionFinishYear + 0.5, //guarantee the demolish after the build
+                    action: 'demolish',
+                    data:currentDemolish
+                });
+
+                return currentDemolish.pm.costOfDemolish(currentDemolish);
+            }
+            else{
+                return currentDemolish.pm.demolish(currentDemolish);
+
+            }
+        }
+        else {
+            throw 'to do';
+        }
     }
 
     _clearYearStats(){
