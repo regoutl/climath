@@ -7,14 +7,14 @@ const supported = ['fr', 'nl', 'en'];
 
 /** @brief swith the current language
 @param language : string. the new language to translate to.
-                            accepted val : fr, en, nl
-                            if undefined, use the user's locale or the last lang used on this device
+        accepted val : fr, en, nl
+        if undefined, use the user's locale or the last lang used on this device
 
 @return a promice that is resolved when the dic is done loading
 
 @note when switching languages, the code should look like
 setLang(newLang).then(app.reRenderAll)
-@warning nust be called at startup time. Exemple :
+@warning nust be called at startup time. Example :
 setLang().then(app.render)
 */
 export function setLang(language){
@@ -39,7 +39,7 @@ export function setLang(language){
     .then(newDic => {
         dic = newDic;
     })
-    .catch(e => alert(e))
+    .catch(e => {alert(e); dic = {}})
     ;
 }
 
@@ -49,12 +49,14 @@ export function setLang(language){
 @param ctx : text context. Used by the translator to choose the most appropriate translation. can be undefined
 @param count : number. if str includes %d, will replace that. else should be undefined
 
-@exemple tr("il y a %d chat", "un contexte", 3)
+@return the translation if existing, else the original string
+
+@example tr("il y a %d chat", "un contexte", 3)
 
 @note it's preferable to do "example" than tr(il y a ) + 3 + tr(chat)
         because the plural cannot be handeled corectly in the second case
 
-@IMPORTANT this function should only be given string kown at compile time.
+@IMPORTANT this function should only be given string KNOWN at COMPILE TIME.
 
                 let greeting = "hello " + userName;
                 tr(str)
@@ -62,6 +64,9 @@ export function setLang(language){
                 will not work. do
 
                 tr("hello") + userName instead
+
+@IMPORTANT as this function isnt pure, its ans should not be cached. i.e.
+            IT SHOULD BE CALLED at RENDER TIME
 */
 export function tr(str, ctx, count){
     if(str in dic && typeof dic[str] == 'string'){
@@ -84,10 +89,6 @@ export function tr(str, ctx, count){
 
 
 
-export function downloadDic(){
-    //add a line break for all the lines we have to translate
-    download(lang + "tmp.dic",JSON.stringify(dic).replace(/},/g, "},\n"));
-}
 
 //to be checked
 function download(filename, text) {
@@ -101,6 +102,16 @@ function download(filename, text) {
   element.click();
 
   document.body.removeChild(element);
+}
+
+
+
+
+//download dic button + functionnality ================================
+
+function downloadDic(){
+    //add a line break for all the lines we have to translate
+    download(lang + "tmp.dic",JSON.stringify(dic).replace(/},/g, "},\n"));
 }
 
 //this code is for dev only

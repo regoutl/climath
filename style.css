@@ -332,3 +332,28 @@ canvas {
 	padding: 10px;
 	font-size: 0.8em;
 }
+
+
+
+
+
+
+
+
+/** REACT =====================================================**/
+
+
+.hFlex{
+	display: flex;
+	flex-direction: row;
+
+}
+
+
+.hLayout{
+	display: flex;
+	flex-direction: row;
+
+	overflow: hidden;
+	flex: 1 1;
+}
