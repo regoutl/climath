@@ -13,6 +13,7 @@ import {Simulateur, promiseSimulater, objSum} from './simulateur/simulateur.js';
 import * as CentralArea from './ui/centralArea.js';
 import * as StatDock from './ui/statdock.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './ui/plot.js';
+import {tr, setLang} from './tr/tr.js';
 
 
 //window.location.hash : get anchor
@@ -23,7 +24,9 @@ function docEl(id){
 	return document.getElementById(id);
 }
 
-
+setLang('fr').then(() => {
+	alert(tr('%d little kitten', 'test', 2));
+})
 
 $(function(){
 
@@ -114,7 +117,7 @@ $(function(){
 			txt += '<div class="bShowPlot" data-target="';
 			//add a data target
 			txt += '"">';
-			txt += yearly.label + ' ';
+			txt += tr(yearly.label, "plot title") + ' ';
 			txt += '<span>';
 			let unit = yearly.unit;
 			if(unit == '')

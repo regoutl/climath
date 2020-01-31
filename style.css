@@ -217,6 +217,11 @@ canvas {
 	left: auto;
 }
 
+#bDownloadDic{
+	top: 120px;
+	left: 20px;
+}
+
 /*#divShowEnergyGrid{
 	top: 0;
 	right: 0;
