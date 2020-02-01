@@ -2,7 +2,7 @@ import ProductionComponent from './productioncomponent.js';
 import MapComponent from './mapcomponent.js';
 import HydroComponent from './hydrocomponent.js';
 import BuildScheduler from './buildScheduler.js';
-import { quantityToHuman as valStr} from '../ui/plot.js';
+import { quantityToHuman as valStr} from '../ui/build/plot.js';
 import * as Yearly from "../timevarin.js";
 
 

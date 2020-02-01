@@ -6,34 +6,47 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-import StatDock from './statdock.js';
-import MapView from './mapview.js';
-import BuildDock from './builddock.js';
-import StatusBar from './statusbar.js';
+var MapLayers = function (_React$Component) {
+    _inherits(MapLayers, _React$Component);
 
-var MainWin = function (_React$Component) {
-    _inherits(MainWin, _React$Component);
+    function MapLayers(props) {
+        _classCallCheck(this, MapLayers);
 
-    function MainWin(props) {
-        _classCallCheck(this, MainWin);
-
-        return _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
+        return _possibleConstructorReturn(this, (MapLayers.__proto__ || Object.getPrototypeOf(MapLayers)).call(this, props));
     }
 
-    _createClass(MainWin, [{
+    _createClass(MapLayers, [{
         key: 'render',
         value: function render() {
+            var bases = ['groundUse', 'popDensity', 'windPowDensAt50'];
+            var layers = ['energyGrid', 'flows'];
+
+            var name2icon = {
+                'groundUse': 'groundUse.jpg',
+                'popDensity': 'pop.png',
+                'windPowDensAt50': 'windbis.jpeg',
+                'energyGrid': 'electricEnergy.png',
+                'flows': 'flows.png'
+            };
+
+            var baseEls = bases.map(function (label) {
+                return React.createElement('img', { src: "res/icons/" + name2icon[label], className: 'mapButton' });
+            });
+
+            var extraEls = layers.map(function (label) {
+                return React.createElement('img', { src: "res/icons/" + name2icon[label], className: 'mapButton' });
+            });
+
             return React.createElement(
                 'div',
-                { className: 'vLayout' },
-                React.createElement(StatusBar, null),
-                React.createElement(MapView, null),
-                React.createElement(BuildDock, null)
+                { id: 'dMapLayers', title: 'MapLayers', className: 'vLayout' },
+                baseEls,
+                extraEls
             );
         }
     }]);
 
-    return MainWin;
+    return MapLayers;
 }(React.Component);
 
-export default MainWin;
+export default MapLayers;

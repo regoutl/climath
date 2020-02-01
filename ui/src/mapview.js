@@ -1,4 +1,4 @@
-import {tr} from '../tr/tr.js';
+import {tr} from '../../tr/tr.js';
 import MapLayers from './maplayers.js';
 import PaletteTexture from './palettetexture.js';
 
