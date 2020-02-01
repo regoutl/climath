@@ -1,7 +1,7 @@
 "use strict";
 
-import MapDrawer from '../ui/mapdrawer.js';
-import PaletteTexture from '../ui/palettetexture.js';
+// import MapDrawer from '../ui/mapdrawer.js';
+// import PaletteTexture from '../ui/palettetexture.js';
 
 const GroundUsage = {
     out:0,
@@ -70,12 +70,12 @@ export default class MapComponent{
         this.windPowDens = mapImgs.windPowDens;
         this.poolMap = mapImgs.pools;
 
-        this.drawer = new MapDrawer({
-            energy: this.energyGrid,
-            groundUse: this.groundUse,
-            popDensity: this.popDensity,
-            windPowDens: this.windPowDens,
-        });
+        // this.drawer = new MapDrawer({
+        //     energy: this.energyGrid,
+        //     groundUse: this.groundUse,
+        //     popDensity: this.popDensity,
+        //     windPowDens: this.windPowDens,
+        // });
 
         this.buildParameters = [{}];// first one is the null build
     }
@@ -238,17 +238,17 @@ export default class MapComponent{
         if(['pv', 'battery', 'wind'].includes(build.info.type) ){
             this.buildParameters.push(build.parameters);
 
-            let buildIndex = this.drawer.appendEnergyPalette(build.info.type);
+            // let buildIndex = this.drawer.appendEnergyPalette(build.info.type);
 
             this._forEachIf(build.area, (x, y) => {
                 this.energyGrid[x + y * 1374] = buildIndex;
             }, ["buildable"]);
 
-            this.drawer.update('energy');
-            this.drawer.draw();
+            // this.drawer.update('energy');
+            // this.drawer.draw();
         }
         else if(['ccgt', 'nuke', 'fusion'].includes(build.info.type)){
-            this.drawer.addItem(build.info.type, build.area.center);
+            // this.drawer.addItem(build.info.type, build.area.center);
             this._centrals.push({
                 id:  build.info.centralId,
                 loc: build.area.center
@@ -282,7 +282,7 @@ export default class MapComponent{
     }
 
     _rmCentral(id){
-        this.drawer.rmItem(this._centrals[id].type, this._centrals[id].loc);
+        // this.drawer.rmItem(this._centrals[id].type, this._centrals[id].loc);
         // this._centrals.splice(id, 1);
         this._centrals[id] = -1;
     }
@@ -312,9 +312,9 @@ export default class MapComponent{
         })
         if(set){
             ['energy','groundUse','popDensity'].forEach((layer, i) => {
-                this.drawer.update(layer);
+                // this.drawer.update(layer);
             });
-            this.drawer.draw();
+            // this.drawer.draw();
         }
         topay += pop_affected * meanCostToRelocate
         // TODO reallocate pop
