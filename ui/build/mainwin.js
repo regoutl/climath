@@ -9,42 +9,31 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
+import StatusBar from './statusbar.js';
 
-var MainSimu = function (_React$Component) {
-    _inherits(MainSimu, _React$Component);
+var MainWin = function (_React$Component) {
+    _inherits(MainWin, _React$Component);
 
-    function MainSimu(props) {
-        _classCallCheck(this, MainSimu);
+    function MainWin(props) {
+        _classCallCheck(this, MainWin);
 
-        var _this = _possibleConstructorReturn(this, (MainSimu.__proto__ || Object.getPrototypeOf(MainSimu)).call(this, props));
-
-        _this.state = { showStats: false, showBM: true };
-        return _this;
+        return _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
     }
 
-    _createClass(MainSimu, [{
+    _createClass(MainWin, [{
         key: 'render',
         value: function render() {
-            // let ans = "";
-            //
-            // if(this.state.showStats)
-            //     ans += <StatDock />;
-            //
-            // ans += <MapView />;
-            //
-            // if(this.state.showBM)
-            //     ans += <BuildDock />;
-
-
             return React.createElement(
                 'div',
-                { className: 'hFlex' },
-                React.createElement(MapView, null)
+                { className: 'vLayout redBox' },
+                React.createElement(StatusBar, null),
+                React.createElement(MapView, null),
+                React.createElement(BuildDock, null)
             );
         }
     }]);
 
-    return MainSimu;
+    return MainWin;
 }(React.Component);
 
-export default MainSimu;
+export default MainWin;

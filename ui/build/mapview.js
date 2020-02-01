@@ -44,7 +44,7 @@ var MapView = function (_React$Component) {
             this.gl = canvas.getContext("webgl", { alpha: false });
 
             this._createProg();
-            this._initTextures();
+            // this._initTextures();
         }
     }, {
         key: 'render',

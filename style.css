@@ -401,3 +401,8 @@ canvas {
     width: 32px;
     border-radius: 16px;
 }
+
+
+.redBox{
+	background: red;
+}
