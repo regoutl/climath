@@ -11,19 +11,32 @@ import * as BuildMenu from './ui/buildmenu.js';
 
 import {Simulateur, promiseSimulater, objSum} from './simulateur/simulateur.js';
 import * as CentralArea from './ui/centralArea.js';
-import * as StatDock from './ui/statdock.js';
+import * as StatDock from './ui/oldstatdock.js';
 import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './ui/plot.js';
+import {tr, setLang} from './tr/tr.js';
 
+
+import App from './ui/app.js';
 
 //window.location.hash : get anchor
 
+//REACT TEST
+ReactDOM.render(
+  React.createElement(App),
+  document.body
+);
+
+
+//END OF REACT TEST
 
 
 function docEl(id){
 	return document.getElementById(id);
 }
 
-
+setLang('fr').then(() => {
+	console.log(tr('%d little kitten', 'test', 2));
+})
 
 $(function(){
 
@@ -114,7 +127,7 @@ $(function(){
 			txt += '<div class="bShowPlot" data-target="';
 			//add a data target
 			txt += '"">';
-			txt += yearly.label + ' ';
+			txt += tr(yearly.label, "plot title") + ' ';
 			txt += '<span>';
 			let unit = yearly.unit;
 			if(unit == '')

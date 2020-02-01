@@ -186,13 +186,6 @@ canvas {
 }
 
 
-.mapButton{
-    position:absolute;
-    z-index: 10000;
-    cursor: pointer;
-    width: 32px;
-    border-radius: 16px;
-}
 
 .mainButton{
 	position:absolute;
@@ -215,6 +208,11 @@ canvas {
 	top: 0;
 	right: 0;
 	left: auto;
+}
+
+#bDownloadDic{
+	top: 120px;
+	left: 20px;
 }
 
 /*#divShowEnergyGrid{
@@ -326,4 +324,80 @@ canvas {
 #author{
 	padding: 10px;
 	font-size: 0.8em;
+}
+
+
+
+
+
+
+
+
+/** REACT =====================================================**/
+
+
+.hFlex{
+	display: flex;
+	flex-direction: row;
+
+}
+
+
+.hLayout{
+	display: flex;
+	flex-direction: row;
+
+	overflow: hidden;
+	flex: 1 1;
+}
+
+.vLayout{
+	display: flex;
+	flex-direction: column;
+
+	overflow: hidden;
+	flex: 1 1;
+}
+
+
+#statusBar{
+	position: absolute;
+	width: 100%;
+	z-index:1000000;
+	justify-content: space-between;
+	height: 40px;
+	align-items: center;
+	font-size: 1.5em;
+}
+
+
+#dBuildDock{
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+	height: 200px;
+	z-index:1000000;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 1.5em;
+	background: gray;
+	overflow: hidden;
+}
+
+
+#dMapBox{
+	flex: 1 1;
+	position: relative;
+}
+
+#dMapLayers{
+	position: absolute;
+	right: 10px;
+	top: 50px;
+}
+
+.mapButton{
+    cursor: pointer;
+    width: 32px;
+    border-radius: 16px;
 }

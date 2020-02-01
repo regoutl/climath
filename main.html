@@ -4,6 +4,15 @@
 	<meta charset="utf-8">
 	<title>Climath</title>
 	<link rel="stylesheet" href="style.css">
+	<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+	<script src="res/jQuery.js"></script>
+	<script src="glpk.min.js"></script>
+	<script src="rand.js"></script>
+
+	<script src="main.js" type="module"></script>
+
 </head>
 <body>
 <!--	<header>
@@ -13,29 +22,11 @@
 		<div id="dLeftDock">
 			<div id="dCoefs">
 			</div>
-			<div id="dStats">
-				<select>
-				 <option value="1">Cette annee</option>
-				 <option value="2">Depuis 2 ans</option>
-				 <option value="5">Depuis 5 ans</option>
-				 <option value="10">Depuis 10 ans</option>
-				 <option value="20">Depuis 20 ans</option>
-				 <option value="100000">Depuis le debut</option>
-				</select>
-				<h2>Origine de l'energie</h2>
-				<p>Demande : 650 TWh</p>
-				<canvas id="cStatEnergyOri" ></canvas>
-				<h2>Empreinte carbone</h2>
-				<p>Total : 10 T</p>
-				<canvas id="cStatFootprint" ></canvas>
-				<h2>Budget</h2>
-				<p>Total : 10 eur</p>
-				<canvas id="cStatBudget" ></canvas>
-			</div>
 		</div>
 		<div id="dCentralArea">
 			<img src="res/icons/fold.png" id="bMaskLeftDock" />
 			<img src="res/icons/configure.png" id="bConfigure" title="Parametres" class="mainButton"/>
+			<img src="res/icons/stats.png" id="bStats" title="Statistiques" class="mainButton"/>
 			<img src="res/icons/stats.png" id="bStats" title="Statistiques" class="mainButton"/>
             <div id="MapLayers" title="MapLayers" class="mainButton"></div>
 
@@ -108,10 +99,5 @@
 <!--	<img src="radioactive.png" id="inNuke" class="input"  crossorigin="anonymous"/>-->
 </body>
 <!--	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->
-<script src="res/jQuery.js"></script>
-<script src="glpk.min.js"></script>
-<script src="rand.js"></script>
-
-<script src="main.js" type="module"></script>
 
 </html>
