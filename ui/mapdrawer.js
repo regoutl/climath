@@ -412,20 +412,6 @@ export default class MapDrawer{
             'energyGrid':'electricEnergy.png',
             'flows':'flows.png',
         }
-        // // RADIO Btn
-        // bases.forEach((m) => {
-        //     let radiobutton = $('<label><input type="radio" name="showBase"' +
-        //         ' value="'+ m + '"' +
-        //         (this.currentShowBase == m ? 'checked':'') + '> ' +
-        //         m + '</label><br>');
-        //     $('#gridLayers').append(radiobutton);
-        // });
-        //
-        // $('#gridLayers input:radio').on('change',
-        // function() {
-        //     grid.currentShowBase = $(this).val();
-        //     grid.draw();
-        // });
 
         let setFilter = (m, grey) => $(name2id(m)).css({
             filter: grey?'grayscale(100%)':'none'
@@ -456,26 +442,6 @@ export default class MapDrawer{
 
 
         let layers = ['energyGrid', 'flows'];
-        // // CHECKBOX
-        // layers.forEach((m) => {
-        //     let checkbox = $('<label>' + '<input type="checkbox"'+
-        //         'name="' + m + '"' + ' value="'+ m + '"' +
-        //         (this.currentShowGrid[m] ? 'checked':'') + '> ' +
-        //         m + '</label><br>');
-        //     $('#gridLayers').append(checkbox);
-        // });
-        //
-        //
-        // $('#gridLayers input:checkbox').on('change',
-        // function() {
-        //     grid.currentShowGrid[$(this).val()] = $(this).is(':checked');
-        //     grid.draw();
-        //     if($(this).val() == 'energyGrid'){
-        //         $('.energyRelated').css({
-        //             'opacity': $(this).is(':checked') ? 1.0: 0,
-        //         });
-        //     }
-        // });
         layers.forEach((m,i) => {
             let imbutton = $('<img src="res/icons/'+name2icon[m]+
             '" id="'+name2id(m).substr(1)+'" title="'+m+'" class="mapButton" />');
