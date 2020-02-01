@@ -6,34 +6,39 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-import StatDock from './statdock.js';
-import MapView from './mapview.js';
-import BuildDock from './builddock.js';
-import StatusBar from './statusbar.js';
+var StatusBar = function (_React$Component) {
+    _inherits(StatusBar, _React$Component);
 
-var MainWin = function (_React$Component) {
-    _inherits(MainWin, _React$Component);
+    function StatusBar(props) {
+        _classCallCheck(this, StatusBar);
 
-    function MainWin(props) {
-        _classCallCheck(this, MainWin);
+        var _this = _possibleConstructorReturn(this, (StatusBar.__proto__ || Object.getPrototypeOf(StatusBar)).call(this, props));
 
-        return _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
+        _this.state = { showStats: true, showBM: true };
+        return _this;
     }
 
-    _createClass(MainWin, [{
-        key: 'render',
+    _createClass(StatusBar, [{
+        key: "render",
         value: function render() {
             return React.createElement(
-                'div',
-                { className: 'vLayout' },
-                React.createElement(StatusBar, null),
-                React.createElement(MapView, null),
-                React.createElement(BuildDock, null)
+                "div",
+                { id: "statusBar", className: "hLayout" },
+                React.createElement(
+                    "div",
+                    { className: "vYear" },
+                    "2019"
+                ),
+                React.createElement(
+                    "div",
+                    { className: "vMoney" },
+                    "10 miles euro"
+                )
             );
         }
     }]);
 
-    return MainWin;
+    return StatusBar;
 }(React.Component);
 
-export default MainWin;
+export default StatusBar;

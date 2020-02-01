@@ -1,22 +1,22 @@
 import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
+import StatusBar from './statusbar.js'
 
 
 export default class MainWin extends React.Component{
     constructor(props){
         super(props);
 
-        this.state = {showStats:true, showBM:true};
     }
 
     render(){
         return (
-        <div className="hLayout">
-            {this.state.showStats && <StatDock />}
+        <div className="vLayout">
+            <StatusBar />
 
             <MapView />
-            {this.state.showBM && <BuildDock />}
+            <BuildDock />
          </div>);
     }
 }

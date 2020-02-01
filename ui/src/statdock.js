@@ -1,6 +1,6 @@
 export default class StatDock extends React.Component{
     render(){
-        return <div style={{width: 300}}>				<select>
+        return <div style={{width: 300, height: 100}}>				<select>
         				 <option value="1">Cette annee</option>
         				 <option value="2">Depuis 2 ans</option>
         				 <option value="5">Depuis 5 ans</option>

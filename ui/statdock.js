@@ -20,7 +20,7 @@ var StatDock = function (_React$Component) {
         value: function render() {
             return React.createElement(
                 "div",
-                { style: { width: 300 } },
+                { style: { width: 300, height: 100 } },
                 "    ",
                 React.createElement(
                     "select",
