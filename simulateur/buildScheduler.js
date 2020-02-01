@@ -4,7 +4,7 @@ import PriorityQueue from '../res/priorityqueue.js';
 export default class BuildScheduler{
     constructor(){
         // top := next to be finished build
-    		this.pendingBuilds = new PriorityQueue((a, b) => a.info.build.end < b.info.build.end);
+    		this.pendingBuilds = new PriorityQueue((a, b) => a.year < b.year);
     }
 
     push(build){
@@ -13,15 +13,25 @@ export default class BuildScheduler{
 
     happyNYEve(yStats){
         let year = yStats.year;
-    		let a =this.pendingBuilds.peek();
-    		while(a && a.info.build.end == year+1){
-    			this._processBuild(this.pendingBuilds.pop());
+		let a =this.pendingBuilds.peek();
+        //note : the inequality allows actions scheduled for a given year to have an order
+		while(a && a.year < year+2){
+			this._processBuild(this.pendingBuilds.pop());
 
-    			a =this.pendingBuilds.peek();
-    		}
+			a =this.pendingBuilds.peek();
+		}
   	}
 
-  	_processBuild(build){
-  		  build.pm.capex(build);
+  	_processBuild(job){
+        if(job.action == 'build'){
+            job.data.pm.capex(job.data);
+        }
+        else if(job.action == 'demolish'){
+            job.data.pm.demolish(job.data);
+        }
+        else if(job.action == null){} //null action : do nothing
+        else {
+            throw 'i dont know this action';
+        }
   	}
 }

@@ -44,4 +44,7 @@ export default class IntermittentProductionMean extends AbstractProductionMean{
             this._capacityFactor[t % this._capacityFactor.length] / 255.0;
   }
 
+  endOfBuild(build){
+      return this.build.delay + build.info.build.begin;
+  }
 }

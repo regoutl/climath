@@ -1,56 +1,53 @@
-import { quantityToHuman as valStr} from './plot.js';
+import { quantityToHuman as valStr } from './plot.js';
 
 /** @brief all the infos about what to build except radius and curPos
 @field type  in ('pv') : what to build
 **/
-export let state = undefined;
+export var state = undefined;
 /** @brief radius : Number (unit : pixel ( switch to meters ?) of the build*/
-export let radius = 0;
+export var radius = 0;
 /** @brief curPos : {x, y} (unit : pixel (switch meters ?)).
 @note if cursor is out of the map, undefined
 */
-export let curPos = undefined;
+export var curPos = undefined;
 
-let stateChangedCallback = undefined;
+var stateChangedCallback = undefined;
 
-let simu = null;
+var simu = null;
 
 /** @brief set the callback function to be called each time
             the state or radius changes
 */
-export function setSimu(s){
+export function setSimu(s) {
   simu = s;
 
-  stateChangedCallback =  simu.onBuildMenuStateChanged.bind(simu);
+  stateChangedCallback = simu.onBuildMenuStateChanged.bind(simu);
 
-  simu.cMap.drawer.on('mousemove',function(evt){
-    curPos = {x: evt.offsetX, y: evt.offsetY};
+  simu.cMap.drawer.on('mousemove', function (evt) {
+    curPos = { x: evt.offsetX, y: evt.offsetY };
 
     notifyStateChanged();
   });
 
-  simu.cMap.drawer.on('pointerleave', function(evt){
+  simu.cMap.drawer.on('pointerleave', function (evt) {
     curPos = undefined;
 
     notifyStateChanged();
   });
-
 }
 
-export function notifyStateChanged(){
-  if(stateChangedCallback)
-    displayStat(stateChangedCallback(state, curPos, radius));
+export function notifyStateChanged() {
+  if (stateChangedCallback) displayStat(stateChangedCallback(state, curPos, radius));
 }
 
-
-$(function(){
+$(function () {
   radius = Number($('#BMRange').val());
 
-  $('.bBuild').on('click', function(e){
-    let t = e.currentTarget.getAttribute("data-target");
+  $('.bBuild').on('click', function (e) {
+    var t = e.currentTarget.getAttribute("data-target");
 
     //double click on same tab : close it
-    if(state && state.type == t){
+    if (state && state.type == t) {
       state = undefined;
       $('#dBuildDetails').hide();
 
@@ -58,14 +55,11 @@ $(function(){
       return;
     }
 
-
-    if(t == 'pv'){
-      $('#BMRange').attr({min:1, max:100});
-    }
-    else if(t == 'battery'){
-      $('#BMRange').attr({min:1, max:50});
-      if(radius > $('#BMRange').attr('max'))
-        radius = $('#BMRange').attr('max');
+    if (t == 'pv') {
+      $('#BMRange').attr({ min: 1, max: 100 });
+    } else if (t == 'battery') {
+      $('#BMRange').attr({ min: 1, max: 50 });
+      if (radius > $('#BMRange').attr('max')) radius = $('#BMRange').attr('max');
     }
 
     state = {};
@@ -74,137 +68,90 @@ $(function(){
 
     $('#dBuildDetails').show();
     // $('#' + t + 'BuildDetails').css('display', 'block');
-
   });
 
-
-  $('#BMRange').on('change', function(e){
+  $('#BMRange').on('change', function (e) {
     radius = Number(this.value);
     notifyStateChanged();
   });
 });
 
-function setOrHide(selector, val, unit, opt){
-    if(val){
-        let txt = (unit) ? valStr(val, unit, opt) : val;
+function setOrHide(selector, val, unit, opt) {
+  if (val) {
+    var txt = unit ? valStr(val, unit, opt) : val;
 
-      $(selector).html(txt);
+    $(selector).html(txt);
 
-      $(selector).parent().show();
-    }
-    else {
-      $(selector).parent().hide();
-    }
-
+    $(selector).parent().show();
+  } else {
+    $(selector).parent().hide();
+  }
 }
 
-export function displayStat(build){
-  if(build === undefined)
-    return;
+export function displayStat(build) {
+  if (build === undefined) return;
 
-    let cmd = build.info;
+  var cmd = build.info;
 
-  ['build', 'perYear', 'perWh'].forEach( fieldName => {
-    let cap = fieldName.substr(0, 1).toUpperCase() + fieldName.substr(1);
-    let mul = 1;
-    if(fieldName == 'perWh')
-      mul = 1000;
+  ['build', 'perYear', 'perWh'].forEach(function (fieldName) {
+    var cap = fieldName.substr(0, 1).toUpperCase() + fieldName.substr(1);
+    var mul = 1;
+    if (fieldName == 'perWh') mul = 1000;
 
-    let lines = [];
-    if(cmd[fieldName] ){
-      if(cmd[fieldName].cost != 0)
-        lines.push('<span class="vBM' + cap + 'Cost">' + valStr(cmd[fieldName].cost * mul, '€') + '</span>');
-      if(cmd[fieldName].co2 != 0)
-        lines.push(valStr(cmd[fieldName].co2 * mul, 'C'));
+    var lines = [];
+    if (cmd[fieldName]) {
+      if (cmd[fieldName].cost != 0) lines.push('<span class="vBM' + cap + 'Cost">' + valStr(cmd[fieldName].cost * mul, '€') + '</span>');
+      if (cmd[fieldName].co2 != 0) lines.push(valStr(cmd[fieldName].co2 * mul, 'C'));
 
-      if(fieldName == 'build'){
-        let delay = cmd[fieldName].end - cmd[fieldName].begin;
-        lines.push(delay + ' an' + ((delay > 1) ? 's':''));
+      if (fieldName == 'build') {
+        var delay = cmd[fieldName].end - cmd[fieldName].begin;
+        lines.push(delay + ' an' + (delay > 1 ? 's' : ''));
       }
-
     }
-    if(lines.length > 0){
+    if (lines.length > 0) {
       $('.vBM' + cap).parent().show();
-      $('.vBM' + cap).html( lines.join('<br />'));
-    }
-    else {
+      $('.vBM' + cap).html(lines.join('<br />'));
+    } else {
       $('.vBM' + cap).parent().hide();
     }
   });
 
   // $('.vBMBuildCost').css('color', (cmd.build.can) ? 'black': 'red');
 
-  if(cmd.area){
-    $('.vBMArea').parent().show();
-    $('.vBMArea').text(valStr(cmd.area, 'm2'));
-  }
-  else {
-    $('.vBMArea').parent().hide();
 
-  }
-
-  if(cmd.nameplate){
+  if (cmd.nameplate) {
     $('.vBMNameplate').parent().show();
-    let lines = [];
+    var lines = [];
     lines.push(valStr(cmd.nameplate.at(cmd.build.end), cmd.nameplate.unit));
-    if(cmd.avgCapacityFactor)
-      lines.push(valStr(cmd.nameplate.at(cmd.build.end) * cmd.avgCapacityFactor, 'W') + ' (en moyenne)');
+    if (cmd.avgCapacityFactor) lines.push(valStr(cmd.nameplate.at(cmd.build.end) * cmd.avgCapacityFactor, 'W') + ' (en moyenne)');
 
     $('.vBMNameplate').html(lines.join('<br />'));
-  }
-  else {
+  } else {
+    //  $('.vBMStorageCapacity').parent().toogle(cmd.storageCapacity);
     $('.vBMNameplate').parent().hide();
   }
 
-//  $('.vBMStorageCapacity').parent().toogle(cmd.storageCapacity);
-  if(cmd.storageCapacity){
-    $('.vBMStorageCapacity').html(valStr(cmd.storageCapacity, 'S'));
-    $('.vBMStorageCapacity').parent().show();
-  }
-  else {
-    $('.vBMStorageCapacity').parent().hide();
-  }
+  setOrHide('.vBMArea', cmd.area, 'm2');
 
-  if(cmd.pop_affected){
-    $('.vBMPop').html(valStr(cmd.pop_affected, 'H', {compact: false}));
-    $('.vBMPop').parent().show();
-  }
-  else {
-    $('.vBMPop').parent().hide();
-  }
+  if (cmd.storageCapacity) setOrHide('.vBMStorageCapacity', cmd.storageCapacity.at(cmd.build.end), 'S');else setOrHide('.vBMStorageCapacity');
 
-  if(cmd.expl_cost){
-    $('.vBMExplCost').html(valStr(cmd.expl_cost, '€'));
-    $('.vBMExplCost').parent().show();
-  }
-  else {
-    $('.vBMExplCost').parent().hide();
-  }
+  setOrHide('.vBMPop', cmd.pop_affected, 'H', { compact: false });
+  setOrHide('.vBMExplCost', cmd.expl_cost, '€');
 
-  if(cmd.river){
-    $('.vBMRiver').html(cmd.river);
-
-    $('.vBMRiver').parent().show();
-  }
-  else {
-    $('.vBMRiver').parent().hide();
-  }
-
-  setOrHide('.vBMCoolingWaterRate', cmd.coolingWaterRate, "m3/s", {mag: 0});
+  setOrHide('.vBMRiver', cmd.river);
+  setOrHide('.vBMCoolingWaterRate', cmd.coolingWaterRate, "m3/s", { mag: 0 });
   setOrHide('.vBMTheoReason', cmd.theorical);
-
-
 
   //maybe move it
 
   //defines a cursor
-  let theorical = (build.area.center === undefined);
+  var theorical = build.area.center === undefined;
 
-  if(!theorical){
-      simu.cMap.drawer.drawCursor(build.parameters.type, build.area.center, build.area.radius);
-  } else{
-      //clear cursor
-      simu.cMap.drawer.clearCursor();
+  if (!theorical) {
+    simu.cMap.drawer.drawCursor(build.parameters.type, build.area.center, build.area.radius);
+  } else {
+    //clear cursor
+    simu.cMap.drawer.clearCursor();
   }
   // simu.cMap.drawer.updateCursor(build.input);
 }

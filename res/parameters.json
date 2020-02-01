@@ -3,7 +3,7 @@
 	"ccgt":{
 		"build":{
 			"cost":{
-				"label":"Frais d'installation du gaz",
+				"label":"CCGT build cost",
 				"source":"https://www.spglobal.com/platts/en/market-insights/latest-news/electric-power/081115-combined-cycle-gas-fired-unit-costs-coming-in-below-expectations-duke",
 				"unit":"€/N",
 				"years":[6.04]
@@ -14,7 +14,7 @@
 		"deconstructionRatio":0.05,
 		"perWh":{
 			"cost":{
-				"label":"Frais (variables) d'exploitation et de maintenance des centrales gaz",
+				"label":"CCGT per wh cost",
 				"unit":"€/Wh",
 				"years":[10],
 				"valMul":0.000001,
@@ -22,7 +22,7 @@
 				"source":"todo ; find the correct value"
 			},
 			"co2":{
-				"label":"Empreinte des centrales gaz",
+				"label":"CCGT per Wh co2",
 				"unit":"C/Wh",
 				"years":[0.2],
 				"source":"todo ; find the correct value"
@@ -47,7 +47,7 @@
 	"nuke":{
 		"build":{
 			"cost":{
-				"label":"Frais d'installation du nucleaire",
+				"label":"Nuke build cost",
 				"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf",
 				"unit":"€/N",
 				"years":[4.43],
@@ -57,7 +57,7 @@
 		},
 		"perWh":{
 			"co2":{
-				"label":"Empreinte carbone du nucleaire",
+				"label":"Nuke per Wh co2",
 				"unit":"C/Wh",
 				"years":[0.012],
 				"in2050":0.012,
@@ -65,7 +65,7 @@
 				"comment":"Cette valeur prend en compte l'installation, l'entretient et la decommission de la centrale, ainsi les emmissions liees au traitement des dechets, ainsi que la production du carburant. "
 			},
 			"cost":{
-				"label":"Frais (variables)  d'exploitation et de maintenance du nucleaire",
+				"label":"Nuke per wh cost",
 				"unit":"€/Wh",
 				"years":[26],
 				"valMul":0.000001,
@@ -111,12 +111,12 @@
 			"source": "https://www.irena.org/-/media/Images/IRENA/Costs/Chart/Solar-photovoltaic/irena_costs_fig_55.jpg avant 2014, https://www.nrel.gov/pv/assets/images/efficiency-chart.png sinon",
 			"in2050": 0.3,
 			"comment": "Cette donnee vise a representer l'efficacite des panneaux solaires en vente, et non celle atteinte en laboratoire. Concerle les multi crystals ",
-			"label":"Efficacite des panneaux solaires"
+			"label":"PV efficiency"
 		},
 		"build":{
 			"time": 1,
 			"cost":{
-				"label":"Cout d'installation de en ferme solaire",
+				"label":"PV farm build cost",
 				"unit":"€/m2",
 				"years":[275, 275, 275, 275, 275,
 						275, 275, 275, 262, 234,
@@ -139,7 +139,7 @@
 				"valMul":1000,
 				"source":"https://www.sciencedirect.com/science/article/pii/S0360544204001148. Note : cet article donne ses infos en MJprim/W . La valeur ci dessus est en energie electrique. Cette valeur a ensuite etee convertie via le rapport W (nameplate) /m2 des PV de 2004 (120 W/m2). L'efficacite de l'onduleur est ignoree (suppossee 1). ",
 				"oldsource":"http://www.smartgreenscans.nl/publications/deWildScholten-and-Glockner-2012-Environmental-footprint-of-Elkem-Solar-Silicon.pdf,https://pubs.acs.org/doi/full/10.1021/es071763q, http://www.clca.columbia.edu/Task12_LCI_LCA_10_21_Final_Report.pdf, https://onlinelibrary.wiley.com/doi/epdf/10.1002/%28SICI%291099-159X%28200001/02%298%3A1%3C17%3A%3AAID-PIP295%3E3.0.CO%3B2-C",
-				"label":"Energie necessaire a la production de panneaux"
+				"label":"PV build energy"
 			}
 		},
 		"perYear":{
@@ -149,7 +149,7 @@
 				"unit":"€/m2y",
 				"source":"https://www.scottmadden.com/insight/solar-photovoltaic-plant-operating-and-maintenance-costs/",
 				"comment": "En supposant qu'il est independant du PIB par habitant. P.e. besoin d'etre capable de controler cette varaible. Donnee en € 2019.",
-				"label":"Frais d'exploitation et de maintenance"
+				"label":"PV per year cost"
 			}
 		},
 		"deconstructionRatio":0.05,
@@ -200,13 +200,13 @@
 		"battery":{
 			"build":{
 				"energy":{
-					"label":"Energie pour produire des batteries",
+					"label":"Battery build energy",
 					"source":"https://www.lowtechmagazine.com/2015/05/sustainability-off-grid-solar-power.html",
 					"years":[388],
 					"unit":"Wh/S"
 				},
 				"cost":{
-					"label":"Cout d'installation de batteries",
+					"label":"Battery build cost",
 					"unit":"€/S",
 					"years":[0],
 					"source":"au pif",
@@ -226,10 +226,10 @@
 				"unit":"€/Sy",
 				"source":"https://www.nrel.gov/docs/fy19osti/73222.pdf",
 				"comment": "Battery cost projections for 4-hour lithium-ion systems. ",
-				"label":"Frais (fixes) d'exploitation et de maintenance des batteries"
+				"label":"Battery per year cost"
 			},
 			"energyDensity":{
-				"source":"Valeur tesla power wall 2",
+				"source":"Battery storage density",
 				"years":[110000],
 				"unit":"S/m3"
 			}
@@ -242,12 +242,13 @@
 			"source": "https://greenliving.lovetoknow.com/Efficiency_of_Wind_Energy",
 			"in2050": 0.45,
 			"comment": "",
-			"label":"Efficacite des eoliennes"
+			"label":"Wind efficiency"
 		},
+		"deconstructionRatio":0.05,
 		"build":{
 			"time": 1,
 			"cost":{
-				"label":"Cout d'installation par eolienne (terrestre, @50m)",
+				"label":"Wind build cost (onshore, @50m)",
 				"unit":"€/i",
 				"years":[10],
 				"valMul":1000000,
@@ -256,7 +257,7 @@
 			}
 		},
 		"density":{
-			"label":"Eolienne (terrestre, @50m) par km2",
+			"label":"Wind (onshore, @50m) density",
 			"unit":"i/m2",
 			"years":[4.23],
 			"valMul":1e-6,
@@ -270,7 +271,7 @@
 		},
 		"perYear":{
 			"cost":{
-				"label":"Frais fixes des eoliennes (terrestre, @50m)",
+				"label":"Wind (terrestre, @50m) per Year cost",
 				"unit":"€/Ny",
 				"years":[45],
 				"valMul":0.001,
@@ -311,7 +312,7 @@
 	"fusion":{
 		"build":{
 			"cost":{
-				"label":"Frais d'installation de la fusion",
+				"label":"Fusion build cost",
 				"source":"?",
 				"unit":"€/N",
 				"years":[6.43],
@@ -319,7 +320,7 @@
 				"comment":"A determiner"
 			},
 			"co2":{
-				"label":"Empreinte carbone construction de la fusion",
+				"label":"Fusion build co2",
 				"unit":"C/N",
 				"years":[0.12],
 				"in2050":0.12,
@@ -330,7 +331,7 @@
 		},
 		"perWh":{
 			"cost":{
-				"label":"Frais (variables) d'exploitation et de maintenance de la fusion",
+				"label":"Fusion per wh cost",
 				"unit":"€/Wh",
 				"years":[36],
 				"valMul":0.000001,
@@ -364,7 +365,7 @@
 					0.482, 0.482, 0.482],
 			"in2050": 0.482,
 			"source":"https://en.wikipedia.org/wiki/Electricity_sector_in_China. Uniquement donnee en 2017.",
-			"label":"Empreinte carbone de l'electricite Chinoise"
+			"label":"China energy co2"
 		}
 	},
 	"usa":{
@@ -376,7 +377,7 @@
 					0.401, 0.401, 0.401, 0.401],
 			"in2050": 0.401,
 			"source":"https://en.wikipedia.org/wiki/Electricity_sector_of_the_United_States. Uniquement donnee en 2018.",
-			"label":"Empreinte carbone de l'electricite des states. ",
+			"label":"USA energy co2",
 			"comment":"cette valeur change fortement d'etat en etat"
 		}
 	},
@@ -393,7 +394,7 @@
 			"source": "Eurostat",
 			"in2050": 1222,
 			"ctrlPts": [{"x": 2018, "y": 1140}, {"x": 2028, "y": 1215}],
-			"label":"Population",
+			"label":"Belgium Population",
 			"unit":"H"
 		},
 		"consoPerCap":{
@@ -403,7 +404,7 @@
 			"valMul": 114.08,
 			"in2050": 49,
 			"unit":"W/H",
-			"label":"Consommation par habitant"
+			"label":"Belgium w per cap"
 			},
 		"gdpPerCap":{
 			"histoUntill": 2018,
@@ -413,7 +414,7 @@
 			"in2050": 550,
 			"unit":"€/Hy",
 			"comment":"Donnee en € 2019. ",
-			"label":"Revenu annuel moyen brut par habitant"
+			"label":"Belgium gdp per cap"
 		}
 	}
 }
