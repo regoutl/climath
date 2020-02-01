@@ -12,7 +12,7 @@ export default class MainWin extends React.Component{
 
     render(){
         return (
-        <div className="vLayout">
+        <div className="vLayout redBox" >
             <StatusBar />
 
             <MapView />
