@@ -61,9 +61,7 @@ export default class Pv extends IntermittentProductionMean{
         parameters.extraSumDemolish = 'radiantFlux';
 
 
-        let a = this.simu.cMap.reduceIf(['area', 'radiantFlux'], build.area, ['buildable']);
-        let area = a[0];
-        let radiantFlux  = a[1];
+        let [area, radiantFlux] = this.simu.cMap.reduceIf(['area', 'radiantFlux'], build.area, ['buildable']);
 
         if(parameters.effiMul === undefined)
           parameters.effiMul = 1;

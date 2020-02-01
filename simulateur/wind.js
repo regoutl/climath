@@ -48,10 +48,8 @@ export default class Wind extends IntermittentProductionMean{
 
     parameters.extraSumDemolish = 'windPower50';
 
-    let a = this.simu.cMap.reduceIf(['area', 'windPower50'], build.area,
+    let [area, windPower] = this.simu.cMap.reduceIf(['area', 'windPower50'], build.area,
                                     ['buildable']);
-    let area = a[0];
-    let windPower = a[1];
 
     this._prepareCapex(build, area, windPower);
 
