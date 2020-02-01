@@ -11,23 +11,69 @@ import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
 
+import { Simulateur, promiseSimulater, objSum } from '../../simulateur/simulateur.js';
+
 var MainWin = function (_React$Component) {
     _inherits(MainWin, _React$Component);
 
     function MainWin(props) {
         _classCallCheck(this, MainWin);
 
-        return _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
+
+        _this.state = {};
+
+        /// set of small functions that update screen text when some values changes
+        var valChangedCallbacks = {
+            money: function money(_money) {
+                // $('.vMoney').text(valStr(money, '€'));
+            },
+            year: function year(_year) {
+                // $('.vYear').text(year);
+                // if(simu){
+                // 	StatDock.update();
+                // 	BuildMenu.notifyStateChanged();
+                // }
+            },
+            // totalCo2: function(co2){
+            // 	let strco2Total = valStr(co2, 'C');
+            // strco2Total = strco2Total.substr(0, strco2Total.length - 6);
+            // $('.vTotalCo2').text(strco2Total);
+            // },
+            // lastYearCo2: function(co2){
+            // 	let strco2Total = valStr(co2, 'C');
+            // strco2Total = strco2Total.substr(0, strco2Total.length - 6);
+            // $('.vLastYearCo2').text(strco2Total);
+            // },
+            taxRate: function taxRate(rate) {
+                // $('.vTaxRate').text(Math.round(rate * 100) + '%');
+            }
+        };
+
+        promiseSimulater(valChangedCallbacks).then(function (s) {
+            _this.setState({ simu: s });
+        }).catch(function (err) {
+            alert(err);
+        });
+        return _this;
     }
 
     _createClass(MainWin, [{
         key: 'render',
         value: function render() {
+            if (this.state.simu === undefined) {
+                return React.createElement(
+                    'p',
+                    null,
+                    'Chargement ... '
+                );
+            }
+
             return React.createElement(
                 'div',
                 { className: 'vLayout' },
                 React.createElement(StatusBar, null),
-                React.createElement(MapView, null),
+                React.createElement(MapView, { cMap: this.state.simu.cMap }),
                 React.createElement(BuildDock, null)
             );
         }

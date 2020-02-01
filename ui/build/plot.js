@@ -2,119 +2,11 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 import * as Yearly from "../timevarin.js";
 
 var PlotLeftMargin = 60.5;
-
-/** option.compact : bool, true if you want the most compact possible. default false
-options.mag int [-3, 5] : force mag order. 1 => k aso. default : auto detect.
-*/
-export function quantityToHuman(value, unit, options) {
-	if (options === undefined) {
-		options = {};
-	}
-	if ((typeof options === "undefined" ? "undefined" : _typeof(options)) != 'object') {
-		throw 'bad options';
-	}
-
-	if (options.compact === undefined) options.compact = false;
-
-	if (unit == '%') return Math.round(value * 1000) / 10 + ' %';
-	if (unit == '€' && !options.compact) return plainTextEuro(value);
-
-	var yolo = 1000;
-	if (unit.length >= 2 && !isNaN(Number(unit[1]))) {
-		if (unit[1] == '2') yolo *= yolo; // square it
-		else if (unit[1] == '3') yolo = yolo * yolo * yolo; // square it
-			else throw 'aie';
-	}
-
-	var mag = Math.floor(Math.log(value) / Math.log(yolo));
-	if (options.mag !== undefined) mag = options.mag;
-
-	var divider = Math.pow(yolo, mag);
-	var suffix = '';
-	switch (mag) {
-		case 0:
-			break;
-		case 1:
-			suffix = 'k';break;
-		case 2:
-			suffix = 'M';break;
-		case 3:
-			suffix = 'G';break;
-		case 4:
-			suffix = 'T';break;
-		case 5:
-			suffix = 'P';break;
-		case -1:
-			suffix = 'm';break;
-		case -2:
-			suffix = 'μ';break;
-		case -3:
-			suffix = 'ν';break;
-	}
-
-	//max 3 digit sig
-	var div = value / divider;
-	if (div >= 100) div = Math.round(div);else div = Math.round(div * 10) / 10;
-
-	if (value == 0) div = 0;
-
-	return div + ' ' + unitToHuman(suffix + unit, options.compact);
-}
-
-function unitToHuman(unit) {
-	var compact = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-	var tmp = unit;
-	if (unit.match(/^(m|μ|ν)(€|C)/) && unit.match(/\//)) {
-		if (unit[0] == 'm') tmp = unit.substring(1).replace('/', '/k');
-		if (unit[0] == 'μ') tmp = unit.substring(1).replace('/', '/M');
-	}
-
-	if (!compact) tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('i', 'item').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (pic) ').replace('C', 'gCO2eq');else tmp = tmp.replace('N', 'Wp').replace('C', 'gCO2');
-
-	//improve carbon readibility
-	tmp = tmp.replace('PgCO2', 'GT CO2').replace('TgCO2', 'MT CO2').replace('GgCO2', 'kT CO2').replace('MgCO2', 'T CO2');
-
-	//storage
-	tmp = tmp.replace('S', 'Wh');
-
-	return tmp.replace('  ', ' ');
-}
-
-function plainTextEuro(amound) {
-	if (amound == 0) return 0 + ' €';
-
-	var coef = 1,
-	    unit = '';
-	if (Math.abs(amound) >= 1000000000) {
-		coef = 0.000000001;
-		unit = 'milliard';
-	} else if (Math.abs(amound) >= 1000000) {
-		coef = 0.000001;
-		unit = 'million';
-	} else if (Math.abs(amound) >= 1000) {
-		coef = 0.001;
-		unit = 'miles';
-	} else if (Math.abs(amound) >= 1) {} else if (Math.abs(amound) >= 0.001) {
-		coef = 100;
-		unit = 'cent';
-	}
-
-	var inMillion = (Math.round(amound * coef * 10) / 10).toString();
-
-	if (inMillion.length != 3 && inMillion.includes('.')) {
-		inMillion = inMillion.substr(0, inMillion.length - 2);
-	}
-
-	return inMillion + " " + unit + (unit != 'cent' ? " €" : "");
-}
 
 export var Plot = function () {
 	function Plot(timeVar, width, height) {

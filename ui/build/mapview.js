@@ -43,13 +43,21 @@ var MapView = function (_React$Component) {
             var canvas = this.refs.mapCanvas;
             this.gl = canvas.getContext("webgl", { alpha: false });
 
-            this._createProg();
-            // this._initTextures();
+            try {
+                this._createProg();
+                this._initTextures();
+            } catch (e) {
+                alert('mapview mount err', e);
+            } finally {}
+
+            console.log("mount mapview !");
+
+            this.draw();
         }
     }, {
         key: 'render',
         value: function render() {
-            if (this.gl) {}
+            this.draw();
 
             return React.createElement(
                 'div',
@@ -67,6 +75,53 @@ var MapView = function (_React$Component) {
                     tr("Your browser is not supported")
                 )
             );
+        }
+
+        /** @brief draw the currenty visible layers.
+        @note if nuke cursor, draw flows
+        */
+
+    }, {
+        key: 'draw',
+        value: function draw() {
+            var gl = this.gl;
+            if (gl === undefined) return;
+
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+            gl.clearColor(1, 1, 1, 1);
+            this.clear();
+
+            this._drawTex(this[this.state.base]);
+            //
+            // if(this.currentShowGrid.energyGrid)
+            //     this._drawTex(this.energy);
+            //
+            // if((this.currentCursor == 'nuke' || this.currentCursor == 'ccgt' || this.currentCursor == 'fusion'
+            //     || this.currentShowGrid.flows) && this.water)
+            //         this._drawTex(this.water);
+        }
+    }, {
+        key: 'clear',
+        value: function clear() {
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        }
+    }, {
+        key: '_drawTex',
+        value: function _drawTex(paletteTexture) {
+            var gl = this.gl; //shortcut
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, paletteTexture.texture);
+
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, paletteTexture.palette.tex);
+
+            gl.useProgram(this.prog);
+            gl.uniform1i(this.imageLoc, 0);
+            gl.uniform1i(this.paletteLoc, 1);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
         }
     }, {
         key: '_createProg',
@@ -96,7 +151,7 @@ var MapView = function (_React$Component) {
         value: function _initTextures() {
             this.energy = new PaletteTexture(this.gl, 2);
             this.energy.appendPalette(0, 0, 0, 0); //index 0 is transparent
-            this.energy.update(this.energySrc);
+            this.energy.update(this.props.cMap.energyGrid);
 
             this._initTexGroundUse();
             this._initTexPopDensity();
@@ -119,7 +174,7 @@ var MapView = function (_React$Component) {
             this.groundUse.appendPalette(137, 141, 131); // city
             this.groundUse.appendPalette(52, 76, 45); //forest2
 
-            this.groundUse.update(this.groundUseSrc);
+            this.groundUse.update(this.props.cMap.groundUse);
         }
     }, {
         key: '_initTexPopDensity',
@@ -137,7 +192,7 @@ var MapView = function (_React$Component) {
             this.popDensity.appendPalette(138, 46, 10); // 5k1-5k h/km2
             this.popDensity.appendPalette(107, 0, 0); // 5k1-50k h/km2
 
-            this.popDensity.update(this.popDensitySrc);
+            this.popDensity.update(this.props.cMap.popDensity);
         }
     }, {
         key: '_initTexFlows',
@@ -253,7 +308,7 @@ var MapView = function (_React$Component) {
                 this.windPowDensAt50.appendPalette(0, 0, 0, 0);
             }this.windPowDensAt50.appendPalette(165, 47, 90);
 
-            this.windPowDensAt50.update(this.windPowDensSrcs.at50);
+            this.windPowDensAt50.update(this.props.cMap.windPowDens.at50);
         }
     }]);
 

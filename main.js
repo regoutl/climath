@@ -8,23 +8,25 @@ Copyright 2020, louis-amedee regout, charles edwin de brouwer
 "use strict";
 
 // import * as BuildMenu from './ui/build/buildmenu.js';
-//
-// import {Simulateur, promiseSimulater, objSum} from './simulateur/simulateur.js';
 // import * as CentralArea from './ui/src/centralArea.js';
 // import * as StatDock from './ui/src/oldstatdock.js';
 // import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './ui/build/plot.js';
-// import {tr, setLang} from './tr/tr.js';
-//
-//
- import App from './ui/build/app.js';
+import {tr, setLang} from './tr/tr.js';
+
+import App from './ui/build/app.js';
 
 //window.location.hash : get anchor
 
 //REACT TEST
-ReactDOM.render(
-  React.createElement(App),
-  document.body
-);
+
+
+setLang().then(() => {
+    ReactDOM.render(
+      React.createElement(App),
+      document.body
+    );
+	// console.log(tr('%d little kitten', 'test', 2));
+})
 
 
 //END OF REACT TEST
@@ -34,9 +36,6 @@ ReactDOM.render(
 // 	return document.getElementById(id);
 // }
 //
-// setLang('fr').then(() => {
-// 	console.log(tr('%d little kitten', 'test', 2));
-// })
 //
 // $(function(){
 //

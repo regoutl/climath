@@ -1,5 +1,3 @@
-//tmp
-import {Plot, canvasEnablePloting, quantityToHuman as valStr} from '../ui/build/plot.js';
 
 /** @brief this component check that no river go negative.
 @note : maybe move it to nuke component (as it is the only user) ?

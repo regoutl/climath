@@ -2,7 +2,7 @@ import ProductionComponent from './productioncomponent.js';
 import MapComponent from './mapcomponent.js';
 import HydroComponent from './hydrocomponent.js';
 import BuildScheduler from './buildScheduler.js';
-import { quantityToHuman as valStr} from '../ui/build/plot.js';
+import { quantityToHuman as valStr} from '../ui/quantitytohuman.js';
 import * as Yearly from "../timevarin.js";
 
 
@@ -56,7 +56,7 @@ export class Simulateur{
         this.run(); //run 2019
 
 
-        this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
+        // this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
     }// END OF Simulateur.constructor()
 
     get taxRate(){return this._taxRate;}
