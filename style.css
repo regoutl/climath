@@ -370,7 +370,6 @@ canvas {
 	font-size: 1.5em;
 }
 
-
 #dBuildDock{
 	position: absolute;
 	bottom: 0px;
@@ -384,6 +383,13 @@ canvas {
 	overflow: hidden;
 }
 
+#BuildMenu{
+    position: absolute;
+    bottom: 200px;
+    z-index:1000000;
+    justify-content: space-between;
+    align-items: center;
+}
 
 #dMapBox{
 	flex: 1 1;
@@ -400,9 +406,4 @@ canvas {
     cursor: pointer;
     width: 32px;
     border-radius: 16px;
-}
-
-
-.redBox{
-	background: red;
 }

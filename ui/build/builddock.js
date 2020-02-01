@@ -8,407 +8,113 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { tr } from "../../tr/tr.js";
 
-/**
-    <BuildDetailsSolar
-        vBMPerYear=""
-        vBMNameplate=""
-        vBMArea=""
-    />
-*/
+function BuildDetailLine(props) {
+    return React.createElement(
+        "tr",
+        { style: props.style },
+        React.createElement(
+            "th",
+            null,
+            tr(props.name)
+        ),
+        React.createElement(
+            "td",
+            { className: props.className },
+            props.value
+        )
+    );
+}
+
+var mapLineFct = function mapLineFct(i) {
+    return React.createElement(BuildDetailLine, {
+        name: i.n,
+        className: i.cn,
+        value: props[i.cn],
+        style: props.restyle[i.cn] === undefined ? {} : props.restyle[i.cn]
+    });
+};
+
 function BuildDetailsSolar(props) {
+    var show = [{ "n": "Installation", "cn": "vBMBuild" }, { "n": "Per year :", "cn": "vBMPerYear" }, { "n": "Production", "cn": "vBMNameplate" }, { "n": "Aire", "cn": "vBMArea" }];
     return React.createElement(
         "div",
         { id: "dBuildDetails" },
         React.createElement(
             "table",
             null,
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Installation")
-                ),
-                React.createElement("td", { className: "vBMBuild" }),
-                React.createElement(
-                    "td",
-                    null,
-                    React.createElement("img", { className: "bmInf", src: "res/icons/info.png" })
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Per year :")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMPerYear" },
-                    props.vBMPerYear
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr('Production')
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMNameplate" },
-                    props.vBMNameplate
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    "Aire"
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMArea" },
-                    props.vBMArea
-                )
-            )
+            show.map(mapLineFct)
         ),
         React.createElement("input", { type: "range", id: "BMRange" }),
         "// TODO:"
     );
 }
 
-/**
-    <BuildDetailsNuke
-        vBMPerYear=""
-        vBMNameplate=""
-        vBMPop=""
-        vBMExplCost=""
-        vBMCoolingWaterRate=""
-    />
-*/
 function BuildDetailsNuke(props) {
+    var show = [{ "n": "Installation", "cn": "vBMBuild" }, { "n": "Per year :", "cn": "vBMPerYear" }, { "n": "Production", "cn": "vBMNameplate" }, { "n": "Population", "cn": "vBMPop" }, { "n": "Explosion cost", "cn": "vBMExplCost" }, { "n": "Cooling", "cn": "vBMCoolingWaterRate" }];
     return React.createElement(
         "div",
         { id: "dBuildDetails" },
         React.createElement(
             "table",
             null,
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Installation")
-                ),
-                React.createElement("td", { className: "vBMBuild" }),
-                React.createElement(
-                    "td",
-                    null,
-                    React.createElement("img", { className: "bmInf", src: "res/icons/info.png" })
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Per year :")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMPerYear" },
-                    props.vBMPerYear
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr('Production')
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMNameplate" },
-                    props.vBMNameplate
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr('Population')
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMPop" },
-                    props.vBMPop
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr('Explosion cost')
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMExplCost" },
-                    props.vBMExplCost
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr('Cooling')
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMCoolingWaterRate" },
-                    props.vBMCoolingWaterRate
-                )
-            )
+            show.map(mapLineFct)
         )
     );
 }
 
-/**
-    <BuildDetailsBat
-        vBMPerYear=""
-        vBMStorageCapacity=""
-    />
-*/
 function BuildDetailsBat(props) {
+    var show = [{ "n": "Installation", "cn": "vBMBuild" }, { "n": "Per year :", "cn": "vBMPerYear" }, { "n": "Capacity", "cn": "vBMStorageCapacity" }];
     return React.createElement(
         "div",
         { id: "dBuildDetails" },
         React.createElement(
             "table",
             null,
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Installation")
-                ),
-                React.createElement("td", { className: "vBMBuild" }),
-                React.createElement(
-                    "td",
-                    null,
-                    React.createElement("img", { className: "bmInf", src: "res/icons/info.png" })
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Per year :")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMPerYear" },
-                    props.vBMPerYear
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Capacity")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMStorageCapacity" },
-                    props.vBMStorageCapacity
-                )
-            )
-        )
+            show.map(mapLineFct)
+        ),
+        React.createElement("input", { type: "range", id: "BMRange" }),
+        "// TODO:"
     );
 }
 
-/**
-    <BuildDetailsCcgt
-        vBMPerYear=""
-        vBMNameplate=""
-        vBMPop=""
-        vBMCoolingWaterRate=""
-    />
-*/
 function BuildDetailsCcgt(props) {
+    var show = [{ "n": "Installation", "cn": "vBMBuild" }, { "n": "Per year :", "cn": "vBMPerYear" }, { "n": "Production", "cn": "vBMNameplate" }, { "n": "Population", "cn": "vBMPop" }, { "n": "Cooling", "cn": "vBMCoolingWaterRate" }];
     return React.createElement(
         "div",
         { id: "dBuildDetails" },
         React.createElement(
             "table",
             null,
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Installation")
-                ),
-                React.createElement("td", { className: "vBMBuild" }),
-                React.createElement(
-                    "td",
-                    null,
-                    React.createElement("img", { className: "bmInf", src: "res/icons/info.png" })
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Per year :")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMPerYear" },
-                    props.vBMPerYear
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Production")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMNameplate" },
-                    props.vBMNameplate
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Population")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMPop" },
-                    props.vBMPop
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Cooling")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMCoolingWaterRate" },
-                    props.vBMCoolingWaterRate
-                )
-            )
+            show.map(mapLineFct)
         )
     );
 }
 
-/**
-    <BuildDetailsNuke
-        vBMPerYear=""
-        vBMNameplate=""
-    />
-*/
-function BuildDetailWind(props) {
+function BuildDetailsWind(props) {
+    var show = [{ "n": "Installation", "cn": "vBMBuild" }, { "n": "Per year :", "cn": "vBMPerYear" }, { "n": "Production", "cn": "vBMNameplate" }];
     return React.createElement(
         "div",
         { id: "dBuildDetails" },
         React.createElement(
             "table",
             null,
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Installation")
-                ),
-                React.createElement("td", { className: "vBMBuild" }),
-                React.createElement(
-                    "td",
-                    null,
-                    React.createElement("img", { className: "bmInf", src: "res/icons/info.png" })
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Per year :")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMPerYear" },
-                    props.vBMPerYear
-                )
-            ),
-            React.createElement(
-                "tr",
-                null,
-                React.createElement(
-                    "th",
-                    null,
-                    tr("Production")
-                ),
-                React.createElement(
-                    "td",
-                    { className: "vBMNameplate" },
-                    props.vBMNameplate
-                )
-            )
-        )
+            show.map(mapLineFct)
+        ),
+        React.createElement("input", { type: "range", id: "BMRange" }),
+        "// TODO:"
     );
 }
 
 function BuildMenu(props) {
     return React.createElement(
         "div",
-        null,
+        { id: "BuildMenu", className: "vLayout" },
         " ",
         [{ name: 'Solar panels', src: 'solar.jpeg', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }].map(function (nrj) {
             return React.createElement("img", {
                 src: 'res/icons/' + nrj.src,
-                className: "bBuild", title: tr(nrj.name),
+                className: "bBuild",
+                title: tr(nrj.name),
                 "data-target": nrj.target
             });
         })
@@ -426,68 +132,48 @@ var BuildDock = function (_React$Component) {
 
     _createClass(BuildDock, [{
         key: "render",
-
-        // constructor(props){
-        //     super(props);
-        //     this.state = {}
-        // }
         value: function render() {
-            // <tr><th>Probleme</th><td className = "vBMTheoReason"></td></tr>
-
-            var optionTable = "";
-            switch (this.props.target) {
-                case "pv":
-                    optionTable = React.createElement(BuildDetailsSolar, {
-                        vBMPerYear: this.props.vBMPerYear,
-                        vBMNameplate: this.props.vBMNameplate,
-                        vBMArea: this.props.vBMArea
-                    });
-                    break;
-                case "nuke":
-                case "fusion":
-                    optionTable = React.createElement(BuildDetailsNuke, {
-                        vBMPerYear: this.props.vBMPerYear,
-                        vBMNameplate: this.props.vBMNameplate,
-                        vBMPop: this.props.vBMPop,
-                        vBMExplCost: this.props.vBMExplCost,
-                        vBMCoolingWaterRate: this.props.vBMCoolingWaterRate
-                    });
-                    break;
-                case "battery":
-                    optionTable = React.createElement(BuildDetailsBat, {
-                        vBMPerYear: this.props.vBMPerYear,
-                        vBMStorageCapacity: this.props.vBMStorageCapacity
-                    });
-                    break;
-                case "ccgt":
-                    optionTable = React.createElement(BuildDetailsCcgt, {
-                        vBMPerYear: this.props.vBMPerYear,
-                        vBMNameplate: this.props.vBMNameplate,
-                        vBMPop: this.props.vBMPop,
-                        vBMCoolingWaterRate: this.props.vBMCoolingWaterRate
-                    });
-                    break;
-                case "wind":
-                    optionTable = React.createElement(BuildDetailsNuke, {
-                        vBMPerYear: this.props.vBMPerYear,
-                        vBMNameplate: this.props.vBMNameplate
-                    });
-                    break;
+            var restyle = {};
+            if (this.props.vBMTheoReason !== undefined) {
+                restyle[this.props.vBMTheoReason] = { "color": "red" };
             }
+
+            var buildDetailsChoice = {
+                "pv": BuildDetailsSolar,
+                "nuke": BuildDetailsNuke,
+                "fusion": BuildDetailsNuke,
+                "battery": BuildDetailsBat,
+                "ccgt": BuildDetailsCcgt,
+                "wind": BuildDetailsWind
+            };
+            var optionTable = "";
+            if (this.props.target !== undefined) {
+                var type = buildDetailsChoice(this.props.target.toLowerCase());
+                optionTable = React.createElement("type", {
+                    vBMBuild: this.props.vBMBuild,
+                    vBMPerYear: this.props.vBMPerYear,
+                    vBMNameplate: this.props.vBMNameplate,
+                    vBMArea: this.props.vBMArea,
+                    vBMPop: this.props.vBMPop,
+                    vBMExplCost: this.props.vBMExplCost,
+                    vBMCoolingWaterRate: this.props.vBMCoolingWaterRate,
+                    vBMStorageCapacity: this.props.vBMStorageCapacity,
+                    restyle: restyle
+                });
+            }
+
             return React.createElement(
                 "div",
-                { id: "dBuildDock" },
-                React.createElement(
-                    "h3",
-                    null,
-                    tr("Build"),
-                    " :"
-                ),
+                null,
                 React.createElement(BuildMenu, null),
                 React.createElement(
                     "div",
-                    { id: "buildMenuOptionTable" },
-                    optionTable
+                    { id: "dBuildDock" },
+                    React.createElement(
+                        "div",
+                        { id: "buildMenuOptionTable" },
+                        optionTable
+                    )
                 )
             );
         }
