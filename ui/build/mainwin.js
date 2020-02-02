@@ -22,8 +22,9 @@ var MainWin = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
 
         _this.state = {
-            simu: {},
+            simu: "unloaded",
             targetBuild: {},
+            targetBuildPos: {},
             vBMTheoReason: "",
             vBMBuild: "",
             vBMPerYear: "",
@@ -79,15 +80,28 @@ var MainWin = function (_React$Component) {
         }
     }, {
         key: 'setTargetBuild',
-        value: function setTargetBuild(target, radius) {
+        value: function setTargetBuild(target) {
             this.setState({
-                'targetBuild': { "type": target, "radius": radius }
+                'targetBuild': { "type": target }
+            });
+        }
+    }, {
+        key: 'setTargetBuildPos',
+        value: function setTargetBuildPos(_ref) {
+            var pos = _ref.pos,
+                radius = _ref.radius;
+
+            this.setState({
+                'targetBuildPos': {
+                    pos: pos === undefined ? this.state.targetBuildPos.pos : pos,
+                    radius: radius === undefined ? this.state.targetBuildPos.radius : radius
+                }
             });
         }
     }, {
         key: 'render',
         value: function render() {
-            if (this.state.simu === undefined) {
+            if (this.state.simu === "unloaded") {
                 return React.createElement(
                     'p',
                     null,
@@ -102,6 +116,7 @@ var MainWin = function (_React$Component) {
                 React.createElement(MapView, { cMap: this.state.simu.cMap }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
+                    buildMenuRadiusCallback: this.setTargetBuildPos.bind(this),
                     target: this.state.targetBuild.type,
                     vBMTheoReason: this.state.vBMTheoReason,
                     vBMBuild: this.state.vBMBuild,

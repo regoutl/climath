@@ -65,7 +65,7 @@ function BuildDetailsBat(props){
                 {show.map(mapLineFct(props))}
             </tbody>
         </table>
-        <input type = "range" id = 'BMRange' />// TODO:
+        <input type = "range" id = 'BMRange' onchange = {props.radiusSliderChange}/>// TODO:
     </div>);
 }
 
@@ -131,7 +131,7 @@ function ShowDockButton(props){
         src = {'res/icons/info.png'}
         className = "bBuild"
         style = {{bottom: (props.dockheight-16)+'px'}}
-        title = {tr((props.showdock?'Show':'Hide')+' dock')}
+        title = {tr((props.showdock?'Hide':'Show')+' dock')}
         onClick = {() => props.onClick()}
         key = "DockButton"
     />)
@@ -149,10 +149,7 @@ export default class BuildDock extends React.Component{
 
     render(){
         let dockheight = this.state.showdock ? 200:32;
-        this.props.buildMenuSelectionCallback(
-            this.state.target,
-            this.state.radius,
-        );
+
 
         let restyle = {}
         if(this.props.vBMTheoReason !== undefined){
@@ -179,6 +176,8 @@ export default class BuildDock extends React.Component{
                 vBMExplCost = {this.props.vBMExplCost}
                 vBMCoolingWaterRate = {this.props.vBMCoolingWaterRate}
                 vBMStorageCapacity = {this.props.vBMStorageCapacity}
+                radiusSliderChange = {radius =>
+                        this.props.buildMenuRadiusCallback({radius: radius})}
                 restyle = {restyle}
             />)
         }
@@ -186,9 +185,10 @@ export default class BuildDock extends React.Component{
         return (
         <div>
             <BuildMenu
-                onClick = {type => this.setState({'target':{'type':type}})}
+                onClick = {type => this.props.buildMenuSelectionCallback(type)}
                 style = {{bottom: dockheight+'px'}}
             />
+
             <div id = "dBuildDock" style = {{height: dockheight+'px'}}>
                 <ShowDockButton
                     dockheight = {dockheight}
@@ -196,7 +196,7 @@ export default class BuildDock extends React.Component{
                     onClick = {() => this.setState({showdock: !this.state.showdock})}
                 />
                 <div id = "buildMenuOptionTable">
-                    {optionTable}
+                    {this.state.showdock?optionTable:''}
                 </div>
             </div>
         </div>);

@@ -87,7 +87,7 @@ function BuildDetailsBat(props) {
                 show.map(mapLineFct(props))
             )
         ),
-        React.createElement("input", { type: "range", id: "BMRange" }),
+        React.createElement("input", { type: "range", id: "BMRange", onchange: props.radiusSliderChange }),
         "// TODO:"
     );
 }
@@ -154,7 +154,7 @@ function ShowDockButton(props) {
         src: 'res/icons/info.png',
         className: "bBuild",
         style: { bottom: props.dockheight - 16 + 'px' },
-        title: tr((props.showdock ? 'Show' : 'Hide') + ' dock'),
+        title: tr((props.showdock ? 'Hide' : 'Show') + ' dock'),
         onClick: function onClick() {
             return props.onClick();
         },
@@ -184,7 +184,6 @@ var BuildDock = function (_React$Component) {
             var _this2 = this;
 
             var dockheight = this.state.showdock ? 200 : 32;
-            this.props.buildMenuSelectionCallback(this.state.target, this.state.radius);
 
             var restyle = {};
             if (this.props.vBMTheoReason !== undefined) {
@@ -211,6 +210,9 @@ var BuildDock = function (_React$Component) {
                     vBMExplCost: this.props.vBMExplCost,
                     vBMCoolingWaterRate: this.props.vBMCoolingWaterRate,
                     vBMStorageCapacity: this.props.vBMStorageCapacity,
+                    radiusSliderChange: function radiusSliderChange(radius) {
+                        return _this2.props.buildMenuRadiusCallback({ radius: radius });
+                    },
                     restyle: restyle
                 });
             }
@@ -220,7 +222,7 @@ var BuildDock = function (_React$Component) {
                 null,
                 React.createElement(BuildMenu, {
                     onClick: function onClick(type) {
-                        return _this2.setState({ 'target': { 'type': type } });
+                        return _this2.props.buildMenuSelectionCallback(type);
                     },
                     style: { bottom: dockheight + 'px' }
                 }),
@@ -237,7 +239,7 @@ var BuildDock = function (_React$Component) {
                     React.createElement(
                         "div",
                         { id: "buildMenuOptionTable" },
-                        optionTable
+                        this.state.showdock ? optionTable : ''
                     )
                 )
             );
