@@ -114,7 +114,7 @@ var MainWin = function (_React$Component) {
 
             return React.createElement(
                 'div',
-                { className: 'vLayout' },
+                { className: 'vLayout', style: { width: '100%', height: '100%' } },
                 React.createElement(StatusBar, {
                     Date: this.state.date,
                     Money: this.state.money

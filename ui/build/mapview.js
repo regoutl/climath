@@ -110,6 +110,9 @@ var MapView = function (_React$Component) {
 
             // console.log('draw');
             this.mvProj = stMat.mul(stMat.scale(this.transform.scale, -this.transform.scale), stMat.translate(this.transform.x * 2 / gl.canvas.width, this.transform.y * 2 / gl.canvas.height));
+            // this.mvProj = new stMat;
+            // console.log(this.mvProj);
+
 
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -133,13 +136,16 @@ var MapView = function (_React$Component) {
     }, {
         key: 'resize',
         value: function resize(canvas) {
+            // return;
+
             var gl = this.gl;
             // Lookup the size the browser is displaying the canvas.
-            var displayWidth = canvas.clientWidth;
-            var displayHeight = canvas.clientHeight;
+            var displayWidth = window.innerWidth;
+            var displayHeight = window.innerWidth;
 
             // Check if the canvas is not the same size.
             if (canvas.width != displayWidth || canvas.height != displayHeight) {
+                console.log('resize', displayHeight);
 
                 // Make the canvas the same size
                 canvas.width = displayWidth;
@@ -169,7 +175,9 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousemove',
         value: function onmousemove(e) {
-            if (e.target != this.refs.mapCanvas) return;
+            // if(e.target != this.refs.mapCanvas)
+            //     return;
+
 
             if (this.isMouseDown) {
 

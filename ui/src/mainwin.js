@@ -90,7 +90,7 @@ export default class MainWin extends React.Component{
         }
 
         return (
-        <div className="vLayout" >
+        <div className="vLayout" style={{width: '100%', height: '100%'}}>
         <StatusBar
             Date = {this.state.date}
             Money = {this.state.money}

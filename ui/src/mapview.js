@@ -100,6 +100,8 @@ export default class MapView extends React.Component{
         // console.log('draw');
         this.mvProj = stMat.mul(stMat.scale(this.transform.scale, -this.transform.scale),
                                 stMat.translate(this.transform.x * 2 / gl.canvas.width, this.transform.y * 2 / gl.canvas.height));
+        // this.mvProj = new stMat;
+        // console.log(this.mvProj);
 
 
 
@@ -125,31 +127,32 @@ export default class MapView extends React.Component{
 
 
     resize(canvas){
+        // return;
+
         let gl = this.gl;
         // Lookup the size the browser is displaying the canvas.
-        let displayWidth  = canvas.clientWidth;
-        let displayHeight = canvas.clientHeight;
+        let displayWidth  =  window.innerWidth;
+        let displayHeight =  window.innerWidth;
 
         // Check if the canvas is not the same size.
         if (canvas.width  != displayWidth || canvas.height != displayHeight) {
+            console.log('resize', displayHeight);
 
-          // Make the canvas the same size
-          canvas.width  = displayWidth;
-          canvas.height = displayHeight;
+            // Make the canvas the same size
+            canvas.width  = displayWidth;
+            canvas.height = displayHeight;
 
-          gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-
-
-          // let ratio;
-          // if(displayWidth > displayHeight){
-          //     ratio = stMat.scale(displayWidth/displayHeight, 1);
-          // }
-          // else {
-          //     ratio = stMat.scale(1,displayHeight/displayWidth);
-          // }
-          //
-          // this.proj = stMat.mul(ratio, stMat.scale(1/window.innerWidth, 1/window.innerHeight));
+            // let ratio;
+            // if(displayWidth > displayHeight){
+            //     ratio = stMat.scale(displayWidth/displayHeight, 1);
+            // }
+            // else {
+            //     ratio = stMat.scale(1,displayHeight/displayWidth);
+            // }
+            //
+            // this.proj = stMat.mul(ratio, stMat.scale(1/window.innerWidth, 1/window.innerHeight));
         }
     }
 
@@ -163,8 +166,8 @@ export default class MapView extends React.Component{
         this.mousePos = {x:e.screenX , y:e.screenY};
     }
     onmousemove(e){
-        if(e.target != this.refs.mapCanvas)
-            return;
+        // if(e.target != this.refs.mapCanvas)
+        //     return;
 
 
         if(this.isMouseDown){
