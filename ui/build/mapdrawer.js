@@ -211,7 +211,7 @@ var MapDrawer = function () {
     }, {
         key: '_createProg',
         value: function _createProg() {
-            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        void main() {\n          gl_Position = a_position;\n\n          // assuming a unit quad for position we\n          // can just use that for texcoords. Flip Y though so we get the top at 0\n          v_texcoord = a_position.xy * vec2(0.5, -0.5) + 0.5;\n        }\n        ';
+            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n\n        void main() {\n          gl_Position = a_position;\n\n          // assuming a unit quad for position we\n          // can just use that for texcoords. Flip Y though so we get the top at 0\n          v_texcoord = u_texMvProj * vec3(a_position.xy, 1.0);\n        }\n        ';
 
             var frag = '\n        precision mediump float;\n        varying vec2 v_texcoord;\n        uniform sampler2D u_image;\n        uniform sampler2D u_palette;\n\n        void main() {\n            vec2 palXY = texture2D(u_image, v_texcoord).ra * 255.0;\n            gl_FragColor = texture2D(u_palette, (palXY + vec2(0.5)) / 256.0);\n        }\n        ';
 

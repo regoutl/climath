@@ -380,7 +380,6 @@ canvas {
 	justify-content: space-between;
 	align-items: center;
 	font-size: 1.5em;
-	background: gray;
 	overflow: hidden;
 }
 
@@ -405,4 +404,9 @@ canvas {
 
 .redBox{
 	background: red;
+}
+
+#dMapBox canvas{
+	width: 100%;
+	height: 100%;
 }

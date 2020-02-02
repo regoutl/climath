@@ -27,6 +27,19 @@ var MapView = function (_React$Component) {
         };
 
         _this.toogleLayer = _this.toogleLayer.bind(_this);
+
+        //pixel to texcoord
+        // this.proj = stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5));
+        //real win px to viewed px (this.modelview * curPos := mapCurPos)
+        _this.modelview = new stMat();
+
+        _this.draw = _this.draw.bind(_this);
+        _this.mousedown = _this.onmousedown.bind(_this);
+        _this.mousemove = _this.onmousemove.bind(_this);
+        _this.mouseup = _this.onmouseup.bind(_this);
+
+        _this.prevMousePos = { x: 0, y: 0 };
+        _this.isMouseDown = false;
         return _this;
     }
 
@@ -41,18 +54,20 @@ var MapView = function (_React$Component) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             var canvas = this.refs.mapCanvas;
+
             this.gl = canvas.getContext("webgl", { alpha: false });
 
-            try {
-                this._createProg();
-                this._initTextures();
-            } catch (e) {
-                alert('mapview mount err', e);
-            } finally {}
+            this._createProg();
+            this._initTextures();
 
             console.log("mount mapview !");
 
             this.draw();
+            window.addEventListener('resize', this.draw);
+
+            window.addEventListener('mousedown', this.mousedown);
+            window.addEventListener('mousemove', this.mousemove);
+            window.addEventListener('mouseup', this.mouseup);
         }
     }, {
         key: 'render',
@@ -87,6 +102,13 @@ var MapView = function (_React$Component) {
             var gl = this.gl;
             if (gl === undefined) return;
 
+            this.resize(gl.canvas);
+
+            var ndcToPix = stMat.mul(stMat.scale(window.innerWidth, window.innerHeight), stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
+
+            // console.log('draw');
+            this.mvProj = stMat.mul(this.proj, stMat.mul(this.modelview, ndcToPix));
+
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -94,9 +116,8 @@ var MapView = function (_React$Component) {
             this.clear();
 
             this._drawTex(this[this.state.base]);
-            //
-            // if(this.currentShowGrid.energyGrid)
-            //     this._drawTex(this.energy);
+
+            if (this.state.energyGrid) this._drawTex(this.energy);
             //
             // if((this.currentCursor == 'nuke' || this.currentCursor == 'ccgt' || this.currentCursor == 'fusion'
             //     || this.currentShowGrid.flows) && this.water)
@@ -106,6 +127,75 @@ var MapView = function (_React$Component) {
         key: 'clear',
         value: function clear() {
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        }
+    }, {
+        key: 'resize',
+        value: function resize(canvas) {
+            var gl = this.gl;
+            // Lookup the size the browser is displaying the canvas.
+            var displayWidth = canvas.clientWidth;
+            var displayHeight = canvas.clientHeight;
+
+            // Check if the canvas is not the same size.
+            if (canvas.width != displayWidth || canvas.height != displayHeight) {
+
+                // Make the canvas the same size
+                canvas.width = displayWidth;
+                canvas.height = displayHeight;
+
+                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+                var ratio = void 0;
+                if (displayWidth > displayHeight) {
+                    ratio = stMat.scale(displayWidth / displayHeight, 1);
+                } else {
+                    ratio = stMat.scale(1, displayHeight / displayWidth);
+                }
+
+                this.proj = stMat.mul(ratio, stMat.scale(1 / window.innerWidth, 1 / window.innerHeight));
+            }
+        }
+    }, {
+        key: 'onmousedown',
+        value: function onmousedown(e) {
+            if (e.target != this.refs.mapCanvas) return;
+
+            this.isMouseDown = true;
+            this.prevMousePos = { x: e.clientX, y: e.clientY };
+        }
+    }, {
+        key: 'onmousemove',
+        value: function onmousemove(e) {
+            if (e.target != this.refs.mapCanvas) return;
+
+            if (this.isMouseDown) {
+
+                // let dPos = {x: e.clientX-this.prevMousePos.x,
+                //             y: e.clientY-this.prevMousePos.y };
+
+                var curX = e.clientX / window.innerWidth;
+                var curY = e.clientY / window.innerHeight;
+
+                // T = this.modelview * (oldPos') - (S * newPos');
+                var tx = this.modelview.sx * (this.prevMousePos.x - curX) + this.modelview.tx;
+                var ty = this.modelview.sy * (this.prevMousePos.y - curY) + this.modelview.ty;
+
+                this.modelview.tx = tx;
+                this.modelview.ty = ty;
+
+                // this.modelview = stMat.mul(stMat.translate(dPos.x, dPos.y), this.proj );
+
+                this.prevMousePos = { x: curX, y: e.curY };
+
+                this.draw();
+            }
+        }
+    }, {
+        key: 'onmouseup',
+        value: function onmouseup(e) {
+            this.isMouseDown = false;
+
+            if (e.target != this.refs.mapCanvas) return;
         }
     }, {
         key: '_drawTex',
@@ -119,6 +209,7 @@ var MapView = function (_React$Component) {
             gl.bindTexture(gl.TEXTURE_2D, paletteTexture.palette.tex);
 
             gl.useProgram(this.prog);
+            this.mvProj.uniform(gl, this.texmodelviewLoc);
             gl.uniform1i(this.imageLoc, 0);
             gl.uniform1i(this.paletteLoc, 1);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -126,7 +217,7 @@ var MapView = function (_React$Component) {
     }, {
         key: '_createProg',
         value: function _createProg() {
-            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        void main() {\n          gl_Position = a_position;\n\n          // assuming a unit quad for position we\n          // can just use that for texcoords. Flip Y though so we get the top at 0\n          v_texcoord = a_position.xy * vec2(0.5, -0.5) + 0.5;\n        }\n        ';
+            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = a_position;\n\n          v_texcoord = vec3(texmodelview * vec3(a_position.xy, 1.0)).xy;\n        }\n        ';
 
             var frag = '\n        precision mediump float;\n        varying vec2 v_texcoord;\n        uniform sampler2D u_image;\n        uniform sampler2D u_palette;\n\n        void main() {\n            vec2 palXY = texture2D(u_image, v_texcoord).ra * 255.0;\n            gl_FragColor = texture2D(u_palette, (palXY + vec2(0.5)) / 256.0);\n        }\n        ';
 
@@ -137,6 +228,7 @@ var MapView = function (_React$Component) {
 
             this.imageLoc = gl.getUniformLocation(this.prog, "u_image");
             this.paletteLoc = gl.getUniformLocation(this.prog, "u_palette");
+            this.texmodelviewLoc = gl.getUniformLocation(this.prog, "texmodelview");
 
             // Setup a unit quad
             var positions = [1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1];
@@ -315,8 +407,80 @@ var MapView = function (_React$Component) {
     return MapView;
 }(React.Component);
 
+/// scale translate matrix
+
+
 export default MapView;
 
+var stMat = function () {
+    //identity
+    function stMat() {
+        _classCallCheck(this, stMat);
+
+        this.sx = 1.0;
+        this.sy = 1.0;
+        this.tx = 0.0;
+        this.ty = 0.0;
+    }
+
+    _createClass(stMat, [{
+        key: 'uniform',
+        value: function uniform(gl, loc) {
+            gl.uniformMatrix3fv(loc, gl.FALSE, [this.sx, 0.0, 0, 0.0, this.sy, 0, this.tx, this.ty, 1]);
+        }
+    }, {
+        key: 'inverse',
+        value: function inverse() {
+            var ans = new stMat();
+
+            //(TS)-1 = S-1 T-1
+
+            ans.sx = 1.0 / this.sx;
+            ans.sy = 1.0 / this.sy;
+
+            ans.tx = -ans.sx * this.tx;
+            ans.ty = -ans.sy * this.ty;
+
+            return ans;
+        }
+    }], [{
+        key: 'scale',
+        value: function scale(scaleX, scaleY) {
+            var ans = new stMat();
+            ans.sx = scaleX;
+            ans.sy = scaleY;
+            return ans;
+        }
+    }, {
+        key: 'translate',
+        value: function translate(x, y) {
+            var ans = new stMat();
+            ans.tx = x;
+            ans.ty = y;
+            return ans;
+        }
+
+        /// return A*B
+
+    }, {
+        key: 'mul',
+        value: function mul(A, B) {
+            if (!(A instanceof stMat) || !(B instanceof stMat)) throw 'matrices only';
+
+            var ans = new stMat();
+
+            ans.sx = A.sx * B.sx;
+            ans.sy = A.sy * B.sy;
+
+            ans.tx = A.sx * B.tx + A.tx;
+            ans.ty = A.sy * B.ty + A.ty;
+
+            return ans;
+        }
+    }]);
+
+    return stMat;
+}();
 
 function createShader(gl, sourceCode, type) {
     // Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
