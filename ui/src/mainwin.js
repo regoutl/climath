@@ -88,7 +88,7 @@ export default class MainWin extends React.Component{
         }
         //this.setTargetBuild.bind(this)
         return (
-        <div className="vLayout" >
+        <div className="vLayout" style={{width: '100%', height: '100%'}} >
         <StatusBar />
 
         <MapView cMap={this.state.simu.cMap} />

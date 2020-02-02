@@ -111,7 +111,7 @@ var MainWin = function (_React$Component) {
             //this.setTargetBuild.bind(this)
             return React.createElement(
                 'div',
-                { className: 'vLayout' },
+                { className: 'vLayout', style: { width: '100%', height: '100%' } },
                 React.createElement(StatusBar, null),
                 React.createElement(MapView, { cMap: this.state.simu.cMap }),
                 React.createElement(BuildDock, {

@@ -10,6 +10,11 @@
     --build-dock-height: 200px;
 }
 
+#root{
+	width: 100%;
+	height: 100%;
+}
+
 html, body{
 	width: 100%;
 	height: 100%;
@@ -415,4 +420,7 @@ canvas {
 #dMapBox canvas{
 	width: 100%;
 	height: 100%;
+	border: 0;
+	padding: 0;
+	margin: 0;
 }
