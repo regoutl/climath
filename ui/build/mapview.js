@@ -38,7 +38,8 @@ var MapView = function (_React$Component) {
         _this.mousemove = _this.onmousemove.bind(_this);
         _this.mouseup = _this.onmouseup.bind(_this);
 
-        _this.prevMousePos = { x: 0, y: 0 };
+        _this.mousePos = { x: 0, y: 0 };
+        _this.transform = { x: -0, y: -0, scale: 1 };
         _this.isMouseDown = false;
         return _this;
     }
@@ -104,10 +105,11 @@ var MapView = function (_React$Component) {
 
             this.resize(gl.canvas);
 
-            var ndcToPix = stMat.mul(stMat.scale(window.innerWidth, window.innerHeight), stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
+            // let ndcToPix = stMat.mul(stMat.scale(window.innerWidth, window.innerHeight),
+            //                             stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
 
             // console.log('draw');
-            this.mvProj = stMat.mul(this.proj, stMat.mul(this.modelview, ndcToPix));
+            this.mvProj = stMat.mul(stMat.scale(this.transform.scale, -this.transform.scale), stMat.translate(this.transform.x * 2 / gl.canvas.width, this.transform.y * 2 / gl.canvas.height));
 
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -145,14 +147,15 @@ var MapView = function (_React$Component) {
 
                 gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-                var ratio = void 0;
-                if (displayWidth > displayHeight) {
-                    ratio = stMat.scale(displayWidth / displayHeight, 1);
-                } else {
-                    ratio = stMat.scale(1, displayHeight / displayWidth);
-                }
-
-                this.proj = stMat.mul(ratio, stMat.scale(1 / window.innerWidth, 1 / window.innerHeight));
+                // let ratio;
+                // if(displayWidth > displayHeight){
+                //     ratio = stMat.scale(displayWidth/displayHeight, 1);
+                // }
+                // else {
+                //     ratio = stMat.scale(1,displayHeight/displayWidth);
+                // }
+                //
+                // this.proj = stMat.mul(ratio, stMat.scale(1/window.innerWidth, 1/window.innerHeight));
             }
         }
     }, {
@@ -161,7 +164,7 @@ var MapView = function (_React$Component) {
             if (e.target != this.refs.mapCanvas) return;
 
             this.isMouseDown = true;
-            this.prevMousePos = { x: e.clientX, y: e.clientY };
+            this.mousePos = { x: e.screenX, y: e.screenY };
         }
     }, {
         key: 'onmousemove',
@@ -170,22 +173,11 @@ var MapView = function (_React$Component) {
 
             if (this.isMouseDown) {
 
-                // let dPos = {x: e.clientX-this.prevMousePos.x,
-                //             y: e.clientY-this.prevMousePos.y };
+                this.transform.x += (e.screenX - this.mousePos.x) / this.transform.scale;
+                this.transform.y += (e.screenY - this.mousePos.y) / this.transform.scale;
 
-                var curX = e.clientX / window.innerWidth;
-                var curY = e.clientY / window.innerHeight;
-
-                // T = this.modelview * (oldPos') - (S * newPos');
-                var tx = this.modelview.sx * (this.prevMousePos.x - curX) + this.modelview.tx;
-                var ty = this.modelview.sy * (this.prevMousePos.y - curY) + this.modelview.ty;
-
-                this.modelview.tx = tx;
-                this.modelview.ty = ty;
-
-                // this.modelview = stMat.mul(stMat.translate(dPos.x, dPos.y), this.proj );
-
-                this.prevMousePos = { x: curX, y: e.curY };
+                this.mousePos.x = e.screenX;
+                this.mousePos.y = e.screenY;
 
                 this.draw();
             }
@@ -217,7 +209,7 @@ var MapView = function (_React$Component) {
     }, {
         key: '_createProg',
         value: function _createProg() {
-            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = a_position;\n\n          v_texcoord = vec3(texmodelview * vec3(a_position.xy, 1.0)).xy;\n        }\n        ';
+            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);\n\n          v_texcoord = a_position.xy * 0.5 + vec2(0.5, 0.5);\n        }\n        ';
 
             var frag = '\n        precision mediump float;\n        varying vec2 v_texcoord;\n        uniform sampler2D u_image;\n        uniform sampler2D u_palette;\n\n        void main() {\n            vec2 palXY = texture2D(u_image, v_texcoord).ra * 255.0;\n            gl_FragColor = texture2D(u_palette, (palXY + vec2(0.5)) / 256.0);\n        }\n        ';
 

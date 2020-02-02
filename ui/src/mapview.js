@@ -27,7 +27,7 @@ export default class MapView extends React.Component{
 
 
         this.mousePos = {x: 0, y:0};
-        this.transform = {x: -0, y: -0, scale:0.64};
+        this.transform = {x: -0, y: -0, scale:1};
         this.isMouseDown = false;
     }
 
@@ -98,8 +98,8 @@ export default class MapView extends React.Component{
         //                             stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
 
         // console.log('draw');
-        this.mvProj = stMat.mul(stMat.scale(this.transform.scale, this.transform.scale),
-                                stMat.translate());
+        this.mvProj = stMat.mul(stMat.scale(this.transform.scale, -this.transform.scale),
+                                stMat.translate(this.transform.x * 2 / gl.canvas.width, this.transform.y * 2 / gl.canvas.height));
 
 
 
@@ -214,7 +214,7 @@ export default class MapView extends React.Component{
         void main() {
           gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);
 
-          v_texcoord = a_position.xy * vec2(0.5, -0.5) + vec2(0.5, 0.5);
+          v_texcoord = a_position.xy * 0.5 + vec2(0.5, 0.5);
         }
         `;
 
