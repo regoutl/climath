@@ -103,6 +103,7 @@ function BuildDetailsWind(props){
 }
 
 function BuildMenu(props){
+    console.log(window.innerHeight);
     let isSelected = true;
     return( <div id = "BuildMenu" className = "vLayout" style = {props.style}>
         {[

@@ -129,6 +129,7 @@ function BuildDetailsWind(props) {
 }
 
 function BuildMenu(props) {
+    console.log(window.innerHeight);
     var isSelected = true;
     return React.createElement(
         "div",
