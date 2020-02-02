@@ -4,7 +4,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-import * as Yearly from "../timevarin.js";
+import * as Yearly from "../../timevarin.js";
 
 var PlotLeftMargin = 60.5;
 

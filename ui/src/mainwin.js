@@ -23,17 +23,19 @@ export default class MainWin extends React.Component{
             vBMExplCost: "",
             vBMCoolingWaterRate: "",
             vBMStorageCapacity: "",
+            money: 0,
+            date: 2019,
         };
 
         let mainWin = this;
 
     	/// set of small functions that update screen text when some values changes
     	let valChangedCallbacks = {
-    		money: function(money){
-    			// $('.vMoney').text(valStr(money, '€'));
-    		},
-    		year: function(year){
-    			// $('.vYear').text(year);
+            money(val){
+                mainWin.setState({money:val});
+            },
+            year(year){
+                mainWin.setState({date: year});
     			// if(simu){
     			// 	StatDock.update();
     			// 	BuildMenu.notifyStateChanged();
@@ -86,10 +88,13 @@ export default class MainWin extends React.Component{
         if(this.state.simu === "unloaded"){
             return <p>Chargement ... </p>;
         }
-        //this.setTargetBuild.bind(this)
+
         return (
         <div className="vLayout" >
-        <StatusBar />
+        <StatusBar
+            Date = {this.state.date}
+            Money = {this.state.money}
+        />
 
         <MapView cMap={this.state.simu.cMap} />
 

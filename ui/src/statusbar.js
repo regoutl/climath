@@ -1,4 +1,4 @@
-
+import { quantityToHuman as valStr } from '../quantitytohuman.js';
 
 export default class StatusBar extends React.Component{
     constructor(props){
@@ -10,8 +10,8 @@ export default class StatusBar extends React.Component{
     render(){
         return (
         <div id="statusBar" className="hLayout" >
-            <div className="vYear">2019</div>
-            <div className="vMoney">10 miles euro</div>
+            <div className="vYear">{this.props.Date}</div>
+            <div className="vMoney">{valStr(this.props.Money, '€')}</div>
         </div>);
     }
 }

@@ -6,6 +6,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+import { quantityToHuman as valStr } from '../quantitytohuman.js';
+
 var StatusBar = function (_React$Component) {
     _inherits(StatusBar, _React$Component);
 
@@ -27,12 +29,12 @@ var StatusBar = function (_React$Component) {
                 React.createElement(
                     "div",
                     { className: "vYear" },
-                    "2019"
+                    this.props.Date
                 ),
                 React.createElement(
                     "div",
                     { className: "vMoney" },
-                    "10 miles euro"
+                    valStr(this.props.Money, '€')
                 )
             );
         }

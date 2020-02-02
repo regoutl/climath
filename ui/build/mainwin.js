@@ -33,23 +33,26 @@ var MainWin = function (_React$Component) {
             vBMPop: "",
             vBMExplCost: "",
             vBMCoolingWaterRate: "",
-            vBMStorageCapacity: ""
+            vBMStorageCapacity: "",
+            money: 0,
+            date: 2019
         };
 
         var mainWin = _this;
 
         /// set of small functions that update screen text when some values changes
         var valChangedCallbacks = {
-            money: function money(_money) {
-                // $('.vMoney').text(valStr(money, '€'));
+            money: function money(val) {
+                mainWin.setState({ money: val });
             },
             year: function year(_year) {
-                // $('.vYear').text(year);
+                mainWin.setState({ date: _year });
                 // if(simu){
                 // 	StatDock.update();
                 // 	BuildMenu.notifyStateChanged();
                 // }
             },
+
             // totalCo2: function(co2){
             // 	let strco2Total = valStr(co2, 'C');
             // strco2Total = strco2Total.substr(0, strco2Total.length - 6);
@@ -108,11 +111,14 @@ var MainWin = function (_React$Component) {
                     'Chargement ... '
                 );
             }
-            //this.setTargetBuild.bind(this)
+
             return React.createElement(
                 'div',
                 { className: 'vLayout' },
-                React.createElement(StatusBar, null),
+                React.createElement(StatusBar, {
+                    Date: this.state.date,
+                    Money: this.state.money
+                }),
                 React.createElement(MapView, { cMap: this.state.simu.cMap }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
