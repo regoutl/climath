@@ -10,12 +10,24 @@ import {Simulateur, promiseSimulater, objSum} from '../../simulateur/simulateur.
 export default class MainWin extends React.Component{
     constructor(props){
         super(props);
-        this.state ={};
+        this.state = {
+            simu:{},
+            targetBuild: {},
+            vBMTheoReason: "",
+            vBMBuild: "",
+            vBMPerYear: "",
+            vBMNameplate: "",
+            vBMArea: "",
+            vBMPop: "",
+            vBMExplCost: "",
+            vBMCoolingWaterRate: "",
+            vBMStorageCapacity: "",
+        };
 
-
+        let mainWin = this;
 
     	/// set of small functions that update screen text when some values changes
-    	let valChangedCallbacks={
+    	let valChangedCallbacks = {
     		money: function(money){
     			// $('.vMoney').text(valStr(money, '€'));
     		},
@@ -49,19 +61,40 @@ export default class MainWin extends React.Component{
         });
     }
 
+    onPositionChange(position){
+        this.simu.onBuildMenuStateChanged(this.state.targetBuild,
+                                    position, this.state.targetBuild.radius);
+    }
 
+    setTargetBuild(target, radius){
+        this.setState({
+            'targetBuild':{"type": target, "radius":radius},
+        });
+    }
 
     render(){
         if(this.state.simu === undefined){
             return <p>Chargement ... </p>;
         }
-
+        //this.setTargetBuild.bind(this)
         return (
         <div className="vLayout" >
             <StatusBar />
 
             <MapView cMap={this.state.simu.cMap} />
-            <BuildDock />
+            <BuildDock
+                buildMenuSelectionCallback = {this.setTargetBuild.bind(this)}
+                target = {this.state.targetBuild.type}
+                vBMTheoReason = {this.state.vBMTheoReason}
+                vBMBuild = {this.state.vBMBuild}
+                vBMPerYear = {this.state.vBMPerYear}
+                vBMNameplate = {this.state.vBMNameplate}
+                vBMArea = {this.state.vBMArea}
+                vBMPop = {this.state.vBMPop}
+                vBMExplCost = {this.state.vBMExplCost}
+                vBMCoolingWaterRate = {this.state.vBMCoolingWaterRate}
+                vBMStorageCapacity = {this.state.vBMStorageCapacity}
+            />
          </div>);
     }
 }

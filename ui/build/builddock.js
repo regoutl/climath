@@ -19,20 +19,23 @@ function BuildDetailLine(props) {
         ),
         React.createElement(
             "td",
-            { className: props.className },
+            { className: props.className, key: props.name },
             props.value
         )
     );
 }
 
-var mapLineFct = function mapLineFct(i) {
-    return React.createElement(BuildDetailLine, {
-        name: i.n,
-        className: i.cn,
-        value: props[i.cn],
-        style: props.restyle[i.cn] === undefined ? {} : props.restyle[i.cn]
-    });
-};
+function mapLineFct(props) {
+    return function (i) {
+        return React.createElement(BuildDetailLine, {
+            name: i.n,
+            className: i.cn,
+            value: props[i.cn],
+            style: props.restyle[i.cn] === undefined ? {} : props.restyle[i.cn],
+            key: i.n
+        });
+    };
+}
 
 function BuildDetailsSolar(props) {
     var show = [{ "n": "Installation", "cn": "vBMBuild" }, { "n": "Per year :", "cn": "vBMPerYear" }, { "n": "Production", "cn": "vBMNameplate" }, { "n": "Aire", "cn": "vBMArea" }];
@@ -42,7 +45,11 @@ function BuildDetailsSolar(props) {
         React.createElement(
             "table",
             null,
-            show.map(mapLineFct)
+            React.createElement(
+                "tbody",
+                null,
+                show.map(mapLineFct(props))
+            )
         ),
         React.createElement("input", { type: "range", id: "BMRange" }),
         "// TODO:"
@@ -57,7 +64,11 @@ function BuildDetailsNuke(props) {
         React.createElement(
             "table",
             null,
-            show.map(mapLineFct)
+            React.createElement(
+                "tbody",
+                null,
+                show.map(mapLineFct(props))
+            )
         )
     );
 }
@@ -70,7 +81,11 @@ function BuildDetailsBat(props) {
         React.createElement(
             "table",
             null,
-            show.map(mapLineFct)
+            React.createElement(
+                "tbody",
+                null,
+                show.map(mapLineFct(props))
+            )
         ),
         React.createElement("input", { type: "range", id: "BMRange" }),
         "// TODO:"
@@ -85,7 +100,11 @@ function BuildDetailsCcgt(props) {
         React.createElement(
             "table",
             null,
-            show.map(mapLineFct)
+            React.createElement(
+                "tbody",
+                null,
+                show.map(mapLineFct(props))
+            )
         )
     );
 }
@@ -98,7 +117,11 @@ function BuildDetailsWind(props) {
         React.createElement(
             "table",
             null,
-            show.map(mapLineFct)
+            React.createElement(
+                "tbody",
+                null,
+                show.map(mapLineFct(props))
+            )
         ),
         React.createElement("input", { type: "range", id: "BMRange" }),
         "// TODO:"
@@ -106,33 +129,63 @@ function BuildDetailsWind(props) {
 }
 
 function BuildMenu(props) {
+    var isSelected = true;
     return React.createElement(
         "div",
-        { id: "BuildMenu", className: "vLayout" },
-        " ",
-        [{ name: 'Solar panels', src: 'solar.jpeg', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }].map(function (nrj) {
+        { id: "BuildMenu", className: "vLayout", style: props.style },
+        [{ name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }].map(function (nrj) {
             return React.createElement("img", {
                 src: 'res/icons/' + nrj.src,
                 className: "bBuild",
                 title: tr(nrj.name),
-                "data-target": nrj.target
+                "data-target": nrj.target,
+                key: nrj.target,
+                onClick: function onClick() {
+                    isSelected = !isSelected;
+                    return props.onClick(isSelected ? target : undefined);
+                }
             });
         })
     );
 }
 
+function ShowDockButton(props) {
+    return React.createElement("img", {
+        src: 'res/icons/info.png',
+        className: "bBuild",
+        style: { bottom: props.dockheight - 16 + 'px' },
+        title: tr((props.showdock ? 'Show' : 'Hide') + ' dock'),
+        onClick: function onClick() {
+            return props.onClick();
+        },
+        key: "DockButton"
+    });
+}
+
 var BuildDock = function (_React$Component) {
     _inherits(BuildDock, _React$Component);
 
-    function BuildDock() {
+    function BuildDock(props) {
         _classCallCheck(this, BuildDock);
 
-        return _possibleConstructorReturn(this, (BuildDock.__proto__ || Object.getPrototypeOf(BuildDock)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (BuildDock.__proto__ || Object.getPrototypeOf(BuildDock)).call(this, props));
+
+        _this.state = {
+            radius: 50,
+            target: "pv", //"nuke","battery","ccgt","wind","fusion", undefined
+            showdock: true
+        };
+        return _this;
     }
 
     _createClass(BuildDock, [{
         key: "render",
         value: function render() {
+            var _this2 = this;
+
+            var dockheight = this.state.showdock ? 200 : 32;
+            this.props.buildMenuSelectionCallback(this.state.target, this.state.radius);
+
             var restyle = {};
             if (this.props.vBMTheoReason !== undefined) {
                 restyle[this.props.vBMTheoReason] = { "color": "red" };
@@ -147,9 +200,9 @@ var BuildDock = function (_React$Component) {
                 "wind": BuildDetailsWind
             };
             var optionTable = "";
-            if (this.props.target !== undefined) {
-                var type = buildDetailsChoice(this.props.target.toLowerCase());
-                optionTable = React.createElement("type", {
+            if (this.state.target !== undefined) {
+                var Type = buildDetailsChoice[this.state.target.toLowerCase()];
+                optionTable = React.createElement(Type, {
                     vBMBuild: this.props.vBMBuild,
                     vBMPerYear: this.props.vBMPerYear,
                     vBMNameplate: this.props.vBMNameplate,
@@ -165,10 +218,22 @@ var BuildDock = function (_React$Component) {
             return React.createElement(
                 "div",
                 null,
-                React.createElement(BuildMenu, null),
+                React.createElement(BuildMenu, {
+                    onClick: function onClick(type) {
+                        return _this2.setState({ 'target': { 'type': type } });
+                    },
+                    style: { bottom: dockheight + 'px' }
+                }),
                 React.createElement(
                     "div",
-                    { id: "dBuildDock" },
+                    { id: "dBuildDock", style: { height: dockheight + 'px' } },
+                    React.createElement(ShowDockButton, {
+                        dockheight: dockheight,
+                        showdock: this.state.showdock,
+                        onClick: function onClick() {
+                            return _this2.setState({ showdock: !_this2.state.showdock });
+                        }
+                    }),
                     React.createElement(
                         "div",
                         { id: "buildMenuOptionTable" },

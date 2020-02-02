@@ -21,7 +21,21 @@ var MainWin = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
 
-        _this.state = {};
+        _this.state = {
+            simu: {},
+            targetBuild: {},
+            vBMTheoReason: "",
+            vBMBuild: "",
+            vBMPerYear: "",
+            vBMNameplate: "",
+            vBMArea: "",
+            vBMPop: "",
+            vBMExplCost: "",
+            vBMCoolingWaterRate: "",
+            vBMStorageCapacity: ""
+        };
+
+        var mainWin = _this;
 
         /// set of small functions that update screen text when some values changes
         var valChangedCallbacks = {
@@ -59,6 +73,18 @@ var MainWin = function (_React$Component) {
     }
 
     _createClass(MainWin, [{
+        key: 'onPositionChange',
+        value: function onPositionChange(position) {
+            this.simu.onBuildMenuStateChanged(this.state.targetBuild, position, this.state.targetBuild.radius);
+        }
+    }, {
+        key: 'setTargetBuild',
+        value: function setTargetBuild(target, radius) {
+            this.setState({
+                'targetBuild': { "type": target, "radius": radius }
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
             if (this.state.simu === undefined) {
@@ -68,13 +94,25 @@ var MainWin = function (_React$Component) {
                     'Chargement ... '
                 );
             }
-
+            //this.setTargetBuild.bind(this)
             return React.createElement(
                 'div',
                 { className: 'vLayout' },
                 React.createElement(StatusBar, null),
                 React.createElement(MapView, { cMap: this.state.simu.cMap }),
-                React.createElement(BuildDock, null)
+                React.createElement(BuildDock, {
+                    buildMenuSelectionCallback: this.setTargetBuild.bind(this),
+                    target: this.state.targetBuild.type,
+                    vBMTheoReason: this.state.vBMTheoReason,
+                    vBMBuild: this.state.vBMBuild,
+                    vBMPerYear: this.state.vBMPerYear,
+                    vBMNameplate: this.state.vBMNameplate,
+                    vBMArea: this.state.vBMArea,
+                    vBMPop: this.state.vBMPop,
+                    vBMExplCost: this.state.vBMExplCost,
+                    vBMCoolingWaterRate: this.state.vBMCoolingWaterRate,
+                    vBMStorageCapacity: this.state.vBMStorageCapacity
+                })
             );
         }
     }]);

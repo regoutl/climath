@@ -39,29 +39,24 @@ var MapLayers = function (_React$Component) {
                 'flows': 'flows.png'
             };
 
-            var baseEls = bases.map(function (label) {
-                return React.createElement('img', { src: "res/icons/" + name2icon[label],
+            var mapListToIm = function mapListToIm(label) {
+                return React.createElement('img', {
+                    src: "res/icons/" + name2icon[label],
                     className: 'mapButton',
-                    style: { filter: _this2.props.base == label ? "none" : 'grayscale(100%)' },
+                    style: {
+                        filter: _this2.props.base == label ? "none" : 'grayscale(100%)'
+                    },
                     onClick: _this2.handleClick,
-                    'data-target': label
+                    'data-target': label,
+                    key: label
                 });
-            });
-
-            var extraEls = layers.map(function (label) {
-                return React.createElement('img', { src: "res/icons/" + name2icon[label],
-                    className: 'mapButton',
-                    style: { filter: _this2.props[label] ? "none" : 'grayscale(100%)' },
-                    onClick: _this2.handleClick,
-                    'data-target': label
-                });
-            });
+            };
 
             return React.createElement(
                 'div',
                 { id: 'dMapLayers', title: 'MapLayers', className: 'vLayout' },
-                baseEls,
-                extraEls
+                bases.map(mapListToIm),
+                layers.map(mapListToIm)
             );
         }
     }]);

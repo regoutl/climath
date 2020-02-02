@@ -23,7 +23,8 @@ import App from './ui/build/app.js';
 setLang().then(() => {
     ReactDOM.render(
       React.createElement(App),
-      document.body
+      document.getElementById("root")
+      // document.body
     );
 	// console.log(tr('%d little kitten', 'test', 2));
 })

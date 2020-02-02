@@ -21,28 +21,22 @@ export default class MapLayers extends React.Component{
             'flows':'flows.png',
         }
 
-
-        const baseEls = bases.map((label) =>
-            <img src={"res/icons/" + name2icon[label] }
-                 className="mapButton"
-                 style={{filter: (this.props.base  == label ? "none": 'grayscale(100%)')}}
-                 onClick={this.handleClick}
-                 data-target={label}
-                 />
-        );
-
-        const extraEls = layers.map((label) =>
-            <img src={"res/icons/" + name2icon[label] }
-                className="mapButton"
-                style={{filter: (this.props[label] ? "none": 'grayscale(100%)')}}
-                onClick={this.handleClick}
-                data-target={label}
-                />
-        );
+        let mapListToIm = (label) =>
+            <img
+                src = {"res/icons/" + name2icon[label]}
+                className = "mapButton"
+                style = {{
+                    filter: (this.props.base  == label ?
+                                                "none": 'grayscale(100%)'),
+                }}
+                onClick = {this.handleClick}
+                data-target = {label}
+                key = {label}
+            />
 
         return (<div id="dMapLayers" title="MapLayers" className="vLayout">
-            {baseEls}
-            {extraEls}
+            {bases.map(mapListToIm)}
+            {layers.map(mapListToIm)}
         </div>);
     }
 }
