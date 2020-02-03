@@ -13,7 +13,7 @@ export default class MainWin extends React.Component{
         this.state = {
             simu: "unloaded",
             targetBuild: {},
-            targetBuildPos: {},
+            targetBuildLoc: {},
             vBMTheoReason: "",
             vBMBuild: "",
             vBMPerYear: "",
@@ -27,6 +27,8 @@ export default class MainWin extends React.Component{
             date: 2019,
         };
 
+        this.slider = {default: 50, min: 0, max: 100,
+            radiusSliderChange: (r) => this.setTargetBuildLoc({radius: r})};
         let mainWin = this;
 
     	/// set of small functions that update screen text when some values changes
@@ -72,14 +74,15 @@ export default class MainWin extends React.Component{
     setTargetBuild(target){
         this.setState({
             'targetBuild':{"type": target},
+            'targetBuildLoc':{radius: this.slider.default},
         });
     }
-    setTargetBuildPos({pos, radius}){
+    setTargetBuildLoc({pos=this.state.targetBuildLoc.pos,
+                                    radius=this.state.targetBuildLoc.radius}){
         this.setState({
-            'targetBuildPos':{
-                pos: pos === undefined? this.state.targetBuildPos.pos:pos,
-                radius: radius === undefined?
-                                    this.state.targetBuildPos.radius:radius,
+            'targetBuildLoc':{
+                pos: pos,
+                radius: radius,
             },
         });
     }
@@ -100,7 +103,6 @@ export default class MainWin extends React.Component{
 
         <BuildDock
             buildMenuSelectionCallback = {this.setTargetBuild.bind(this)}
-            buildMenuRadiusCallback = {this.setTargetBuildPos.bind(this)}
             target = {this.state.targetBuild.type}
             vBMTheoReason = {this.state.vBMTheoReason}
             vBMBuild = {this.state.vBMBuild}
@@ -111,6 +113,7 @@ export default class MainWin extends React.Component{
             vBMExplCost = {this.state.vBMExplCost}
             vBMCoolingWaterRate = {this.state.vBMCoolingWaterRate}
             vBMStorageCapacity = {this.state.vBMStorageCapacity}
+            sliderRadiusDefault = {this.slider}
         />
          </div>);
     }

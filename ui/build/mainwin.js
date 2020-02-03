@@ -24,7 +24,7 @@ var MainWin = function (_React$Component) {
         _this.state = {
             simu: "unloaded",
             targetBuild: {},
-            targetBuildPos: {},
+            targetBuildLoc: {},
             vBMTheoReason: "",
             vBMBuild: "",
             vBMPerYear: "",
@@ -38,6 +38,10 @@ var MainWin = function (_React$Component) {
             date: 2019
         };
 
+        _this.slider = { default: 50, min: 0, max: 100,
+            radiusSliderChange: function radiusSliderChange(r) {
+                return _this.setTargetBuildLoc({ radius: r });
+            } };
         var mainWin = _this;
 
         /// set of small functions that update screen text when some values changes
@@ -85,19 +89,22 @@ var MainWin = function (_React$Component) {
         key: 'setTargetBuild',
         value: function setTargetBuild(target) {
             this.setState({
-                'targetBuild': { "type": target }
+                'targetBuild': { "type": target },
+                'targetBuildLoc': { radius: this.slider.default }
             });
         }
     }, {
-        key: 'setTargetBuildPos',
-        value: function setTargetBuildPos(_ref) {
-            var pos = _ref.pos,
-                radius = _ref.radius;
+        key: 'setTargetBuildLoc',
+        value: function setTargetBuildLoc(_ref) {
+            var _ref$pos = _ref.pos,
+                pos = _ref$pos === undefined ? this.state.targetBuildLoc.pos : _ref$pos,
+                _ref$radius = _ref.radius,
+                radius = _ref$radius === undefined ? this.state.targetBuildLoc.radius : _ref$radius;
 
             this.setState({
-                'targetBuildPos': {
-                    pos: pos === undefined ? this.state.targetBuildPos.pos : pos,
-                    radius: radius === undefined ? this.state.targetBuildPos.radius : radius
+                'targetBuildLoc': {
+                    pos: pos,
+                    radius: radius
                 }
             });
         }
@@ -122,7 +129,6 @@ var MainWin = function (_React$Component) {
                 React.createElement(MapView, { cMap: this.state.simu.cMap }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
-                    buildMenuRadiusCallback: this.setTargetBuildPos.bind(this),
                     target: this.state.targetBuild.type,
                     vBMTheoReason: this.state.vBMTheoReason,
                     vBMBuild: this.state.vBMBuild,
@@ -132,7 +138,8 @@ var MainWin = function (_React$Component) {
                     vBMPop: this.state.vBMPop,
                     vBMExplCost: this.state.vBMExplCost,
                     vBMCoolingWaterRate: this.state.vBMCoolingWaterRate,
-                    vBMStorageCapacity: this.state.vBMStorageCapacity
+                    vBMStorageCapacity: this.state.vBMStorageCapacity,
+                    sliderRadiusDefault: this.slider
                 })
             );
         }

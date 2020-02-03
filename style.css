@@ -154,12 +154,12 @@ h1{
 #buildMenuOptionTable{
     display: flex;
     flex-direction: row;
-    background-color: white;
+    width: min-content;
 }
 
 .bBuild{
 	height: 40px;
-	margin: 10px;
+	margin: 5px;
 	cursor: pointer;
 }
 
@@ -168,7 +168,13 @@ h1{
 }
 
 #dBuildDetails{
-	display: none;
+	/* display: none; */
+    max-width: max-content;
+    width: 100%;
+    background-color: rgba(76, 175, 80, 0.3);
+    padding-left: 10px;
+    padding-right: 20px;
+    white-space: nowrap;
 }
 #dBuildDetails th{
 	text-align:left;
@@ -383,7 +389,8 @@ canvas {
 #dBuildDock{
 	position: absolute;
 	bottom: 0px;
-	width: 100%;
+	/* width: 100%; */
+    width: min-content;
 	height: var(--build-dock-height);
 	z-index:1000000;
 	justify-content: space-between;
