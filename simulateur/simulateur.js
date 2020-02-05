@@ -83,6 +83,10 @@ export class Simulateur{
     // nothin to build, skip
         if(buildMenuState === undefined)
             return;
+        if(this._c(buildMenuState.type) == undefined){ //means no build selected
+            // console.log('undefined type');
+            return;
+        }
 
         buildMenuState.year = this.year;
 
