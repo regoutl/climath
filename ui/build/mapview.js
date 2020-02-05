@@ -28,8 +28,6 @@ var MapView = function (_React$Component) {
 
         _this.toogleLayer = _this.toogleLayer.bind(_this);
 
-        //pixel to texcoord
-        // this.proj = stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5));
         //real win px to viewed px (this.modelview * curPos := mapCurPos)
         _this.modelview = new stMat();
 
@@ -37,9 +35,10 @@ var MapView = function (_React$Component) {
         _this.mousedown = _this.onmousedown.bind(_this);
         _this.mousemove = _this.onmousemove.bind(_this);
         _this.mouseup = _this.onmouseup.bind(_this);
+        _this.wheel = _this.onwheel.bind(_this);
 
         _this.mousePos = { x: 0, y: 0 };
-        _this.transform = { x: -0, y: -0, scale: 1 };
+        _this.transform = { x: -0, y: -0, scale: 0.64 };
         _this.isMouseDown = false;
         return _this;
     }
@@ -69,6 +68,7 @@ var MapView = function (_React$Component) {
             window.addEventListener('mousedown', this.mousedown);
             window.addEventListener('mousemove', this.mousemove);
             window.addEventListener('mouseup', this.mouseup);
+            window.addEventListener('wheel', this.wheel);
         }
     }, {
         key: 'render',
@@ -109,8 +109,13 @@ var MapView = function (_React$Component) {
             //                             stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
 
             // console.log('draw');
-            this.mvProj = stMat.mul(stMat.scale(this.transform.scale, -this.transform.scale), stMat.translate(this.transform.x * 2 / gl.canvas.width, this.transform.y * 2 / gl.canvas.height));
-            // this.mvProj = new stMat;
+            var unitSquareToPix = stMat.scale(1374, 1183);
+
+            var pixTrans = stMat.mul(stMat.scale(this.transform.scale, this.transform.scale), stMat.translate(this.transform.x, this.transform.y));
+
+            var pixToNDC = stMat.mul(stMat.translate(-1, 1), stMat.scale(2 / gl.canvas.width, -2 / gl.canvas.height));
+
+            this.mvProj = stMat.mul(stMat.mul(pixToNDC, pixTrans), unitSquareToPix);
             // console.log(this.mvProj);
 
 
@@ -151,7 +156,7 @@ var MapView = function (_React$Component) {
                 canvas.width = displayWidth;
                 canvas.height = displayHeight;
 
-                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+                gl.viewport(0, 0, canvas.width, canvas.height);
 
                 // let ratio;
                 // if(displayWidth > displayHeight){
@@ -198,6 +203,32 @@ var MapView = function (_React$Component) {
             if (e.target != this.refs.mapCanvas) return;
         }
     }, {
+        key: 'onwheel',
+        value: function onwheel(e) {
+            var curX = e.pageX,
+                curY = e.pageY;
+
+            var origin = {
+                x: curX / this.transform.scale - this.transform.x,
+                y: curY / this.transform.scale - this.transform.y
+            };
+
+            if (e.deltaY > 0) {
+                this.transform.scale *= 0.8;
+            } else {
+                this.transform.scale /= 0.8;
+            }
+
+            //bounds
+            this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4)); //unzoom
+            this.transform.scale = Math.min(this.transform.scale, Math.pow(1 / 0.8, 8)); //zoom
+
+            this.transform.x = curX / this.transform.scale - origin.x;
+            this.transform.y = curY / this.transform.scale - origin.y;
+
+            this.draw();
+        }
+    }, {
         key: '_drawTex',
         value: function _drawTex(paletteTexture) {
             var gl = this.gl; //shortcut
@@ -217,7 +248,7 @@ var MapView = function (_React$Component) {
     }, {
         key: '_createProg',
         value: function _createProg() {
-            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);\n\n          v_texcoord = a_position.xy * 0.5 + vec2(0.5, 0.5);\n        }\n        ';
+            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);\n\n          v_texcoord = vec2(a_position.xy);\n        }\n        ';
 
             var frag = '\n        precision mediump float;\n        varying vec2 v_texcoord;\n        uniform sampler2D u_image;\n        uniform sampler2D u_palette;\n\n        void main() {\n            vec2 palXY = texture2D(u_image, v_texcoord).ra * 255.0;\n            gl_FragColor = texture2D(u_palette, (palXY + vec2(0.5)) / 256.0);\n        }\n        ';
 
@@ -231,7 +262,7 @@ var MapView = function (_React$Component) {
             this.texmodelviewLoc = gl.getUniformLocation(this.prog, "texmodelview");
 
             // Setup a unit quad
-            var positions = [1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1];
+            var positions = [1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0];
             this.vertBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);

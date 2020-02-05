@@ -15,8 +15,6 @@ export default class MapView extends React.Component{
 
         this.toogleLayer = this.toogleLayer.bind(this);
 
-        //pixel to texcoord
-        // this.proj = stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5));
         //real win px to viewed px (this.modelview * curPos := mapCurPos)
         this.modelview = new stMat();
 
@@ -24,10 +22,11 @@ export default class MapView extends React.Component{
         this.mousedown = this.onmousedown.bind(this);
         this.mousemove = this.onmousemove.bind(this);
         this.mouseup = this.onmouseup.bind(this);
+        this.wheel = this.onwheel.bind(this);
 
 
         this.mousePos = {x: 0, y:0};
-        this.transform = {x: -0, y: -0, scale:1};
+        this.transform = {x: -0, y: -0, scale:0.64};
         this.isMouseDown = false;
     }
 
@@ -58,6 +57,7 @@ export default class MapView extends React.Component{
         window.addEventListener('mousedown', this.mousedown);
         window.addEventListener('mousemove', this.mousemove);
         window.addEventListener('mouseup', this.mouseup);
+        window.addEventListener('wheel', this.wheel);
     }
 
     render(){
@@ -98,9 +98,16 @@ export default class MapView extends React.Component{
         //                             stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
 
         // console.log('draw');
-        this.mvProj = stMat.mul(stMat.scale(this.transform.scale, -this.transform.scale),
-                                stMat.translate(this.transform.x * 2 / gl.canvas.width, this.transform.y * 2 / gl.canvas.height));
-        // this.mvProj = new stMat;
+        let unitSquareToPix = stMat.scale(1374, 1183);
+
+        let pixTrans = stMat.mul(stMat.scale(this.transform.scale, this.transform.scale),
+                                stMat.translate(this.transform.x, this.transform.y));
+
+        let pixToNDC = stMat.mul( stMat.translate(-1, 1),
+                                    stMat.scale(2 / gl.canvas.width, -2 / gl.canvas.height));
+
+
+        this.mvProj = stMat.mul(stMat.mul(pixToNDC, pixTrans), unitSquareToPix);
         // console.log(this.mvProj);
 
 
@@ -142,7 +149,7 @@ export default class MapView extends React.Component{
             canvas.width  = displayWidth;
             canvas.height = displayHeight;
 
-            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.viewport(0, 0, canvas.width, canvas.height);
 
             // let ratio;
             // if(displayWidth > displayHeight){
@@ -190,6 +197,32 @@ export default class MapView extends React.Component{
 
     }
 
+    onwheel(e){
+        let curX = e.pageX ,
+            curY = e.pageY ;
+
+        let origin = {
+            x: (curX  / this.transform.scale- this.transform.x),
+            y: (curY  / this.transform.scale- this.transform.y)
+        };
+
+        if(e.deltaY > 0){
+            this.transform.scale *= 0.8;
+        }else{
+            this.transform.scale /= 0.8;
+        }
+
+        //bounds
+        this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4)); //unzoom
+        this.transform.scale = Math.min(this.transform.scale, Math.pow(1/0.8, 8));//zoom
+
+        this.transform.x = curX / this.transform.scale - origin.x;
+        this.transform.y = curY / this.transform.scale - origin.y;
+        
+        this.draw();
+    }
+
+
     _drawTex(paletteTexture){
         let gl = this.gl; //shortcut
 
@@ -217,7 +250,7 @@ export default class MapView extends React.Component{
         void main() {
           gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);
 
-          v_texcoord = a_position.xy * 0.5 + vec2(0.5, 0.5);
+          v_texcoord = vec2(a_position.xy);
         }
         `;
 
@@ -245,12 +278,12 @@ export default class MapView extends React.Component{
 
         // Setup a unit quad
         let positions = [
-             1,  1,
-            -1,  1,
-            -1, -1,
-             1,  1,
-            -1, -1,
-             1, -1,
+            1,  1,
+            0,  1,
+            0, 0,
+            1,  1,
+            0, 0,
+            1, 0,
         ];
         this.vertBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
