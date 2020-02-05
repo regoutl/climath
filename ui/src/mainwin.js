@@ -85,21 +85,20 @@ export default class MainWin extends React.Component{
     */
     setTargetBuildLoc({pos=this.state.targetBuildLoc.pos,
                                     radius=this.state.targetBuildLoc.radius}){
-        this.setState({
-            'targetBuildLoc':{
-                pos: pos,
-                radius: radius,
-            },
-        }, () => {
-            let build = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild,
-                                        this.state.targetBuildLoc.pos, this.state.targetBuildLoc.radius);
-            if(!build)
-                return;
+        let targetBuildLoc = {
+            pos: pos,
+            radius: radius,
+        }, vBMArea = undefined;
 
-            this.setState({
-                vBMArea: build.info.area
-            });
-        });
+        if(this.state.targetBuild.type !== undefined
+            && targetBuildLoc.pos !== undefined){
+                let build = this.state.simu.onBuildMenuStateChanged(
+                    this.state.targetBuild, this.state.targetBuildLoc.pos,
+                    this.state.targetBuildLoc.radius);
+                vBMArea = (build.info !== undefined)?build.info.area:undefined;
+        }
+
+        this.setState({targetBuildLoc:targetBuildLoc, vBMArea:vBMArea})
     }
 
     render(){

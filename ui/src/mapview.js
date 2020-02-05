@@ -192,7 +192,7 @@ export default class MapView extends React.Component{
 
                     <canvas
                         ref="mapCanvas"
-                        onmouseleave={this.mouseleave}
+                        onMouseLeave={this.mouseleave}
                     >
                         {tr("Your browser is not supported")}
                     </canvas>

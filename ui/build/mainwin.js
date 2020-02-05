@@ -102,31 +102,28 @@ var MainWin = function (_React$Component) {
     }, {
         key: 'setTargetBuildLoc',
         value: function setTargetBuildLoc(_ref) {
-            var _this2 = this;
-
             var _ref$pos = _ref.pos,
                 pos = _ref$pos === undefined ? this.state.targetBuildLoc.pos : _ref$pos,
                 _ref$radius = _ref.radius,
                 radius = _ref$radius === undefined ? this.state.targetBuildLoc.radius : _ref$radius;
 
-            this.setState({
-                'targetBuildLoc': {
-                    pos: pos,
-                    radius: radius
-                }
-            }, function () {
-                var build = _this2.state.simu.onBuildMenuStateChanged(_this2.state.targetBuild, _this2.state.targetBuildLoc.pos, _this2.state.targetBuildLoc.radius);
-                if (!build) return;
+            var targetBuildLoc = {
+                pos: pos,
+                radius: radius
+            },
+                vBMArea = undefined;
 
-                _this2.setState({
-                    vBMArea: build.info.area
-                });
-            });
+            if (this.state.targetBuild.type !== undefined && targetBuildLoc.pos !== undefined) {
+                var build = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild, this.state.targetBuildLoc.pos, this.state.targetBuildLoc.radius);
+                vBMArea = build.info !== undefined ? build.info.area : undefined;
+            }
+
+            this.setState({ targetBuildLoc: targetBuildLoc, vBMArea: vBMArea });
         }
     }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this2 = this;
 
             if (this.state.simu === null) {
                 return React.createElement(
@@ -146,7 +143,7 @@ var MainWin = function (_React$Component) {
                 React.createElement(MapView, {
                     cMap: this.state.simu.cMap,
                     mousemove: function mousemove(curPos) {
-                        return _this3.setTargetBuildLoc({ pos: curPos });
+                        return _this2.setTargetBuildLoc({ pos: curPos });
                     }
                 }),
                 React.createElement(BuildDock, {

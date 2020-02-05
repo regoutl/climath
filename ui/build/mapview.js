@@ -220,7 +220,7 @@ var MapView = function (_React$Component) {
                     'canvas',
                     {
                         ref: 'mapCanvas',
-                        onmouseleave: this.mouseleave
+                        onMouseLeave: this.mouseleave
                     },
                     tr("Your browser is not supported")
                 )
