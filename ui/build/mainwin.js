@@ -22,7 +22,7 @@ var MainWin = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
 
         _this.state = {
-            simu: "unloaded",
+            simu: null,
             targetBuild: {},
             targetBuildLoc: {},
             vBMTheoReason: "",
@@ -80,23 +80,13 @@ var MainWin = function (_React$Component) {
         return _this;
     }
 
-    /**
-     never used ?
+    /** callback
+        set the current target build
+        target is a string as specified in builddock.js
     */
 
 
     _createClass(MainWin, [{
-        key: 'onPositionChange',
-        value: function onPositionChange(position) {
-            this.simu.onBuildMenuStateChanged(this.state.targetBuild, position, this.state.targetBuild.radius);
-        }
-
-        /** callback
-            set the current target build
-            target is a string as specified in builddock.js
-        */
-
-    }, {
         key: 'setTargetBuild',
         value: function setTargetBuild(target) {
             this.setState({
@@ -112,6 +102,8 @@ var MainWin = function (_React$Component) {
     }, {
         key: 'setTargetBuildLoc',
         value: function setTargetBuildLoc(_ref) {
+            var _this2 = this;
+
             var _ref$pos = _ref.pos,
                 pos = _ref$pos === undefined ? this.state.targetBuildLoc.pos : _ref$pos,
                 _ref$radius = _ref.radius,
@@ -122,12 +114,21 @@ var MainWin = function (_React$Component) {
                     pos: pos,
                     radius: radius
                 }
+            }, function () {
+                var build = _this2.state.simu.onBuildMenuStateChanged(_this2.state.targetBuild, _this2.state.targetBuildLoc.pos, _this2.state.targetBuildLoc.radius);
+                if (!build) return;
+
+                _this2.setState({
+                    vBMArea: build.info.area
+                });
             });
         }
     }, {
         key: 'render',
         value: function render() {
-            if (this.state.simu === "unloaded") {
+            var _this3 = this;
+
+            if (this.state.simu === null) {
                 return React.createElement(
                     'p',
                     null,
@@ -142,7 +143,12 @@ var MainWin = function (_React$Component) {
                     Date: this.state.date,
                     Money: this.state.money
                 }),
-                React.createElement(MapView, { cMap: this.state.simu.cMap }),
+                React.createElement(MapView, {
+                    cMap: this.state.simu.cMap,
+                    mousemove: function mousemove(curPos) {
+                        return _this3.setTargetBuildLoc({ pos: curPos });
+                    }
+                }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
                     target: this.state.targetBuild.type,

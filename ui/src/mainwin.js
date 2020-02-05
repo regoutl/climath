@@ -11,7 +11,7 @@ export default class MainWin extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            simu: "unloaded",
+            simu: null,
             targetBuild: {},
             targetBuildLoc: {},
             vBMTheoReason: "",
@@ -26,6 +26,8 @@ export default class MainWin extends React.Component{
             money: 0,
             date: 2019,
         };
+
+
 
         this.slider = {default: 50, min: 0, max: 100,
             sliderChange: (r) => this.setTargetBuildLoc({radius: r})};
@@ -66,13 +68,6 @@ export default class MainWin extends React.Component{
         });
     }
 
-    /**
-     never used ?
-    */
-    onPositionChange(position){
-        this.simu.onBuildMenuStateChanged(this.state.targetBuild,
-                                    position, this.state.targetBuild.radius);
-    }
 
     /** callback
         set the current target build
@@ -95,11 +90,20 @@ export default class MainWin extends React.Component{
                 pos: pos,
                 radius: radius,
             },
+        }, () => {
+            let build = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild,
+                                        this.state.targetBuildLoc.pos, this.state.targetBuildLoc.radius);
+            if(!build)
+                return;
+
+            this.setState({
+                vBMArea: build.info.area
+            });
         });
     }
 
     render(){
-        if(this.state.simu === "unloaded"){
+        if(this.state.simu === null){
             return <p>Chargement ... </p>;
         }
 
@@ -110,7 +114,10 @@ export default class MainWin extends React.Component{
             Money = {this.state.money}
         />
 
-        <MapView cMap={this.state.simu.cMap} />
+        <MapView
+            cMap={this.state.simu.cMap}
+            mousemove={(curPos) => this.setTargetBuildLoc({pos: curPos})}
+        />
 
         <BuildDock
             buildMenuSelectionCallback = {this.setTargetBuild.bind(this)}
@@ -128,4 +135,5 @@ export default class MainWin extends React.Component{
         />
          </div>);
     }
+
 }

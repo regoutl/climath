@@ -12,13 +12,23 @@ import { tr } from '../../tr/tr.js';
 import MapLayers from './maplayers.js';
 import PaletteTexture from './palettetexture.js';
 
+function isCentral(type) {
+    return type == 'nuke' || type == 'ccgt' || type == 'fusion';
+}
+
 var MapView = function (_React$Component) {
     _inherits(MapView, _React$Component);
 
+    /* accepted props :
+    mousemove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
+    click : function(curPos)        -> called on click
+    */
     function MapView(props) {
         _classCallCheck(this, MapView);
 
         var _this = _possibleConstructorReturn(this, (MapView.__proto__ || Object.getPrototypeOf(MapView)).call(this, props));
+        //react
+
 
         _this.state = {
             energyGrid: true,
@@ -26,26 +36,148 @@ var MapView = function (_React$Component) {
             base: 'groundUse'
         };
 
-        _this.toogleLayer = _this.toogleLayer.bind(_this);
+        _this._toogleLayer = _this._toogleLayer.bind(_this);
 
-        //real win px to viewed px (this.modelview * curPos := mapCurPos)
-        _this.modelview = new stMat();
-
+        //drag ----------------------------------------------------
         _this.draw = _this.draw.bind(_this);
         _this.mousedown = _this.onmousedown.bind(_this);
         _this.mousemove = _this.onmousemove.bind(_this);
         _this.mouseup = _this.onmouseup.bind(_this);
         _this.wheel = _this.onwheel.bind(_this);
 
-        _this.mousePos = { x: 0, y: 0 };
+        _this.mouseleave = _this.onmouseleave.bind(_this);
+
+        _this.physMousePos = { x: 0, y: 0 }; // cursor pos (px) in window coord
+        //transforms logical coord -> physical coord
+        // physMousePos.* = (logicMousePos.* + translate) * scale
         _this.transform = { x: -0, y: -0, scale: 0.64 };
+        //is the mouse curently down
         _this.isMouseDown = false;
+
+        // content --------------------------------------------------
+
+        //array of positions of ponctual stuff (nuke, ccgt, ...). format : type, pos
+        _this.items = [];
+
+        //current cursor
+        _this.cursor = {
+            type: null, //will be str, (nuke| ccgt| fusion| pv| bat| wind)
+            pos: { //note : logical pos (not transformed)
+                x: null,
+                y: null
+            },
+            radius: null
+        };
         return _this;
     }
 
+    /** @brief update the given layer*/
+
+
     _createClass(MapView, [{
-        key: 'toogleLayer',
-        value: function toogleLayer(name) {
+        key: 'update',
+        value: function update(layerName) {
+            throw 'todo';
+            // if(this[layerName+'Src'] === undefined)
+            //     throw 'olala';
+            // // this.energy.update(this.energySrc);
+            // this[layerName].update(this[layerName+'Src']);
+        }
+
+        // conceptually, mapView stores a Map (id, color)
+        // this function return the next free id and maps it to its coresponding color
+
+    }, {
+        key: 'appendEnergyPalette',
+        value: function appendEnergyPalette(type) {
+            var r = void 0,
+                g = void 0,
+                b = void 0,
+                a = 255;
+            if (type == 'pv') {
+                r = 70;g = 85;b = 130;
+            } else if (type == 'battery') {
+                r = 0;g = 255;b = 250;
+            } else if (type == 'wind') {
+                r = 255;g = 255;b = 250;a = 128;
+            } else {
+                throw 'todo';
+            }
+
+            return this.energy.appendPalette(r, g, b, a);
+        }
+
+        /// @brief draws a cursor of the given type at the given location.
+        /// radius can be ommited for centrals
+
+    }, {
+        key: 'drawCursor',
+        value: function drawCursor(type, pos, radius) {
+            if (isCentral(type)) {
+                if (isCentral(this.cursor.type)) {
+                    //life is good - we were already a central
+                    this.items[this.items.length - 1] = { pos: pos, type: type };
+                    // this.items[this.items.length-1].type = pos; //will have to se the type
+                } else {
+                    //new central
+                    this.items.push({ pos: pos, type: type });
+                }
+                this._updatePtsBuf();
+            } else if (isCentral(this.cursor.type)) {
+                //we where a central, just remove it
+                this.items.pop();
+                this._updatePtsBuf();
+            }
+
+            this.cursor.type = type;
+            this.cursor.pos = pos;
+            this.cursor.radius = radius;
+
+            this.draw();
+        }
+    }, {
+        key: 'clearCursor',
+        value: function clearCursor() {
+            this.drawCursor(null, null, null);
+        }
+
+        /// adds a point item at the given position
+        /// NOTE : tmp ; should be a red square. NOT TESTED
+
+    }, {
+        key: 'addItem',
+        value: function addItem(type, pos) {
+            if (!isCentral(type)) throw 'not possible';
+
+            this.items.push({ type: type, pos: pos });
+            //update gl
+            this._updatePtsBuf();
+            this.draw();
+        }
+
+        //removes a central
+
+    }, {
+        key: 'rmItem',
+        value: function rmItem(type, pos) {
+            if (!isCentral(type)) throw 'not possible';
+
+            var id = this.items.findIndex(function (v) {
+                return v.type === type && v.pos.x === pos.x && v.pos.y === pos.y;
+            });
+
+            this.items.splice(id, 1);
+
+            //update gl
+            this._updatePtsBuf();
+            this.draw();
+        }
+
+        //internal functions--------------------------------------------------------
+
+    }, {
+        key: '_toogleLayer',
+        value: function _toogleLayer(name) {
             if (['energyGrid', 'flows'].includes(name)) this.setState(function (state) {
                 return _defineProperty({}, name, !state[name]);
             });else this.setState({ base: name });
@@ -57,8 +189,9 @@ var MapView = function (_React$Component) {
 
             this.gl = canvas.getContext("webgl", { alpha: false });
 
-            this._createProg();
+            this._initMapShader();
             this._initTextures();
+            this._initPointShader();
 
             console.log("mount mapview !");
 
@@ -82,11 +215,12 @@ var MapView = function (_React$Component) {
                     base: this.state.base,
                     energyGrid: this.state.energyGrid,
                     flows: this.state.flows,
-                    setVisible: this.toogleLayer }),
+                    setVisible: this._toogleLayer }),
                 React.createElement(
                     'canvas',
                     {
-                        ref: 'mapCanvas'
+                        ref: 'mapCanvas',
+                        onmouseleave: this.mouseleave
                     },
                     tr("Your browser is not supported")
                 )
@@ -100,38 +234,46 @@ var MapView = function (_React$Component) {
     }, {
         key: 'draw',
         value: function draw() {
-            var gl = this.gl;
-            if (gl === undefined) return;
+            var _this2 = this;
 
-            this.resize(gl.canvas);
+            requestAnimationFrame(function () {
+                var gl = _this2.gl;
+                if (gl === undefined) return;
 
-            // let ndcToPix = stMat.mul(stMat.scale(window.innerWidth, window.innerHeight),
-            //                             stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
+                _this2.checkSize();
 
-            // console.log('draw');
-            var unitSquareToPix = stMat.scale(1374, 1183);
+                // let ndcToPix = stMat.mul(stMat.scale(window.innerWidth, window.innerHeight),
+                //                             stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
 
-            var pixTrans = stMat.mul(stMat.scale(this.transform.scale, this.transform.scale), stMat.translate(this.transform.x, this.transform.y));
+                // console.log('draw');
+                var unitSquareToPix = stMat.scale(1374, 1183);
 
-            var pixToNDC = stMat.mul(stMat.translate(-1, 1), stMat.scale(2 / gl.canvas.width, -2 / gl.canvas.height));
+                var pixTrans = stMat.mul(stMat.scale(_this2.transform.scale, _this2.transform.scale), stMat.translate(_this2.transform.x, _this2.transform.y));
 
-            this.mvProj = stMat.mul(stMat.mul(pixToNDC, pixTrans), unitSquareToPix);
-            // console.log(this.mvProj);
+                var pixToNDC = stMat.mul(stMat.translate(-1, 1), stMat.scale(2 / gl.canvas.width, -2 / gl.canvas.height));
+
+                _this2.mvProj = stMat.mul(stMat.mul(pixToNDC, pixTrans), unitSquareToPix);
+                // console.log(this.mvProj);
 
 
-            gl.enable(gl.BLEND);
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-            gl.clearColor(1, 1, 1, 1);
-            this.clear();
+                gl.clearColor(1, 1, 1, 1);
+                _this2.clear();
 
-            this._drawTex(this[this.state.base]);
+                _this2._drawTex(_this2[_this2.state.base]);
 
-            if (this.state.energyGrid) this._drawTex(this.energy);
-            //
-            // if((this.currentCursor == 'nuke' || this.currentCursor == 'ccgt' || this.currentCursor == 'fusion'
-            //     || this.currentShowGrid.flows) && this.water)
-            //         this._drawTex(this.water);
+                if (_this2.state.energyGrid) _this2._drawTex(_this2.energy);
+
+                if ((isCentral(_this2.cursor.type) || _this2.state.flows) && _this2.water) _this2._drawTex(_this2.water);
+
+                _this2._drawPoints();
+
+                if (_this2.cursor.type !== null && !isCentral(_this2.cursor.type)) {
+                    // this._drawAreaCursor();
+                }
+            });
         }
     }, {
         key: 'clear',
@@ -139,18 +281,19 @@ var MapView = function (_React$Component) {
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         }
     }, {
-        key: 'resize',
-        value: function resize(canvas) {
+        key: 'checkSize',
+        value: function checkSize() {
             // return;
 
             var gl = this.gl;
+            var canvas = gl.canvas;
             // Lookup the size the browser is displaying the canvas.
             var displayWidth = window.innerWidth;
             var displayHeight = window.innerWidth;
 
             // Check if the canvas is not the same size.
             if (canvas.width != displayWidth || canvas.height != displayHeight) {
-                console.log('resize', displayHeight);
+                // console.log('resize', displayHeight);
 
                 // Make the canvas the same size
                 canvas.width = displayWidth;
@@ -175,7 +318,7 @@ var MapView = function (_React$Component) {
             if (e.target != this.refs.mapCanvas) return;
 
             this.isMouseDown = true;
-            this.mousePos = { x: e.screenX, y: e.screenY };
+            this.physMousePos = { x: e.pageX, y: e.pageY };
         }
     }, {
         key: 'onmousemove',
@@ -186,13 +329,22 @@ var MapView = function (_React$Component) {
 
             if (this.isMouseDown) {
 
-                this.transform.x += (e.screenX - this.mousePos.x) / this.transform.scale;
-                this.transform.y += (e.screenY - this.mousePos.y) / this.transform.scale;
+                this.transform.x += (e.pageX - this.physMousePos.x) / this.transform.scale;
+                this.transform.y += (e.pageY - this.physMousePos.y) / this.transform.scale;
 
-                this.mousePos.x = e.screenX;
-                this.mousePos.y = e.screenY;
+                this.physMousePos.x = e.pageX;
+                this.physMousePos.y = e.pageY;
 
                 this.draw();
+            } else {
+                var rawPos = { x: e.pageX, y: e.pageY };
+
+                var transformedPos = {
+                    x: rawPos.x / this.transform.scale - this.transform.x,
+                    y: rawPos.y / this.transform.scale - this.transform.y
+                };
+
+                this.props.mousemove(transformedPos);
             }
         }
     }, {
@@ -228,6 +380,14 @@ var MapView = function (_React$Component) {
 
             this.draw();
         }
+
+        //called when cursor leaves direct contact with central area
+
+    }, {
+        key: 'onmouseleave',
+        value: function onmouseleave(e) {
+            this.props.mousemove(undefined);
+        }
     }, {
         key: '_drawTex',
         value: function _drawTex(paletteTexture) {
@@ -239,32 +399,40 @@ var MapView = function (_React$Component) {
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, paletteTexture.palette.tex);
 
-            gl.useProgram(this.prog);
-            this.mvProj.uniform(gl, this.texmodelviewLoc);
-            gl.uniform1i(this.imageLoc, 0);
-            gl.uniform1i(this.paletteLoc, 1);
+            gl.useProgram(this._mapShader);
+            this.mvProj.uniform(gl, this._texmodelviewLoc);
+
+            //send the points
+            gl.enableVertexAttribArray(0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._mapVertBuffer);
+            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+            //bind the textures
+            gl.uniform1i(this._imageLoc, 0);
+            gl.uniform1i(this._paletteLoc, 1);
+            //draw
             gl.drawArrays(gl.TRIANGLES, 0, 6);
         }
     }, {
-        key: '_createProg',
-        value: function _createProg() {
-            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);\n\n          v_texcoord = vec2(a_position.xy);\n        }\n        ';
+        key: '_initMapShader',
+        value: function _initMapShader() {
+            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);\n\n          v_texcoord = a_position.xy;\n        }\n        ';
 
             var frag = '\n        precision mediump float;\n        varying vec2 v_texcoord;\n        uniform sampler2D u_image;\n        uniform sampler2D u_palette;\n\n        void main() {\n            vec2 palXY = texture2D(u_image, v_texcoord).ra * 255.0;\n            gl_FragColor = texture2D(u_palette, (palXY + vec2(0.5)) / 256.0);\n        }\n        ';
 
             var gl = this.gl; //shortcut
 
 
-            this.prog = createProgram(gl, [vert, frag]);
+            this._mapShader = createProgram(gl, [vert, frag]);
 
-            this.imageLoc = gl.getUniformLocation(this.prog, "u_image");
-            this.paletteLoc = gl.getUniformLocation(this.prog, "u_palette");
-            this.texmodelviewLoc = gl.getUniformLocation(this.prog, "texmodelview");
+            this._imageLoc = gl.getUniformLocation(this._mapShader, "u_image");
+            this._paletteLoc = gl.getUniformLocation(this._mapShader, "u_palette");
+            this._texmodelviewLoc = gl.getUniformLocation(this._mapShader, "texmodelview");
 
             // Setup a unit quad
             var positions = [1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0];
-            this.vertBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
+            this._mapVertBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._mapVertBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
             gl.enableVertexAttribArray(0);
             gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
@@ -432,6 +600,69 @@ var MapView = function (_React$Component) {
             }this.windPowDensAt50.appendPalette(165, 47, 90);
 
             this.windPowDensAt50.update(this.props.cMap.windPowDens.at50);
+        }
+    }, {
+        key: '_initPointShader',
+        value: function _initPointShader() {
+            var vert = '\n        attribute vec4 a_position;\n        varying vec2 v_texcoord;\n        uniform mat3 texmodelview;\n\n        void main() {\n          gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);\n\n          v_texcoord = vec2(0.5, 0.5); //whatever\n          gl_PointSize = 64.0;\n        }\n        ';
+
+            var frag = '\n        precision mediump float;\n        varying vec2 v_texcoord;\n        uniform sampler2D u_image;\n\n        void main() {\n            gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n        }\n        ';
+
+            var gl = this.gl; //shortcut
+
+
+            this._ptsShader = createProgram(gl, [vert, frag]);
+
+            this._mvLocInPtsShader = gl.getUniformLocation(this._ptsShader, "texmodelview");
+            // this.imageLoc = gl.getUniformLocation(this.ptsShader, "u_image");
+
+            this._updatePtsBuf();
+        }
+
+        //
+
+    }, {
+        key: '_updatePtsBuf',
+        value: function _updatePtsBuf() {
+            var gl = this.gl; //shortcut
+            // Setup a unit quad
+            var positions = new Float32Array(2 * this.items.length);
+            for (var i = 0; i < this.items.length; i++) {
+                position[2 * i + 0] = this.items[i].pos.x;
+                position[2 * i + 1] = this.items[i].pos.y;
+            }
+
+            this._ptsBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._ptsBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+            gl.enableVertexAttribArray(0);
+            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+        }
+    }, {
+        key: '_drawPoints',
+        value: function _drawPoints() {
+            var gl = this.gl; //shortcut
+
+            // gl.activeTexture(gl.TEXTURE0);
+            // gl.bindTexture(gl.TEXTURE_2D, paletteTexture.texture);
+            //
+            // gl.activeTexture(gl.TEXTURE1);
+            // gl.bindTexture(gl.TEXTURE_2D, paletteTexture.palette.tex);
+
+
+            gl.useProgram(this._ptsShader);
+            this.mvProj.uniform(gl, this._mvLocInPtsShader);
+
+            //send the pointstexmodelviewLoc
+            gl.enableVertexAttribArray(0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._ptsBuffer);
+            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+            // //bind the textures
+            //     gl.uniform1i(this._imageLoc, 0);
+            //     gl.uniform1i(this._paletteLoc, 1);
+            //draw
+            gl.drawArrays(gl.POINTS, 0, this.items.length); //todo ; not 1
         }
     }]);
 
