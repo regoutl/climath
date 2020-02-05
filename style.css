@@ -8,6 +8,7 @@
 
 :root {
     --build-dock-height: 200px;
+    --status-bar-height: 40px;
 }
 
 #root{
@@ -153,12 +154,12 @@ h1{
 #buildMenuOptionTable{
     display: flex;
     flex-direction: row;
-    background-color: white;
+    width: min-content;
 }
 
 .bBuild{
 	height: 40px;
-	margin: 10px;
+	margin: 5px;
 	cursor: pointer;
 }
 
@@ -167,7 +168,13 @@ h1{
 }
 
 #dBuildDetails{
-	display: none;
+	/* display: none; */
+    max-width: max-content;
+    width: 100%;
+    background-color: rgba(76, 175, 80, 0.3);
+    padding-left: 10px;
+    padding-right: 20px;
+    white-space: nowrap;
 }
 #dBuildDetails th{
 	text-align:left;
@@ -374,7 +381,7 @@ canvas {
 	width: 100%;
 	z-index:1000000;
 	justify-content: space-between;
-	height: 40px;
+	height: var(--status-bar-height);
 	align-items: center;
 	font-size: 1.5em;
 }
@@ -382,7 +389,8 @@ canvas {
 #dBuildDock{
 	position: absolute;
 	bottom: 0px;
-	width: 100%;
+	/* width: 100%; */
+    width: min-content;
 	height: var(--build-dock-height);
 	z-index:1000000;
 	justify-content: space-between;
@@ -397,6 +405,11 @@ canvas {
     z-index:1000000;
     justify-content: space-between;
     align-items: center;
+    left: 0;
+    top: var(--status-bar-height);
+    flex-wrap: wrap;
+    overflow: visible;
+    justify-content: flex-end;
 }
 
 #dMapBox{
