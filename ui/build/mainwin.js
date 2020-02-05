@@ -39,7 +39,7 @@ var MainWin = function (_React$Component) {
         };
 
         _this.slider = { default: 50, min: 0, max: 100,
-            radiusSliderChange: function radiusSliderChange(r) {
+            sliderChange: function sliderChange(r) {
                 return _this.setTargetBuildLoc({ radius: r });
             } };
         var mainWin = _this;
@@ -80,11 +80,22 @@ var MainWin = function (_React$Component) {
         return _this;
     }
 
+    /**
+     never used ?
+    */
+
+
     _createClass(MainWin, [{
         key: 'onPositionChange',
         value: function onPositionChange(position) {
             this.simu.onBuildMenuStateChanged(this.state.targetBuild, position, this.state.targetBuild.radius);
         }
+
+        /** callback
+            set the current target build
+            target is a string as specified in builddock.js
+        */
+
     }, {
         key: 'setTargetBuild',
         value: function setTargetBuild(target) {
@@ -93,6 +104,11 @@ var MainWin = function (_React$Component) {
                 'targetBuildLoc': { radius: this.slider.default }
             });
         }
+
+        /** callback
+            set the current location of the cursor as {pos:{x:,y:}, radius:}
+        */
+
     }, {
         key: 'setTargetBuildLoc',
         value: function setTargetBuildLoc(_ref) {
@@ -139,7 +155,7 @@ var MainWin = function (_React$Component) {
                     vBMExplCost: this.state.vBMExplCost,
                     vBMCoolingWaterRate: this.state.vBMCoolingWaterRate,
                     vBMStorageCapacity: this.state.vBMStorageCapacity,
-                    sliderRadiusDefault: this.slider
+                    sliderRadius: this.slider
                 })
             );
         }

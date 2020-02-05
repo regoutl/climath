@@ -21,6 +21,122 @@ function isSmallScreen() {
 }
 ////////
 
+///////////////////////////////////////////////////////////////////////////////
+// List props for this Component :
+//     buildMenuSelectionCallback = function setNewTarget(target)
+//     target = var currentTarget
+//     vBMTheoReason = var currentVBMTheoReason
+//     vBMBuild = var currentVBMBuild
+//     vBMPerYear = var currentVBMPerYear
+//     vBMNameplate = var currentVBMNameplate
+//     vBMArea = var currentVBMArea
+//     vBMPop = var currentVBMPop
+//     vBMExplCost = var currentVBMExplCost
+//     vBMCoolingWaterRate = var currentVBMCoolingWaterRate
+//     vBMStorageCapacity = var currentVBMStorageCapacity
+//     sliderRadius = {default:, min:, max:, sliderChange: r=>f(r)}
+///////////////////////////////////////////////////////////////////////////////
+// List possible target :
+//     ['pv', 'nuke', 'battery', 'ccgt', 'wind', 'fusion']
+///////////////////////////////////////////////////////////////////////////////
+
+var BuildDock = function (_React$Component) {
+    _inherits(BuildDock, _React$Component);
+
+    function BuildDock(props) {
+        _classCallCheck(this, BuildDock);
+
+        //props.Radius
+        var _this = _possibleConstructorReturn(this, (BuildDock.__proto__ || Object.getPrototypeOf(BuildDock)).call(this, props));
+
+        _this.state = {
+            showdock: true
+        };
+        return _this;
+    }
+
+    _createClass(BuildDock, [{
+        key: "render",
+        value: function render() {
+            var _this2 = this;
+
+            var showdock = this.props.target !== undefined; //this.state.showdock
+            var dockheight = showdock ? 200 : 32;
+            var defaultRadius = 50,
+                maxRadius = 100;
+
+            var restyle = {};
+            if (this.props.vBMTheoReason !== undefined) {
+                restyle[this.props.vBMTheoReason] = { "color": "red" };
+            }
+
+            var buildDetailsChoice = {
+                "pv": BuildDetailsSolar,
+                "nuke": BuildDetailsNuke,
+                "fusion": BuildDetailsNuke,
+                "battery": BuildDetailsBat,
+                "ccgt": BuildDetailsCcgt,
+                "wind": BuildDetailsWind
+            };
+            var optionTable = "";
+            if (this.props.target !== undefined) {
+                var Type = buildDetailsChoice[this.props.target.toLowerCase()];
+                optionTable = React.createElement(Type, {
+                    vBMBuild: this.props.vBMBuild,
+                    vBMPerYear: this.props.vBMPerYear,
+                    vBMNameplate: this.props.vBMNameplate,
+                    vBMArea: this.props.vBMArea,
+                    vBMPop: this.props.vBMPop,
+                    vBMExplCost: this.props.vBMExplCost,
+                    vBMCoolingWaterRate: this.props.vBMCoolingWaterRate,
+                    vBMStorageCapacity: this.props.vBMStorageCapacity,
+                    slider: this.props.sliderRadius,
+                    restyle: restyle,
+                    style: { bottom: 0, height: dockheight }
+                });
+            }
+
+            var hideDockButton = React.createElement(ShowDockButton, {
+                dockheight: dockheight,
+                showdock: showdock,
+                onClick: function onClick() {
+                    return _this2.setState({ showdock: !showdock });
+                }
+            });
+
+            return React.createElement(
+                "div",
+                { className: "yLayout" },
+                React.createElement(BuildMenu, {
+                    onClick: function onClick(type) {
+                        return _this2.props.buildMenuSelectionCallback(type);
+                    },
+                    style: { bottom: dockheight + 'px' },
+                    showMenu: this.props.target === undefined ? true : this.props.target
+                }),
+                false ? hideDockButton : "",
+                React.createElement(
+                    "div",
+                    { id: "dBuildDock", style: { height: dockheight + 'px' } },
+                    React.createElement(
+                        "div",
+                        { id: "buildMenuOptionTable" },
+                        showdock ? optionTable : ''
+                    )
+                )
+            );
+        }
+    }]);
+
+    return BuildDock;
+}(React.Component);
+
+///////////////////////////////////////////////////////////////////////////////
+////////////// fcts to Build the details about the future build  //////////////
+///////////////////////////////////////////////////////////////////////////////
+
+
+export default BuildDock;
 function BuildDetailLine(props) {
     return React.createElement(
         "tr",
@@ -39,6 +155,12 @@ function BuildDetailLine(props) {
     );
 }
 
+/**
+    function use to map [{n,cn},...]
+        where n === name
+              cn === className
+    to BuildDetailLine() which create 1 line (<tr>) of a table
+*/
 function mapLineFct(props) {
     return function (i) {
         return React.createElement(BuildDetailLine, {
@@ -57,7 +179,7 @@ function InputSlider(props) {
         id: "BMRange",
         defaultValue: props.slider.default,
         onChange: function onChange(event) {
-            return props.slider.radiusSliderChange(event.target.value);
+            return props.slider.sliderChange(event.target.value);
         },
         min: props.slider.min,
         max: props.slider.max
@@ -152,6 +274,9 @@ function BuildDetailsWind(props) {
     );
 }
 
+///////////////////////////////////////////////////////////////////////////////
+////// function building the left build Menu  (choose the building type) //////
+///////////////////////////////////////////////////////////////////////////////
 var lastSelected = undefined;
 var selecte = void 0;
 function BuildMenu(props) {
@@ -183,7 +308,8 @@ function BuildMenu(props) {
         })
     );
 }
-
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 function ShowDockButton(props) {
     return React.createElement("img", {
         src: 'res/icons/info.png',
@@ -196,96 +322,4 @@ function ShowDockButton(props) {
         key: "DockButton"
     });
 }
-
-var BuildDock = function (_React$Component) {
-    _inherits(BuildDock, _React$Component);
-
-    function BuildDock(props) {
-        _classCallCheck(this, BuildDock);
-
-        //props.Radius
-        var _this = _possibleConstructorReturn(this, (BuildDock.__proto__ || Object.getPrototypeOf(BuildDock)).call(this, props));
-
-        _this.state = {
-            showdock: true
-        };
-        return _this;
-    }
-
-    _createClass(BuildDock, [{
-        key: "render",
-        value: function render() {
-            var _this2 = this;
-
-            var showdock = this.props.target !== undefined; //this.state.showdock
-            var dockheight = showdock ? 200 : 32;
-            var defaultRadius = 50,
-                maxRadius = 100;
-
-            var restyle = {};
-            if (this.props.vBMTheoReason !== undefined) {
-                restyle[this.props.vBMTheoReason] = { "color": "red" };
-            }
-
-            var buildDetailsChoice = {
-                "pv": BuildDetailsSolar,
-                "nuke": BuildDetailsNuke,
-                "fusion": BuildDetailsNuke,
-                "battery": BuildDetailsBat,
-                "ccgt": BuildDetailsCcgt,
-                "wind": BuildDetailsWind
-            };
-            var optionTable = "";
-            if (this.props.target !== undefined) {
-                var Type = buildDetailsChoice[this.props.target.toLowerCase()];
-                optionTable = React.createElement(Type, {
-                    vBMBuild: this.props.vBMBuild,
-                    vBMPerYear: this.props.vBMPerYear,
-                    vBMNameplate: this.props.vBMNameplate,
-                    vBMArea: this.props.vBMArea,
-                    vBMPop: this.props.vBMPop,
-                    vBMExplCost: this.props.vBMExplCost,
-                    vBMCoolingWaterRate: this.props.vBMCoolingWaterRate,
-                    vBMStorageCapacity: this.props.vBMStorageCapacity,
-                    slider: this.props.sliderRadiusDefault,
-                    restyle: restyle,
-                    style: { bottom: 0, height: dockheight }
-                });
-            }
-
-            var hideDockButton = React.createElement(ShowDockButton, {
-                dockheight: dockheight,
-                showdock: showdock,
-                onClick: function onClick() {
-                    return _this2.setState({ showdock: !showdock });
-                }
-            });
-
-            return React.createElement(
-                "div",
-                { className: "yLayout" },
-                React.createElement(BuildMenu, {
-                    onClick: function onClick(type) {
-                        return _this2.props.buildMenuSelectionCallback(type);
-                    },
-                    style: { bottom: dockheight + 'px' },
-                    showMenu: this.props.target === undefined ? true : this.props.target
-                }),
-                false ? hideDockButton : "",
-                React.createElement(
-                    "div",
-                    { id: "dBuildDock", style: { height: dockheight + 'px' } },
-                    React.createElement(
-                        "div",
-                        { id: "buildMenuOptionTable" },
-                        showdock ? optionTable : ''
-                    )
-                )
-            );
-        }
-    }]);
-
-    return BuildDock;
-}(React.Component);
-
-export default BuildDock;
+///////////////////////////////////////////////////////////////////////////////

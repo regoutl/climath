@@ -8,6 +8,97 @@ function isMobile() {
 function isSmallScreen() {return window.innerHeight <= 760 || window.innerWidth <= 760}
 ////////
 
+///////////////////////////////////////////////////////////////////////////////
+// List props for this Component :
+//     buildMenuSelectionCallback = function setNewTarget(target)
+//     target = var currentTarget
+//     vBMTheoReason = var currentVBMTheoReason
+//     vBMBuild = var currentVBMBuild
+//     vBMPerYear = var currentVBMPerYear
+//     vBMNameplate = var currentVBMNameplate
+//     vBMArea = var currentVBMArea
+//     vBMPop = var currentVBMPop
+//     vBMExplCost = var currentVBMExplCost
+//     vBMCoolingWaterRate = var currentVBMCoolingWaterRate
+//     vBMStorageCapacity = var currentVBMStorageCapacity
+//     sliderRadius = {default:, min:, max:, sliderChange: r=>f(r)}
+///////////////////////////////////////////////////////////////////////////////
+// List possible target :
+//     ['pv', 'nuke', 'battery', 'ccgt', 'wind', 'fusion']
+///////////////////////////////////////////////////////////////////////////////
+export default class BuildDock extends React.Component{
+    constructor(props){
+        super(props);
+        //props.Radius
+        this.state = {
+            showdock: true,
+        };
+    }
+
+    render(){
+        let showdock = this.props.target !== undefined; //this.state.showdock
+        let dockheight = showdock ? 200:32;
+        const defaultRadius = 50, maxRadius = 100;
+
+        let restyle = {}
+        if(this.props.vBMTheoReason !== undefined){
+            restyle[this.props.vBMTheoReason] = {"color": "red"};
+        }
+
+        let buildDetailsChoice = {
+            "pv":BuildDetailsSolar,
+            "nuke":BuildDetailsNuke,
+            "fusion":BuildDetailsNuke,
+            "battery":BuildDetailsBat,
+            "ccgt":BuildDetailsCcgt,
+            "wind":BuildDetailsWind,
+        };
+        let optionTable = "";
+        if(this.props.target !== undefined){
+            let Type = buildDetailsChoice[this.props.target.toLowerCase()];
+            optionTable = (<Type
+                vBMBuild = {this.props.vBMBuild}
+                vBMPerYear = {this.props.vBMPerYear}
+                vBMNameplate = {this.props.vBMNameplate}
+                vBMArea = {this.props.vBMArea}
+                vBMPop = {this.props.vBMPop}
+                vBMExplCost = {this.props.vBMExplCost}
+                vBMCoolingWaterRate = {this.props.vBMCoolingWaterRate}
+                vBMStorageCapacity = {this.props.vBMStorageCapacity}
+                slider = {this.props.sliderRadius}
+                restyle = {restyle}
+                style = {{bottom: 0, height: dockheight,}}
+            />)
+        }
+
+        let hideDockButton = (<ShowDockButton
+                            dockheight = {dockheight}
+                            showdock = {showdock}
+                            onClick = {() => this.setState({showdock: !showdock})}
+                        />);
+
+
+        return (
+        <div className = "yLayout">
+            <BuildMenu
+                onClick = {type => this.props.buildMenuSelectionCallback(type)}
+                style = {{bottom: dockheight+'px'}}
+                showMenu = {this.props.target === undefined ?
+                                                true : this.props.target}
+            />
+                {false?hideDockButton:""}
+            <div id = "dBuildDock" style = {{height: dockheight+'px'}}>
+                <div id = "buildMenuOptionTable">
+                    {showdock?optionTable:''}
+                </div>
+            </div>
+        </div>);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+////////////// fcts to Build the details about the future build  //////////////
+///////////////////////////////////////////////////////////////////////////////
 function BuildDetailLine(props){
     return (<tr style = {props.style}>
         <th>{tr(props.name)} :</th>
@@ -15,6 +106,12 @@ function BuildDetailLine(props){
     </tr>)
 }
 
+/**
+    function use to map [{n,cn},...]
+        where n === name
+              cn === className
+    to BuildDetailLine() which create 1 line (<tr>) of a table
+*/
 function mapLineFct(props){
     return i =>
     (<BuildDetailLine
@@ -32,7 +129,7 @@ function InputSlider(props){
         id = 'BMRange'
         defaultValue = {props.slider.default}
         onChange = {(event) =>
-                    props.slider.radiusSliderChange(event.target.value)}
+                    props.slider.sliderChange(event.target.value)}
         min = {props.slider.min}
         max = {props.slider.max}
     />);
@@ -122,6 +219,9 @@ function BuildDetailsWind(props){
     </div>);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+////// function building the left build Menu  (choose the building type) //////
+///////////////////////////////////////////////////////////////////////////////
 let lastSelected = undefined;
 let selecte;
 function BuildMenu(props){
@@ -155,7 +255,8 @@ function BuildMenu(props){
             />) : '' )}
     </div>);
 }
-
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 function ShowDockButton(props){
     return (<img
         src = {'res/icons/info.png'}
@@ -166,73 +267,4 @@ function ShowDockButton(props){
         key = "DockButton"
     />)
 }
-
-export default class BuildDock extends React.Component{
-    constructor(props){
-        super(props);
-        //props.Radius
-        this.state = {
-            showdock: true,
-        };
-    }
-
-    render(){
-        let showdock = this.props.target !== undefined; //this.state.showdock
-        let dockheight = showdock ? 200:32;
-        const defaultRadius = 50, maxRadius = 100;
-
-        let restyle = {}
-        if(this.props.vBMTheoReason !== undefined){
-            restyle[this.props.vBMTheoReason] = {"color": "red"};
-        }
-
-        let buildDetailsChoice = {
-            "pv":BuildDetailsSolar,
-            "nuke":BuildDetailsNuke,
-            "fusion":BuildDetailsNuke,
-            "battery":BuildDetailsBat,
-            "ccgt":BuildDetailsCcgt,
-            "wind":BuildDetailsWind,
-        };
-        let optionTable = "";
-        if(this.props.target !== undefined){
-            let Type = buildDetailsChoice[this.props.target.toLowerCase()];
-            optionTable = (<Type
-                vBMBuild = {this.props.vBMBuild}
-                vBMPerYear = {this.props.vBMPerYear}
-                vBMNameplate = {this.props.vBMNameplate}
-                vBMArea = {this.props.vBMArea}
-                vBMPop = {this.props.vBMPop}
-                vBMExplCost = {this.props.vBMExplCost}
-                vBMCoolingWaterRate = {this.props.vBMCoolingWaterRate}
-                vBMStorageCapacity = {this.props.vBMStorageCapacity}
-                slider = {this.props.sliderRadiusDefault}
-                restyle = {restyle}
-                style = {{bottom: 0, height: dockheight,}}
-            />)
-        }
-
-        let hideDockButton = (<ShowDockButton
-                            dockheight = {dockheight}
-                            showdock = {showdock}
-                            onClick = {() => this.setState({showdock: !showdock})}
-                        />);
-
-
-        return (
-        <div className = "yLayout">
-            <BuildMenu
-                onClick = {type => this.props.buildMenuSelectionCallback(type)}
-                style = {{bottom: dockheight+'px'}}
-                showMenu = {this.props.target === undefined ?
-                                                true : this.props.target}
-            />
-                {false?hideDockButton:""}
-            <div id = "dBuildDock" style = {{height: dockheight+'px'}}>
-                <div id = "buildMenuOptionTable">
-                    {showdock?optionTable:''}
-                </div>
-            </div>
-        </div>);
-    }
-}
+///////////////////////////////////////////////////////////////////////////////

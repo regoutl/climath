@@ -28,7 +28,7 @@ export default class MainWin extends React.Component{
         };
 
         this.slider = {default: 50, min: 0, max: 100,
-            radiusSliderChange: (r) => this.setTargetBuildLoc({radius: r})};
+            sliderChange: (r) => this.setTargetBuildLoc({radius: r})};
         let mainWin = this;
 
     	/// set of small functions that update screen text when some values changes
@@ -66,17 +66,28 @@ export default class MainWin extends React.Component{
         });
     }
 
+    /**
+     never used ?
+    */
     onPositionChange(position){
         this.simu.onBuildMenuStateChanged(this.state.targetBuild,
                                     position, this.state.targetBuild.radius);
     }
 
+    /** callback
+        set the current target build
+        target is a string as specified in builddock.js
+    */
     setTargetBuild(target){
         this.setState({
             'targetBuild':{"type": target},
             'targetBuildLoc':{radius: this.slider.default},
         });
     }
+
+    /** callback
+        set the current location of the cursor as {pos:{x:,y:}, radius:}
+    */
     setTargetBuildLoc({pos=this.state.targetBuildLoc.pos,
                                     radius=this.state.targetBuildLoc.radius}){
         this.setState({
@@ -113,7 +124,7 @@ export default class MainWin extends React.Component{
             vBMExplCost = {this.state.vBMExplCost}
             vBMCoolingWaterRate = {this.state.vBMCoolingWaterRate}
             vBMStorageCapacity = {this.state.vBMStorageCapacity}
-            sliderRadiusDefault = {this.slider}
+            sliderRadius = {this.slider}
         />
          </div>);
     }
