@@ -291,11 +291,12 @@ function BuildMenu(props) {
             return props.onClick(lastSelected);
         };
     }
+
     return React.createElement(
         "div",
         { id: "BuildMenu", className: "vLayout", style: props.style },
-        [{ name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }].map(function (nrj) {
-            return props.showMenu === true || props.showMenu === nrj.target ? React.createElement("img", {
+        [{ name: 'Go back', src: 'back.png', target: undefined }, { name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }].map(function (nrj) {
+            return (props.showMenu === true ? nrj.target !== undefined : props.showMenu === nrj.target || nrj.target === undefined) ? React.createElement("img", {
                 src: 'res/icons/' + nrj.src,
                 className: "bBuild",
                 title: tr(nrj.name),
