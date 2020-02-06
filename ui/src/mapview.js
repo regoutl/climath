@@ -303,7 +303,6 @@ export default class MapView extends React.Component{
         // if(e.target != this.refs.mapCanvas)
         //     return;
 
-
         if(this.isMouseDown){
 
             this.transform.x += (e.pageX - this.physMousePos.x) / this.transform.scale;
@@ -319,8 +318,8 @@ export default class MapView extends React.Component{
             let rawPos = {x:e.pageX, y : e.pageY};
 
             let transformedPos = {
-                x: (rawPos.x / this.transform.scale) - this.transform.x,
-                y: (rawPos.y / this.transform.scale) - this.transform.y,
+                x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
+                y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
             };
 
             this.props.mousemove(transformedPos);

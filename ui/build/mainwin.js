@@ -107,15 +107,19 @@ var MainWin = function (_React$Component) {
                 _ref$radius = _ref.radius,
                 radius = _ref$radius === undefined ? this.state.targetBuildLoc.radius : _ref$radius;
 
+            // console.log(pos.x, pos.y, radius);
+            // console.log('yo');
             var targetBuildLoc = {
                 pos: pos,
                 radius: radius
             },
                 vBMArea = undefined;
 
-            if (this.state.targetBuild.type !== undefined && targetBuildLoc.pos !== undefined) {
-                var build = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild, this.state.targetBuildLoc.pos, this.state.targetBuildLoc.radius);
+            if (this.state.targetBuild.type !== undefined) {
+                //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
+                var build = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild, targetBuildLoc.pos, targetBuildLoc.radius);
                 vBMArea = build.info !== undefined ? build.info.area : undefined;
+                // console.log(build.info.area);
             }
 
             this.setState({ targetBuildLoc: targetBuildLoc, vBMArea: vBMArea });

@@ -326,7 +326,6 @@ var MapView = function (_React$Component) {
             // if(e.target != this.refs.mapCanvas)
             //     return;
 
-
             if (this.isMouseDown) {
 
                 this.transform.x += (e.pageX - this.physMousePos.x) / this.transform.scale;
@@ -340,8 +339,8 @@ var MapView = function (_React$Component) {
                 var rawPos = { x: e.pageX, y: e.pageY };
 
                 var transformedPos = {
-                    x: rawPos.x / this.transform.scale - this.transform.x,
-                    y: rawPos.y / this.transform.scale - this.transform.y
+                    x: Math.round(rawPos.x / this.transform.scale - this.transform.x),
+                    y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
                 };
 
                 this.props.mousemove(transformedPos);
