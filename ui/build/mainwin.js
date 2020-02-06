@@ -25,15 +25,18 @@ var MainWin = function (_React$Component) {
             simu: null,
             targetBuild: {},
             targetBuildLoc: {},
-            vBMTheoReason: "",
-            vBMBuild: "",
-            vBMPerYear: "",
-            vBMNameplate: "",
-            vBMArea: "",
-            vBMPop: "",
-            vBMExplCost: "",
-            vBMCoolingWaterRate: "",
-            vBMStorageCapacity: "",
+            bm: {
+                theoReason: "",
+                buildCost: 0,
+                buildCo2: 0,
+                perYearCost: 0,
+                perYearCo2: 0,
+                nameplate: 0,
+                pop: 0,
+                explCost: 0,
+                coolingWaterRate: 0,
+                storageCapacity: 0
+            },
             money: 0,
             date: 2019
         };
@@ -113,16 +116,46 @@ var MainWin = function (_React$Component) {
                 pos: pos,
                 radius: radius
             },
-                vBMArea = undefined;
+                vBMArea = "",
+                vBMBuildCost = 0;
 
             if (this.state.targetBuild.type !== undefined) {
                 //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
-                var build = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild, targetBuildLoc.pos, targetBuildLoc.radius);
-                vBMArea = build.info !== undefined ? build.info.area : undefined;
-                // console.log(build.info.area);
-            }
+                var info = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild, targetBuildLoc.pos, targetBuildLoc.radius).info;
 
-            this.setState({ targetBuildLoc: targetBuildLoc, vBMArea: vBMArea });
+                var avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
+
+                this.setState({
+                    targetBuildLoc: targetBuildLoc,
+                    bm: {
+                        theoReason: info.theorical,
+                        buildCost: info.build.cost,
+                        buildCo2: info.build.co2,
+                        perYearCost: info.perYear.cost + info.perWh.cost * avgProd,
+                        perYearCo2: info.perYear.co2 + info.perWh.co2 * avgProd,
+                        avgProd: avgProd,
+                        pop: info.pop_affected,
+                        explCost: info.expl_cost,
+                        coolingWaterRate: info.coolingWaterRate,
+                        storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
+                    } });
+            } else {
+                this.setState({
+                    targetBuildLoc: targetBuildLoc,
+                    bm: {
+                        theoReason: undefined,
+                        buildCost: 0,
+                        buildCo2: 0,
+                        perYearCost: 0,
+                        perYearCo2: 0,
+                        nameplate: 0,
+                        pop: 0,
+                        explCost: 0,
+                        coolingWaterRate: 0,
+                        storageCapacity: 0
+                    }
+                });
+            }
         }
     }, {
         key: 'render',
@@ -153,15 +186,7 @@ var MainWin = function (_React$Component) {
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
                     target: this.state.targetBuild.type,
-                    vBMTheoReason: this.state.vBMTheoReason,
-                    vBMBuild: this.state.vBMBuild,
-                    vBMPerYear: this.state.vBMPerYear,
-                    vBMNameplate: this.state.vBMNameplate,
-                    vBMArea: this.state.vBMArea,
-                    vBMPop: this.state.vBMPop,
-                    vBMExplCost: this.state.vBMExplCost,
-                    vBMCoolingWaterRate: this.state.vBMCoolingWaterRate,
-                    vBMStorageCapacity: this.state.vBMStorageCapacity,
+                    info: this.state.bm,
                     sliderRadius: this.slider
                 })
             );

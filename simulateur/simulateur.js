@@ -92,7 +92,18 @@ export class Simulateur{
         this._currentBuild.parameters = buildMenuState;
         this._currentBuild.area =  {center:curPos, radius:radius};
 
-        this._currentBuild.info = {type: buildMenuState.type, build:{begin: this.year}};
+        this._currentBuild.info = {
+            type: buildMenuState.type,
+            build:{begin: this.year},
+            perWh:{
+                cost: 0,
+                co2: 0
+            },
+            perYear:{
+                cost: 0,
+                co2: 0
+            }
+        };
 
         this._c(buildMenuState.type).prepareCapex(this._currentBuild);
 

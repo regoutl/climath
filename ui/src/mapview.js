@@ -6,11 +6,14 @@ function isCentral(type){
     return type == 'nuke' || type == 'ccgt' || type == 'fusion';
 }
 
+/* IMPORTANT : should never be re-mounted. (big perf cost + useless)
+*/
 export default class MapView extends React.Component{
 
     /* accepted props :
     mousemove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
     click : function(curPos)        -> called on click
+
     */
     constructor(props){
         //react

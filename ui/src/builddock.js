@@ -1,4 +1,5 @@
 import {tr} from "../../tr/tr.js";
+import { quantityToHuman as valStr} from '../quantitytohuman.js';
 
 ////////Nothing to do in here
 function isTouchScreen() { return ('ontouchstart' in document.documentElement); }
@@ -9,19 +10,23 @@ function isSmallScreen() {return window.innerHeight <= 760 || window.innerWidth 
 ////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// List props for this Component :
-//     buildMenuSelectionCallback = function setNewTarget(target)
-//     target = var currentTarget
-//     vBMTheoReason = var currentVBMTheoReason
-//     vBMBuild = var currentVBMBuild
-//     vBMPerYear = var currentVBMPerYear
-//     vBMNameplate = var currentVBMNameplate
-//     vBMArea = var currentVBMArea
-//     vBMPop = var currentVBMPop
-//     vBMExplCost = var currentVBMExplCost
-//     vBMCoolingWaterRate = var currentVBMCoolingWaterRate
-//     vBMStorageCapacity = var currentVBMStorageCapacity
-//     sliderRadius = {default:, min:, max:, sliderChange: r=>f(r)}
+    // List props for this Component :
+    // buildMenuSelectionCallback = function setNewTarget(target)
+    // target = var currentTarget
+    // info{
+    //     theoReason: "",
+    //     buildCost: 0,
+    //     buildCo2: 0,
+    //     perYearCost: 0,
+    //     perYearCo2: 0,
+    //     nameplate: 0,
+    //     pop: 0,
+    //     explCost: 0,
+    //     coolingWaterRate: 0,
+    //     storageCapacity: 0,
+    //
+    // }
+    // sliderRadius = {default:, min:, max:, sliderChange: r=>f(r)}
 ///////////////////////////////////////////////////////////////////////////////
 // List possible target :
 //     ['pv', 'nuke', 'battery', 'ccgt', 'wind', 'fusion']
@@ -41,33 +46,27 @@ export default class BuildDock extends React.Component{
         const defaultRadius = 50, maxRadius = 100;
 
         let restyle = {}
-        if(this.props.vBMTheoReason !== undefined){
-            restyle[this.props.vBMTheoReason] = {"color": "red"};
+        if(this.props.info.theoReason !== undefined){
+            restyle[this.props.info.theoReason] = {"color": "red"};
         }
 
-        let buildDetailsChoice = {
-            "pv":BuildDetailsSolar,
-            "nuke":BuildDetailsNuke,
-            "fusion":BuildDetailsNuke,
-            "battery":BuildDetailsBat,
-            "ccgt":BuildDetailsCcgt,
-            "wind":BuildDetailsWind,
+        let needSlider = {
+            "pv":true,
+            "nuke":false,
+            "fusion":false,
+            "battery":true,
+            "ccgt":false,
+            "wind":true,
         };
         let optionTable = "";
         if(this.props.target !== undefined){
-            let Type = buildDetailsChoice[this.props.target.toLowerCase()];
-            optionTable = (<Type
-                vBMBuild = {this.props.vBMBuild}
-                vBMPerYear = {this.props.vBMPerYear}
-                vBMNameplate = {this.props.vBMNameplate}
-                vBMArea = {this.props.vBMArea}
-                vBMPop = {this.props.vBMPop}
-                vBMExplCost = {this.props.vBMExplCost}
-                vBMCoolingWaterRate = {this.props.vBMCoolingWaterRate}
-                vBMStorageCapacity = {this.props.vBMStorageCapacity}
+            // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
+            optionTable = (<BuildDetailsAny
+                info = {this.props.info}
                 slider = {this.props.sliderRadius}
                 restyle = {restyle}
                 style = {{bottom: 0, height: dockheight,}}
+                needsSlider= {needSlider[this.props.target.toLowerCase()]}
             />)
         }
 
@@ -102,7 +101,7 @@ export default class BuildDock extends React.Component{
 function BuildDetailLine(props){
     return (<tr style = {props.style}>
         <th>{tr(props.name)} :</th>
-        <td className = {props.className} key = {props.name}>{props.value}</td>
+        <td className = {props.className} key = {props.name}>{valStr(props.value, props.unit)}</td>
     </tr>)
 }
 
@@ -113,14 +112,20 @@ function BuildDetailLine(props){
     to BuildDetailLine() which create 1 line (<tr>) of a table
 */
 function mapLineFct(props){
-    return i =>
-    (<BuildDetailLine
-        name = {i.n}
-        className = {i.cn}
-        value = {props[i.cn]}
-        style = {props.restyle[i.cn] === undefined ? {}:props.restyle[i.cn]}
-        key = {i.n}
-    />)
+
+    return i => {
+        //skip the non numerical properties, or the 0
+        if(props.info[i.cn] == 0 || Number.isNaN(props.info[i.cn]) || props.info[i.cn] === undefined)
+            return null;
+
+        return (<BuildDetailLine
+            name = {i.n}
+            className = {i.cn}
+            value = {props.info[i.cn]}
+            style = {props.restyle[i.cn] === undefined ? {}:props.restyle[i.cn]}
+            key = {i.n}
+            unit={i.unit}
+        />)}
 }
 
 function InputSlider(props){
@@ -135,89 +140,115 @@ function InputSlider(props){
     />);
 }
 
-function BuildDetailsSolar(props){
+
+function BuildDetailsAny(props){
     let show = [
-        {"n":"Installation",    "cn":"vBMBuild",},
-        {"n":"Per year",        "cn":"vBMPerYear",},
-        {"n":"Production",      "cn":"vBMNameplate",},
-        {"n":"Aire",            "cn":"vBMArea",},
+        {"n":"Installation cost",   "cn":"buildCost",       "unit":"€"},
+        {"n":"Installation co2",    "cn":"buildCo2",        "unit":"C"},
+        {"n":"Per year cost",       "cn":"perYearCost",     "unit":"€"},
+        {"n":"Per year co2",        "cn":"perYearCo2",      "unit":"C"},
+        {"n":"Production",          "cn":"avgProd",         "unit":"W"},
+        {"n":"Population",          "cn":"pop",             "unit":"H"},
+        {"n":"Explosion cost",      "cn":"explCost",        "unit":"€"},
+        {"n":"Cooling",             "cn":"coolingWaterRate","unit":"m3/s"},
+        {"n":"Storage capacity",    "cn":"storageCapacity", "unit":"S",},
     ];
+
     return (<div id = "dBuildDetails" style = {props.style}>
         <table>
             <tbody>
                 {show.map(mapLineFct(props))}
             </tbody>
         </table>
-        <InputSlider slider = {props.slider}/>
+        {props.needsSlider &&  <InputSlider slider = {props.slider}/>}
     </div>);
 }
 
-function BuildDetailsNuke(props){
-    let show = [
-        {"n":"Installation",    "cn":"vBMBuild",},
-        {"n":"Per year",      "cn":"vBMPerYear",},
-        {"n":"Production",      "cn":"vBMNameplate",},
-        {"n":"Population",      "cn":"vBMPop",},
-        {"n":"Explosion cost",  "cn":"vBMExplCost",},
-        {"n":"Cooling",         "cn":"vBMCoolingWaterRate",},
-    ];
-    return (<div id = "dBuildDetails" style = {props.style}>
-        <table>
-            <tbody>
-                {show.map(mapLineFct(props))}
-            </tbody>
-        </table>
-    </div>);
-}
+// function BuildDetailsSolar(props){
+//     let show = [
+//         {"n":"Installation cost",    "cn":"buildCost",        "unit":"€"},
+//         {"n":"Installation co2",    "cn":"buildCo2",        "unit":"C"},
+//         {"n":"Per year cost",        "cn":"perYearCost",          "unit":"€"},
+//         {"n":"Per year co2",        "cn":"perYearCo2",          "unit":"C"},
+//         {"n":"Production",          "cn":"avgProd",        "unit":"W"},
+//     ];
+//
+//     return (<div id = "dBuildDetails" style = {props.style}>
+//         <table>
+//             <tbody>
+//                 {show.map(mapLineFct(props))}
+//             </tbody>
+//         </table>
+//         <InputSlider slider = {props.slider}/>
+//     </div>);
+// }
 
-function BuildDetailsBat(props){
-    let show = [
-        {"n":"Installation",    "cn":"vBMBuild",},
-        {"n":"Per year",      "cn":"vBMPerYear",},
-        {"n":"Capacity",        "cn":"vBMStorageCapacity",},
-    ];
-    return (<div id = "dBuildDetails" style = {props.style}>
-        <table>
-            <tbody>
-                {show.map(mapLineFct(props))}
-            </tbody>
-        </table>
-        <InputSlider slider = {props.slider}/>
-    </div>);
-}
+// function BuildDetailsNuke(props){
+//     let show = [
+//         {"n":"Installation",    "cn":"build",},
+//         {"n":"Per year",      "cn":"perYear",},
+//         {"n":"Production",      "cn":"nameplate",},
+//         {"n":"Population",      "cn":"pop",},
+//         {"n":"Explosion cost",  "cn":"explCost",},
+//         {"n":"Cooling",         "cn":"coolingWaterRate",},
+//     ];
+//     return (<div id = "dBuildDetails" style = {props.style}>
+//         <table>
+//             <tbody>
+//                 {show.map(mapLineFct(props))}
+//             </tbody>
+//         </table>
+//     </div>);
+// }
 
-function BuildDetailsCcgt(props){
-    let show = [
-        {"n":"Installation",    "cn":"vBMBuild",},
-        {"n":"Per year",      "cn":"vBMPerYear",},
-        {"n":"Production",      "cn":"vBMNameplate",},
-        {"n":"Population",      "cn":"vBMPop",},
-        {"n":"Cooling",         "cn":"vBMCoolingWaterRate",},
-    ];
-    return (<div id = "dBuildDetails" style = {props.style}>
-        <table>
-            <tbody>
-                {show.map(mapLineFct(props))}
-            </tbody>
-        </table>
-    </div>);
-}
+// function BuildDetailsBat(props){
+//     let show = [
+//         {"n":"Installation",    "cn":"build",},
+//         {"n":"Per year",      "cn":"perYear",},
+//         {"n":"Capacity",        "cn":"storageCapacity",},
+//     ];
+//     return (<div id = "dBuildDetails" style = {props.style}>
+//         <table>
+//             <tbody>
+//                 {show.map(mapLineFct(props))}
+//             </tbody>
+//         </table>
+//         <InputSlider slider = {props.slider}/>
+//     </div>);
+// }
 
-function BuildDetailsWind(props){
-    let show = [
-        {"n":"Installation",    "cn":"vBMBuild",},
-        {"n":"Per year",      "cn":"vBMPerYear",},
-        {"n":"Production",      "cn":"vBMNameplate",},
-    ];
-    return (<div id = "dBuildDetails" style = {props.style}>
-        <table>
-            <tbody>
-                {show.map(mapLineFct(props))}
-            </tbody>
-        </table>
-        <InputSlider slider = {props.slider}/>
-    </div>);
-}
+// function BuildDetailsCcgt(props){
+//     let show = [
+//         {"n":"Installation",    "cn":"build",},
+//         {"n":"Per year",      "cn":"perYear",},
+//         {"n":"Production",      "cn":"nameplate",},
+//         {"n":"Population",      "cn":"pop",},
+//         {"n":"Cooling",         "cn":"coolingWaterRate",},
+//     ];
+//     return (<div id = "dBuildDetails" style = {props.style}>
+//         <table>
+//             <tbody>
+//                 {show.map(mapLineFct(props))}
+//             </tbody>
+//         </table>
+//     </div>);
+// }
+
+// function BuildDetailsWind(props){
+//     let show = [
+//         {"n":"Installation",    "cn":"build",},
+//         {"n":"Per year",      "cn":"perYear",},
+//         {"n":"Production",      "cn":"nameplate",},
+//     ];
+//     return (<div id = "dBuildDetails" style = {props.style}>
+//         <table>
+//             <tbody>
+//                 {show.map(mapLineFct(props))}
+//             </tbody>
+//         </table>
+//         <InputSlider slider = {props.slider}/>
+//     </div>);
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ////// function building the left build Menu  (choose the building type) //////
