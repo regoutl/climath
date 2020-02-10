@@ -128,7 +128,7 @@ export default class MapComponent{
     @warning this function modifies 'fields' and 'conditions'
     */
     reduceIf(fields, area, conditions){
-        if(area.center == undefined || !this._areaIntersectWithCountry(area)){
+        if(/*area.center == undefined ||*/ !this._areaIntersectWithCountry(area)){
             return this._theoricReduce(fields, area, conditions);
         }
 
@@ -186,6 +186,7 @@ export default class MapComponent{
             maxX: Math.min(x+radius, 1374)             -x,
             maxY: Math.min(y+radius, 1183)             -y,
         };
+        // console.log(x, y, radius, box);
 
         for(let i = box.minX; i < box.maxX; i++){
             const i2 = i*i;

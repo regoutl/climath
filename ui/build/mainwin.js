@@ -43,7 +43,7 @@ var MainWin = function (_React$Component) {
 
         _this.slider = { default: 50, min: 1, max: 100,
             sliderChange: function sliderChange(r) {
-                return _this.setTargetBuildLoc({ radius: r });
+                return _this.setTargetBuildLoc({ radius: Number(r) });
             } };
         var mainWin = _this;
 

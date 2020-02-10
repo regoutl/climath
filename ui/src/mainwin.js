@@ -34,7 +34,7 @@ export default class MainWin extends React.Component{
 
 
         this.slider = {default: 50, min: 1, max: 100,
-            sliderChange: (r) => this.setTargetBuildLoc({radius: r})};
+            sliderChange: (r) => this.setTargetBuildLoc({radius: Number(r)})};
         let mainWin = this;
 
     	/// set of small functions that update screen text when some values changes
