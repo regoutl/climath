@@ -26,7 +26,7 @@ store general values
 */
 export class Simulateur{
     constructor(createInfo, valChangedCallbacks){
-        this.cMap = new MapComponent(createInfo.map, this);
+        this.cMap = new MapComponent(createInfo.map, this, createInfo.mapView);
         this.cHydro = new HydroComponent(createInfo.hydro);
         this.cProd = new ProductionComponent(createInfo.production, this);
         this.cScheduler = new BuildScheduler();
@@ -130,6 +130,8 @@ export class Simulateur{
 
     //called on click on the map
     confirmCurrentBuild(){
+        /// STEP 1 : check the build is valid-----------------------------------
+
         // only build in present
         if(this._currentBuild === undefined){
             return;
@@ -143,13 +145,17 @@ export class Simulateur{
           return false;
         }
 
+
+        /// do the build-----------------------------------
+
+        //schedule an event to execute on completion
         this.cScheduler.push({
             year: this._currentBuild.info.build.end,
             action: 'build',
             data: this._currentBuild
         });
-        // this.cProd.execute(this._currentBuild);
 
+        //draw it
         this.cMap.build(this._currentBuild);
 
         //record some stats
@@ -214,6 +220,14 @@ export class Simulateur{
         // ans.push(countries.usa.elecFootprint);
 
         return ans;
+    }
+
+    //return current year gdp of current region
+    get gdp(){
+        let yStats = this.yStats;
+
+        return this.cProd.countries.belgium.pop.at(yStats.year)
+                * this.cProd.countries.belgium.gdpPerCap.at(yStats.year);
     }
 
     /**
@@ -368,10 +382,11 @@ export class Simulateur{
 
 
 
-
-/// load all data needed for a simulater &
-/// return a promise when its ready
-export function promiseSimulater(valChangedCallbacks){
+/** @brief load all data needed for a simulater
+@param mapView is as defined in MapComponent's constructor
+@return a promise that is resolved when ready.
+**/
+export function promiseSimulater(valChangedCallbacks, mapView){
   return Promise.all([
     fetch('res/parameters.json')
         .then((response) => response.json()),
@@ -402,6 +417,7 @@ export function promiseSimulater(valChangedCallbacks){
             windPowDens:{at50:new Uint8Array(values[6])},
             pools: new Uint8Array(values[4]),
         };
+        simuCreateInfo.mapView = mapView;
 
         simuCreateInfo.hydro = {
             stations: new Float32Array(values[2]),
