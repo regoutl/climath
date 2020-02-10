@@ -11,6 +11,8 @@ import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
 
+import Scene from '../scene.js';
+
 import { Simulateur, promiseSimulater, objSum } from '../../simulateur/simulateur.js';
 
 var MainWin = function (_React$Component) {
@@ -19,12 +21,11 @@ var MainWin = function (_React$Component) {
     function MainWin(props) {
         _classCallCheck(this, MainWin);
 
+        //those are no state bc their draw is not related to a DOM change
         var _this = _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).call(this, props));
 
-        _this.state = {
-            simu: null,
-            targetBuild: {},
-            targetBuildLoc: { pos: { x: 0, y: 0 }, radius: 0 },
+        _this.simu = null;
+        _this.targetBuild = {}, _this.targetBuildLoc = { pos: { x: 0, y: 0 }, radius: 0 }, _this.state = {
             currentBuildInfo: {
                 theoReason: "",
                 buildCost: 0,
@@ -75,8 +76,14 @@ var MainWin = function (_React$Component) {
             }
         };
 
-        promiseSimulater(valChangedCallbacks).then(function (s) {
-            _this.setState({ simu: s });
+        _this.scene = new Scene();
+
+        promiseSimulater(valChangedCallbacks, _this.scene).then(function (s) {
+            _this.scene.setMap(s.cMap);
+
+            _this.simu = s;
+
+            _this.forceUpdate();
         }).catch(function (err) {
             alert(err);
         });
@@ -92,56 +99,12 @@ var MainWin = function (_React$Component) {
     _createClass(MainWin, [{
         key: 'setTargetBuild',
         value: function setTargetBuild(target) {
-            this.setState({
-                'targetBuild': { "type": target },
-                'targetBuildLoc': { pos: { x: 0, y: 0 }, radius: this.slider.default }
-            });
-        }
+            if (target === undefined && this.targetBuild.type !== undefined) {
+                //we just cleaered the cursor
+                // this.targetBuildLoc = targetBuildLoc;
 
-        /** callback
-            set the current location of the cursor as {pos:{x:,y:}, radius:}
-        */
-
-    }, {
-        key: 'setTargetBuildLoc',
-        value: function setTargetBuildLoc(_ref) {
-            var _ref$pos = _ref.pos,
-                pos = _ref$pos === undefined ? this.state.targetBuildLoc.pos : _ref$pos,
-                _ref$radius = _ref.radius,
-                radius = _ref$radius === undefined ? this.state.targetBuildLoc.radius : _ref$radius;
-
-            // console.log(pos.x, pos.y, radius);
-            // console.log('yo');
-            var targetBuildLoc = {
-                pos: pos,
-                radius: radius
-            },
-                vBMArea = "",
-                vBMBuildCost = 0;
-
-            if (this.state.targetBuild.type !== undefined) {
-                //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
-                var info = this.state.simu.onBuildMenuStateChanged(this.state.targetBuild, targetBuildLoc.pos, targetBuildLoc.radius).info;
-
-                var avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
-
+                this.scene.cursor.type = undefined;
                 this.setState({
-                    targetBuildLoc: targetBuildLoc,
-                    currentBuildInfo: {
-                        theoReason: info.theorical,
-                        buildCost: info.build.cost,
-                        buildCo2: info.build.co2,
-                        perYearCost: info.perYear.cost + info.perWh.cost * avgProd,
-                        perYearCo2: info.perYear.co2 + info.perWh.co2 * avgProd,
-                        avgProd: avgProd,
-                        pop: info.pop_affected,
-                        explCost: info.expl_cost,
-                        coolingWaterRate: info.coolingWaterRate,
-                        storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
-                    } });
-            } else {
-                this.setState({
-                    targetBuildLoc: targetBuildLoc,
                     currentBuildInfo: {
                         theoReason: undefined,
                         buildCost: 0,
@@ -156,13 +119,66 @@ var MainWin = function (_React$Component) {
                     }
                 });
             }
+
+            this.targetBuild.type = target;
+            this.targetBuildLoc = { pos: { x: 0, y: 0 }, radius: this.slider.default };
+        }
+
+        /** callback
+            set the current location of the cursor as {pos:{x:,y:}, radius:}
+        */
+
+    }, {
+        key: 'setTargetBuildLoc',
+        value: function setTargetBuildLoc(_ref) {
+            var _ref$pos = _ref.pos,
+                pos = _ref$pos === undefined ? this.targetBuildLoc.pos : _ref$pos,
+                _ref$radius = _ref.radius,
+                radius = _ref$radius === undefined ? this.targetBuildLoc.radius : _ref$radius;
+
+
+            var targetBuildLoc = {
+                pos: pos,
+                radius: radius
+            },
+                vBMArea = "",
+                vBMBuildCost = 0;
+
+            if (this.targetBuild.type !== undefined) {
+                //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
+                var info = this.simu.onBuildMenuStateChanged(this.targetBuild, targetBuildLoc.pos, targetBuildLoc.radius).info;
+
+                var avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
+
+                this.targetBuildLoc = targetBuildLoc;
+
+                this.scene.cursor = {
+                    type: this.targetBuild.type,
+                    radius: this.targetBuildLoc.radius,
+                    pos: this.targetBuildLoc.pos
+                };
+
+                this.setState({
+                    currentBuildInfo: {
+                        theoReason: info.theorical,
+                        buildCost: info.build.cost,
+                        buildCo2: info.build.co2,
+                        perYearCost: info.perYear.cost + info.perWh.cost * avgProd,
+                        perYearCo2: info.perYear.co2 + info.perWh.co2 * avgProd,
+                        avgProd: avgProd,
+                        pop: info.pop_affected,
+                        explCost: info.expl_cost,
+                        coolingWaterRate: info.coolingWaterRate,
+                        storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
+                    } });
+            }
         }
     }, {
         key: 'render',
         value: function render() {
             var _this2 = this;
 
-            if (this.state.simu === null) {
+            if (this.simu === null) {
                 return React.createElement(
                     'p',
                     null,
@@ -178,22 +194,17 @@ var MainWin = function (_React$Component) {
                     Money: this.state.money
                 }),
                 React.createElement(MapView, {
-                    cMap: this.state.simu.cMap,
+                    scene: this.scene,
                     onMouseMove: function onMouseMove(curPos) {
                         return _this2.setTargetBuildLoc({ pos: curPos });
                     },
-                    cursor: {
-                        type: this.state.targetBuild.type,
-                        radius: this.state.targetBuildLoc.radius,
-                        pos: this.state.targetBuildLoc.pos
-                    },
                     onClick: function onClick(curPos) {
-                        return _this2.state.simu.confirmCurrentBuild();
+                        return _this2.simu.confirmCurrentBuild();
                     }
                 }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
-                    target: this.state.targetBuild.type,
+                    target: this.targetBuild.type,
                     info: this.state.currentBuildInfo,
                     sliderRadius: this.slider
                 })

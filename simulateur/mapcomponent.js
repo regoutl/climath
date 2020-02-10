@@ -60,7 +60,16 @@ const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
 
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
-    constructor(mapImgs, simu){
+
+    /** @brief
+    @param view, is the map view, must implement the functions
+        - addItem(type, pos)
+        - appendEnergyPalette(type)
+        - update(layername)
+    */
+    constructor(mapImgs, simu, view){
+        this.view = view;
+
         this.simu = simu;
 
         this._centrals = [];
@@ -272,17 +281,17 @@ export default class MapComponent{
         if(['pv', 'battery', 'wind'].includes(build.info.type) ){
             this.buildParameters.push(build.parameters);
 
-            // let buildIndex = this.drawer.appendEnergyPalette(build.info.type);
+            let buildIndex = this.view.appendEnergyPalette(build.info.type);
 
             this._forEachIf(build.area, (x, y) => {
                 this.energyGrid[x + y * 1374] = buildIndex;
             }, ["buildable"]);
 
-            // this.drawer.update('energy');
+            this.view.update('energy');
             // this.drawer.draw();
         }
         else if(['ccgt', 'nuke', 'fusion'].includes(build.info.type)){
-            // this.drawer.addItem(build.info.type, build.area.center);
+            this.view.addItem(build.info.type, build.area.center);
             this._centrals.push({
                 id:  build.info.centralId,
                 loc: build.area.center
