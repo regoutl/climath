@@ -17,9 +17,20 @@ let curForType = {
 };
 
 /** @brief this class is only responsible for the drawing of the map
+@details the idea here is that there is no need to use react for map darwing as
+there is no dom manipulation.
+
+example usage :
+
+let s = new Scene
+
+s.setMap(map)
+s.init(canvas)
+
+s.draw(...)
  */
 export default class Scene{
-    constructor(cMap){
+    constructor(){
 
         //array of positions of ponctual stuff (nuke, ccgt, ...). format : type, pos
         this.items = [];
@@ -117,7 +128,6 @@ export default class Scene{
 
 
 
-    //internal functions--------------------------------------------------------
 
 
     /** @brief draw the currenty visible layers.
@@ -130,7 +140,7 @@ export default class Scene{
                 return;
 
             /// handle any canvas resize event
-            this.checkSize();
+            this._checkSize();
 
 
             //compute the transformation matrix
@@ -171,7 +181,10 @@ export default class Scene{
 
 
 
-    checkSize(){
+    //internal functions--------------------------------------------------------
+
+    //check canvas siwe is the same as displayed size
+    _checkSize(){
         // return;
 
         let gl = this.gl;

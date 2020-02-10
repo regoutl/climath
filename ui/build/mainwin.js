@@ -10,6 +10,7 @@ import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
+import { tr } from '../../tr/tr.js';
 
 import Scene from '../scene.js';
 
@@ -174,6 +175,11 @@ var MainWin = function (_React$Component) {
             }
         }
     }, {
+        key: 'runYear',
+        value: function runYear() {
+            this.simu.run();
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this2 = this;
@@ -207,7 +213,16 @@ var MainWin = function (_React$Component) {
                     target: this.targetBuild.type,
                     info: this.state.currentBuildInfo,
                     sliderRadius: this.slider
-                })
+                }),
+                React.createElement(
+                    'div',
+                    {
+                        id: 'bNextTurn',
+                        title: tr("Go to the next year"),
+                        onClick: this.runYear.bind(this)
+                    },
+                    tr("Next turn")
+                )
             );
         }
     }]);

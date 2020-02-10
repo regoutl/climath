@@ -2,6 +2,7 @@ import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
+import {tr} from '../../tr/tr.js';
 
 import Scene from '../scene.js';
 
@@ -165,6 +166,12 @@ export default class MainWin extends React.Component{
 
     }
 
+    runYear(){
+        this.simu.run();
+
+        
+    }
+
     render(){
         if(this.simu === null){
             return <p>Chargement ... </p>;
@@ -189,6 +196,14 @@ export default class MainWin extends React.Component{
             info={this.state.currentBuildInfo}
             sliderRadius = {this.slider}
         />
+
+        <div
+            id="bNextTurn"
+            title={tr("Go to the next year")}
+            onClick={this.runYear.bind(this)}
+        >
+            {tr("Next turn")}
+        </div>
          </div>);
     }
 
