@@ -29,8 +29,8 @@ var MapView = function (_React$Component) {
     _inherits(MapView, _React$Component);
 
     /* accepted props :
-    mousemove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
-    click : function(curPos)        -> called on click
+    onMouseMove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
+    onClick : function(curPos)        -> called on click
     cursor : {type, radius} type : undefined or string (pv, nuke, ...)
                             radius : undefined or Number. unit : px
     */
@@ -55,6 +55,7 @@ var MapView = function (_React$Component) {
         _this.mousemove = _this.onmousemove.bind(_this);
         _this.mouseup = _this.onmouseup.bind(_this);
         _this.wheel = _this.onwheel.bind(_this);
+        _this.click = _this.onclick.bind(_this);
 
         _this.mouseleave = _this.onmouseleave.bind(_this);
 
@@ -119,7 +120,6 @@ var MapView = function (_React$Component) {
         }
 
         /// adds a point item at the given position
-        /// NOTE : tmp ; should be a red square. NOT TESTED
 
     }, {
         key: 'addItem',
@@ -206,7 +206,8 @@ var MapView = function (_React$Component) {
                     'canvas',
                     {
                         ref: 'mapCanvas',
-                        onMouseLeave: this.mouseleave
+                        onMouseLeave: this.mouseleave,
+                        onClick: this.click
                     },
                     tr("Your browser is not supported")
                 )
@@ -320,6 +321,8 @@ var MapView = function (_React$Component) {
 
                 this.physMousePos.x = e.pageX;
                 this.physMousePos.y = e.pageY;
+                this.dragging = true; //used to prevent click when drawing
+
 
                 this.draw();
             } else {
@@ -330,13 +333,18 @@ var MapView = function (_React$Component) {
                     y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
                 };
 
-                this.props.mousemove(transformedPos);
+                this.props.onMouseMove(transformedPos);
             }
         }
     }, {
         key: 'onmouseup',
         value: function onmouseup(e) {
+            var _this3 = this;
+
             this.isMouseDown = false;
+            setTimeout(function () {
+                _this3.dragging = false;
+            }, 0);
 
             if (e.target != this.refs.mapCanvas) return;
         }
@@ -366,13 +374,26 @@ var MapView = function (_React$Component) {
 
             this.draw();
         }
+    }, {
+        key: 'onclick',
+        value: function onclick(e) {
+            if (this.dragging) return;
+            var rawPos = { x: e.pageX, y: e.pageY };
+
+            var transformedPos = {
+                x: Math.round(rawPos.x / this.transform.scale - this.transform.x),
+                y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
+            };
+
+            this.props.onClick(transformedPos);
+        }
 
         //called when cursor leaves direct contact with central area
 
     }, {
         key: 'onmouseleave',
         value: function onmouseleave(e) {
-            this.props.mousemove(undefined);
+            this.props.onMouseMove(undefined);
         }
     }, {
         key: '_drawTex',

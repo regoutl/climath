@@ -179,13 +179,16 @@ var MainWin = function (_React$Component) {
                 }),
                 React.createElement(MapView, {
                     cMap: this.state.simu.cMap,
-                    mousemove: function mousemove(curPos) {
+                    onMouseMove: function onMouseMove(curPos) {
                         return _this2.setTargetBuildLoc({ pos: curPos });
                     },
                     cursor: {
                         type: this.state.targetBuild.type,
                         radius: this.state.targetBuildLoc.radius,
                         pos: this.state.targetBuildLoc.pos
+                    },
+                    onClick: function onClick(curPos) {
+                        return _this2.state.simu.confirmCurrentBuild();
                     }
                 }),
                 React.createElement(BuildDock, {

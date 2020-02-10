@@ -154,12 +154,13 @@ export default class MainWin extends React.Component{
 
         <MapView
             cMap={this.state.simu.cMap}
-            mousemove={(curPos) => this.setTargetBuildLoc({pos: curPos})}
+            onMouseMove={(curPos) => this.setTargetBuildLoc({pos: curPos})}
             cursor={{
                 type:this.state.targetBuild.type,
                 radius: this.state.targetBuildLoc.radius,
                 pos:this.state.targetBuildLoc.pos
             }}
+            onClick={(curPos) => this.state.simu.confirmCurrentBuild()    }
         />
 
         <BuildDock
