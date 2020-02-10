@@ -222,6 +222,14 @@ export class Simulateur{
         return ans;
     }
 
+    //return current year gdp of current region
+    get gdp(){
+        let yStats = this.yStats;
+
+        return this.cProd.countries.belgium.pop.at(yStats.year)
+                * this.cProd.countries.belgium.gdpPerCap.at(yStats.year);
+    }
+
     /**
     @brief compute the tax income of the previous year (called on new years eve)
     */

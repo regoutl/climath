@@ -2,12 +2,16 @@ import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
+import BudgetDialog from './budgetdialog.js';
 import {tr} from '../../tr/tr.js';
 
 import Scene from '../scene.js';
 
 import {Simulateur, promiseSimulater, objSum} from '../../simulateur/simulateur.js';
 
+function NullDialog(props){
+    return null;
+}
 
 
 export default class MainWin extends React.Component{
@@ -34,6 +38,7 @@ export default class MainWin extends React.Component{
             },
             money: 0,
             date: 2019,
+            currentDialog: NullDialog
         };
 
 
@@ -169,7 +174,16 @@ export default class MainWin extends React.Component{
     runYear(){
         this.simu.run();
 
-        
+
+    }
+
+    showBudgetDialog(){
+        this.setState({currentDialog: BudgetDialog});
+    }
+
+    onTaxRateChanged(newVal){
+        this.simu.taxRate = newVal;
+        this.forceUpdate();
     }
 
     render(){
@@ -177,11 +191,14 @@ export default class MainWin extends React.Component{
             return <p>Chargement ... </p>;
         }
 
+        let CurDialog = this.state.currentDialog;
+
         return (
         <div className="vLayout" style={{width: '100%', height: '100%'}}>
         <StatusBar
-            Date = {this.state.date}
-            Money = {this.state.money}
+            date = {this.state.date}
+            money = {this.state.money}
+            showBudgetDialog={this.showBudgetDialog.bind(this)}
         />
 
         <MapView
@@ -203,7 +220,10 @@ export default class MainWin extends React.Component{
             onClick={this.runYear.bind(this)}
         >
             {tr("Next turn")}
+
         </div>
+
+        <CurDialog gdp={this.simu.gdp} regularTaxRate={this.simu.minTaxRate} taxRate={this.simu.taxRate} onTaxRateChanged={this.onTaxRateChanged.bind(this)}/>
          </div>);
     }
 

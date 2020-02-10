@@ -10,11 +10,16 @@ import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
+import BudgetDialog from './budgetdialog.js';
 import { tr } from '../../tr/tr.js';
 
 import Scene from '../scene.js';
 
 import { Simulateur, promiseSimulater, objSum } from '../../simulateur/simulateur.js';
+
+function NullDialog(props) {
+    return null;
+}
 
 var MainWin = function (_React$Component) {
     _inherits(MainWin, _React$Component);
@@ -40,7 +45,8 @@ var MainWin = function (_React$Component) {
                 storageCapacity: 0
             },
             money: 0,
-            date: 2019
+            date: 2019,
+            currentDialog: NullDialog
         };
 
         _this.slider = { default: 50, min: 1, max: 100,
@@ -180,6 +186,17 @@ var MainWin = function (_React$Component) {
             this.simu.run();
         }
     }, {
+        key: 'showBudgetDialog',
+        value: function showBudgetDialog() {
+            this.setState({ currentDialog: BudgetDialog });
+        }
+    }, {
+        key: 'onTaxRateChanged',
+        value: function onTaxRateChanged(newVal) {
+            this.simu.taxRate = newVal;
+            this.forceUpdate();
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this2 = this;
@@ -192,12 +209,15 @@ var MainWin = function (_React$Component) {
                 );
             }
 
+            var CurDialog = this.state.currentDialog;
+
             return React.createElement(
                 'div',
                 { className: 'vLayout', style: { width: '100%', height: '100%' } },
                 React.createElement(StatusBar, {
-                    Date: this.state.date,
-                    Money: this.state.money
+                    date: this.state.date,
+                    money: this.state.money,
+                    showBudgetDialog: this.showBudgetDialog.bind(this)
                 }),
                 React.createElement(MapView, {
                     scene: this.scene,
@@ -222,7 +242,8 @@ var MainWin = function (_React$Component) {
                         onClick: this.runYear.bind(this)
                     },
                     tr("Next turn")
-                )
+                ),
+                React.createElement(CurDialog, { gdp: this.simu.gdp, regularTaxRate: this.simu.minTaxRate, taxRate: this.simu.taxRate, onTaxRateChanged: this.onTaxRateChanged.bind(this) })
             );
         }
     }]);
