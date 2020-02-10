@@ -116,7 +116,7 @@ export default class MapComponent{
 
     @return array of the requested field sums, in the same order as fields
 
-    @note if the area is invalid (aka curPos is undefined) :
+    @note if the area is invalid (aka curPos is undefined OR none of the specified area touches the country) :
           - condition buildable always succeed
           - specific values are replaced by their averages :
               - irradiance by average irradiance
@@ -128,22 +128,8 @@ export default class MapComponent{
     @warning this function modifies 'fields' and 'conditions'
     */
     reduceIf(fields, area, conditions){
-        if(area.center == undefined){
-            let A = area.radius * area.radius * 3.14 * pixelArea;
-            for(let i = 0; i < fields.length; i++){
-                if(fields[i] == 'area')
-                    fields[i] = A;
-                else if(fields[i] == 'radiantFlux')
-                    fields[i] = A * avgIrradiance;
-                else if(fields[i] == 'population')
-                    fields[i] = A * avgPopDensity;
-                else if(fields[i] == 'windPower50')
-                    fields[i] = A * avgWindPowerDensity50;
-                else
-                    throw 'to do';
-            }
-
-            return fields;
+        if(area.center == undefined || !this._areaIntersectWithCountry(area)){
+            return this._theoricReduce(fields, area, conditions);
         }
 
 
@@ -163,7 +149,54 @@ export default class MapComponent{
             f.ans.push(0);
 
         this._forEachIf(area, f, conditions);
+
+
         return f.ans;
+    }
+
+    //do the theorical val of reduce.
+    _theoricReduce(fields, area, conditions){
+        let A = area.radius * area.radius * 3.14 * pixelArea;
+        for(let i = 0; i < fields.length; i++){
+            if(fields[i] == 'area')
+                fields[i] = A;
+            else if(fields[i] == 'radiantFlux')
+                fields[i] = A * avgIrradiance;
+            else if(fields[i] == 'population')
+                fields[i] = A * avgPopDensity;
+            else if(fields[i] == 'windPower50')
+                fields[i] = A * avgWindPowerDensity50;
+            else
+                throw 'to do';
+        }
+
+        return fields;
+    }
+
+    //true if area intersects with the country
+    _areaIntersectWithCountry(area){
+        const radius = area.radius;
+        const x = area.center.x, y = area.center.y;
+        const radius2 = radius*radius;
+
+                //         bound   ,no outside       recenter
+        let box = {
+            minX: Math.max(x-radius,    0)             -x,
+            minY: Math.max(y-radius,    0)             -y,
+            maxX: Math.min(x+radius, 1374)             -x,
+            maxY: Math.min(y+radius, 1183)             -y,
+        };
+
+        for(let i = box.minX; i < box.maxX; i++){
+            const i2 = i*i;
+            const xi = i + x;
+            for(let j=box.minY; j < box.maxY; j++){
+                if(i2+j*j<radius2 && this.isInCountry(xi, y+j)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     areaAt(x, y){return pixelArea;}

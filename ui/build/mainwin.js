@@ -24,8 +24,8 @@ var MainWin = function (_React$Component) {
         _this.state = {
             simu: null,
             targetBuild: {},
-            targetBuildLoc: {},
-            bm: {
+            targetBuildLoc: { pos: { x: 0, y: 0 }, radius: 0 },
+            currentBuildInfo: {
                 theoReason: "",
                 buildCost: 0,
                 buildCo2: 0,
@@ -41,7 +41,7 @@ var MainWin = function (_React$Component) {
             date: 2019
         };
 
-        _this.slider = { default: 50, min: 0, max: 100,
+        _this.slider = { default: 50, min: 1, max: 100,
             sliderChange: function sliderChange(r) {
                 return _this.setTargetBuildLoc({ radius: r });
             } };
@@ -94,7 +94,7 @@ var MainWin = function (_React$Component) {
         value: function setTargetBuild(target) {
             this.setState({
                 'targetBuild': { "type": target },
-                'targetBuildLoc': { radius: this.slider.default }
+                'targetBuildLoc': { pos: { x: 0, y: 0 }, radius: this.slider.default }
             });
         }
 
@@ -127,7 +127,7 @@ var MainWin = function (_React$Component) {
 
                 this.setState({
                     targetBuildLoc: targetBuildLoc,
-                    bm: {
+                    currentBuildInfo: {
                         theoReason: info.theorical,
                         buildCost: info.build.cost,
                         buildCo2: info.build.co2,
@@ -142,7 +142,7 @@ var MainWin = function (_React$Component) {
             } else {
                 this.setState({
                     targetBuildLoc: targetBuildLoc,
-                    bm: {
+                    currentBuildInfo: {
                         theoReason: undefined,
                         buildCost: 0,
                         buildCo2: 0,
@@ -181,12 +181,17 @@ var MainWin = function (_React$Component) {
                     cMap: this.state.simu.cMap,
                     mousemove: function mousemove(curPos) {
                         return _this2.setTargetBuildLoc({ pos: curPos });
+                    },
+                    cursor: {
+                        type: this.state.targetBuild.type,
+                        radius: this.state.targetBuildLoc.radius,
+                        pos: this.state.targetBuildLoc.pos
                     }
                 }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
                     target: this.state.targetBuild.type,
-                    info: this.state.bm,
+                    info: this.state.currentBuildInfo,
                     sliderRadius: this.slider
                 })
             );

@@ -6,14 +6,22 @@ function isCentral(type){
     return type == 'nuke' || type == 'ccgt' || type == 'fusion';
 }
 
-/* IMPORTANT : should never be re-mounted. (big perf cost + useless)
-*/
+let curForType = {
+    ccgt: 0,
+    nuke: 1,
+    fusion: 2,
+    pv: 3,
+    wind: 3,
+    battery: 3,
+};
+
 export default class MapView extends React.Component{
 
     /* accepted props :
     mousemove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
     click : function(curPos)        -> called on click
-
+    cursor : {type, radius} type : undefined or string (pv, nuke, ...)
+                            radius : undefined or Number. unit : px
     */
     constructor(props){
         //react
@@ -40,7 +48,7 @@ export default class MapView extends React.Component{
 
         this.physMousePos = {x: 0, y:0}; // cursor pos (px) in window coord
         //transforms logical coord -> physical coord
-        // physMousePos.* = (logicMousePos.* + translate) * scale
+        // physMousePos  = (logicMousePos + translate) * scale
         this.transform = {x: -0, y: -0, scale:0.64};
         //is the mouse curently down
         this.isMouseDown = false;
@@ -50,15 +58,15 @@ export default class MapView extends React.Component{
         //array of positions of ponctual stuff (nuke, ccgt, ...). format : type, pos
         this.items = [];
 
-        //current cursor
-        this.cursor = {
-            type: null,   //will be str, (nuke| ccgt| fusion| pv| bat| wind)
-            pos: {        //note : logical pos (not transformed)
-                x: null,
-                y: null
-            },
-            radius: null,
-        };
+        // //current cursor
+        // this.cursor = {
+        //     type: null,   //will be str, (nuke| ccgt| fusion| pv| bat| wind)
+        //     pos: {        //note : logical pos (not transformed)
+        //         x: null,
+        //         y: null
+        //     },
+        //     radius: null,
+        // };
     }
 
 
@@ -86,36 +94,6 @@ export default class MapView extends React.Component{
 
       return this.energy.appendPalette(r, g, b, a);
     }
-
-    /// @brief draws a cursor of the given type at the given location.
-    /// radius can be ommited for centrals
-    drawCursor(type, pos, radius){
-        if(isCentral(type)){
-            if(isCentral(this.cursor.type)){//life is good - we were already a central
-                this.items[this.items.length-1] = {pos: pos, type:type};
-                // this.items[this.items.length-1].type = pos; //will have to se the type
-            }
-            else{ //new central
-                this.items.push({pos: pos, type:type});
-            }
-            this._updatePtsBuf();
-        }
-        else if(isCentral(this.cursor.type)){//we where a central, just remove it
-            this.items.pop();
-            this._updatePtsBuf();
-        }
-
-        this.cursor.type = type;
-        this.cursor.pos = pos;
-        this.cursor.radius = radius;
-
-        this.draw();
-    }
-
-    clearCursor(){
-        this.drawCursor(null, null, null);
-    }
-
 
     /// adds a point item at the given position
     /// NOTE : tmp ; should be a red square. NOT TESTED
@@ -162,6 +140,15 @@ export default class MapView extends React.Component{
         let canvas = this.refs.mapCanvas;
 
         this.gl = canvas.getContext("webgl", { alpha: false });
+
+        let gl = this.gl;
+
+        this.instancing = gl.getExtension("ANGLE_instanced_arrays");
+
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        gl.clearColor(1, 1, 1, 1);
 
         this._initMapShader();
         this._initTextures();
@@ -213,53 +200,58 @@ export default class MapView extends React.Component{
             if(gl === undefined)
                 return;
 
+            /// handle any canvas resize event
             this.checkSize();
 
 
-            // let ndcToPix = stMat.mul(stMat.scale(window.innerWidth, window.innerHeight),
-            //                             stMat.mul(stMat.translate(0.5, 0.5), stMat.scale(0.5, -0.5)));
-
-            // console.log('draw');
+            //compute the transformation matrix
             let unitSquareToPix = stMat.scale(1374, 1183);
-
             let pixTrans = stMat.mul(stMat.scale(this.transform.scale, this.transform.scale),
                                     stMat.translate(this.transform.x, this.transform.y));
-
             let pixToNDC = stMat.mul( stMat.translate(-1, 1),
                                         stMat.scale(2 / gl.canvas.width, -2 / gl.canvas.height));
 
 
             this.mvProj = stMat.mul(stMat.mul(pixToNDC, pixTrans), unitSquareToPix);
-            // console.log(this.mvProj);
 
 
+            //clear canvas
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-            gl.enable(gl.BLEND);
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-            gl.clearColor(1, 1, 1, 1);
-            this.clear();
-
+            //draw base
             this._drawTex(this[this.state.base]);
 
+            //draw energy grid if toogled
             if(this.state.energyGrid)
                 this._drawTex(this.energy);
 
-            if((isCentral(this.cursor.type)
+            //draw flows if toogled or user is building a central
+            if((isCentral(this.props.cursor.type)
                 || this.state.flows) && this.water)
                     this._drawTex(this.water);
 
+
+            //point positions are in pixels already
+            this.mvProj = stMat.mul(pixToNDC, pixTrans);
+            //draw all the point items
             this._drawPoints();
 
-            if(this.cursor.type !== null && !isCentral(this.cursor.type)){
-                // this._drawAreaCursor();
-            }
+            this.mvProj = stMat.mul(stMat.mul(pixToNDC, pixTrans), unitSquareToPix);
+
+            // //draw the cursor
+            // if(isCentral(this.state.cursor.type)){
+            //     // this._drawCentralCursor();
+            // }
+            // else if(['pv', 'battery', 'wind'].includes(this.state.cursor.type)){
+            //     this._drawAreaCursor();
+            // }
         });
     }
 
-    clear(){
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    _drawAreaCursor(){
+
     }
+
 
 
     checkSize(){
@@ -581,25 +573,80 @@ export default class MapView extends React.Component{
 
     _initPointShader(){
         let vert = `
+        //xy is center of the quad,  (px)
+        //z  is texture index : 0 : ccgt, 1 nuke, 2 : fusion, 3 circle
+        //w  is circle radius (px). ignored for cursor != circle.
         attribute vec4 a_position;
-        varying vec2 v_texcoord;
-        uniform mat3 texmodelview;
+        //point coord in {0,1}^2
+        attribute vec2 a_texcoord;
+
+
+
+        varying float v_tex;         //passes a_position.z
+        varying vec2 v_pointcoord;  //passes a_texcoord
+        uniform mat3 texmodelview;  //transformation
+        uniform vec4 overrideValue; //cursor info
+        uniform vec2 invScreenSize; //1/screen.*
+
 
         void main() {
-          gl_Position = vec4(vec3(texmodelview * vec3(a_position.xy, 1.0)).xy, 0.0, 1.0);
+            v_pointcoord = a_texcoord; //pass the tex coord
+            vec4 me = a_position;
+            vec2 snormCoord = 2.0 * a_texcoord - vec2(1.0); //also coords, but range from -1 to 1
 
-          v_texcoord = vec2(0.5, 0.5); //whatever
-          gl_PointSize = 64.0;
+            if(a_position.x < 0.0){ //its an invalid x -> we know its the cursor -> replace it with cursor value
+                me = overrideValue;
+
+                if(overrideValue.z > 2.5){           //it is a round cursor : dynamic point size
+                    v_tex = me.z;
+                    gl_Position = vec4(
+                            vec3(texmodelview * vec3(    //transformation
+                                me.xy                    //square origin
+                                + snormCoord * me.w // +/- radius
+                                , 1.0)).xy,
+                            0.0, 1.0);
+
+                    return;
+                }
+            }
+
+            v_tex = me.z;
+
+            gl_Position = vec4(
+                    vec3(texmodelview * vec3(me.xy, 1.0)).xy  //transformation of the position
+                    + snormCoord*32.0*invScreenSize,         // +/- 32 pix
+                0.0, 1.0);
         }
         `;
 
         let frag = `
         precision mediump float;
-        varying vec2 v_texcoord;
+        varying float v_tex;
+        varying vec2 v_pointcoord;
         uniform sampler2D u_image;
 
         void main() {
-            gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            vec2 offset = vec2(0.0);
+            if(v_tex < 0.5){ //ccgt
+                offset = vec2(0.0, 0.5);
+            }
+            else if(v_tex < 1.5){ //nuke
+                offset = vec2(0.5);
+            }
+            else if(v_tex < 2.5){ //fusion
+                offset = vec2(0.0);
+            }
+            else if(v_tex < 3.5){ // its a circle
+                vec2 centered = v_pointcoord * 2.0 - vec2(1.0);
+                if( dot(centered, centered) < 1.0)
+                    gl_FragColor = vec4(0.5, 0.5, 0.5, 0.8);
+                else
+                    gl_FragColor = vec4(0.0);
+                return;
+            }
+
+            gl_FragColor = texture2D(u_image, vec2(v_pointcoord * 0.5 + offset) * vec2(1.0, -1.0) + vec2(0.0, 1.0) );
+            // gl_FragColor = texture2D(u_image, v_pointcoord  * vec2(1.0, -1.0) + vec2(0.0, 1.0) );
         }
         `;
 
@@ -610,53 +657,108 @@ export default class MapView extends React.Component{
 
 
         this._mvLocInPtsShader = gl.getUniformLocation(this._ptsShader, "texmodelview");
-        // this.imageLoc = gl.getUniformLocation(this.ptsShader, "u_image");
+        this._cursorLocInPtsShader = gl.getUniformLocation(this._ptsShader, "overrideValue");
+        this._texPtsLocInPtsShader = gl.getUniformLocation(this._ptsShader, "u_image");
+        this._invScreenSizePtsLocInPtsShader = gl.getUniformLocation(this._ptsShader, "invScreenSize");
 
         this._updatePtsBuf();
+
+        this._texPts = loadTexture(gl, 'res/icons/itemTex.png');
+
+
+
+        //create the quad buf
+        let texCoords = new Uint8Array([
+            0, 0,
+            0, 255,
+            255, 0,
+
+            255, 255,
+            0, 255,
+            255, 0,
+        ]); // 1 quad = 2 tri = 6 pts
+        this._quadBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._quadBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
     }
 
     //
     _updatePtsBuf(){
         let gl = this.gl; //shortcut
-        // Setup a unit quad
-        let positions = new Float32Array(2*this.items.length);
+
+
+        let positions = new Float32Array(4*(this.items.length + 1)); //4 float per item + cursor
+
+        positions[0] = -1; //x -> cursor so -1
+
+
         for(let i = 0; i < this.items.length; i++){
-            position[2*i+0] = this.items[i].pos.x;
-            position[2*i+1] = this.items[i].pos.y;
+            positions[i*4 + 4 + 0] = this.items[i].pos.x; //x
+            positions[i*4 + 4 + 1] = this.items[i].pos.y; //y
+
+            positions[i*4  + 4 + 2] = curForType[this.items[i].type]; //z
         }
 
 
         this._ptsBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this._ptsBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
     }
 
     _drawPoints(){
+        // return;
         let gl = this.gl; //shortcut
 
-        // gl.activeTexture(gl.TEXTURE0);
-        // gl.bindTexture(gl.TEXTURE_2D, paletteTexture.texture);
-        //
-        // gl.activeTexture(gl.TEXTURE1);
-        // gl.bindTexture(gl.TEXTURE_2D, paletteTexture.palette.tex);
+        //bind point sprites
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this._texPts);
 
 
         gl.useProgram(this._ptsShader);
         this.mvProj.uniform(gl, this._mvLocInPtsShader);
+        gl.uniform2fv(this._invScreenSizePtsLocInPtsShader, [2.0/gl.canvas.width, 2.0/gl.canvas.height]); //no cursor : offset it
+
+        if(this.props.cursor.type === undefined)
+            gl.uniform4fv(this._cursorLocInPtsShader, [-1000000, 0, 0, 0]); //no cursor : offset it
+        else{
+            gl.uniform4fv(this._cursorLocInPtsShader,
+                [this.props.cursor.pos.x,
+                    this.props.cursor.pos.y,
+                    curForType[this.props.cursor.type],
+                    this.props.cursor.radius]);
+            // console.log(this.props.cursor.radius);
+        }
 
         //send the pointstexmodelviewLoc
             gl.enableVertexAttribArray(0);
             gl.bindBuffer(gl.ARRAY_BUFFER, this._ptsBuffer);
-            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+            gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
+            this.instancing.vertexAttribDivisorANGLE(0, 1);
+            // this.instancing.vertexAttribDivisorANGLE(0, 0);
+
+        //send the square
+            gl.enableVertexAttribArray(1);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._quadBuffer);
+            gl.vertexAttribPointer(
+                1, //concern  VertexAttribArray 1
+                2, //2 components
+                gl.UNSIGNED_BYTE, //unsigned bytes each
+                true,  //normalize them
+                0, // no space between them
+                0); //no offset at buffer beginning
+
 
         // //bind the textures
-        //     gl.uniform1i(this._imageLoc, 0);
+            gl.uniform1i(this._texPtsLocInPtsShader, 0);
         //     gl.uniform1i(this._paletteLoc, 1);
         //draw
-            gl.drawArrays(gl.POINTS, 0, this.items.length); //todo ; not 1
+            this.instancing.drawArraysInstancedANGLE(gl.TRIANGLES, 0, 6, (this.items.length+1)); // each tile is 6 verdices
+
+            this.instancing.vertexAttribDivisorANGLE(0, 0); //reset instancing
+            gl.disableVertexAttribArray(1);
+
     }
 }
 
@@ -745,6 +847,7 @@ function createProgram(gl, src, attribs){
     gl.attachShader(program,  createShader(gl, src[1], gl.FRAGMENT_SHADER));
 
     gl.bindAttribLocation(program, 0, 'a_position');
+    gl.bindAttribLocation(program, 1, 'a_texcoord');
 
     gl.linkProgram(program);
 
@@ -753,4 +856,60 @@ function createProgram(gl, src, attribs){
         throw 'Could not compile WebGL program. \n\n' + info;
     }
     return program;
+}
+
+
+
+//
+// Initialize a texture and load an image.
+// When the image finished loading copy it into the texture.
+//
+function loadTexture(gl, url) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Because images have to be download over the internet
+  // they might take a moment until they are ready.
+  // Until then put a single pixel in the texture so we can
+  // use it immediately. When the image has finished downloading
+  // we'll update the texture with the contents of the image.
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 0, 255, 255]);  // opaque blue
+  gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                width, height, border, srcFormat, srcType,
+                pixel);
+
+  const image = new Image();
+  image.onload = function() {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                  srcFormat, srcType, image);
+
+    // WebGL1 has different requirements for power of 2 images
+    // vs non power of 2 images so check if the image is a
+    // power of 2 in both dimensions.
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+       // Yes, it's a power of 2. Generate mips.
+       gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+       // No, it's not a power of 2. Turn off mips and set
+       // wrapping to clamp to edge
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+  };
+  image.src = url;
+
+  return texture;
+}
+
+function isPowerOf2(value) {
+  return (value & (value - 1)) == 0;
 }

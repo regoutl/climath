@@ -14,8 +14,8 @@ export default class MainWin extends React.Component{
         this.state = {
             simu: null,
             targetBuild: {},
-            targetBuildLoc: {},
-            bm:{
+            targetBuildLoc: {pos:{x:0, y:0}, radius:0},
+            currentBuildInfo:{
                 theoReason: "",
                 buildCost: 0,
                 buildCo2: 0,
@@ -33,7 +33,7 @@ export default class MainWin extends React.Component{
 
 
 
-        this.slider = {default: 50, min: 0, max: 100,
+        this.slider = {default: 50, min: 1, max: 100,
             sliderChange: (r) => this.setTargetBuildLoc({radius: r})};
         let mainWin = this;
 
@@ -80,7 +80,7 @@ export default class MainWin extends React.Component{
     setTargetBuild(target){
         this.setState({
             'targetBuild':{"type": target},
-            'targetBuildLoc':{radius: this.slider.default},
+            'targetBuildLoc':{pos:{x:0, y:0}, radius: this.slider.default},
         });
     }
 
@@ -107,7 +107,7 @@ export default class MainWin extends React.Component{
 
             this.setState({
                 targetBuildLoc:targetBuildLoc,
-                bm:{
+                currentBuildInfo:{
                     theoReason: info.theorical,
                     buildCost: info.build.cost,
                     buildCo2: info.build.co2,
@@ -123,7 +123,7 @@ export default class MainWin extends React.Component{
         else{
             this.setState({
                 targetBuildLoc:targetBuildLoc,
-                bm:{
+                currentBuildInfo:{
                     theoReason: undefined,
                     buildCost: 0,
                     buildCo2: 0,
@@ -155,12 +155,17 @@ export default class MainWin extends React.Component{
         <MapView
             cMap={this.state.simu.cMap}
             mousemove={(curPos) => this.setTargetBuildLoc({pos: curPos})}
+            cursor={{
+                type:this.state.targetBuild.type,
+                radius: this.state.targetBuildLoc.radius,
+                pos:this.state.targetBuildLoc.pos
+            }}
         />
 
         <BuildDock
             buildMenuSelectionCallback = {this.setTargetBuild.bind(this)}
             target = {this.state.targetBuild.type}
-            info={this.state.bm}
+            info={this.state.currentBuildInfo}
             sliderRadius = {this.slider}
         />
          </div>);
