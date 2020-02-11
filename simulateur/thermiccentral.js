@@ -160,6 +160,7 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         info.coolingWaterRate = nameplate * info.avgCapacityFactor * info._m3PerJ;
 
         info.centralId = this.nextCentralName;
+        this.nextCentralName++;
 
         if(parameters.type == 'nuke'){
             info.pop_affected = this.simu.cMap.reduceIf(['population'],
@@ -209,7 +210,6 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
             demolishCost: info.build.cost * this[parameters.type].demolishRatio,
         };
 
-        this.nextCentralName++;
     }
 
     /** same input as pv.demolish. return the cost of demolition. Dont apply the demoliton*/

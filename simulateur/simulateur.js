@@ -84,12 +84,13 @@ export class Simulateur{
         if(buildMenuState === undefined)
             return;
 
-        buildMenuState.year = this.year;
 
         //reset the current build
         this._currentBuild = {};
 
-        this._currentBuild.parameters = buildMenuState;
+        this._currentBuild.parameters = {...buildMenuState}; // copy bc can change
+        this._currentBuild.parameters.year = this.year;
+
         this._currentBuild.area =  {center:curPos, radius:radius};
 
         this._currentBuild.info = {
