@@ -205,6 +205,7 @@ export default class MainWin extends React.Component{
             date = {this.state.date}
             money = {this.state.money}
             showBudgetDialog={this.setDialog.bind(this, BudgetDialog)}
+            co2= "200"
         />
 
         <MapView

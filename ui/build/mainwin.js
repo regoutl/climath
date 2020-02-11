@@ -223,7 +223,8 @@ var MainWin = function (_React$Component) {
                 React.createElement(StatusBar, {
                     date: this.state.date,
                     money: this.state.money,
-                    showBudgetDialog: this.setDialog.bind(this, BudgetDialog)
+                    showBudgetDialog: this.setDialog.bind(this, BudgetDialog),
+                    co2: '200'
                 }),
                 React.createElement(MapView, {
                     scene: this.scene,
