@@ -1,5 +1,6 @@
 import {tr} from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
+import {pieChart} from '../piechart.js';
 
 
 /** @brief fancy slider for tax rates. Note that everyting is is range [0-1] */
@@ -88,35 +89,128 @@ class TaxSlider extends React.Component {
     }
 }
 
+let palette =     {nuke: 'yellow',
+    pv:'rgb(70, 85,180)',
+    fossil:'rgb(255, 124, 84)',
+    storage:'rgb(0, 255, 250)',
+    constructions:'red',
+    ccgt:'rgb(169, 202, 250)',
+    wind: 'white',
+    fusion: 'green',
+  };
+
 export default class BudgetDialog extends React.Component{
 
+    /** @details props
+    closeRequested => function
+    */
     constructor(props){
         super(props);
 
+        this.click = this.onClick.bind(this);
+        this.key = this.onKey.bind(this);
+
+        this.me = React.createRef();
+        this.bOk = React.createRef();
+        this.pieChart = React.createRef();
+    }
+
+    onClick(e){
+        if(this.me.current.contains(e.target) && this.bOk.current != e.target) //the dialog was clicked
+            return;
+
+        this.props.closeRequested();
+    }
+
+    onKey(e){
+        if(e.key === "Escape") {
+            this.props.closeRequested();
+        }
+    }
+
+    componentDidMount(){
+        //use a timeout, else the open click is catched by this event listener
+        setTimeout(() => window.addEventListener("mousedown", this.click), 0);
+        window.addEventListener("keydown", this.key)
+
+
+
+
+
+
+        let lastYearCosts = this.props.history[this.props.history.length - 1].cost;
+
+        let allOnM = {
+          	"nuke":lastYearCosts.perYear.nuke + lastYearCosts.perWh.nuke,
+          	"pv":lastYearCosts.perYear.pv + lastYearCosts.perWh.pv,
+          	"fossil":lastYearCosts.perYear.fossil + lastYearCosts.perWh.fossil,
+          	"storage":lastYearCosts.perYear.storage + lastYearCosts.perWh.storage,
+            "ccgt":lastYearCosts.perYear.ccgt + lastYearCosts.perWh.ccgt,
+            "wind":lastYearCosts.perYear.wind + lastYearCosts.perWh.wind,
+            "fusion":lastYearCosts.perYear.fusion + lastYearCosts.perWh.fusion,
+        }
+
+        let ctx = this.pieChart.current.getContext("2d");
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        ctx.translate(50, 50);
+
+
+        pieChart(ctx, allOnM, palette, {fontColor: 'white', legend: 'text'});
+        ctx.translate(-50, -50);
+
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener("mousedown", this.click);
+        window.removeEventListener("keydown", this.key)
     }
 
 
     render(){
-        return (<div className="dialog vLayout">
+        let lastYearCosts = this.props.history[this.props.history.length - 1].cost;
+
+        let allOnM = {
+          	"nuke":lastYearCosts.perYear.nuke + lastYearCosts.perWh.nuke,
+          	"pv":lastYearCosts.perYear.pv + lastYearCosts.perWh.pv,
+          	"fossil":lastYearCosts.perYear.fossil + lastYearCosts.perWh.fossil,
+          	"storage":lastYearCosts.perYear.storage + lastYearCosts.perWh.storage,
+            "ccgt":lastYearCosts.perYear.ccgt + lastYearCosts.perWh.ccgt,
+            "wind":lastYearCosts.perYear.wind + lastYearCosts.perWh.wind,
+            "fusion":lastYearCosts.perYear.fusion + lastYearCosts.perWh.fusion,
+        }
+
+
+        let taxIn = this.props.gdp * this.props.taxRate;
+        let regSpend = this.props.gdp * this.props.regularTaxRate;
+        let energySpend = allOnM.nuke + allOnM.pv + allOnM.fossil + allOnM.storage + allOnM.ccgt + allOnM.wind + allOnM.fusion;
+
+        return (<div className="dialog vLayout" ref={this.me} style={{right: 50, top: 110}}>
         <table>
             <tr>
-                <th>{tr("Gross national product")}</th>
-                <td>{valStr(this.props.gdp, '€')}</td>
-            </tr>
-            <tr>
-                <th>{tr("Tax rate (average)")}</th>
+                <th style={{verticalAlign: 'middle'}}>{tr("Tax rate (average)")}</th>
                 <td><TaxSlider oninput={this.props.onTaxRateChanged} value={this.props.taxRate}  /></td>
             </tr>
             <tr>
                 <th>{tr("Taxes income")}</th>
-                <td> + {valStr(this.props.gdp * this.props.taxRate, '€')}</td>
+                <td> + {valStr(taxIn, '€')}</td>
             </tr>
             <tr>
                 <th>{tr("Regular government spendings")}</th>
-                <td> - {valStr(this.props.gdp * this.props.regularTaxRate, '€')}</td>
+                <td> - {valStr(regSpend, '€')}</td>
+            </tr>
+            <tr>
+                <th>{tr("Energy maintenace (value of %d)", '', this.props.history[this.props.history.length - 1].year)}</th>
+                <td><div> - {valStr(energySpend, '€')}</div><canvas ref={this.pieChart} width="250" height="100"/></td>
+            </tr>
+            <tr>
+                <th>{tr('Balance')}</th>
+                <td>{valStr(taxIn - regSpend - energySpend, '€', {forceSign: true})}</td>
             </tr>
         </table>
-        <div className="button">{tr("Ok")}</div>
+        <div className="hLayout">
+            <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
+        </div>
         </div>);
     }
 }
