@@ -3,6 +3,8 @@ import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
 import BudgetDialog from './budgetdialog.js';
+import {Co2Dialog} from './co2dialog.js';
+import {ConsoDialog} from './consodialog.js';
 import {tr} from '../../tr/tr.js';
 
 import Scene from '../scene.js';
@@ -173,8 +175,7 @@ export default class MainWin extends React.Component{
 
     runYear(){
         this.simu.run();
-
-
+        this.forceUpdate();
     }
 
     showBudgetDialog(){
@@ -205,7 +206,9 @@ export default class MainWin extends React.Component{
             date = {this.state.date}
             money = {this.state.money}
             showBudgetDialog={this.setDialog.bind(this, BudgetDialog)}
-            co2= "200"
+            showCo2Dialog={this.setDialog.bind(this, Co2Dialog)}
+            history={this.simu.stats}
+            showConsoDialog={this.setDialog.bind(this, ConsoDialog)}
         />
 
         <MapView

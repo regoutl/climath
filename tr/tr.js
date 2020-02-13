@@ -114,13 +114,13 @@ function downloadDic(){
     download(lang + "tmp.dic",JSON.stringify(dic).replace(/},/g, "},\n"));
 }
 
-//this code is for dev only
-$(function(){
-    let downloadDicButton = $('<img src="res/icons/download.png" id="bDownloadDic" title="(Dev) download dic" class="mainButton"/>');
-    downloadDicButton.on("click", () => {
-        downloadDic();
-    });
-
-    $('#dCentralArea').append(downloadDicButton);
-
-});
+// //this code is for dev only
+// $(function(){
+//     let downloadDicButton = $('<img src="res/icons/download.png" id="bDownloadDic" title="(Dev) download dic" class="mainButton"/>');
+//     downloadDicButton.on("click", () => {
+//         downloadDic();
+//     });
+//
+//     $('#dCentralArea').append(downloadDicButton);
+//
+// });

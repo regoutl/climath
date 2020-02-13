@@ -9,6 +9,12 @@
 	vertical-align: top;
 }
 
+sup{
+	vertical-align: super;
+	font-size: smaller;
+
+}
+
 :root {
     --build-dock-height: 200px;
     --status-bar-height: 40px;
@@ -395,6 +401,7 @@ canvas {
 #statusBar > * {
 	margin: 0 10px;
 	cursor: pointer;
+	width: 200px;
 }
 
 #dBuildDock{
@@ -459,7 +466,7 @@ canvas {
 .button{
 	display:block;
 	padding:0.35em 1.2em;
-	margin:0 0.3em 0.3em 0;
+	margin:0.3em;
 	border-radius:0.12em;
 	box-sizing: border-box;
 	text-decoration:none;
@@ -512,7 +519,10 @@ canvas {
 }
 
 
-
+.dialog h3{
+	margin: 10px;
+	text-align: center;
+}
 
 
 .taxSlider{
