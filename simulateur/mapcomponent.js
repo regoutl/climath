@@ -225,7 +225,9 @@ export default class MapComponent{
             || lu == GroundUsage.forest || lu == GroundUsage.forest2)
             && nrj == 0;
     }
-
+    isEnergy(x, y){
+        return this.getNrj(x,y) != 0;
+    }
 
     /** @brief delete energies in the given area.
     @return cost
@@ -458,6 +460,7 @@ export default class MapComponent{
     _regToHydroCoord(input){
       return {x : Math.floor((input.x - 8) / 1.836),   y: Math.floor((input.y - 63) / 1.836)};
     }
+
 }
 
 

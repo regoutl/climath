@@ -13,6 +13,7 @@ import StatusBar from './statusbar.js';
 import BudgetDialog from './budgetdialog.js';
 import { Co2Dialog } from './co2dialog.js';
 import { ConsoDialog } from './consodialog.js';
+import { EndDialog } from './enddialog.js';
 import { tr } from '../../tr/tr.js';
 
 import Scene from '../scene.js';
@@ -186,6 +187,14 @@ var MainWin = function (_React$Component) {
         key: 'runYear',
         value: function runYear() {
             this.simu.run();
+            if (this.simu.year == 2070) {
+                this.setState({
+                    currentDialog: EndDialog
+                });
+
+                this.setTargetBuild(undefined);
+            }
+
             this.forceUpdate();
         }
     }, {
@@ -206,6 +215,13 @@ var MainWin = function (_React$Component) {
             this.forceUpdate();
         }
     }, {
+        key: 'newGame',
+        value: function newGame() {
+            this.simu.newGame({ gameplay: { initMoney: 10e9 } });
+            this.setDialog(undefined);
+            this.forceUpdate();
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this2 = this;
@@ -219,6 +235,29 @@ var MainWin = function (_React$Component) {
             }
 
             var CurDialog = this.state.currentDialog;
+
+            var dialog = void 0;
+            if (this.state.currentDialog == EndDialog) {
+                var areaAll = { center: { x: 0, y: 0 }, radius: 100000000 };
+
+                var energyGroundUseProp = this.simu.cMap.reduceIf(['area'], areaAll, ['energy']) / this.simu.cMap.reduceIf(['area'], areaAll);
+
+                dialog = React.createElement(EndDialog, {
+                    closeRequested: this.setDialog.bind(this, null),
+                    history: this.simu.stats,
+                    energyGroundUseProp: energyGroundUseProp,
+                    newGame: this.newGame.bind(this, null)
+                });
+            } else {
+                dialog = React.createElement(CurDialog, {
+                    gdp: this.simu.gdp,
+                    regularTaxRate: this.simu.minTaxRate,
+                    taxRate: this.simu.taxRate,
+                    onTaxRateChanged: this.onTaxRateChanged.bind(this),
+                    closeRequested: this.setDialog.bind(this, null),
+                    history: this.simu.stats
+                });
+            }
 
             return React.createElement(
                 'div',
@@ -256,14 +295,7 @@ var MainWin = function (_React$Component) {
                     },
                     tr("Next turn")
                 ),
-                React.createElement(CurDialog, {
-                    gdp: this.simu.gdp,
-                    regularTaxRate: this.simu.minTaxRate,
-                    taxRate: this.simu.taxRate,
-                    onTaxRateChanged: this.onTaxRateChanged.bind(this),
-                    closeRequested: this.setDialog.bind(this, null),
-                    history: this.simu.stats
-                })
+                dialog
             );
         }
     }]);

@@ -8,6 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { tr } from '../../tr/tr.js';
+import { periodAvgCo2 } from '../../periodavgco2.js';
 
 var StatusBar = function (_React$Component) {
     _inherits(StatusBar, _React$Component);
@@ -33,42 +34,9 @@ var StatusBar = function (_React$Component) {
     _createClass(StatusBar, [{
         key: 'render',
         value: function render() {
-            var _this2 = this;
-
             //compute co2 of the last 15 years
-            var energies = ['nuke', 'pv', 'fossil', 'storage', 'ccgt', 'wind', 'fusion'];
-
-            var begin = Math.max(0, this.props.history.length - 20);
-
-            var avgCo2 = 0;
-
-            var _loop = function _loop(i) {
-                var emi = _this2.props.history[i].co2;
-
-                energies.forEach(function (item) {
-                    avgCo2 += emi.build[item];
-                });
-                energies.forEach(function (item) {
-                    avgCo2 += emi.perWh[item] + emi.perYear[item];
-                });
-            };
-
-            for (var i = begin; i < this.props.history.length; i++) {
-                _loop(i);
-            }
-
-            avgCo2 /= this.props.history.length - begin; //sum to avg
-
-
-            //compute first year Co2
-            var firstYearCo2 = 0;
-            var emi = this.props.history[0].co2;
-            energies.forEach(function (item) {
-                firstYearCo2 += emi.build[item];
-            });
-            energies.forEach(function (item) {
-                firstYearCo2 += emi.perWh[item] + emi.perYear[item];
-            });
+            var avgCo2 = periodAvgCo2(this.props.history, Math.max(0, this.props.history.length - 20), this.props.history.length);
+            var firstYearCo2 = periodAvgCo2(this.props.history, 0, 1);
 
             //co2 increase compared to 2019, %
             var increase = -Math.round(100 * (1 - avgCo2 / firstYearCo2));
@@ -81,13 +49,7 @@ var StatusBar = function (_React$Component) {
 
 
             //electricity origin
-            // let ctx = cStatEnergyOri.getContext("2d");
-            // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            // ctx.translate(50, 50);
             var consumed = this.props.history[this.props.history.length - 1].consumedEnergy.total;
-            // $('#dStats p')[0].innerHTML = 'Demande moyenne : ' + valStr(consumed.total, 'Wh');
-            // pieChart(ctx, consumed.origin,palette);
-            // ctx.translate(-50, -50);
 
             return React.createElement(
                 'div',

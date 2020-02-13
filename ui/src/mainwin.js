@@ -5,6 +5,7 @@ import StatusBar from './statusbar.js';
 import BudgetDialog from './budgetdialog.js';
 import {Co2Dialog} from './co2dialog.js';
 import {ConsoDialog} from './consodialog.js';
+import {EndDialog} from './enddialog.js';
 import {tr} from '../../tr/tr.js';
 
 import Scene from '../scene.js';
@@ -175,6 +176,15 @@ export default class MainWin extends React.Component{
 
     runYear(){
         this.simu.run();
+        if(this.simu.year == 2070){
+            this.setState({
+                currentDialog: EndDialog,
+            });
+
+            this.setTargetBuild(undefined);
+        }
+
+
         this.forceUpdate();
     }
 
@@ -193,12 +203,46 @@ export default class MainWin extends React.Component{
         this.forceUpdate();
     }
 
+    newGame(){
+        this.simu.newGame({gameplay:{initMoney: 10e9}});
+        this.setDialog(undefined);
+        this.forceUpdate();
+    }
+
     render(){
         if(this.simu === null){
             return <p>Chargement ... </p>;
         }
 
         let CurDialog = this.state.currentDialog;
+
+        let dialog;
+        if(this.state.currentDialog == EndDialog){
+            let areaAll = {center:{x:0, y: 0}, radius: 100000000};
+
+            let  energyGroundUseProp = this.simu.cMap.reduceIf(['area'], areaAll, ['energy']) / this.simu.cMap.reduceIf(['area'], areaAll);
+
+
+            dialog = (<EndDialog
+                closeRequested={this.setDialog.bind(this, null)}
+                history={this.simu.stats}
+                energyGroundUseProp={energyGroundUseProp}
+                newGame={this.newGame.bind(this, null)}
+                />
+            );
+        }
+        else{
+            dialog = (<CurDialog
+               gdp={this.simu.gdp}
+               regularTaxRate={this.simu.minTaxRate}
+               taxRate={this.simu.taxRate}
+               onTaxRateChanged={this.onTaxRateChanged.bind(this)}
+               closeRequested={this.setDialog.bind(this, null)}
+               history={this.simu.stats}
+           />);
+
+        }
+
 
         return (
         <div className="vLayout" style={{width: '100%', height: '100%'}}>
@@ -234,14 +278,7 @@ export default class MainWin extends React.Component{
 
         </div>
 
-        <CurDialog
-            gdp={this.simu.gdp}
-            regularTaxRate={this.simu.minTaxRate}
-            taxRate={this.simu.taxRate}
-            onTaxRateChanged={this.onTaxRateChanged.bind(this)}
-            closeRequested={this.setDialog.bind(this, null)}
-            history={this.simu.stats}
-        />
+        {dialog}
          </div>);
     }
 

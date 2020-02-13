@@ -1,5 +1,6 @@
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import {tr} from '../../tr/tr.js';
+import {periodAvgCo2} from '../../periodavgco2.js';
 
 export default class StatusBar extends React.Component{
     /*
@@ -20,29 +21,8 @@ export default class StatusBar extends React.Component{
 
     render(){
         //compute co2 of the last 15 years
-        const energies = ['nuke', 'pv', 'fossil', 'storage', 'ccgt', 'wind', 'fusion'];
-
-        const begin = Math.max(0, this.props.history.length - 20);
-
-        let avgCo2 = 0;
-
-
-        for(let i = begin; i < this.props.history.length; i++){
-            let emi = this.props.history[i].co2;
-
-
-            energies.forEach((item) => {avgCo2 += emi.build[item];});
-            energies.forEach((item) => {avgCo2 += emi.perWh[item] + emi.perYear[item];});
-        }
-
-        avgCo2 /= (this.props.history.length - begin); //sum to avg
-
-
-        //compute first year Co2
-        let firstYearCo2 = 0;
-        let emi = this.props.history[0].co2;
-        energies.forEach((item) => {firstYearCo2 += emi.build[item];});
-        energies.forEach((item) => {firstYearCo2 += emi.perWh[item] + emi.perYear[item];});
+        let avgCo2 = periodAvgCo2(this.props.history, Math.max(0, this.props.history.length - 20), this.props.history.length);
+        let firstYearCo2 = periodAvgCo2(this.props.history, 0, 1);
 
 
         //co2 increase compared to 2019, %
@@ -56,13 +36,7 @@ export default class StatusBar extends React.Component{
 
 
         //electricity origin
-        // let ctx = cStatEnergyOri.getContext("2d");
-        // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        // ctx.translate(50, 50);
         const consumed = this.props.history[this.props.history.length-1].consumedEnergy.total;
-        // $('#dStats p')[0].innerHTML = 'Demande moyenne : ' + valStr(consumed.total, 'Wh');
-        // pieChart(ctx, consumed.origin,palette);
-        // ctx.translate(-50, -50);
 
         return (
         <div id="statusBar" className="hLayout" >

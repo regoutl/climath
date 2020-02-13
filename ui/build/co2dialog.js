@@ -119,7 +119,7 @@ export var Co2Dialog = function (_React$Component) {
         value: function render() {
             return React.createElement(
                 'div',
-                { className: 'dialog vLayout', ref: this.me, style: { left: '50%', top: 110, marginLeft: -210 } },
+                { className: 'dialog vLayout', ref: this.me, style: { left: '50%', top: 60, marginLeft: -210 } },
                 React.createElement(
                     'h3',
                     null,

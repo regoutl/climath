@@ -23,9 +23,9 @@ export function stackedLineChart(ctx, values, {palette= null, unit='', from=null
         });
     }
 
-    if(values.length == 1){ //duplicate values
-        values.push(values[0]);
-    }
+    // if(values.length == 1){ //duplicate values
+    //     values.push(values[0]);
+    // }
 
     const hAxisSpace = 50;
     const vAxisSpace = 30;
@@ -112,17 +112,25 @@ function xAxis(ctx, width, height, values, hScale, from, to){
         mod = 1;
     else if(widthPerYear > 20)
         mod = 2;
-    else
+    else if(widthPerYear > 8)
         mod = 5;
+    else
+        mod = 10;
 
     //the x axis gradings
     values.forEach((item, i) => {
-        ctx.beginPath();
-        ctx.moveTo((i + 0.0)*hScale, 4);
-        ctx.lineTo((i + 0.0)*hScale, 0);
-        ctx.stroke();
-
         let year = (to - from) / (values.length-1) * i + from;
+        if(values.length == 1)
+            year = from;
+        if(mod != 10 || year % 2 == 0){
+            ctx.beginPath();
+            ctx.moveTo((i + 0.0)*hScale, 4);
+            ctx.lineTo((i + 0.0)*hScale, 0);
+            ctx.stroke();
+
+        }
+
+
         if(year%mod == 0){
 
             ctx.fillText(year, (i + 0.5)*hScale, 15);

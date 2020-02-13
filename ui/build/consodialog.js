@@ -100,7 +100,7 @@ export var ConsoDialog = function (_React$Component) {
         value: function render() {
             return React.createElement(
                 'div',
-                { className: 'dialog vLayout', ref: this.me, style: { left: '100px', top: 110 } },
+                { className: 'dialog vLayout', ref: this.me, style: { left: '100px', top: 60 } },
                 React.createElement(
                     'h3',
                     null,

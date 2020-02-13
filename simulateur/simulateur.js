@@ -33,12 +33,19 @@ export class Simulateur{
 
         this.valChangedCallbacks = valChangedCallbacks;
 
-
-        this.money  = createInfo.gameplay.initMoney;
         // they would pay 30% if all spending were only for other purposes
         /// WARNING TODO check this number
         // minimum tax level. const.
         this.minTaxRate = createInfo.gameplay.minTaxRate;
+
+
+        this.newGame(createInfo);
+        // this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
+    }// END OF Simulateur.constructor()
+
+    newGame(createInfo){
+        this.money  = createInfo.gameplay.initMoney;
+
         // Player controlled
         this.taxRate = this.minTaxRate + 0.05;
 
@@ -47,17 +54,13 @@ export class Simulateur{
         //static (maybe partial) of the current year. see struc in _clearYearStats
         this.yStats = {};
 
-
         //like if we just finished another year
         this._clearYearStats();
         this.yStats.year= 2018;
         this._newYear();
         this.stats = [];//remove the empty stat
         this.run(); //run 2019
-
-
-        // this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
-    }// END OF Simulateur.constructor()
+    }
 
     get taxRate(){return this._taxRate;}
     set taxRate(val){

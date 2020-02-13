@@ -401,7 +401,6 @@ canvas {
 #statusBar > * {
 	margin: 0 10px;
 	cursor: pointer;
-	width: 200px;
 }
 
 #dBuildDock{
@@ -506,10 +505,6 @@ canvas {
 	/* height: 100px;
     width: 100px; */
     position: absolute;
-    /* left: 50%; */
-    margin-left: -50px;
-    /* top: 50%; */
-    margin-top: -50px;
 	background: rgba(50, 50, 50, 0.9);
 	color: white;
 
