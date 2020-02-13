@@ -67,7 +67,7 @@ export default class StatusBar extends React.Component{
         return (
         <div id="statusBar" className="hLayout" >
             <div
-                title={tr('This year consumption')}
+                title={tr('Last year consumption')}
                 onClick={this.props.showConsoDialog}
             >
                 {this.props.date} <img width="25" src="res/icons/electricEnergy.png" /> {valStr(consumed, 'W')}

@@ -95,7 +95,7 @@ var StatusBar = function (_React$Component) {
                 React.createElement(
                     'div',
                     {
-                        title: tr('This year consumption'),
+                        title: tr('Last year consumption'),
                         onClick: this.props.showConsoDialog
                     },
                     this.props.date,

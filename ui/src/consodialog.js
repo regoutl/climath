@@ -76,7 +76,7 @@ export class ConsoDialog extends React.Component{
 
     render(){
         return (<div className="dialog vLayout" ref={this.me} style={{left: '100px', top: 110}}>
-        <h3>Origine de l'energie</h3>
+        <h3>{tr("Energy origin")}</h3>
         <canvas ref={this.pieChart} width="200" height="110"/>
         <div className="hLayout">
             <div className="button white" ref={this.bOk}>{tr("Ok")}</div>

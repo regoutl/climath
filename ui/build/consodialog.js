@@ -104,7 +104,7 @@ export var ConsoDialog = function (_React$Component) {
                 React.createElement(
                     'h3',
                     null,
-                    'Origine de l\'energie'
+                    tr("Energy origin")
                 ),
                 React.createElement('canvas', { ref: this.pieChart, width: '200', height: '110' }),
                 React.createElement(
