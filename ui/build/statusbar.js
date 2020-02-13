@@ -29,12 +29,17 @@ var StatusBar = function (_React$Component) {
                 { id: 'statusBar', className: 'hLayout' },
                 React.createElement(
                     'div',
-                    { className: 'vYear', title: '' },
+                    { title: '' },
                     this.props.date
                 ),
                 React.createElement(
                     'div',
-                    { className: 'vMoney', title: tr("Set budget"), onClick: this.props.showBudgetDialog },
+                    { title: 'Co2' },
+                    this.props.co2
+                ),
+                React.createElement(
+                    'div',
+                    { title: tr("Set budget"), onClick: this.props.showBudgetDialog },
                     valStr(this.props.money, '€')
                 )
             );

@@ -57,62 +57,9 @@ var MapView = function (_React$Component) {
         //is the mouse curently down
         _this.isMouseDown = false;
 
-        // content --------------------------------------------------
-
-        // //array of positions of ponctual stuff (nuke, ccgt, ...). format : type, pos
-        // this.items = [];
+        _this.canvas = React.createRef();
         return _this;
     }
-
-    // /** @brief update the given layer*/
-    // update(layerName){
-    //     throw 'todo';
-    //     // if(this[layerName+'Src'] === undefined)
-    //     //     throw 'olala';
-    //     // // this.energy.update(this.energySrc);
-    //     // this[layerName].update(this[layerName+'Src']);
-    // }
-    //
-    // // conceptually, mapView stores a Map (id, color)
-    // // this function return the next free id and maps it to its coresponding color
-    // appendEnergyPalette(type){
-    //   let r, g, b, a = 255;
-    //   if(type == 'pv'){r = 70; g = 85; b = 130;}
-    //   else if(type == 'battery'){r = 0; g = 255; b = 250;}
-    //   else if(type == 'wind'){r = 255; g = 255; b = 250; a = 128}
-    //   else {
-    //     throw 'todo';
-    //   }
-    //
-    //   return this.energy.appendPalette(r, g, b, a);
-    // }
-    //
-    // /// adds a point item at the given position
-    // addItem(type, pos){
-    //     if(!isCentral(type))
-    //         throw 'not possible';
-    //
-    //     this.items.push({type: type, pos:pos});
-    //     //update gl
-    //     this._updatePtsBuf();
-    //     this.draw();
-    // }
-    //
-    // //removes a central
-    // rmItem(type, pos){
-    //     if(!isCentral(type))
-    //         throw 'not possible';
-    //
-    //     let id = this.items.findIndex(v => v.type === type && v.pos.x === pos.x
-    //         && v.pos.y === pos.y);
-    //
-    //     this.items.splice(id, 1);
-    //
-    //     //update gl
-    //     this._updatePtsBuf();
-    //     this.draw();
-    // }
-
 
     //internal functions--------------------------------------------------------
 
@@ -126,7 +73,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
-            this.props.scene.init(this.refs.mapCanvas);
+            this.props.scene.init(this.canvas.current);
 
             console.log("mount mapview !");
 
@@ -158,7 +105,7 @@ var MapView = function (_React$Component) {
                 React.createElement(
                     'canvas',
                     {
-                        ref: 'mapCanvas',
+                        ref: this.canvas,
                         onMouseLeave: this.mouseleave,
                         onClick: this.click
                     },
@@ -174,7 +121,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousedown',
         value: function onmousedown(e) {
-            if (e.target != this.refs.mapCanvas) return;
+            if (e.target != this.canvas.current) return;
 
             this.isMouseDown = true;
             this.physMousePos = { x: e.pageX, y: e.pageY };
@@ -182,7 +129,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousemove',
         value: function onmousemove(e) {
-            // if(e.target != this.refs.mapCanvas)
+            // if(e.target != this.canvas)
             //     return;
 
             if (this.isMouseDown) {
@@ -217,7 +164,7 @@ var MapView = function (_React$Component) {
                 _this2.dragging = false;
             }, 0);
 
-            if (e.target != this.refs.mapCanvas) return;
+            if (e.target != this.canvas.current) return;
         }
     }, {
         key: 'onwheel',

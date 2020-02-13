@@ -181,6 +181,12 @@ export default class MainWin extends React.Component{
         this.setState({currentDialog: BudgetDialog});
     }
 
+    setDialog(c){
+        if(c === undefined || c === null)
+            c = NullDialog;
+        this.setState({currentDialog: c});
+    }
+
     onTaxRateChanged(newVal){
         this.simu.taxRate = newVal;
         this.forceUpdate();
@@ -198,7 +204,8 @@ export default class MainWin extends React.Component{
         <StatusBar
             date = {this.state.date}
             money = {this.state.money}
-            showBudgetDialog={this.showBudgetDialog.bind(this)}
+            showBudgetDialog={this.setDialog.bind(this, BudgetDialog)}
+            co2= "200"
         />
 
         <MapView
@@ -216,6 +223,7 @@ export default class MainWin extends React.Component{
 
         <div
             id="bNextTurn"
+            className="button black"
             title={tr("Go to the next year")}
             onClick={this.runYear.bind(this)}
         >
@@ -223,7 +231,14 @@ export default class MainWin extends React.Component{
 
         </div>
 
-        <CurDialog gdp={this.simu.gdp} regularTaxRate={this.simu.minTaxRate} taxRate={this.simu.taxRate} onTaxRateChanged={this.onTaxRateChanged.bind(this)}/>
+        <CurDialog
+            gdp={this.simu.gdp}
+            regularTaxRate={this.simu.minTaxRate}
+            taxRate={this.simu.taxRate}
+            onTaxRateChanged={this.onTaxRateChanged.bind(this)}
+            closeRequested={this.setDialog.bind(this, null)}
+            history={this.simu.stats}
+        />
          </div>);
     }
 

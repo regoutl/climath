@@ -1,5 +1,6 @@
 /** option.compact : bool, true if you want the most compact possible. default false
 options.mag int [-3, 5] : force mag order. 1 => k aso. default : auto detect.
+options.forceSign : bool. default false. if true, will write '+3' instead of '3'
 */
 export function quantityToHuman(value, unit, options){
 	if(options === undefined){
@@ -12,10 +13,16 @@ export function quantityToHuman(value, unit, options){
 	if(options.compact === undefined)
 		options.compact = false;
 
+	let sign = '';
+
+	if(options.forceSign && value > 0)
+		sign = '+ ';
+
+
 	if(unit == '%')
-		return Math.round(value * 1000) / 10 + ' %';
+		return sign + Math.round(value * 1000) / 10 + ' %';
 	if(unit == '€' && !options.compact)
-		return plainTextEuro(value);
+		return sign + plainTextEuro(value);
 
 	let yolo = 1000;
 	if(unit.length >= 2 && !isNaN(Number(unit[1]))){
@@ -57,7 +64,7 @@ export function quantityToHuman(value, unit, options){
 		div = 0;
 
 
-	return div + ' ' + unitToHuman(suffix + unit, options.compact);
+	return sign + div + ' ' + unitToHuman(suffix + unit, options.compact);
 }
 
 function unitToHuman(unit, compact = false){

@@ -463,7 +463,7 @@ export default class Scene{
 
             gl_Position = vec4(
                     vec3(texmodelview * vec3(me.xy, 1.0)).xy  //transformation of the position
-                    + snormCoord*32.0*invScreenSize,         // +/- 32 pix
+                    + snormCoord*16.0*invScreenSize,         // +/- 16 pix
                 0.0, 1.0);
         }
         `;

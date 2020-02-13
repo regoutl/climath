@@ -191,6 +191,12 @@ var MainWin = function (_React$Component) {
             this.setState({ currentDialog: BudgetDialog });
         }
     }, {
+        key: 'setDialog',
+        value: function setDialog(c) {
+            if (c === undefined || c === null) c = NullDialog;
+            this.setState({ currentDialog: c });
+        }
+    }, {
         key: 'onTaxRateChanged',
         value: function onTaxRateChanged(newVal) {
             this.simu.taxRate = newVal;
@@ -217,7 +223,8 @@ var MainWin = function (_React$Component) {
                 React.createElement(StatusBar, {
                     date: this.state.date,
                     money: this.state.money,
-                    showBudgetDialog: this.showBudgetDialog.bind(this)
+                    showBudgetDialog: this.setDialog.bind(this, BudgetDialog),
+                    co2: '200'
                 }),
                 React.createElement(MapView, {
                     scene: this.scene,
@@ -238,12 +245,20 @@ var MainWin = function (_React$Component) {
                     'div',
                     {
                         id: 'bNextTurn',
+                        className: 'button black',
                         title: tr("Go to the next year"),
                         onClick: this.runYear.bind(this)
                     },
                     tr("Next turn")
                 ),
-                React.createElement(CurDialog, { gdp: this.simu.gdp, regularTaxRate: this.simu.minTaxRate, taxRate: this.simu.taxRate, onTaxRateChanged: this.onTaxRateChanged.bind(this) })
+                React.createElement(CurDialog, {
+                    gdp: this.simu.gdp,
+                    regularTaxRate: this.simu.minTaxRate,
+                    taxRate: this.simu.taxRate,
+                    onTaxRateChanged: this.onTaxRateChanged.bind(this),
+                    closeRequested: this.setDialog.bind(this, null),
+                    history: this.simu.stats
+                })
             );
         }
     }]);
