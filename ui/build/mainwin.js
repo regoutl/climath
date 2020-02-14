@@ -187,7 +187,7 @@ var MainWin = function (_React$Component) {
         key: 'runYear',
         value: function runYear() {
             this.simu.run();
-            if (this.simu.year == 2070) {
+            if (this.simu.year == 2025) {
                 this.setState({
                     currentDialog: EndDialog
                 });

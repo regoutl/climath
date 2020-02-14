@@ -54,6 +54,8 @@ export class Simulateur{
         //static (maybe partial) of the current year. see struc in _clearYearStats
         this.yStats = {};
 
+        this.cMap.clearEnergies();
+
         //like if we just finished another year
         this._clearYearStats();
         this.yStats.year= 2018;

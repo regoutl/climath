@@ -461,6 +461,11 @@ export default class MapComponent{
       return {x : Math.floor((input.x - 8) / 1.836),   y: Math.floor((input.y - 63) / 1.836)};
     }
 
+
+    clearEnergies(){
+        //todo : also clear palette cursor. 
+        this.energyGrid = new Uint16Array(1374 * 1183);
+    }
 }
 
 
