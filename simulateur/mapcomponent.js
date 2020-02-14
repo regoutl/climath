@@ -79,13 +79,6 @@ export default class MapComponent{
         this.windPowDens = mapImgs.windPowDens;
         this.poolMap = mapImgs.pools;
 
-        // this.drawer = new MapDrawer({
-        //     energy: this.energyGrid,
-        //     groundUse: this.groundUse,
-        //     popDensity: this.popDensity,
-        //     windPowDens: this.windPowDens,
-        // });
-
         this.buildParameters = [{}];// first one is the null build
     }
 
@@ -463,7 +456,7 @@ export default class MapComponent{
 
 
     clearEnergies(){
-        //todo : also clear palette cursor. 
+        //todo : also clear palette cursor.
         this.energyGrid = new Uint16Array(1374 * 1183);
     }
 }

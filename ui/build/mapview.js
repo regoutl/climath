@@ -86,6 +86,16 @@ var MapView = function (_React$Component) {
             window.addEventListener('wheel', this.wheel);
         }
     }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            window.removeEventListener('resize', this.draw);
+
+            window.removeEventListener('mousedown', this.mousedown);
+            window.removeEventListener('mousemove', this.mousemove);
+            window.removeEventListener('mouseup', this.mouseup);
+            window.removeEventListener('wheel', this.wheel);
+        }
+    }, {
         key: 'render',
         value: function render() {
 

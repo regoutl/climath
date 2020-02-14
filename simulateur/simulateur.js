@@ -25,13 +25,12 @@ export function objSum(object){
 store general values
 */
 export class Simulateur{
-    constructor(createInfo, valChangedCallbacks){
+    constructor(createInfo){
         this.cMap = new MapComponent(createInfo.map, this, createInfo.mapView);
         this.cHydro = new HydroComponent(createInfo.hydro);
         this.cProd = new ProductionComponent(createInfo.production, this);
         this.cScheduler = new BuildScheduler();
 
-        this.valChangedCallbacks = valChangedCallbacks;
 
         // they would pay 30% if all spending were only for other purposes
         /// WARNING TODO check this number
@@ -70,7 +69,7 @@ export class Simulateur{
         if(isNaN(this._taxRate))
             throw new TypeError('NaN !!!!');
 
-        this.valChangedCallbacks.taxRate(this._taxRate);
+        // this.valChangedCallbacks.taxRate(this._taxRate);
     }
 
     get money(){return this._money;}
@@ -78,7 +77,7 @@ export class Simulateur{
         if(isNaN(val))
           throw 'nan';
         this._money = val;
-        this.valChangedCallbacks.money(this._money);
+        // this.valChangedCallbacks.money(this._money);
     }
 
     get year(){return this.yStats.year;}
@@ -366,7 +365,7 @@ export class Simulateur{
             },
             taxes:{in: 0, rate:0},
         };
-        this.valChangedCallbacks.year(this.year);
+        // this.valChangedCallbacks.year(this.year);
     }
 
     _lotsOfSavingOfStatisticsAboutLastYearAndCallbacks(){
@@ -392,7 +391,7 @@ export class Simulateur{
 @param mapView is as defined in MapComponent's constructor
 @return a promise that is resolved when ready.
 **/
-export function promiseSimulater(valChangedCallbacks, mapView){
+export function promiseSimulater(mapView){
   return Promise.all([
     fetch('res/parameters.json')
         .then((response) => response.json()),
@@ -435,7 +434,7 @@ export function promiseSimulater(valChangedCallbacks, mapView){
             "initMoney":10000000000,
         };
 
-        return new Simulateur(simuCreateInfo, valChangedCallbacks);
+        return new Simulateur(simuCreateInfo);
     })
     .catch(err => alert('loading error ' + err)) ;
 }

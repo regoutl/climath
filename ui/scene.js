@@ -48,8 +48,8 @@ export default class Scene{
     //should be called once, with the valid canvas
     init(canvas){
         if(this.gl){
-            console.log('no second init');
-            return;
+            console.log('Wrining :no second init');
+//            return;
         }
 
         if(this.cMap === undefined){
