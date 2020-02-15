@@ -74,6 +74,7 @@ var GameWin = function (_React$Component) {
     _createClass(GameWin, [{
         key: 'setTargetBuild',
         value: function setTargetBuild(target) {
+            console.log('set ' + target);
             if (target === undefined && this.targetBuild.type !== undefined) {
                 //we just cleaered the cursor
                 // this.targetBuildLoc = targetBuildLoc;
@@ -97,6 +98,8 @@ var GameWin = function (_React$Component) {
 
             this.targetBuild.type = target;
             this.targetBuildLoc = { pos: { x: 0, y: 0 }, radius: this.slider.default };
+
+            this.forceUpdate();
         }
 
         /** callback

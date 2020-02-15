@@ -63,6 +63,7 @@ export default class GameWin extends React.Component{
         target is a string as specified in builddock.js
     */
     setTargetBuild(target){
+        console.log('set ' + target);
         if(target === undefined && this.targetBuild.type !== undefined){//we just cleaered the cursor
             // this.targetBuildLoc = targetBuildLoc;
 
@@ -86,6 +87,8 @@ export default class GameWin extends React.Component{
 
         this.targetBuild.type = target;
         this.targetBuildLoc = {pos:{x:0, y:0}, radius: this.slider.default};
+
+        this.forceUpdate();
     }
 
     /** callback
