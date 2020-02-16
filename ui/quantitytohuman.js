@@ -67,6 +67,7 @@ export function quantityToHuman(value, unit, options){
 	return sign + div + ' ' + unitToHuman(suffix + unit, options.compact);
 }
 
+
 function unitToHuman(unit, compact = false){
 	var tmp = unit;
 	if(unit.match(/^(m|μ|ν)(€|C)/) && unit.match(/\//)){

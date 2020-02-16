@@ -168,7 +168,7 @@ export default class Storage /*extends AbstractProductionMean*/{
     _prepareCapex(build, area){
         const parameters = build.parameters; //leave this const
         let info = build.info;
-
+        info.build.end = info.build.begin + this.solutions.battery.build.delay;
 
         let volume = area * parameters.height;
 

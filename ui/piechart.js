@@ -4,6 +4,7 @@ options :
     fontColor : text font color (default black)
     legend :    'text' : only the text
                 'percent' : 'percatage : text'
+                'hide' : no legend
 */
 export function pieChart(ctx, values, palette, {fontColor= 'black', legend= 'percent'}) {
   var defaultColors = ['red', 'green', 'blue', 'yellow', 'pink'];
@@ -38,23 +39,26 @@ export function pieChart(ctx, values, palette, {fontColor= 'black', legend= 'per
     if (palette === undefined) ctx.fillStyle = defaultColors[index];else ctx.fillStyle = palette[it[0]];
     ctx.fill();
 
-    var perc = Math.round(it[1] / sum * 100);
-    if (index < 4 && perc >= 1) {
-      ctx.fillRect(60, -38 + 18 * index, 8, 8);
-      ctx.fillStyle = fontColor;
-      perc = String(perc);
-      if (perc.length < 2) perc = " " + perc;
+    if(legend != 'hide'){
+        var perc = Math.round(it[1] / sum * 100);
+        if (index < 4 && perc >= 1) {
+          ctx.fillRect(60, -38 + 18 * index, 8, 8);
+          ctx.fillStyle = fontColor;
+          perc = String(perc);
+          if (perc.length < 2) perc = " " + perc;
 
-      let txt = '';
-      if(legend == 'text')
-        txt = it[0];
-      else if(legend == 'percent')
-        txt = perc + " % : " + it[0];
-      else {
-          throw 'unknown legend';
-      }
+          let txt = '';
+          if(legend == 'text')
+            txt = it[0];
+          else if(legend == 'percent')
+            txt = perc + " % : " + it[0];
+          else {
+              throw 'unknown legend';
+          }
 
-      ctx.fillText(txt, 75, -30 + 18 * index);
+          ctx.fillText(txt, 75, -30 + 18 * index);
+        }
+        
     }
   });
 }

@@ -25,20 +25,26 @@ export function objSum(object){
 store general values
 */
 export class Simulateur{
-    constructor(createInfo, valChangedCallbacks){
+    constructor(createInfo){
         this.cMap = new MapComponent(createInfo.map, this, createInfo.mapView);
         this.cHydro = new HydroComponent(createInfo.hydro);
         this.cProd = new ProductionComponent(createInfo.production, this);
         this.cScheduler = new BuildScheduler();
 
-        this.valChangedCallbacks = valChangedCallbacks;
 
-
-        this.money  = createInfo.gameplay.initMoney;
         // they would pay 30% if all spending were only for other purposes
         /// WARNING TODO check this number
         // minimum tax level. const.
         this.minTaxRate = createInfo.gameplay.minTaxRate;
+
+
+        this.newGame(createInfo);
+        // this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
+    }// END OF Simulateur.constructor()
+
+    newGame(createInfo){
+        this.money  = createInfo.gameplay.initMoney;
+
         // Player controlled
         this.taxRate = this.minTaxRate + 0.05;
 
@@ -47,6 +53,7 @@ export class Simulateur{
         //static (maybe partial) of the current year. see struc in _clearYearStats
         this.yStats = {};
 
+        this.cMap.clearEnergies();
 
         //like if we just finished another year
         this._clearYearStats();
@@ -54,10 +61,7 @@ export class Simulateur{
         this._newYear();
         this.stats = [];//remove the empty stat
         this.run(); //run 2019
-
-
-        // this.cMap.drawer.on('click',this.confirmCurrentBuild.bind(this));
-    }// END OF Simulateur.constructor()
+    }
 
     get taxRate(){return this._taxRate;}
     set taxRate(val){
@@ -65,7 +69,7 @@ export class Simulateur{
         if(isNaN(this._taxRate))
             throw new TypeError('NaN !!!!');
 
-        this.valChangedCallbacks.taxRate(this._taxRate);
+        // this.valChangedCallbacks.taxRate(this._taxRate);
     }
 
     get money(){return this._money;}
@@ -73,7 +77,7 @@ export class Simulateur{
         if(isNaN(val))
           throw 'nan';
         this._money = val;
-        this.valChangedCallbacks.money(this._money);
+        // this.valChangedCallbacks.money(this._money);
     }
 
     get year(){return this.yStats.year;}
@@ -361,7 +365,7 @@ export class Simulateur{
             },
             taxes:{in: 0, rate:0},
         };
-        this.valChangedCallbacks.year(this.year);
+        // this.valChangedCallbacks.year(this.year);
     }
 
     _lotsOfSavingOfStatisticsAboutLastYearAndCallbacks(){
@@ -387,7 +391,7 @@ export class Simulateur{
 @param mapView is as defined in MapComponent's constructor
 @return a promise that is resolved when ready.
 **/
-export function promiseSimulater(valChangedCallbacks, mapView){
+export function promiseSimulater(mapView){
   return Promise.all([
     fetch('res/parameters.json')
         .then((response) => response.json()),
@@ -430,7 +434,7 @@ export function promiseSimulater(valChangedCallbacks, mapView){
             "initMoney":10000000000,
         };
 
-        return new Simulateur(simuCreateInfo, valChangedCallbacks);
+        return new Simulateur(simuCreateInfo);
     })
     .catch(err => alert('loading error ' + err)) ;
 }

@@ -39,13 +39,7 @@ var BuildDock = function (_React$Component) {
     function BuildDock(props) {
         _classCallCheck(this, BuildDock);
 
-        //props.Radius
-        var _this = _possibleConstructorReturn(this, (BuildDock.__proto__ || Object.getPrototypeOf(BuildDock)).call(this, props));
-
-        _this.state = {
-            showdock: true
-        };
-        return _this;
+        return _possibleConstructorReturn(this, (BuildDock.__proto__ || Object.getPrototypeOf(BuildDock)).call(this, props));
     }
 
     _createClass(BuildDock, [{
@@ -53,16 +47,11 @@ var BuildDock = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
-            var showdock = this.props.target !== undefined; //this.state.showdock
-            var dockheight = showdock ? 200 : 32;
+            var showdock = this.props.target !== undefined;
+            var dockheight = showdock ? 150 : 32;
+            var dockwidth = 350;
             var defaultRadius = 50,
                 maxRadius = 100;
-
-            var restyle = {};
-            if (this.props.info.theoReason !== undefined) {
-                restyle[this.props.info.theoReason] = { "color": "red" };
-            }
-
             var needSlider = {
                 "pv": true,
                 "nuke": false,
@@ -71,6 +60,8 @@ var BuildDock = function (_React$Component) {
                 "ccgt": false,
                 "wind": true
             };
+
+            var restyle = {};
             var optionTable = "";
             if (this.props.target !== undefined) {
                 // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
@@ -78,9 +69,27 @@ var BuildDock = function (_React$Component) {
                     info: this.props.info,
                     slider: this.props.sliderRadius,
                     restyle: restyle,
-                    style: { bottom: 0, height: dockheight },
-                    needsSlider: needSlider[this.props.target.toLowerCase()]
+                    style: { bottom: 0, height: dockheight, width: dockwidth },
+                    needsSlider: needSlider[this.props.target.toLowerCase()],
+                    onBack: function onBack() {
+                        _this2.props.buildMenuSelectionCallback(undefined);
+                    }
                 });
+            }
+
+            return React.createElement(
+                'div',
+                null,
+                React.createElement(BuildMenu, {
+                    onClick: this.props.buildMenuSelectionCallback,
+                    style: { bottom: dockheight + 50 + 'px' },
+                    showMenu: this.props.target === undefined ? true : this.props.target
+                }),
+                optionTable
+            );
+
+            if (this.props.info.theoReason !== undefined) {
+                restyle[this.props.info.theoReason] = { "color": "red" };
             }
 
             var hideDockButton = React.createElement(ShowDockButton, {
@@ -95,22 +104,11 @@ var BuildDock = function (_React$Component) {
                 'div',
                 { className: 'yLayout' },
                 React.createElement(BuildMenu, {
-                    onClick: function onClick(type) {
-                        return _this2.props.buildMenuSelectionCallback(type);
-                    },
-                    style: { bottom: dockheight + 'px' },
+                    onClick: this.props.buildMenuSelectionCallback,
+                    style: { bottom: dockheight + 50 + 'px' },
                     showMenu: this.props.target === undefined ? true : this.props.target
                 }),
-                false ? hideDockButton : "",
-                React.createElement(
-                    'div',
-                    { id: 'dBuildDock', style: { height: dockheight + 'px' } },
-                    React.createElement(
-                        'div',
-                        { id: 'buildMenuOptionTable' },
-                        showdock ? optionTable : ''
-                    )
-                )
+                optionTable
             );
         }
     }]);
@@ -183,7 +181,7 @@ function BuildDetailsAny(props) {
 
     return React.createElement(
         'div',
-        { id: 'dBuildDetails', style: props.style },
+        { className: 'dialog', style: props.style },
         React.createElement(
             'table',
             null,
@@ -193,7 +191,18 @@ function BuildDetailsAny(props) {
                 show.map(mapLineFct(props))
             )
         ),
-        props.needsSlider && React.createElement(InputSlider, { slider: props.slider })
+        props.needsSlider && React.createElement(InputSlider, { slider: props.slider }),
+        React.createElement(
+            'div',
+            { className: 'hLayout' },
+            React.createElement(
+                'div',
+                { className: 'button white', onClick: function onClick() {
+                        return props.onBack(undefined);
+                    } },
+                ' Back '
+            )
+        )
     );
 }
 
@@ -201,24 +210,24 @@ function BuildDetailsAny(props) {
 ////// function building the left build Menu  (choose the building type) //////
 ///////////////////////////////////////////////////////////////////////////////
 var lastSelected = undefined;
-var selecte = void 0;
+// let selecte;
 function BuildMenu(props) {
-    if (isTouchScreen() || isMobile() || isSmallScreen()) {
-        selecte = function selecte(target) {
-            lastSelected = lastSelected === target ? undefined : target;
-            return props.onClick(lastSelected);
-        };
-    } else {
-        selecte = function selecte(target) {
-            lastSelected = lastSelected === target ? undefined : target;
-            return props.onClick(lastSelected);
-        };
-    }
+    // if(isTouchScreen() || isMobile() || isSmallScreen()){
+    //     selecte = (target) => {
+    //         lastSelected = (lastSelected === target) ? undefined: target;
+    //         return props.onClick(lastSelected)
+    //     }
+    // }else{
+    //     selecte = (target) => {
+    //         lastSelected = lastSelected === target ? undefined: target;
+    //         return props.onClick(lastSelected)
+    //     }
+    // }
 
     return React.createElement(
         'div',
         { id: 'BuildMenu', className: 'vLayout', style: props.style },
-        [{ name: 'Go back', src: 'back.png', target: undefined }, { name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }].map(function (nrj) {
+        [{ name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }].map(function (nrj) {
             return (props.showMenu === true ? nrj.target !== undefined : props.showMenu === nrj.target || nrj.target === undefined) ? React.createElement('img', {
                 src: 'res/icons/' + nrj.src,
                 className: 'bBuild',
@@ -226,7 +235,7 @@ function BuildMenu(props) {
                 'data-target': nrj.target,
                 key: nrj.target + nrj.src,
                 onClick: function onClick() {
-                    return selecte(nrj.target);
+                    return props.onClick(nrj.target);
                 }
             }) : '';
         })

@@ -27,23 +27,14 @@ import {isTouchScreen,isMobile,isSmallScreen} from '../screenDetection.js';
 export default class BuildDock extends React.Component{
     constructor(props){
         super(props);
-        //props.Radius
-        this.state = {
-            showdock: true,
-        };
     }
 
     render(){
-        let showdock = this.props.target !== undefined; //this.state.showdock
-        let dockheight = showdock ? 200:32;
+        let showdock = this.props.target !== undefined;
+        let dockheight = showdock ? 150:32;
+        const dockwidth = 350;
         const defaultRadius = 50, maxRadius = 100;
-
-        let restyle = {}
-        if(this.props.info.theoReason !== undefined){
-            restyle[this.props.info.theoReason] = {"color": "red"};
-        }
-
-        let needSlider = {
+        const needSlider = {
             "pv":true,
             "nuke":false,
             "fusion":false,
@@ -51,6 +42,8 @@ export default class BuildDock extends React.Component{
             "ccgt":false,
             "wind":true,
         };
+
+        let restyle = {}
         let optionTable = "";
         if(this.props.target !== undefined){
             // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
@@ -58,10 +51,29 @@ export default class BuildDock extends React.Component{
                 info = {this.props.info}
                 slider = {this.props.sliderRadius}
                 restyle = {restyle}
-                style = {{bottom: 0, height: dockheight,}}
+                style = {{bottom: 0, height: dockheight,width: dockwidth}}
                 needsSlider= {needSlider[this.props.target.toLowerCase()]}
+                onBack = {() => {this.props.buildMenuSelectionCallback(undefined)}}
             />)
         }
+
+
+        return (
+            <div>
+                <BuildMenu
+                    onClick = {this.props.buildMenuSelectionCallback}
+                    style = {{bottom: (dockheight + 50) +'px'}}
+                    showMenu = {this.props.target === undefined ?
+                                                    true : this.props.target}
+                />
+                {optionTable}
+            </div>);
+
+
+        if(this.props.info.theoReason !== undefined){
+            restyle[this.props.info.theoReason] = {"color": "red"};
+        }
+
 
         let hideDockButton = (<ShowDockButton
                             dockheight = {dockheight}
@@ -73,17 +85,12 @@ export default class BuildDock extends React.Component{
         return (
         <div className = "yLayout">
             <BuildMenu
-                onClick = {type => this.props.buildMenuSelectionCallback(type)}
-                style = {{bottom: dockheight+'px'}}
+                onClick = {this.props.buildMenuSelectionCallback}
+                style = {{bottom: (dockheight + 50) +'px'}}
                 showMenu = {this.props.target === undefined ?
                                                 true : this.props.target}
             />
-                {false?hideDockButton:""}
-            <div id = "dBuildDock" style = {{height: dockheight+'px'}}>
-                <div id = "buildMenuOptionTable">
-                    {showdock?optionTable:''}
-                </div>
-            </div>
+            {optionTable}
         </div>);
     }
 }
@@ -147,13 +154,16 @@ function BuildDetailsAny(props){
         {"n":"Storage capacity",    "cn":"storageCapacity", "unit":"S",},
     ];
 
-    return (<div id = "dBuildDetails" style = {props.style}>
+    return (<div className = "dialog" style = {props.style}>
         <table>
             <tbody>
                 {show.map(mapLineFct(props))}
             </tbody>
         </table>
         {props.needsSlider &&  <InputSlider slider = {props.slider}/>}
+        <div className='hLayout'>
+            <div className='button white' onClick={()=>props.onBack(undefined)}> Back </div>
+        </div>
     </div>);
 }
 
@@ -161,23 +171,22 @@ function BuildDetailsAny(props){
 ////// function building the left build Menu  (choose the building type) //////
 ///////////////////////////////////////////////////////////////////////////////
 let lastSelected = undefined;
-let selecte;
+// let selecte;
 function BuildMenu(props){
-    if(isTouchScreen() || isMobile() || isSmallScreen()){
-        selecte = (target) => {
-            lastSelected = (lastSelected === target) ? undefined: target;
-            return props.onClick(lastSelected)
-        }
-    }else{
-        selecte = (target) => {
-            lastSelected = lastSelected === target ? undefined: target;
-            return props.onClick(lastSelected)
-        }
-    }
+    // if(isTouchScreen() || isMobile() || isSmallScreen()){
+    //     selecte = (target) => {
+    //         lastSelected = (lastSelected === target) ? undefined: target;
+    //         return props.onClick(lastSelected)
+    //     }
+    // }else{
+    //     selecte = (target) => {
+    //         lastSelected = lastSelected === target ? undefined: target;
+    //         return props.onClick(lastSelected)
+    //     }
+    // }
 
     return( <div id = "BuildMenu" className = "vLayout" style = {props.style}>
         {[
-            {name: 'Go back',               src:'back.png',  target:undefined,},
             {name: 'Solar panels',          src:'solar.png', target:'pv',     },
             {name: 'Nuclear power plant',   src:'nuke.png',  target:'nuke',   },
             {name: 'Battery',               src:'bat.png',   target:'battery',},
@@ -192,7 +201,7 @@ function BuildMenu(props){
                 title = {tr(nrj.name)}
                 data-target = {nrj.target}
                 key = {nrj.target + nrj.src}
-                onClick = {() => selecte(nrj.target)}
+                onClick={() => props.onClick(nrj.target)}
             />) : '' )}
     </div>);
 }

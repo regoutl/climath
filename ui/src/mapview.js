@@ -79,6 +79,16 @@ export default class MapView extends React.Component{
         window.addEventListener('wheel', this.wheel);
     }
 
+    componentWillUnmount(){
+        window.removeEventListener('resize', this.draw);
+
+
+        window.removeEventListener('mousedown', this.mousedown);
+        window.removeEventListener('mousemove', this.mousemove);
+        window.removeEventListener('mouseup', this.mouseup);
+        window.removeEventListener('wheel', this.wheel);
+    }
+
 
     render(){
 

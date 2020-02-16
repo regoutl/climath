@@ -54,8 +54,12 @@ export class Raw{
 	/// return the value of the input of the given year.
 	/// year must be in [1950; 2050[
 	at(year){
-		if(year < 2000 || year > 2050)
-			throw "year must be in [2000: 2050]";
+		if(year < 2000)
+			throw "year must be >= 2000";
+
+		if(year > 2050)
+			year = 2050;
+		
 		return this.years[year - 2000];
 
 
