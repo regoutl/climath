@@ -184,6 +184,7 @@ export default class GameWin extends React.Component{
         this.setDialog(undefined);
     }
 
+
     render(){
         if(this.state.currentDialog == NewGameDialog){
             return (<NewGameDialog
@@ -225,6 +226,17 @@ export default class GameWin extends React.Component{
 
         }
 
+        let helpDialog;
+        if(this.state.help == PvDetails){
+            helpDialog = (
+                <div className="dialog" style={{left: '25%', right:'25%', top: 120, bottom: 100, background:'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto'}}>
+                <PvDetails
+                    efficiency={this.simu.cProd.productionMeans.pv.efficiency}
+                    buildEnergy={this.simu.cProd.productionMeans.pv.build.energy}
+                    buildCost={this.simu.cProd.productionMeans.pv.build.cost}
+                />
+            </div>);
+        }
 
         return (
         <div className="vLayout" style={{width: '100%', height: '100%'}}>
@@ -248,7 +260,7 @@ export default class GameWin extends React.Component{
             target = {this.targetBuild.type}
             info={this.state.currentBuildInfo}
             sliderRadius = {this.slider}
-            detailsRequested = {() => alert('yo')}
+            detailsRequested = {() => {this.setState({help: PvDetails})}}
         />
 
         <div
@@ -258,10 +270,12 @@ export default class GameWin extends React.Component{
             onClick={this.runYear.bind(this)}
         >
             {tr("Next turn")}
-
         </div>
 
+
+
         {dialog}
+        {helpDialog}
          </div>);
     }
 

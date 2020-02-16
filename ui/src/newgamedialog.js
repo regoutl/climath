@@ -30,6 +30,9 @@ export class NewGameDialog extends React.Component{
 
     componentDidMount(){
         window.addEventListener('keydown', this.key);
+
+        //auto start game. TMP
+        this.start();
     }
     componentWillUnmount(){
         window.removeEventListener('keydown', this.key);

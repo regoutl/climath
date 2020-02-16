@@ -68,7 +68,7 @@ export function quantityToHuman(value, unit, options){
 }
 
 
-function unitToHuman(unit, compact = false){
+export function unitToHuman(unit, compact = false){
 	var tmp = unit;
 	if(unit.match(/^(m|μ|ν)(€|C)/) && unit.match(/\//)){
 		if(unit[0] == 'm')

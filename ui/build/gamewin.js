@@ -241,6 +241,19 @@ var GameWin = function (_React$Component) {
                 });
             }
 
+            var helpDialog = void 0;
+            if (this.state.help == PvDetails) {
+                helpDialog = React.createElement(
+                    'div',
+                    { className: 'dialog', style: { left: '25%', right: '25%', top: 120, bottom: 100, background: 'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto' } },
+                    React.createElement(PvDetails, {
+                        efficiency: this.simu.cProd.productionMeans.pv.efficiency,
+                        buildEnergy: this.simu.cProd.productionMeans.pv.build.energy,
+                        buildCost: this.simu.cProd.productionMeans.pv.build.cost
+                    })
+                );
+            }
+
             return React.createElement(
                 'div',
                 { className: 'vLayout', style: { width: '100%', height: '100%' } },
@@ -265,7 +278,7 @@ var GameWin = function (_React$Component) {
                     info: this.state.currentBuildInfo,
                     sliderRadius: this.slider,
                     detailsRequested: function detailsRequested() {
-                        return alert('yo');
+                        _this2.setState({ help: PvDetails });
                     }
                 }),
                 React.createElement(
@@ -278,7 +291,8 @@ var GameWin = function (_React$Component) {
                     },
                     tr("Next turn")
                 ),
-                dialog
+                dialog,
+                helpDialog
             );
         }
     }]);
