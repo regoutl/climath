@@ -83,7 +83,7 @@ class TaxSlider extends React.Component {
                 onMouseDown={this.onMouseDown.bind(this)}
                 style={{left: (this.props.value*100) + '%', border: `5px solid rgb(${borderColor.r}, ${borderColor.g}, ${borderColor.b})`}}
             >
-                {String(Math.round(this.props.value*100) + " %").substr(0, 4)}
+                {String(Math.round(this.props.value*100) + "%").substr(0, 4)}
             </div>
         </div>)
     }
@@ -186,7 +186,7 @@ export default class BudgetDialog extends React.Component{
         let energySpend = allOnM.nuke + allOnM.pv + allOnM.fossil + allOnM.storage + allOnM.ccgt + allOnM.wind + allOnM.fusion;
 
         return (<div className="dialog vLayout" ref={this.me} style={{right: 50, top: 110}}>
-        <table>
+        <table><tbody>
             <tr>
                 <th style={{verticalAlign: 'middle'}}>{tr("Tax rate (average)")}</th>
                 <td><TaxSlider oninput={this.props.onTaxRateChanged} value={this.props.taxRate}  /></td>
@@ -207,7 +207,7 @@ export default class BudgetDialog extends React.Component{
                 <th>{tr('Balance')}</th>
                 <td>{valStr(taxIn - regSpend - energySpend, '€', {forceSign: true})}</td>
             </tr>
-        </table>
+        </tbody></table>
         <div className="hLayout">
             <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
         </div>
