@@ -1,13 +1,6 @@
 import {tr} from "../../tr/tr.js";
 import { quantityToHuman as valStr} from '../quantitytohuman.js';
-
-////////Nothing to do in here
-function isTouchScreen() { return ('ontouchstart' in document.documentElement); }
-function isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-}
-function isSmallScreen() {return window.innerHeight <= 760 || window.innerWidth <= 760}
-////////
+import {isTouchScreen,isMobile,isSmallScreen} from '../screenDetection.js';
 
 ///////////////////////////////////////////////////////////////////////////////
     // List props for this Component :
@@ -210,7 +203,7 @@ function BuildMenu(props){
                 className = "bBuild"
                 title = {tr(nrj.name)}
                 data-target = {nrj.target}
-                key = {nrj.target}
+                key = {nrj.target + nrj.src}
                 onClick={() => props.onClick(nrj.target)}
             />) : '' )}
     </div>);
