@@ -6,7 +6,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
@@ -74,7 +73,6 @@ var GameWin = function (_React$Component) {
     _createClass(GameWin, [{
         key: 'setTargetBuild',
         value: function setTargetBuild(target) {
-            console.log('set ' + target);
             if (target === undefined && this.targetBuild.type !== undefined) {
                 //we just cleaered the cursor
                 // this.targetBuildLoc = targetBuildLoc;

@@ -8,8 +8,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { tr } from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import { pieChart } from '../piechart.js';
-import { stackedLineChart } from '../stackedlinechart.js';
+import { pieChart } from '../charts.js';
+import { stackedLineChart } from '../charts.js';
 
 var palette = {
     nuke: 'yellow',
