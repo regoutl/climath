@@ -43,6 +43,9 @@ export var NewGameDialog = function (_React$Component) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             window.addEventListener('keydown', this.key);
+
+            //auto start game. TMP
+            this.start();
         }
     }, {
         key: 'componentWillUnmount',

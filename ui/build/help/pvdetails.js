@@ -6,8 +6,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+import { tr } from '../../../tr/tr.js';
+import { Plot } from '../../plot.js';
+
 /** @brief this class provide a lot of explainations about pv
 */
+
 var PvDetails = function (_React$Component) {
     _inherits(PvDetails, _React$Component);
 
@@ -20,12 +24,23 @@ var PvDetails = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (PvDetails.__proto__ || Object.getPrototypeOf(PvDetails)).call(this, props));
 
         _this.cEffi = React.createRef(); //canvas of the effi plot
+        _this.cBuildEn = React.createRef(); //canvas of the effi plot
+        _this.cBuildCost = React.createRef(); //canvas of the effi plot
         return _this;
     }
 
     _createClass(PvDetails, [{
         key: 'componentDidMount',
-        value: function componentDidMount() {}
+        value: function componentDidMount() {
+            var p = new Plot(this.props.efficiency, 300, 200);
+            p.draw(this.cEffi.current.getContext('2d'));
+
+            p = new Plot(this.props.buildEnergy, 300, 200);
+            p.draw(this.cBuildEn.current.getContext('2d'));
+
+            p = new Plot(this.props.buildCost, 300, 200);
+            p.draw(this.cBuildCost.current.getContext('2d'));
+        }
     }, {
         key: 'componentWillUnmount',
         value: function componentWillUnmount() {}
@@ -35,6 +50,11 @@ var PvDetails = function (_React$Component) {
             return React.createElement(
                 'div',
                 null,
+                React.createElement(
+                    'h3',
+                    null,
+                    tr('Solar panels')
+                ),
                 React.createElement(
                     'p',
                     null,
@@ -46,11 +66,43 @@ var PvDetails = function (_React$Component) {
                     tr('They are caracterised by their efficiency : the proportion of sun power transformed into electric power. ')
                 ),
                 React.createElement(
+                    'h4',
+                    null,
+                    tr('Efficiency evolution')
+                ),
+                React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
+                React.createElement(
+                    'p',
+                    { className: 'pSource' },
+                    this.props.efficiency.comment
+                ),
+                React.createElement(
+                    'h4',
+                    null,
+                    tr('Build energy')
+                ),
+                React.createElement(
                     'p',
                     null,
-                    tr('The following plot present the evolution of average solar pannel.')
+                    tr('Solar pannel manufacturing cost some energy. ')
                 ),
-                React.createElement('canvas', { ref: this.cEffi, width: '200', height: '100' })
+                React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
+                React.createElement(
+                    'p',
+                    null,
+                    tr('This implies that, depending on the country, the pollution varies')
+                ),
+                React.createElement(
+                    'h4',
+                    null,
+                    tr('Build cost')
+                ),
+                React.createElement(
+                    'p',
+                    null,
+                    tr('Solar pannel manufacturing cost. ')
+                ),
+                React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' })
             );
         }
     }]);
