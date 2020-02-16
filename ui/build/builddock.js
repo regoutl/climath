@@ -40,6 +40,7 @@ function isSmallScreen() {
 //
 // }
 // sliderRadius = {default:, min:, max:, sliderChange: r=>f(r)}
+// detailsRequested : function called when details is clicked
 ///////////////////////////////////////////////////////////////////////////////
 // List possible target :
 //     ['pv', 'nuke', 'battery', 'ccgt', 'wind', 'fusion']
@@ -74,7 +75,7 @@ var BuildDock = function (_React$Component) {
             };
 
             var restyle = {};
-            var optionTable = "";
+            var optionTable = undefined;
             if (this.props.target !== undefined) {
                 // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
                 optionTable = React.createElement(BuildDetailsAny, {
@@ -85,7 +86,8 @@ var BuildDock = function (_React$Component) {
                     needsSlider: needSlider[this.props.target.toLowerCase()],
                     onBack: function onBack() {
                         _this2.props.buildMenuSelectionCallback(undefined);
-                    }
+                    },
+                    detailsRequested: this.props.detailsRequested
                 });
             }
 
@@ -100,28 +102,28 @@ var BuildDock = function (_React$Component) {
                 optionTable
             );
 
-            if (this.props.info.theoReason !== undefined) {
-                restyle[this.props.info.theoReason] = { "color": "red" };
-            }
-
-            var hideDockButton = React.createElement(ShowDockButton, {
-                dockheight: dockheight,
-                showdock: showdock,
-                onClick: function onClick() {
-                    return _this2.setState({ showdock: !showdock });
-                }
-            });
-
-            return React.createElement(
-                'div',
-                { className: 'yLayout' },
-                React.createElement(BuildMenu, {
-                    onClick: this.props.buildMenuSelectionCallback,
-                    style: { bottom: dockheight + 50 + 'px' },
-                    showMenu: this.props.target === undefined ? true : this.props.target
-                }),
-                optionTable
-            );
+            // if(this.props.info.theoReason !== undefined){
+            //     restyle[this.props.info.theoReason] = {"color": "red"};
+            // }
+            //
+            //
+            // let hideDockButton = (<ShowDockButton
+            //                     dockheight = {dockheight}
+            //                     showdock = {showdock}
+            //                     onClick = {() => this.setState({showdock: !showdock})}
+            //                 />);
+            //
+            //
+            // return (
+            // <div className = "yLayout">
+            //     <BuildMenu
+            //         onClick = {this.props.buildMenuSelectionCallback}
+            //         style = {{bottom: (dockheight + 50) +'px'}}
+            //         showMenu = {this.props.target === undefined ?
+            //                                         true : this.props.target}
+            //     />
+            //     {optionTable}
+            // </div>);
         }
     }]);
 
@@ -212,7 +214,13 @@ function BuildDetailsAny(props) {
                 { className: 'button white', onClick: function onClick() {
                         return props.onBack(undefined);
                     } },
-                ' Back '
+                tr('Back'),
+                ' '
+            ),
+            React.createElement(
+                'div',
+                { className: 'button white', onClick: props.detailsRequested },
+                tr('Details...')
             )
         )
     );

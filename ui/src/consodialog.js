@@ -18,6 +18,7 @@ export class ConsoDialog extends React.Component{
 
     /** @details props
     closeRequested => function
+    detailsRequested => function. user request details
     */
     constructor(props){
         super(props);
@@ -80,6 +81,7 @@ export class ConsoDialog extends React.Component{
         <canvas ref={this.pieChart} width="200" height="110"/>
         <div className="hLayout">
             <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
+            <div className="button white" onClick={this.props.detailsRequested}>{tr('Details...')}</div>
         </div>
         </div>);
     }

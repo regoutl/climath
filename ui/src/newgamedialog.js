@@ -47,16 +47,22 @@ export class NewGameDialog extends React.Component{
 
     }
 
+    handleRegionChange(){
+
+    }
+
+    handleParamChange(){}
+
     render(){
         return (
             <div style={{position: 'absolute', width: '100%', 'height':'100%', zIndex: 100000000, alignItems: 'center', justifyContent: 'center'}} className="vLayout">
                 <div className="dialog vLayout" ref={this.me} style={{position: 'static', flex: '0 0'}}>
                     <h3>{tr("New game")}</h3>
-                    <table>
+                    <table><tbody>
                     <tr>
                         <th>{tr('Region')}</th>
                         <td>
-                            <select value={this.state.region} onChange={this.handleRegionChange}>
+                            <select value={this.state.region} onChange={this.handleRegionChange.bind(this)}>
                               <option value="belgium">{tr('Belgium')}</option>
                             </select>
                         </td>
@@ -64,13 +70,13 @@ export class NewGameDialog extends React.Component{
                     <tr>
                         <th>{tr('Parameters')}</th>
                         <td>
-                            <select value={this.state.paramSet} onChange={this.handleParamChange}>
+                            <select value={this.state.paramSet} onChange={this.handleParamChange.bind(this)}>
                               <option value="default">{tr('Default')}</option>
                             </select>
                         </td>
                     </tr>
 
-                    </table>
+                    </tbody></table>
                     <div className="hLayout">
                         <div className="button white" onClick={this.startClicked.bind(this)}>{tr("Start")}</div>
                     </div>

@@ -14,6 +14,7 @@ import { Co2Dialog } from './co2dialog.js';
 import { ConsoDialog } from './consodialog.js';
 import { EndDialog } from './enddialog.js';
 import { NewGameDialog } from './newgamedialog.js';
+import PvDetails from './help/pvdetails.js';
 import { tr } from '../../tr/tr.js';
 
 import Scene from '../scene.js';
@@ -21,6 +22,9 @@ import Scene from '../scene.js';
 import { Simulateur, promiseSimulater, objSum } from '../../simulateur/simulateur.js';
 
 function NullDialog(props) {
+    return null;
+}
+function NullHelp(props) {
     return null;
 }
 
@@ -51,7 +55,8 @@ var GameWin = function (_React$Component) {
                 storageCapacity: 0
             },
             money: 0,
-            currentDialog: NewGameDialog
+            currentDialog: NewGameDialog,
+            help: NullHelp
         };
 
         _this.slider = { default: 50, min: 1, max: 100,
@@ -258,7 +263,10 @@ var GameWin = function (_React$Component) {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
                     target: this.targetBuild.type,
                     info: this.state.currentBuildInfo,
-                    sliderRadius: this.slider
+                    sliderRadius: this.slider,
+                    detailsRequested: function detailsRequested() {
+                        return alert('yo');
+                    }
                 }),
                 React.createElement(
                     'div',

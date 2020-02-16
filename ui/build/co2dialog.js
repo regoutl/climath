@@ -133,6 +133,11 @@ export var Co2Dialog = function (_React$Component) {
                         'div',
                         { className: 'button white', ref: this.bOk },
                         tr("Ok")
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'button white', onClick: this.props.detailsRequested },
+                        tr('Details...')
                     )
                 )
             );

@@ -27,6 +27,7 @@ export var ConsoDialog = function (_React$Component) {
 
     /** @details props
     closeRequested => function
+    detailsRequested => function. user request details
     */
     function ConsoDialog(props) {
         _classCallCheck(this, ConsoDialog);
@@ -114,6 +115,11 @@ export var ConsoDialog = function (_React$Component) {
                         'div',
                         { className: 'button white', ref: this.bOk },
                         tr("Ok")
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'button white', onClick: this.props.detailsRequested },
+                        tr('Details...')
                     )
                 )
             );

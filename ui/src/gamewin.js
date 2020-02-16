@@ -8,6 +8,7 @@ import {Co2Dialog} from './co2dialog.js';
 import {ConsoDialog} from './consodialog.js';
 import {EndDialog} from './enddialog.js';
 import {NewGameDialog} from './newgamedialog.js';
+import PvDetails from './help/pvdetails.js';
 import {tr} from '../../tr/tr.js';
 
 import Scene from '../scene.js';
@@ -17,6 +18,10 @@ import {Simulateur, promiseSimulater, objSum} from '../../simulateur/simulateur.
 function NullDialog(props){
     return null;
 }
+function NullHelp(props){
+    return null;
+}
+
 
 /** @brief playing window
 */
@@ -43,7 +48,8 @@ export default class GameWin extends React.Component{
                 storageCapacity: 0,
             },
             money: 0,
-            currentDialog: NewGameDialog
+            currentDialog: NewGameDialog,
+            help: NullHelp
         };
 
 
@@ -242,6 +248,7 @@ export default class GameWin extends React.Component{
             target = {this.targetBuild.type}
             info={this.state.currentBuildInfo}
             sliderRadius = {this.slider}
+            detailsRequested = {() => alert('yo')}
         />
 
         <div

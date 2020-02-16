@@ -222,81 +222,85 @@ var BudgetDialog = function (_React$Component2) {
                     'table',
                     null,
                     React.createElement(
-                        'tr',
+                        'tbody',
                         null,
                         React.createElement(
-                            'th',
-                            { style: { verticalAlign: 'middle' } },
-                            tr("Tax rate (average)")
-                        ),
-                        React.createElement(
-                            'td',
-                            null,
-                            React.createElement(TaxSlider, { oninput: this.props.onTaxRateChanged, value: this.props.taxRate })
-                        )
-                    ),
-                    React.createElement(
-                        'tr',
-                        null,
-                        React.createElement(
-                            'th',
-                            null,
-                            tr("Taxes income")
-                        ),
-                        React.createElement(
-                            'td',
-                            null,
-                            ' + ',
-                            valStr(taxIn, '€')
-                        )
-                    ),
-                    React.createElement(
-                        'tr',
-                        null,
-                        React.createElement(
-                            'th',
-                            null,
-                            tr("Regular government spendings")
-                        ),
-                        React.createElement(
-                            'td',
-                            null,
-                            ' - ',
-                            valStr(regSpend, '€')
-                        )
-                    ),
-                    React.createElement(
-                        'tr',
-                        null,
-                        React.createElement(
-                            'th',
-                            null,
-                            tr("Energy maintenace (value of %d)", '', this.props.history[this.props.history.length - 1].year)
-                        ),
-                        React.createElement(
-                            'td',
+                            'tr',
                             null,
                             React.createElement(
-                                'div',
-                                null,
-                                ' - ',
-                                valStr(energySpend, '€')
+                                'th',
+                                { style: { verticalAlign: 'middle' } },
+                                tr("Tax rate (average)")
                             ),
-                            React.createElement('canvas', { ref: this.pieChart, width: '250', height: '100' })
-                        )
-                    ),
-                    React.createElement(
-                        'tr',
-                        null,
-                        React.createElement(
-                            'th',
-                            null,
-                            tr('Balance')
+                            React.createElement(
+                                'td',
+                                null,
+                                React.createElement(TaxSlider, { oninput: this.props.onTaxRateChanged, value: this.props.taxRate })
+                            )
                         ),
                         React.createElement(
-                            'td',
+                            'tr',
                             null,
-                            valStr(taxIn - regSpend - energySpend, '€', { forceSign: true })
+                            React.createElement(
+                                'th',
+                                null,
+                                tr("Taxes income")
+                            ),
+                            React.createElement(
+                                'td',
+                                null,
+                                ' + ',
+                                valStr(taxIn, '€')
+                            )
+                        ),
+                        React.createElement(
+                            'tr',
+                            null,
+                            React.createElement(
+                                'th',
+                                null,
+                                tr("Regular government spendings")
+                            ),
+                            React.createElement(
+                                'td',
+                                null,
+                                ' - ',
+                                valStr(regSpend, '€')
+                            )
+                        ),
+                        React.createElement(
+                            'tr',
+                            null,
+                            React.createElement(
+                                'th',
+                                null,
+                                tr("Energy maintenace (value of %d)", '', this.props.history[this.props.history.length - 1].year)
+                            ),
+                            React.createElement(
+                                'td',
+                                null,
+                                React.createElement(
+                                    'div',
+                                    null,
+                                    ' - ',
+                                    valStr(energySpend, '€')
+                                ),
+                                React.createElement('canvas', { ref: this.pieChart, width: '250', height: '100' })
+                            )
+                        ),
+                        React.createElement(
+                            'tr',
+                            null,
+                            React.createElement(
+                                'th',
+                                null,
+                                tr('Balance')
+                            ),
+                            React.createElement(
+                                'td',
+                                null,
+                                valStr(taxIn - regSpend - energySpend, '€', { forceSign: true })
+                            )
                         )
                     )
                 ),
@@ -307,6 +311,11 @@ var BudgetDialog = function (_React$Component2) {
                         'div',
                         { className: 'button white', ref: this.bOk },
                         tr("Ok")
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'button white', onClick: this.props.detailsRequested },
+                        tr('Details...')
                     )
                 )
             );

@@ -63,6 +63,12 @@ export var NewGameDialog = function (_React$Component) {
             });
         }
     }, {
+        key: 'handleRegionChange',
+        value: function handleRegionChange() {}
+    }, {
+        key: 'handleParamChange',
+        value: function handleParamChange() {}
+    }, {
         key: 'render',
         value: function render() {
             return React.createElement(
@@ -80,45 +86,49 @@ export var NewGameDialog = function (_React$Component) {
                         'table',
                         null,
                         React.createElement(
-                            'tr',
+                            'tbody',
                             null,
                             React.createElement(
-                                'th',
-                                null,
-                                tr('Region')
-                            ),
-                            React.createElement(
-                                'td',
+                                'tr',
                                 null,
                                 React.createElement(
-                                    'select',
-                                    { value: this.state.region, onChange: this.handleRegionChange },
+                                    'th',
+                                    null,
+                                    tr('Region')
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
                                     React.createElement(
-                                        'option',
-                                        { value: 'belgium' },
-                                        tr('Belgium')
+                                        'select',
+                                        { value: this.state.region, onChange: this.handleRegionChange.bind(this) },
+                                        React.createElement(
+                                            'option',
+                                            { value: 'belgium' },
+                                            tr('Belgium')
+                                        )
                                     )
                                 )
-                            )
-                        ),
-                        React.createElement(
-                            'tr',
-                            null,
-                            React.createElement(
-                                'th',
-                                null,
-                                tr('Parameters')
                             ),
                             React.createElement(
-                                'td',
+                                'tr',
                                 null,
                                 React.createElement(
-                                    'select',
-                                    { value: this.state.paramSet, onChange: this.handleParamChange },
+                                    'th',
+                                    null,
+                                    tr('Parameters')
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
                                     React.createElement(
-                                        'option',
-                                        { value: 'default' },
-                                        tr('Default')
+                                        'select',
+                                        { value: this.state.paramSet, onChange: this.handleParamChange.bind(this) },
+                                        React.createElement(
+                                            'option',
+                                            { value: 'default' },
+                                            tr('Default')
+                                        )
                                     )
                                 )
                             )

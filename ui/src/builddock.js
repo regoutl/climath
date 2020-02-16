@@ -27,6 +27,7 @@ function isSmallScreen() {return window.innerHeight <= 760 || window.innerWidth 
     //
     // }
     // sliderRadius = {default:, min:, max:, sliderChange: r=>f(r)}
+    // detailsRequested : function called when details is clicked
 ///////////////////////////////////////////////////////////////////////////////
 // List possible target :
 //     ['pv', 'nuke', 'battery', 'ccgt', 'wind', 'fusion']
@@ -51,7 +52,7 @@ export default class BuildDock extends React.Component{
         };
 
         let restyle = {}
-        let optionTable = "";
+        let optionTable = undefined;
         if(this.props.target !== undefined){
             // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
             optionTable = (<BuildDetailsAny
@@ -61,6 +62,7 @@ export default class BuildDock extends React.Component{
                 style = {{bottom: 0, height: dockheight,width: dockwidth}}
                 needsSlider= {needSlider[this.props.target.toLowerCase()]}
                 onBack = {() => {this.props.buildMenuSelectionCallback(undefined)}}
+                detailsRequested={this.props.detailsRequested}
             />)
         }
 
@@ -77,28 +79,28 @@ export default class BuildDock extends React.Component{
             </div>);
 
 
-        if(this.props.info.theoReason !== undefined){
-            restyle[this.props.info.theoReason] = {"color": "red"};
-        }
-
-
-        let hideDockButton = (<ShowDockButton
-                            dockheight = {dockheight}
-                            showdock = {showdock}
-                            onClick = {() => this.setState({showdock: !showdock})}
-                        />);
-
-
-        return (
-        <div className = "yLayout">
-            <BuildMenu
-                onClick = {this.props.buildMenuSelectionCallback}
-                style = {{bottom: (dockheight + 50) +'px'}}
-                showMenu = {this.props.target === undefined ?
-                                                true : this.props.target}
-            />
-            {optionTable}
-        </div>);
+        // if(this.props.info.theoReason !== undefined){
+        //     restyle[this.props.info.theoReason] = {"color": "red"};
+        // }
+        //
+        //
+        // let hideDockButton = (<ShowDockButton
+        //                     dockheight = {dockheight}
+        //                     showdock = {showdock}
+        //                     onClick = {() => this.setState({showdock: !showdock})}
+        //                 />);
+        //
+        //
+        // return (
+        // <div className = "yLayout">
+        //     <BuildMenu
+        //         onClick = {this.props.buildMenuSelectionCallback}
+        //         style = {{bottom: (dockheight + 50) +'px'}}
+        //         showMenu = {this.props.target === undefined ?
+        //                                         true : this.props.target}
+        //     />
+        //     {optionTable}
+        // </div>);
     }
 }
 
@@ -169,7 +171,8 @@ function BuildDetailsAny(props){
         </table>
         {props.needsSlider &&  <InputSlider slider = {props.slider}/>}
         <div className='hLayout'>
-            <div className='button white' onClick={()=>props.onBack(undefined)}> Back </div>
+            <div className='button white' onClick={()=>props.onBack(undefined)}>{tr('Back')} </div>
+            <div className="button white" onClick={props.detailsRequested}>{tr('Details...')}</div>
         </div>
     </div>);
 }

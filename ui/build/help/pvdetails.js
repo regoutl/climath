@@ -6,36 +6,56 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-import GameWin from './gamewin.js';
+/** @brief this class provide a lot of explainations about pv
+*/
+var PvDetails = function (_React$Component) {
+    _inherits(PvDetails, _React$Component);
 
-/** @brief switch between full layouts*/
+    /* accepted props
+    efficiency : Raw Time varying input
+    */
+    function PvDetails(props) {
+        _classCallCheck(this, PvDetails);
 
-var App = function (_React$Component) {
-    _inherits(App, _React$Component);
+        var _this = _possibleConstructorReturn(this, (PvDetails.__proto__ || Object.getPrototypeOf(PvDetails)).call(this, props));
 
-    function App(props) {
-        _classCallCheck(this, App);
-
-        var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
-
-        _this.state = { currentPage: 'gameWin' };
+        _this.cEffi = React.createRef(); //canvas of the effi plot
         return _this;
     }
 
-    _createClass(App, [{
+    _createClass(PvDetails, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {}
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {}
+    }, {
         key: 'render',
         value: function render() {
-            if (this.state.currentPage == 'gameWin') return React.createElement(GameWin, null);
-
             return React.createElement(
-                'p',
+                'div',
                 null,
-                'Coucou'
+                React.createElement(
+                    'p',
+                    null,
+                    tr('Solar pannels are devices that transform sun into electricity.')
+                ),
+                React.createElement(
+                    'p',
+                    null,
+                    tr('They are caracterised by their efficiency : the proportion of sun power transformed into electric power. ')
+                ),
+                React.createElement(
+                    'p',
+                    null,
+                    tr('The following plot present the evolution of average solar pannel.')
+                ),
+                React.createElement('canvas', { ref: this.cEffi, width: '200', height: '100' })
             );
         }
     }]);
 
-    return App;
+    return PvDetails;
 }(React.Component);
 
-export default App;
+export default PvDetails;
