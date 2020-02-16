@@ -19,8 +19,8 @@ export default class MapView extends React.Component{
         super(props);
 
         this.state = {
-            energyGrid:true,
-            flows:false,
+            energyGrid: true,
+            flows: false,
             base: 'groundUse'
         };
 
@@ -32,6 +32,9 @@ export default class MapView extends React.Component{
         this.mousemove = this.onmousemove.bind(this);
         this.mouseup = this.onmouseup.bind(this);
         this.wheel = this.onwheel.bind(this);
+        this.touchstart = this.ontouchstart.bind(this);
+        this.touchmove = this.ontouchmove.bind(this);
+        this.touchend = this.ontouchend.bind(this);
         this.click = this.onclick.bind(this);
 
         this.mouseleave = this.onmouseleave.bind(this);
@@ -44,6 +47,11 @@ export default class MapView extends React.Component{
         this.transform = {x: -0, y: -0, scale:0.64};
         //is the mouse curently down
         this.isMouseDown = false;
+
+        //Touch state
+        this.touchstate = {
+            touches: [],
+        };
 
         this.canvas = React.createRef();
     }
@@ -72,21 +80,29 @@ export default class MapView extends React.Component{
         this.draw();
         window.addEventListener('resize', this.draw);
 
-
         window.addEventListener('mousedown', this.mousedown);
         window.addEventListener('mousemove', this.mousemove);
         window.addEventListener('mouseup', this.mouseup);
-        window.addEventListener('wheel', this.wheel);
+        // window.addEventListener('wheel', this.wheel);
+
+        window.addEventListener('touchstart', this.touchstart);
+        window.addEventListener('touchmove', this.touchmove, {passive: false});
+        window.addEventListener('touchend', this.touchend);
+        window.addEventListener('touchcancel', this.touchend);
     }
 
     componentWillUnmount(){
         window.removeEventListener('resize', this.draw);
 
-
         window.removeEventListener('mousedown', this.mousedown);
         window.removeEventListener('mousemove', this.mousemove);
         window.removeEventListener('mouseup', this.mouseup);
         window.removeEventListener('wheel', this.wheel);
+
+        window.removeEventListener('touchstart', this.touchstart);
+        window.removeEventListener('touchmove', this.touchmove);
+        window.removeEventListener('touchend', this.touchend);
+        window.removeEventListener('touchcancel', this.touchend);
     }
 
 
@@ -109,6 +125,7 @@ export default class MapView extends React.Component{
                         ref={this.canvas}
                         onMouseLeave={this.mouseleave}
                         onClick={this.click}
+                        onWheel={this.wheel}
                     >
                         {tr("Your browser is not supported")}
                     </canvas>
@@ -165,19 +182,19 @@ export default class MapView extends React.Component{
 
     }
     onwheel(e){
-        let curX = e.pageX ,
-            curY = e.pageY ;
-
+        this.zoom({
+            curX:e.pageX,
+            curY:e.pageY,
+            deltaY:e.deltaY,
+        });
+    }
+    zoom({curX, curY, deltaY, scale = 0}){
         let origin = {
             x: (curX  / this.transform.scale- this.transform.x),
             y: (curY  / this.transform.scale- this.transform.y)
         };
 
-        if(e.deltaY > 0){
-            this.transform.scale *= 0.8;
-        }else{
-            this.transform.scale /= 0.8;
-        }
+        this.transform.scale *= (scale === 0? (deltaY > 0? 0.8:1.25):scale);
 
         //bounds
         this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4)); //unzoom
@@ -199,8 +216,6 @@ export default class MapView extends React.Component{
         };
 
         this.props.onClick(transformedPos);
-
-
     }
 
     //called when cursor leaves direct contact with central area
@@ -208,5 +223,60 @@ export default class MapView extends React.Component{
         this.props.onMouseMove(undefined);
     }
 
+    updatetouchstate(touches){
+        this.touchstate.touches = touches.map(touch => {
+            return {x:touch.pageX, y:touch.pageY};
+        });
+    }
+
+    ontouchstart(e){
+        this.updatetouchstate(new Array(...e.touches));
+    }
+    ontouchmove(e){
+        e.preventDefault();
+        let touchstate = this.touchstate;
+        let touches = new Array(...e.targetTouches);
+        if(e.targetTouches.length > 1){//wheel
+            let middle = (x0,x1) => Math.abs(x0 + x1)/2,
+                d0 = {
+                    x: touches[0].pageX,
+                    y: touches[0].pageY,
+                },
+                d1 = {
+                    x: touches[1].pageX,
+                    y: touches[1].pageY,
+                },
+                oldd0 = touchstate.touches[0],
+                oldd1 = touchstate.touches[1];
+
+            let zoomArg = {
+                    curX: middle(d0.x, d1.x),
+                    curY: middle(d0.y, d1.y),
+                };
+
+            let dist = (x0, y0, x1, y1) =>
+                Math.sqrt( Math.pow(x1-x0,2) + Math.pow(y1-y0,2) );
+            let currDist = dist(d0.x, d0.y, d1.x, d1.y);
+            let oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
+
+            zoomArg.deltaY = Math.round(oldDist - currDist);
+            zoomArg.scale = (currDist/oldDist);
+
+            this.updatetouchstate(touches);
+            this.zoom(zoomArg);
+        }else{
+            this.transform.x += (touches[0].pageX - touchstate.touches[0].x) / this.transform.scale;
+            this.transform.y += (touches[0].pageY - touchstate.touches[0].y) / this.transform.scale;
+
+            this.dragging = true;//used to prevent click when drawing
+
+            this.updatetouchstate(touches);
+            this.draw();
+        }
+    }
+    ontouchend(e){
+        this.touchstate = {touches:[], };
+        this.dragging = false;
+    }
 
 }

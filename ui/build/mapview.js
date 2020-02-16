@@ -1,5 +1,7 @@
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -45,6 +47,9 @@ var MapView = function (_React$Component) {
         _this.mousemove = _this.onmousemove.bind(_this);
         _this.mouseup = _this.onmouseup.bind(_this);
         _this.wheel = _this.onwheel.bind(_this);
+        _this.touchstart = _this.ontouchstart.bind(_this);
+        _this.touchmove = _this.ontouchmove.bind(_this);
+        _this.touchend = _this.ontouchend.bind(_this);
         _this.click = _this.onclick.bind(_this);
 
         _this.mouseleave = _this.onmouseleave.bind(_this);
@@ -56,6 +61,11 @@ var MapView = function (_React$Component) {
         _this.transform = { x: -0, y: -0, scale: 0.64 };
         //is the mouse curently down
         _this.isMouseDown = false;
+
+        //Touch state
+        _this.touchstate = {
+            touches: []
+        };
 
         _this.canvas = React.createRef();
         return _this;
@@ -83,7 +93,12 @@ var MapView = function (_React$Component) {
             window.addEventListener('mousedown', this.mousedown);
             window.addEventListener('mousemove', this.mousemove);
             window.addEventListener('mouseup', this.mouseup);
-            window.addEventListener('wheel', this.wheel);
+            // window.addEventListener('wheel', this.wheel);
+
+            window.addEventListener('touchstart', this.touchstart);
+            window.addEventListener('touchmove', this.touchmove, { passive: false });
+            window.addEventListener('touchend', this.touchend);
+            window.addEventListener('touchcancel', this.touchend);
         }
     }, {
         key: 'componentWillUnmount',
@@ -94,6 +109,11 @@ var MapView = function (_React$Component) {
             window.removeEventListener('mousemove', this.mousemove);
             window.removeEventListener('mouseup', this.mouseup);
             window.removeEventListener('wheel', this.wheel);
+
+            window.removeEventListener('touchstart', this.touchstart);
+            window.removeEventListener('touchmove', this.touchmove);
+            window.removeEventListener('touchend', this.touchend);
+            window.removeEventListener('touchcancel', this.touchend);
         }
     }, {
         key: 'render',
@@ -117,7 +137,8 @@ var MapView = function (_React$Component) {
                     {
                         ref: this.canvas,
                         onMouseLeave: this.mouseleave,
-                        onClick: this.click
+                        onClick: this.click,
+                        onWheel: this.wheel
                     },
                     tr("Your browser is not supported")
                 )
@@ -179,19 +200,27 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onwheel',
         value: function onwheel(e) {
-            var curX = e.pageX,
-                curY = e.pageY;
+            this.zoom({
+                curX: e.pageX,
+                curY: e.pageY,
+                deltaY: e.deltaY
+            });
+        }
+    }, {
+        key: 'zoom',
+        value: function zoom(_ref2) {
+            var curX = _ref2.curX,
+                curY = _ref2.curY,
+                deltaY = _ref2.deltaY,
+                _ref2$scale = _ref2.scale,
+                scale = _ref2$scale === undefined ? 0 : _ref2$scale;
 
             var origin = {
                 x: curX / this.transform.scale - this.transform.x,
                 y: curY / this.transform.scale - this.transform.y
             };
 
-            if (e.deltaY > 0) {
-                this.transform.scale *= 0.8;
-            } else {
-                this.transform.scale /= 0.8;
-            }
+            this.transform.scale *= scale === 0 ? deltaY > 0 ? 0.8 : 1.25 : scale;
 
             //bounds
             this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4)); //unzoom
@@ -222,6 +251,72 @@ var MapView = function (_React$Component) {
         key: 'onmouseleave',
         value: function onmouseleave(e) {
             this.props.onMouseMove(undefined);
+        }
+    }, {
+        key: 'updatetouchstate',
+        value: function updatetouchstate(touches) {
+            this.touchstate.touches = touches.map(function (touch) {
+                return { x: touch.pageX, y: touch.pageY };
+            });
+        }
+    }, {
+        key: 'ontouchstart',
+        value: function ontouchstart(e) {
+            this.updatetouchstate(new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.touches))))());
+        }
+    }, {
+        key: 'ontouchmove',
+        value: function ontouchmove(e) {
+            e.preventDefault();
+            var touchstate = this.touchstate;
+            var touches = new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.targetTouches))))();
+            if (e.targetTouches.length > 1) {
+                //wheel
+                var middle = function middle(x0, x1) {
+                    return Math.abs(x0 + x1) / 2;
+                },
+                    d0 = {
+                    x: touches[0].pageX,
+                    y: touches[0].pageY
+                },
+                    d1 = {
+                    x: touches[1].pageX,
+                    y: touches[1].pageY
+                },
+                    oldd0 = touchstate.touches[0],
+                    oldd1 = touchstate.touches[1];
+
+                var zoomArg = {
+                    curX: middle(d0.x, d1.x),
+                    curY: middle(d0.y, d1.y)
+                };
+
+                var dist = function dist(x0, y0, x1, y1) {
+                    return Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
+                };
+                var currDist = dist(d0.x, d0.y, d1.x, d1.y);
+                var oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
+
+                zoomArg.deltaY = Math.round(oldDist - currDist);
+                zoomArg.scale = currDist / oldDist;
+
+                this.updatetouchstate(touches);
+                this.zoom(zoomArg);
+            } else {
+                this.transform.x += (touches[0].pageX - touchstate.touches[0].x) / this.transform.scale;
+                this.transform.y += (touches[0].pageY - touchstate.touches[0].y) / this.transform.scale;
+
+                this.dragging = true; //used to prevent click when drawing
+
+                this.updatetouchstate(touches);
+                this.draw();
+            }
+        }
+    }, {
+        key: 'ontouchend',
+        value: function ontouchend(e) {
+            this.touchstate = { touches: [] };
+            this.dragging = false;
         }
     }]);
 
