@@ -8,7 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { tr } from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import { pieChart } from '../piechart.js';
+import { pieChart } from '../charts.js';
 
 /** @brief fancy slider for tax rates. Note that everyting is is range [0-1] */
 

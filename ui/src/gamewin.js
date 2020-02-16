@@ -1,6 +1,5 @@
 
 
-import StatDock from './statdock.js';
 import MapView from './mapview.js';
 import BuildDock from './builddock.js';
 import StatusBar from './statusbar.js';
@@ -63,7 +62,6 @@ export default class GameWin extends React.Component{
         target is a string as specified in builddock.js
     */
     setTargetBuild(target){
-        console.log('set ' + target);
         if(target === undefined && this.targetBuild.type !== undefined){//we just cleaered the cursor
             // this.targetBuildLoc = targetBuildLoc;
 
