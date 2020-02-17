@@ -554,3 +554,32 @@ canvas {
 	text-align: center;
 	cursor: pointer;
 }
+
+
+
+
+
+/* Details  */
+.detailContent h3{
+	font-size: 1.4em;
+	
+}
+
+.detailContent h4{
+	border-bottom: 5px solid rgb(200, 200, 255);
+	font-size: 1.3em;
+	line-height: 3em;
+	margin-bottom: 10px;
+}
+
+
+.hWrapLayout{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.hWrapLayout > *{
+	width: 400px;
+	margin: 10px;
+}

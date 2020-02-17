@@ -241,15 +241,17 @@ var GameWin = function (_React$Component) {
                 });
             }
 
-            var helpDialog = void 0;
+            var helpDialog = null;
             if (this.state.help == PvDetails) {
                 helpDialog = React.createElement(
                     'div',
-                    { className: 'dialog', style: { left: '25%', right: '25%', top: 120, bottom: 100, background: 'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto' } },
+                    { className: 'dialog', style: { left: '5%', right: '5%', top: 60, bottom: 30, background: 'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto' } },
                     React.createElement(PvDetails, {
-                        efficiency: this.simu.cProd.productionMeans.pv.efficiency,
-                        buildEnergy: this.simu.cProd.productionMeans.pv.build.energy,
-                        buildCost: this.simu.cProd.productionMeans.pv.build.cost
+                        productionMeans: this.simu.cProd.productionMeans,
+                        countries: this.simu.cProd.countries,
+                        closeRequested: function closeRequested() {
+                            return _this2.setState({ help: NullHelp });
+                        }
                     })
                 );
             }

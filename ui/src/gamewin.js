@@ -226,14 +226,14 @@ export default class GameWin extends React.Component{
 
         }
 
-        let helpDialog;
+        let helpDialog = null;
         if(this.state.help == PvDetails){
             helpDialog = (
-                <div className="dialog" style={{left: '25%', right:'25%', top: 120, bottom: 100, background:'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto'}}>
+                <div className="dialog" style={{left: '5%', right:'5%', top: 60, bottom: 30, background:'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto'}}>
                 <PvDetails
-                    efficiency={this.simu.cProd.productionMeans.pv.efficiency}
-                    buildEnergy={this.simu.cProd.productionMeans.pv.build.energy}
-                    buildCost={this.simu.cProd.productionMeans.pv.build.cost}
+                    productionMeans={this.simu.cProd.productionMeans}
+                    countries={this.simu.cProd.countries}
+                    closeRequested={() => this.setState({help: NullHelp})}
                 />
             </div>);
         }
