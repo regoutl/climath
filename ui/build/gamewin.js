@@ -14,7 +14,6 @@ import { Co2Dialog } from './co2dialog.js';
 import { ConsoDialog } from './consodialog.js';
 import { EndDialog } from './enddialog.js';
 import { NewGameDialog } from './newgamedialog.js';
-import PvDetails from './help/pvdetails.js';
 import { tr } from '../../tr/tr.js';
 
 import Scene from '../scene.js';
@@ -242,11 +241,12 @@ var GameWin = function (_React$Component) {
             }
 
             var helpDialog = null;
-            if (this.state.help == PvDetails) {
+            if (this.state.help != NullHelp) {
+                var Help = this.state.help;
                 helpDialog = React.createElement(
                     'div',
                     { className: 'dialog', style: { left: '5%', right: '5%', top: 60, bottom: 30, background: 'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto' } },
-                    React.createElement(PvDetails, {
+                    React.createElement(Help, {
                         productionMeans: this.simu.cProd.productionMeans,
                         countries: this.simu.cProd.countries,
                         closeRequested: function closeRequested() {
@@ -279,8 +279,8 @@ var GameWin = function (_React$Component) {
                     target: this.targetBuild.type,
                     info: this.state.currentBuildInfo,
                     sliderRadius: this.slider,
-                    detailsRequested: function detailsRequested() {
-                        _this2.setState({ help: PvDetails });
+                    detailsRequested: function detailsRequested(c) {
+                        _this2.setState({ help: c });
                     }
                 }),
                 React.createElement(

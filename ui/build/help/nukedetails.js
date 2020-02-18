@@ -12,41 +12,39 @@ import { Plot } from '../../plot.js';
 /** @brief this class provide a lot of explainations about pv
 */
 
-var PvDetails = function (_React$Component) {
-    _inherits(PvDetails, _React$Component);
+var NukeDetails = function (_React$Component) {
+    _inherits(NukeDetails, _React$Component);
 
     /* accepted props
     productionMeans = this.simu.cProd.productionMeans
     countries       = this.simu.cProd.countries
     closeRequested
     */
-    function PvDetails(props) {
-        _classCallCheck(this, PvDetails);
+    function NukeDetails(props) {
+        _classCallCheck(this, NukeDetails);
 
-        var _this = _possibleConstructorReturn(this, (PvDetails.__proto__ || Object.getPrototypeOf(PvDetails)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (NukeDetails.__proto__ || Object.getPrototypeOf(NukeDetails)).call(this, props));
 
-        _this.cEffi = React.createRef(); //canvas of the effi plot
-        _this.cBuildEn = React.createRef(); //canvas of the effi plot
         _this.cBuildCost = React.createRef(); //canvas of the effi plot
-        _this.cPerYearCost = React.createRef(); //canvas of the effi plot
+        _this.cPerWhCost = React.createRef(); //canvas of the effi plot
+        _this.cPerWhCo2 = React.createRef(); //canvas of the effi plot
         return _this;
     }
 
-    _createClass(PvDetails, [{
+    _createClass(NukeDetails, [{
         key: 'componentDidMount',
         value: function componentDidMount() {
-            var pv = this.props.productionMeans.pv;
-            var p = new Plot(pv.efficiency, 300, 200);
-            p.draw(this.cEffi.current.getContext('2d'));
+            var nuke = this.props.productionMeans.centrals.nuke;
+            var p = void 0;
 
-            p = new Plot(pv.build.energy, 300, 200);
-            p.draw(this.cBuildEn.current.getContext('2d'));
-
-            p = new Plot(pv.build.cost, 300, 200);
+            p = new Plot(nuke.build.cost, 300, 200);
             p.draw(this.cBuildCost.current.getContext('2d'));
 
-            p = new Plot(pv.perYear.cost, 300, 200);
-            p.draw(this.cPerYearCost.current.getContext('2d'));
+            p = new Plot(nuke.perWh.cost, 300, 200);
+            p.draw(this.cPerWhCost.current.getContext('2d'));
+
+            p = new Plot(nuke.perWh.co2, 300, 200);
+            p.draw(this.cPerWhCo2.current.getContext('2d'));
         }
     }, {
         key: 'componentWillUnmount',
@@ -54,7 +52,7 @@ var PvDetails = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            var pv = this.props.productionMeans.pv;
+            var nuke = this.props.productionMeans.centrals.nuke;
 
             return React.createElement(
                 'div',
@@ -62,18 +60,18 @@ var PvDetails = function (_React$Component) {
                 React.createElement(
                     'h3',
                     null,
-                    tr('Solar panels')
+                    tr('Nuclear reactors')
                 ),
                 React.createElement(
                     'p',
                     null,
-                    tr('Solar pannels are devices that transform sun into electricity.')
+                    tr('Nuclear reactors are devices that transform radioactivity into electricity.')
                 ),
                 React.createElement(
                     'p',
                     null,
-                    tr('The production of PV is '),
-                    React.createElement('img', { src: 'data/pv/eq.svg', alt: 'Pv production eq' }),
+                    tr('The production of a central is '),
+                    React.createElement('img', { src: 'data/nuke/eq.svg', alt: 'Pv production eq' }),
                     tr('where')
                 ),
                 React.createElement(
@@ -82,29 +80,16 @@ var PvDetails = function (_React$Component) {
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/pv/radFlux.svg', alt: 'Pv production eq' }),
-                        tr('is the maximal radiant flux (W/m2)')
+                        React.createElement('img', { src: 'data/nuke/nameplate.svg', alt: 'Pv production eq' }),
+                        ' ',
+                        tr('is the central pic production')
                     ),
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/pv/area.svg', alt: 'Pv production eq' }),
+                        React.createElement('img', { src: 'data/nuke/capaFact.svg', alt: 'Pv production eq' }),
                         ' ',
-                        tr('is the area (m2)')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/efficiency.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the pannel efficiency')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/capaFact.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the capacity factor at that hour')
+                        tr('is the capacity factor')
                     )
                 ),
                 React.createElement(
@@ -116,58 +101,18 @@ var PvDetails = function (_React$Component) {
                         React.createElement(
                             'h4',
                             null,
-                            tr('Efficiency evolution')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Proportion of sun power transformed into electric power. ')
-                        ),
-                        React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.efficiency.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Build energy')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Solar pannel manufacturing requires some energy. ')
-                        ),
-                        React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.build.energy.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
                             tr('Build cost')
                         ),
                         React.createElement(
                             'p',
                             null,
-                            tr('Solar pannel manufacturing cost. ')
+                            tr('Nuclear central construction cost. ')
                         ),
                         React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            pv.build.cost.source
+                            nuke.build.cost.source
                         )
                     ),
                     React.createElement(
@@ -181,13 +126,33 @@ var PvDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             null,
-                            tr('Yearly cost per m2')
+                            tr('Cost per Wh')
                         ),
-                        React.createElement('canvas', { ref: this.cPerYearCost, width: '300', height: '200' }),
+                        React.createElement('canvas', { ref: this.cPerWhCost, width: '300', height: '200' }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            pv.perYear.cost.source
+                            nuke.perWh.cost.source
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Operation footprint')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Footprint per Wh')
+                        ),
+                        React.createElement('canvas', { ref: this.cPerWhCo2, width: '300', height: '200' }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            nuke.perWh.co2.source
                         )
                     ),
                     React.createElement(
@@ -201,17 +166,79 @@ var PvDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             null,
-                            tr('Naturally, photovoltaic panels do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')
-                        ),
-                        React.createElement(
-                            'a',
-                            { href: 'data/pv/allBePvCapaFact.csv' },
-                            tr('Download the historic data for Belgium (1985-2016)')
+                            tr('Nuclear centrals have a capacity factor of 0.9.')
                         ),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            'https://www.renewables.ninja/downloads'
+                            'Source ?'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Decommission')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Deconstruction of a nuclear central have an estimated cost of 15% of the build cost')
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            'Source ?'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Accident risk')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Public health treathening accidents happend with probability ')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('In case of accident, a radius of 10km aroudn the central must be evacueted')
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            'Source ?'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Cooling')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Nuclear centrals have a primary energy efficiency of ') + nuke.primEnergyEffi
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Evacuhating all this heat by boiling 20 deg water requires 1.6m3/s')
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            'Source ?'
                         )
                     )
                 ),
@@ -228,7 +255,7 @@ var PvDetails = function (_React$Component) {
         }
     }]);
 
-    return PvDetails;
+    return NukeDetails;
 }(React.Component);
 
-export default PvDetails;
+export default NukeDetails;

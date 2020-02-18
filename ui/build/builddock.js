@@ -10,6 +10,13 @@ import { tr } from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { isTouchScreen, isMobile, isSmallScreen } from '../screenDetection.js';
 
+import PvDetails from './help/pvdetails.js';
+import NukeDetails from './help/nukedetails.js';
+import WindDetails from './help/winddetails.js';
+import CcgtDetails from './help/ccgtdetails.js';
+import BatteryDetails from './help/batterydetails.js';
+import FusionDetails from './help/fusiondetails.js';
+
 ///////////////////////////////////////////////////////////////////////////////
 // List props for this Component :
 // buildMenuSelectionCallback = function setNewTarget(target)
@@ -61,6 +68,14 @@ var BuildDock = function (_React$Component) {
                 "ccgt": false,
                 "wind": true
             };
+            var detailForTech = {
+                "pv": PvDetails,
+                "nuke": NukeDetails,
+                "fusion": FusionDetails,
+                "battery": BatteryDetails,
+                "ccgt": CcgtDetails,
+                "wind": WindDetails
+            };
 
             var restyle = {};
             var optionTable = undefined;
@@ -75,7 +90,9 @@ var BuildDock = function (_React$Component) {
                     onBack: function onBack() {
                         _this2.props.buildMenuSelectionCallback(undefined);
                     },
-                    detailsRequested: this.props.detailsRequested
+                    detailsRequested: function detailsRequested() {
+                        return _this2.props.detailsRequested(detailForTech[_this2.props.target.toLowerCase()]);
+                    }
                 });
             }
 

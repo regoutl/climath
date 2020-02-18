@@ -12,41 +12,31 @@ import { Plot } from '../../plot.js';
 /** @brief this class provide a lot of explainations about pv
 */
 
-var PvDetails = function (_React$Component) {
-    _inherits(PvDetails, _React$Component);
+var FusionDetails = function (_React$Component) {
+    _inherits(FusionDetails, _React$Component);
 
     /* accepted props
     productionMeans = this.simu.cProd.productionMeans
     countries       = this.simu.cProd.countries
     closeRequested
     */
-    function PvDetails(props) {
-        _classCallCheck(this, PvDetails);
+    function FusionDetails(props) {
+        _classCallCheck(this, FusionDetails);
 
-        var _this = _possibleConstructorReturn(this, (PvDetails.__proto__ || Object.getPrototypeOf(PvDetails)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (FusionDetails.__proto__ || Object.getPrototypeOf(FusionDetails)).call(this, props));
 
-        _this.cEffi = React.createRef(); //canvas of the effi plot
-        _this.cBuildEn = React.createRef(); //canvas of the effi plot
         _this.cBuildCost = React.createRef(); //canvas of the effi plot
-        _this.cPerYearCost = React.createRef(); //canvas of the effi plot
         return _this;
     }
 
-    _createClass(PvDetails, [{
+    _createClass(FusionDetails, [{
         key: 'componentDidMount',
         value: function componentDidMount() {
-            var pv = this.props.productionMeans.pv;
-            var p = new Plot(pv.efficiency, 300, 200);
-            p.draw(this.cEffi.current.getContext('2d'));
+            var nuke = this.props.productionMeans.nuke;
+            var p = void 0;
 
-            p = new Plot(pv.build.energy, 300, 200);
-            p.draw(this.cBuildEn.current.getContext('2d'));
-
-            p = new Plot(pv.build.cost, 300, 200);
+            p = new Plot(nuke.build.cost, 300, 200);
             p.draw(this.cBuildCost.current.getContext('2d'));
-
-            p = new Plot(pv.perYear.cost, 300, 200);
-            p.draw(this.cPerYearCost.current.getContext('2d'));
         }
     }, {
         key: 'componentWillUnmount',
@@ -54,7 +44,7 @@ var PvDetails = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            var pv = this.props.productionMeans.pv;
+            var nuke = this.props.productionMeans.nuke;
 
             return React.createElement(
                 'div',
@@ -62,7 +52,7 @@ var PvDetails = function (_React$Component) {
                 React.createElement(
                     'h3',
                     null,
-                    tr('Solar panels')
+                    tr('Nuclear reactors')
                 ),
                 React.createElement(
                     'p',
@@ -228,7 +218,7 @@ var PvDetails = function (_React$Component) {
         }
     }]);
 
-    return PvDetails;
+    return FusionDetails;
 }(React.Component);
 
-export default PvDetails;
+export default FusionDetails;

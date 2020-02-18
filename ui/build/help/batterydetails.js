@@ -12,40 +12,34 @@ import { Plot } from '../../plot.js';
 /** @brief this class provide a lot of explainations about pv
 */
 
-var PvDetails = function (_React$Component) {
-    _inherits(PvDetails, _React$Component);
+var BatteryDetails = function (_React$Component) {
+    _inherits(BatteryDetails, _React$Component);
 
     /* accepted props
     productionMeans = this.simu.cProd.productionMeans
     countries       = this.simu.cProd.countries
     closeRequested
     */
-    function PvDetails(props) {
-        _classCallCheck(this, PvDetails);
+    function BatteryDetails(props) {
+        _classCallCheck(this, BatteryDetails);
 
-        var _this = _possibleConstructorReturn(this, (PvDetails.__proto__ || Object.getPrototypeOf(PvDetails)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (BatteryDetails.__proto__ || Object.getPrototypeOf(BatteryDetails)).call(this, props));
 
-        _this.cEffi = React.createRef(); //canvas of the effi plot
         _this.cBuildEn = React.createRef(); //canvas of the effi plot
-        _this.cBuildCost = React.createRef(); //canvas of the effi plot
         _this.cPerYearCost = React.createRef(); //canvas of the effi plot
         return _this;
     }
 
-    _createClass(PvDetails, [{
+    _createClass(BatteryDetails, [{
         key: 'componentDidMount',
         value: function componentDidMount() {
-            var pv = this.props.productionMeans.pv;
-            var p = new Plot(pv.efficiency, 300, 200);
-            p.draw(this.cEffi.current.getContext('2d'));
+            var bat = this.props.productionMeans.storage.solutions.battery;
+            var p = void 0;
 
-            p = new Plot(pv.build.energy, 300, 200);
+            p = new Plot(bat.build.energy, 300, 200);
             p.draw(this.cBuildEn.current.getContext('2d'));
 
-            p = new Plot(pv.build.cost, 300, 200);
-            p.draw(this.cBuildCost.current.getContext('2d'));
-
-            p = new Plot(pv.perYear.cost, 300, 200);
+            p = new Plot(bat.perYear.cost, 300, 200);
             p.draw(this.cPerYearCost.current.getContext('2d'));
         }
     }, {
@@ -54,7 +48,7 @@ var PvDetails = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            var pv = this.props.productionMeans.pv;
+            var bat = this.props.productionMeans.storage.solutions.battery;
 
             return React.createElement(
                 'div',
@@ -62,18 +56,18 @@ var PvDetails = function (_React$Component) {
                 React.createElement(
                     'h3',
                     null,
-                    tr('Solar panels')
+                    tr('Batteries')
                 ),
                 React.createElement(
                     'p',
                     null,
-                    tr('Solar pannels are devices that transform sun into electricity.')
+                    tr('Batteries devices that store electricity.')
                 ),
                 React.createElement(
                     'p',
                     null,
-                    tr('The production of PV is '),
-                    React.createElement('img', { src: 'data/pv/eq.svg', alt: 'Pv production eq' }),
+                    tr('The storage capacity of a battery is '),
+                    React.createElement('img', { src: 'data/battery/capa.svg', alt: 'Pv production eq' }),
                     tr('where')
                 ),
                 React.createElement(
@@ -82,54 +76,34 @@ var PvDetails = function (_React$Component) {
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/pv/radFlux.svg', alt: 'Pv production eq' }),
-                        tr('is the maximal radiant flux (W/m2)')
+                        React.createElement('img', { src: 'data/nuke/nameplate.svg', alt: 'Pv production eq' }),
+                        tr('is the installed capacity')
                     ),
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/pv/area.svg', alt: 'Pv production eq' }),
+                        React.createElement('img', { src: 'data/battery/storCapaDecl.svg', alt: 'Pv production eq' }),
                         ' ',
-                        tr('is the area (m2)')
+                        tr('is the yearly storage capacity decline')
                     ),
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/pv/efficiency.svg', alt: 'Pv production eq' }),
+                        React.createElement('img', { src: 'data/battery/curYear.svg', alt: 'Pv production eq' }),
                         ' ',
-                        tr('is the pannel efficiency')
+                        tr('is the current year')
                     ),
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/pv/capaFact.svg', alt: 'Pv production eq' }),
+                        React.createElement('img', { src: 'data/battery/buildYear.svg', alt: 'Pv production eq' }),
                         ' ',
-                        tr('is the capacity factor at that hour')
+                        tr('is the build year')
                     )
                 ),
                 React.createElement(
                     'div',
                     { className: 'hWrapLayout' },
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Efficiency evolution')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Proportion of sun power transformed into electric power. ')
-                        ),
-                        React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.efficiency.source
-                        )
-                    ),
                     React.createElement(
                         'div',
                         null,
@@ -147,27 +121,7 @@ var PvDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            pv.build.energy.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Build cost')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Solar pannel manufacturing cost. ')
-                        ),
-                        React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.build.cost.source
+                            bat.build.energy.source
                         )
                     ),
                     React.createElement(
@@ -181,37 +135,13 @@ var PvDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             null,
-                            tr('Yearly cost per m2')
+                            tr('Yearly cost per storage capacity')
                         ),
                         React.createElement('canvas', { ref: this.cPerYearCost, width: '300', height: '200' }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            pv.perYear.cost.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Capacity factor')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Naturally, photovoltaic panels do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')
-                        ),
-                        React.createElement(
-                            'a',
-                            { href: 'data/pv/allBePvCapaFact.csv' },
-                            tr('Download the historic data for Belgium (1985-2016)')
-                        ),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            'https://www.renewables.ninja/downloads'
+                            bat.perYear.cost.source
                         )
                     )
                 ),
@@ -228,7 +158,7 @@ var PvDetails = function (_React$Component) {
         }
     }]);
 
-    return PvDetails;
+    return BatteryDetails;
 }(React.Component);
 
-export default PvDetails;
+export default BatteryDetails;

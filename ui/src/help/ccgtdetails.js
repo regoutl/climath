@@ -4,7 +4,7 @@ import {Plot} from '../../plot.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
-export default class PvDetails extends React.Component{
+export default class CcgtDetails extends React.Component{
 
     /* accepted props
     productionMeans = this.simu.cProd.productionMeans
@@ -13,25 +13,17 @@ export default class PvDetails extends React.Component{
     */
     constructor(props){
         super(props);
-        this.cEffi = React.createRef();//canvas of the effi plot
-        this.cBuildEn = React.createRef();//canvas of the effi plot
         this.cBuildCost = React.createRef();//canvas of the effi plot
-        this.cPerYearCost = React.createRef();//canvas of the effi plot
     }
 
     componentDidMount(){
-        let pv = this.props.productionMeans.pv;
-        let p = new Plot(pv.efficiency, 300, 200);
-        p.draw(this.cEffi.current.getContext('2d'));
+        let nuke = this.props.productionMeans.nuke;
+        let p;
 
-        p = new Plot(pv.build.energy, 300, 200);
-        p.draw(this.cBuildEn.current.getContext('2d'));
 
-        p = new Plot(pv.build.cost, 300, 200);
+        p = new Plot(nuke.build.cost, 300, 200);
         p.draw(this.cBuildCost.current.getContext('2d'));
 
-        p = new Plot(pv.perYear.cost, 300, 200);
-        p.draw(this.cPerYearCost.current.getContext('2d'));
     }
 
     componentWillUnmount(){
@@ -39,11 +31,11 @@ export default class PvDetails extends React.Component{
     }
 
     render(){
-        let pv = this.props.productionMeans.pv;
+        let nuke = this.props.productionMeans.nuke;
 
 
         return (<div className='detailContent'>
-            <h3>{tr('Solar panels')}</h3>
+            <h3>{tr('Nuclear reactors')}</h3>
             <p>{tr('Solar pannels are devices that transform sun into electricity.')}</p>
 
             <p>{tr('The production of PV is ')}
