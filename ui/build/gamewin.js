@@ -249,7 +249,19 @@ var GameWin = function (_React$Component) {
                 var Help = this.state.help;
                 helpDialog = React.createElement(
                     'div',
-                    { className: 'dialog', style: { left: '5%', right: '5%', top: 60, bottom: 30, background: 'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto' } },
+                    {
+                        className: 'dialog',
+                        style: {
+                            left: '5%',
+                            right: '5%',
+                            top: 'calc(var(--status-bar-height) + 20px)', // 60px
+                            bottom: 30,
+                            background: 'white',
+                            boxShadow: '0 0 50px 10px black',
+                            color: 'black',
+                            overflow: 'auto'
+                        }
+                    },
                     React.createElement(Help, {
                         productionMeans: this.simu.cProd.productionMeans,
                         countries: this.simu.cProd.countries,

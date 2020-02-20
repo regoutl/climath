@@ -217,7 +217,14 @@ var BudgetDialog = function (_React$Component2) {
 
             return React.createElement(
                 'div',
-                { className: 'dialog vLayout', ref: this.me, style: { right: 50, top: 60 } },
+                {
+                    className: 'dialog vLayout',
+                    ref: this.me,
+                    style: {
+                        right: 50,
+                        top: 'calc(var(--status-bar-height) + 20px)' //60
+                    }
+                },
                 React.createElement(
                     'table',
                     null,

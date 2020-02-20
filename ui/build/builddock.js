@@ -8,7 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { tr } from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import { isTouchScreen, isMobile, isSmallScreen } from '../screenDetection.js';
+import { isTouchScreen, isMobile, isSmallScreen, isLandscape } from '../screenDetection.js';
 
 import PvDetails from './help/pvdetails.js';
 import NukeDetails from './help/nukedetails.js';
@@ -56,8 +56,8 @@ var BuildDock = function (_React$Component) {
             var _this2 = this;
 
             var showdock = this.props.target !== undefined;
-            var dockheight = showdock ? 150 : 32;
-            var dockwidth = 350;
+            var dockheight = showdock ? isLandscape() ? 150 : 150 : 32;
+            var dockwidth = isMobile() || isSmallScreen() ? '100%' : 350;
             var defaultRadius = 50,
                 maxRadius = 100;
             var needSlider = {

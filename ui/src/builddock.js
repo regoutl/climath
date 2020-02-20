@@ -1,6 +1,6 @@
 import {tr} from "../../tr/tr.js";
 import { quantityToHuman as valStr} from '../quantitytohuman.js';
-import {isTouchScreen,isMobile,isSmallScreen} from '../screenDetection.js';
+import {isTouchScreen,isMobile,isSmallScreen,isLandscape} from '../screenDetection.js';
 
 import PvDetails from './help/pvdetails.js';
 import NukeDetails from './help/nukedetails.js';
@@ -39,8 +39,9 @@ export default class BuildDock extends React.Component{
 
     render(){
         let showdock = this.props.target !== undefined;
-        let dockheight = showdock ? 150:32;
-        const dockwidth = 350;
+        let dockheight = showdock ?
+                            (isLandscape()? 150:150):32;
+        let dockwidth = isMobile() || isSmallScreen() ? '100%':350;
         const defaultRadius = 50, maxRadius = 100;
         const needSlider = {
             "pv":true,

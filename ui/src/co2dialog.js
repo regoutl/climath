@@ -92,7 +92,15 @@ export class Co2Dialog extends React.Component{
 
 
     render(){
-        return (<div className="dialog vLayout" ref={this.me} style={{left: '50%', top: 60, marginLeft: -210}}>
+        return (<div
+            className="dialog vLayout"
+            ref={this.me}
+            style={{
+                left: '50%',
+                top: 'calc(var(--status-bar-height) + 20px)',//60,
+                marginLeft: -210
+            }}
+        >
         <h3>Emissions</h3>
         <canvas ref={this.pieCharts} width="400" height="200"/>
         <div className="hLayout">

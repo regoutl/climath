@@ -1,0 +1,31 @@
+:root {
+    --build-dock-height: 200px;
+    --status-bar-height: 60px;
+    --menu-icon-size: 100px;
+    --based-font-size: 1.05em;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {:root {
+}}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {:root {
+    --status-bar-height: 50px;
+    --menu-icon-size: 60px;
+}}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {:root {
+}}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {:root {
+    --status-bar-height: 40px;
+    --menu-icon-size: 40px;
+    --based-font-size: 1em;
+}}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {:root {
+}}

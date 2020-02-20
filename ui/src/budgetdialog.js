@@ -185,7 +185,14 @@ export default class BudgetDialog extends React.Component{
         let regSpend = this.props.gdp * this.props.regularTaxRate;
         let energySpend = allOnM.nuke + allOnM.pv + allOnM.fossil + allOnM.storage + allOnM.ccgt + allOnM.wind + allOnM.fusion;
 
-        return (<div className="dialog vLayout" ref={this.me} style={{right: 50, top: 60}}>
+        return (<div
+            className="dialog vLayout"
+            ref={this.me}
+            style={{
+                right: 50,
+                top:'calc(var(--status-bar-height) + 20px)', //60
+            }}
+            >
         <table><tbody>
             <tr>
                 <th style={{verticalAlign: 'middle'}}>{tr("Tax rate (average)")}</th>

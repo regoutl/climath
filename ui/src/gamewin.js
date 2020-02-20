@@ -231,7 +231,19 @@ export default class GameWin extends React.Component{
         if(this.state.help != NullHelp){
             let Help = this.state.help;
             helpDialog = (
-                <div className="dialog" style={{left: '5%', right:'5%', top: 60, bottom: 30, background:'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto'}}>
+                <div
+                    className="dialog"
+                    style={{
+                        left: '5%',
+                        right:'5%',
+                        top: 'calc(var(--status-bar-height) + 20px)',// 60px
+                        bottom: 30,
+                        background:'white',
+                        boxShadow: '0 0 50px 10px black',
+                        color: 'black',
+                        overflow: 'auto'
+                    }}
+                >
                 <Help
                     productionMeans={this.simu.cProd.productionMeans}
                     countries={this.simu.cProd.countries}
