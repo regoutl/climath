@@ -46,10 +46,11 @@ export default class GameWin extends React.Component{
                 explCost: 0,
                 coolingWaterRate: 0,
                 storageCapacity: 0,
+                confirmOnDock: false,
             },
             money: 0,
             currentDialog: NewGameDialog,
-            help: NullHelp
+            help: NullHelp,
         };
 
 
@@ -84,6 +85,7 @@ export default class GameWin extends React.Component{
                     explCost: 0,
                     coolingWaterRate: 0,
                     storageCapacity: 0,
+                    confirmOnDock: false,
                 }
             });
 
@@ -99,7 +101,7 @@ export default class GameWin extends React.Component{
         set the current location of the cursor as {pos:{x:,y:}, radius:}
     */
     setTargetBuildLoc({pos=this.targetBuildLoc.pos,
-                                    radius=this.targetBuildLoc.radius}){
+                    radius=this.targetBuildLoc.radius, confirmOnDock=false}){
 
 
 
@@ -111,7 +113,6 @@ export default class GameWin extends React.Component{
 
 
         if(this.targetBuild.type !== undefined ){
-        //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
             const info = this.simu.onBuildMenuStateChanged(
                 this.targetBuild, targetBuildLoc.pos,
                 targetBuildLoc.radius).info;
@@ -140,6 +141,7 @@ export default class GameWin extends React.Component{
                     explCost: info.expl_cost,
                     coolingWaterRate: info.coolingWaterRate,
                     storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
+                    confirmOnDock: confirmOnDock,
                 }});
         }
 
@@ -250,17 +252,18 @@ export default class GameWin extends React.Component{
         />
 
         <MapView
-            scene={this.scene}
-            onMouseMove={(curPos) => this.setTargetBuildLoc({pos: curPos})}
-            onClick={this.confirmBuild.bind(this)}
+            scene = {this.scene}
+            onBuildChange = {this.setTargetBuildLoc.bind(this)}
+            onConfirmBuild = {this.confirmBuild.bind(this)}
         />
 
         <BuildDock
             buildMenuSelectionCallback = {this.setTargetBuild.bind(this)}
             target = {this.targetBuild.type}
-            info={this.state.currentBuildInfo}
+            info = {this.state.currentBuildInfo}
             sliderRadius = {this.slider}
             detailsRequested = {() => {this.setState({help: PvDetails})}}
+            onConfirmBuild = {() => this.confirmBuild(this.scene.cursor.pos)}
         />
 
         <div

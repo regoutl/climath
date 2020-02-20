@@ -68,6 +68,7 @@ var BuildDock = function (_React$Component) {
                 // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
                 optionTable = React.createElement(BuildDetailsAny, {
                     info: this.props.info,
+                    confirmBuild: this.props.onConfirmBuild,
                     slider: this.props.sliderRadius,
                     restyle: restyle,
                     style: { bottom: 0, height: dockheight, width: dockwidth },
@@ -209,6 +210,11 @@ function BuildDetailsAny(props) {
                 'div',
                 { className: 'button white', onClick: props.detailsRequested },
                 tr('Details...')
+            ),
+            props.info.confirmOnDock && React.createElement(
+                'div',
+                { className: 'button white', onClick: props.confirmBuild },
+                tr('Confirm')
             )
         )
     );

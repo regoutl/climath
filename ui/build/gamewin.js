@@ -52,7 +52,8 @@ var GameWin = function (_React$Component) {
                 pop: 0,
                 explCost: 0,
                 coolingWaterRate: 0,
-                storageCapacity: 0
+                storageCapacity: 0,
+                confirmOnDock: false
             },
             money: 0,
             currentDialog: NewGameDialog,
@@ -94,7 +95,8 @@ var GameWin = function (_React$Component) {
                         pop: 0,
                         explCost: 0,
                         coolingWaterRate: 0,
-                        storageCapacity: 0
+                        storageCapacity: 0,
+                        confirmOnDock: false
                     }
                 });
             }
@@ -115,7 +117,9 @@ var GameWin = function (_React$Component) {
             var _ref$pos = _ref.pos,
                 pos = _ref$pos === undefined ? this.targetBuildLoc.pos : _ref$pos,
                 _ref$radius = _ref.radius,
-                radius = _ref$radius === undefined ? this.targetBuildLoc.radius : _ref$radius;
+                radius = _ref$radius === undefined ? this.targetBuildLoc.radius : _ref$radius,
+                _ref$confirmOnDock = _ref.confirmOnDock,
+                confirmOnDock = _ref$confirmOnDock === undefined ? false : _ref$confirmOnDock;
 
 
             var targetBuildLoc = {
@@ -126,7 +130,6 @@ var GameWin = function (_React$Component) {
                 vBMBuildCost = 0;
 
             if (this.targetBuild.type !== undefined) {
-                //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
                 var info = this.simu.onBuildMenuStateChanged(this.targetBuild, targetBuildLoc.pos, targetBuildLoc.radius).info;
 
                 var avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
@@ -150,7 +153,8 @@ var GameWin = function (_React$Component) {
                         pop: info.pop_affected,
                         explCost: info.expl_cost,
                         coolingWaterRate: info.coolingWaterRate,
-                        storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
+                        storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
+                        confirmOnDock: confirmOnDock
                     } });
             }
         }
@@ -267,10 +271,8 @@ var GameWin = function (_React$Component) {
                 }),
                 React.createElement(MapView, {
                     scene: this.scene,
-                    onMouseMove: function onMouseMove(curPos) {
-                        return _this2.setTargetBuildLoc({ pos: curPos });
-                    },
-                    onClick: this.confirmBuild.bind(this)
+                    onBuildChange: this.setTargetBuildLoc.bind(this),
+                    onConfirmBuild: this.confirmBuild.bind(this)
                 }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
@@ -279,6 +281,9 @@ var GameWin = function (_React$Component) {
                     sliderRadius: this.slider,
                     detailsRequested: function detailsRequested() {
                         _this2.setState({ help: PvDetails });
+                    },
+                    onConfirmBuild: function onConfirmBuild() {
+                        return _this2.confirmBuild(_this2.scene.cursor.pos);
                     }
                 }),
                 React.createElement(

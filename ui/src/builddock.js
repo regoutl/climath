@@ -50,6 +50,7 @@ export default class BuildDock extends React.Component{
             // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
             optionTable = (<BuildDetailsAny
                 info = {this.props.info}
+                confirmBuild = {this.props.onConfirmBuild}
                 slider = {this.props.sliderRadius}
                 restyle = {restyle}
                 style = {{bottom: 0, height: dockheight,width: dockwidth}}
@@ -166,6 +167,11 @@ function BuildDetailsAny(props){
         <div className='hLayout'>
             <div className='button white' onClick={()=>props.onBack(undefined)}>{tr('Back')} </div>
             <div className="button white" onClick={props.detailsRequested}>{tr('Details...')}</div>
+            {props.info.confirmOnDock &&
+                <div className="button white" onClick={props.confirmBuild}>
+                    {tr('Confirm')}
+                </div>
+            }
         </div>
     </div>);
 }

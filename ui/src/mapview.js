@@ -9,8 +9,8 @@ function isCentral(type){
 export default class MapView extends React.Component{
 
     /* accepted props :
-    onMouseMove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
-    onClick : function(curPos)        -> called on click
+    onBuildChange : function({pos: curPos, confirmOnDock: bool})    -> called on mouse move && mouse leave  (then with undefined curPos)
+    onConfirmBuild : function(curPos)        -> called on click
     cursor : {type, radius} type : undefined or string (pv, nuke, ...)
                             radius : undefined or Number. unit : px
     */
@@ -97,7 +97,7 @@ export default class MapView extends React.Component{
         window.removeEventListener('mousedown', this.mousedown);
         window.removeEventListener('mousemove', this.mousemove);
         window.removeEventListener('mouseup', this.mouseup);
-        window.removeEventListener('wheel', this.wheel);
+        // window.removeEventListener('wheel', this.wheel);
 
         window.removeEventListener('touchstart', this.touchstart);
         window.removeEventListener('touchmove', this.touchmove);
@@ -125,7 +125,7 @@ export default class MapView extends React.Component{
                         ref={this.canvas}
                         onMouseLeave={this.mouseleave}
                         onClick={this.click}
-                        onWheel={this.wheel}
+                        onWheel = {this.wheel}
                     >
                         {tr("Your browser is not supported")}
                     </canvas>
@@ -138,6 +138,14 @@ export default class MapView extends React.Component{
     }
 
 
+    onBuildTargetChange({rawPos, confirmOnDock=false}){
+        this.props.onBuildChange({pos: {
+                x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
+                y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
+            },
+            confirmOnDock: confirmOnDock,
+        });
+    }
 
     onmousedown(e){
         if(e.target != this.canvas.current)
@@ -147,8 +155,8 @@ export default class MapView extends React.Component{
         this.physMousePos = {x:e.pageX , y:e.pageY};
     }
     onmousemove(e){
-        // if(e.target != this.canvas)
-        //     return;
+        if(e.target != this.canvas)
+            return;
 
         if(this.isMouseDown){
 
@@ -163,14 +171,7 @@ export default class MapView extends React.Component{
             this.draw();
         }
         else {
-            let rawPos = {x:e.pageX, y : e.pageY};
-
-            let transformedPos = {
-                x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
-                y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
-            };
-
-            this.props.onMouseMove(transformedPos);
+            this.onBuildTargetChange({rawPos: {x:e.pageX, y : e.pageY}})
         }
     }
     onmouseup(e){
@@ -215,12 +216,12 @@ export default class MapView extends React.Component{
             y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
         };
 
-        this.props.onClick(transformedPos);
+        this.props.onConfirmBuild(transformedPos);
     }
 
     //called when cursor leaves direct contact with central area
     onmouseleave(e){
-        this.props.onMouseMove(undefined);
+        this.props.onBuildChange({pos: undefined});
     }
 
     updatetouchstate(touches){
@@ -230,53 +231,71 @@ export default class MapView extends React.Component{
     }
 
     ontouchstart(e){
-        this.updatetouchstate(new Array(...e.touches));
+        if(e.target === this.canvas.current){
+            this.updatetouchstate(new Array(...e.touches));
+            if(e.touches.length === 1){
+                this.onBuildTargetChange({rawPos: {
+                    x : e.touches[0].pageX,
+                    y : e.touches[0].pageY,
+                }, confirmOnDock: true,})
+            }
+        }
     }
     ontouchmove(e){
-        e.preventDefault();
-        let touchstate = this.touchstate;
-        let touches = new Array(...e.targetTouches);
-        if(e.targetTouches.length > 1){//wheel
-            let middle = (x0,x1) => Math.abs(x0 + x1)/2,
-                d0 = {
-                    x: touches[0].pageX,
-                    y: touches[0].pageY,
-                },
-                d1 = {
-                    x: touches[1].pageX,
-                    y: touches[1].pageY,
-                },
-                oldd0 = touchstate.touches[0],
-                oldd1 = touchstate.touches[1];
+        if(e.target === this.canvas.current){
+            e.preventDefault();
+            let touchstate = this.touchstate;
+            let touches = new Array(...e.targetTouches);
+            if(e.targetTouches.length > 1){//wheel
+                let middle = (x0,x1) => Math.abs(x0 + x1)/2,
+                    d0 = {
+                        x: touches[0].pageX,
+                        y: touches[0].pageY,
+                    },
+                    d1 = {
+                        x: touches[1].pageX,
+                        y: touches[1].pageY,
+                    },
+                    oldd0 = touchstate.touches[0],
+                    oldd1 = touchstate.touches[1];
 
-            let zoomArg = {
-                    curX: middle(d0.x, d1.x),
-                    curY: middle(d0.y, d1.y),
-                };
+                let zoomArg = {
+                        curX: middle(d0.x, d1.x),
+                        curY: middle(d0.y, d1.y),
+                    };
 
-            let dist = (x0, y0, x1, y1) =>
-                Math.sqrt( Math.pow(x1-x0,2) + Math.pow(y1-y0,2) );
-            let currDist = dist(d0.x, d0.y, d1.x, d1.y);
-            let oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
+                let dist = (x0, y0, x1, y1) =>
+                    Math.sqrt( Math.pow(x1-x0,2) + Math.pow(y1-y0,2) );
+                let currDist = dist(d0.x, d0.y, d1.x, d1.y);
+                let oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
 
-            zoomArg.deltaY = Math.round(oldDist - currDist);
-            zoomArg.scale = (currDist/oldDist);
+                zoomArg.deltaY = Math.round(oldDist - currDist);
+                zoomArg.scale = (currDist/oldDist);
 
-            this.updatetouchstate(touches);
-            this.zoom(zoomArg);
-        }else{
-            this.transform.x += (touches[0].pageX - touchstate.touches[0].x) / this.transform.scale;
-            this.transform.y += (touches[0].pageY - touchstate.touches[0].y) / this.transform.scale;
+                this.updatetouchstate(touches);
+                this.zoom(zoomArg);
+            }else{
+                this.transform.x += (touches[0].pageX - touchstate.touches[0].x) / this.transform.scale;
+                this.transform.y += (touches[0].pageY - touchstate.touches[0].y) / this.transform.scale;
 
-            this.dragging = true;//used to prevent click when drawing
+                this.onBuildTargetChange({rawPos: {
+                    x : touches[0].pageX,
+                    y : touches[0].pageY,
+                }, confirmOnDock: true,});
 
-            this.updatetouchstate(touches);
-            this.draw();
+                this.dragging = true;//used to prevent click when drawing
+
+                this.updatetouchstate(touches);
+                this.draw();
+            }
         }
     }
     ontouchend(e){
-        this.touchstate = {touches:[], };
-        this.dragging = false;
+        if(e.target === this.canvas.current){
+            e.preventDefault();
+            this.touchstate = {touches:[], };
+            this.dragging = false;
+        }
     }
 
 }
