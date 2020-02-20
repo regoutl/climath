@@ -40,8 +40,8 @@ export default class BuildDock extends React.Component{
     render(){
         let showdock = this.props.target !== undefined;
         let dockheight = showdock ?
-                            (isLandscape()? 150:150):32;
-        let dockwidth = isMobile() || isSmallScreen() ? '100%':350;
+                            'var(--build-dock-height)':32;
+        let dockwidth = isMobile() || isSmallScreen() ? '95%':350;
         const defaultRadius = 50, maxRadius = 100;
         const needSlider = {
             "pv":true,
@@ -72,7 +72,9 @@ export default class BuildDock extends React.Component{
                 style = {{bottom: 0, height: dockheight,width: dockwidth}}
                 needsSlider= {needSlider[this.props.target.toLowerCase()]}
                 onBack = {() => {this.props.buildMenuSelectionCallback(undefined)}}
-                detailsRequested={() => this.props.detailsRequested(detailForTech[this.props.target.toLowerCase()])}
+                detailsRequested={() =>
+                    this.props.detailsRequested(detailForTech[
+                                                this.props.target.toLowerCase()])}
             />)
         }
 
@@ -81,7 +83,7 @@ export default class BuildDock extends React.Component{
             <div>
                 <BuildMenu
                     onClick = {this.props.buildMenuSelectionCallback}
-                    style = {{bottom: (dockheight + 50) +'px'}}
+                    style = {{bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))'}}
                     showMenu = {this.props.target === undefined ?
                                                     true : this.props.target}
                 />
@@ -120,7 +122,9 @@ export default class BuildDock extends React.Component{
 function BuildDetailLine(props){
     return (<tr style = {props.style}>
         <th>{tr(props.name)} :</th>
-        <td className = {props.className} key = {props.name}>{valStr(props.value, props.unit)}</td>
+        <td className = {props.className} key = {props.name}>
+            {valStr(props.value, props.unit)}
+        </td>
     </tr>)
 }
 
@@ -134,7 +138,8 @@ function mapLineFct(props){
 
     return i => {
         //skip the non numerical properties, or the 0
-        if(props.info[i.cn] == 0 || Number.isNaN(props.info[i.cn]) || props.info[i.cn] === undefined)
+        if(props.info[i.cn] == 0 || Number.isNaN(props.info[i.cn])
+                                            || props.info[i.cn] === undefined)
             return null;
 
         return (<BuildDetailLine
@@ -181,8 +186,12 @@ function BuildDetailsAny(props){
         </table>
         {props.needsSlider &&  <InputSlider slider = {props.slider}/>}
         <div className='hLayout'>
-            <div className='button white' onClick={()=>props.onBack(undefined)}>{tr('Back')} </div>
-            <div className="button white" onClick={props.detailsRequested}>{tr('Details...')}</div>
+            <div className='button white' onClick={()=>props.onBack(undefined)}>
+                {tr('Back')}
+            </div>
+            <div className="button white" onClick={props.detailsRequested}>
+                {tr('Details...')}
+            </div>
             {props.info.confirmOnDock &&
                 <div className="button white" onClick={props.confirmBuild}>
                     {tr('Confirm')}

@@ -1,5 +1,5 @@
 :root {
-    --build-dock-height: 200px;
+    --build-dock-height: 220px;
     --status-bar-height: 60px;
     --menu-icon-size: 100px;
     --based-font-size: 1.05em;
@@ -24,6 +24,7 @@
     --status-bar-height: 40px;
     --menu-icon-size: 40px;
     --based-font-size: 1em;
+    --build-dock-height: 150px;
 }}
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */

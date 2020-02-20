@@ -56,8 +56,8 @@ var BuildDock = function (_React$Component) {
             var _this2 = this;
 
             var showdock = this.props.target !== undefined;
-            var dockheight = showdock ? isLandscape() ? 150 : 150 : 32;
-            var dockwidth = isMobile() || isSmallScreen() ? '100%' : 350;
+            var dockheight = showdock ? 'var(--build-dock-height)' : 32;
+            var dockwidth = isMobile() || isSmallScreen() ? '95%' : 350;
             var defaultRadius = 50,
                 maxRadius = 100;
             var needSlider = {
@@ -102,7 +102,7 @@ var BuildDock = function (_React$Component) {
                 null,
                 React.createElement(BuildMenu, {
                     onClick: this.props.buildMenuSelectionCallback,
-                    style: { bottom: dockheight + 50 + 'px' },
+                    style: { bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))' },
                     showMenu: this.props.target === undefined ? true : this.props.target
                 }),
                 optionTable
@@ -220,8 +220,7 @@ function BuildDetailsAny(props) {
                 { className: 'button white', onClick: function onClick() {
                         return props.onBack(undefined);
                     } },
-                tr('Back'),
-                ' '
+                tr('Back')
             ),
             React.createElement(
                 'div',

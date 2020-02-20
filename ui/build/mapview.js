@@ -21,7 +21,8 @@ var MapView = function (_React$Component) {
     _inherits(MapView, _React$Component);
 
     /* accepted props :
-    onBuildChange : function({pos: curPos, confirmOnDock: bool})    -> called on mouse move && mouse leave  (then with undefined curPos)
+    onBuildChange : function({pos: curPos, confirmOnDock: bool})
+            -> called on mouse move && mouse leave  (then with undefined curPos)
     onConfirmBuild : function(curPos)        -> called on click
     cursor : {type, radius} type : undefined or string (pv, nuke, ...)
                             radius : undefined or Number. unit : px
@@ -229,8 +230,8 @@ var MapView = function (_React$Component) {
             this.transform.scale *= scale === 0 ? deltaY > 0 ? 0.8 : 1.25 : scale;
 
             //bounds
-            this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4)); //unzoom
-            this.transform.scale = Math.min(this.transform.scale, Math.pow(1 / 0.8, 8)); //zoom
+            this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4));
+            this.transform.scale = Math.min(this.transform.scale, Math.pow(1 / 0.8, 8));
 
             this.transform.x = curX / this.transform.scale - origin.x;
             this.transform.y = curY / this.transform.scale - origin.y;
@@ -317,7 +318,7 @@ var MapView = function (_React$Component) {
 
                     this.updatetouchstate(touches);
                     this.zoom(zoomArg);
-                } else {
+                } else if (this.touchstate.touches.length > 0) {
                     this.transform.x += (touches[0].pageX - touchstate.touches[0].x) / this.transform.scale;
                     this.transform.y += (touches[0].pageY - touchstate.touches[0].y) / this.transform.scale;
 
@@ -330,6 +331,10 @@ var MapView = function (_React$Component) {
 
                     this.updatetouchstate(touches);
                     this.draw();
+                } else {
+                    this.dragging = true; //used to prevent click when drawing
+                    this.updatetouchstate(touches);
+                    this.draw();
                 }
             }
         }
@@ -338,6 +343,7 @@ var MapView = function (_React$Component) {
         value: function ontouchend(e) {
             if (e.target === this.canvas.current) {
                 e.preventDefault();
+                this.draw();
                 this.touchstate = { touches: [] };
                 this.dragging = false;
             }
