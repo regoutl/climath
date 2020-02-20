@@ -195,19 +195,12 @@ function BuildDetailsAny(props){
 ////// function building the left build Menu  (choose the building type) //////
 ///////////////////////////////////////////////////////////////////////////////
 let lastSelected = undefined;
-// let selecte;
+let selecte;
 function BuildMenu(props){
-    // if(isTouchScreen() || isMobile() || isSmallScreen()){
-    //     selecte = (target) => {
-    //         lastSelected = (lastSelected === target) ? undefined: target;
-    //         return props.onClick(lastSelected)
-    //     }
-    // }else{
-    //     selecte = (target) => {
-    //         lastSelected = lastSelected === target ? undefined: target;
-    //         return props.onClick(lastSelected)
-    //     }
-    // }
+    selecte = (target) => {
+            lastSelected = (lastSelected === target) ? undefined: target;
+            return props.onClick(lastSelected)
+        };
 
     return( <div id = "BuildMenu" className = "vLayout" style = {props.style}>
         {[
@@ -225,7 +218,7 @@ function BuildMenu(props){
                 title = {tr(nrj.name)}
                 data-target = {nrj.target}
                 key = {nrj.target + nrj.src}
-                onClick={() => props.onClick(nrj.target)}
+                onClick={() => selecte(nrj.target)}
             />) : '' )}
     </div>);
 }

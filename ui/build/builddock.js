@@ -241,19 +241,12 @@ function BuildDetailsAny(props) {
 ////// function building the left build Menu  (choose the building type) //////
 ///////////////////////////////////////////////////////////////////////////////
 var lastSelected = undefined;
-// let selecte;
+var selecte = void 0;
 function BuildMenu(props) {
-    // if(isTouchScreen() || isMobile() || isSmallScreen()){
-    //     selecte = (target) => {
-    //         lastSelected = (lastSelected === target) ? undefined: target;
-    //         return props.onClick(lastSelected)
-    //     }
-    // }else{
-    //     selecte = (target) => {
-    //         lastSelected = lastSelected === target ? undefined: target;
-    //         return props.onClick(lastSelected)
-    //     }
-    // }
+    selecte = function selecte(target) {
+        lastSelected = lastSelected === target ? undefined : target;
+        return props.onClick(lastSelected);
+    };
 
     return React.createElement(
         'div',
@@ -266,7 +259,7 @@ function BuildMenu(props) {
                 'data-target': nrj.target,
                 key: nrj.target + nrj.src,
                 onClick: function onClick() {
-                    return props.onClick(nrj.target);
+                    return selecte(nrj.target);
                 }
             }) : '';
         })

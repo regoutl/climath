@@ -155,8 +155,8 @@ export default class MapView extends React.Component{
         this.physMousePos = {x:e.pageX , y:e.pageY};
     }
     onmousemove(e){
-        if(e.target != this.canvas)
-            return;
+        if ("ontouchstart" in document.documentElement)
+            return; // prenvent mouse move event on touch event
 
         if(this.isMouseDown){
 

@@ -174,7 +174,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousemove',
         value: function onmousemove(e) {
-            if (e.target != this.canvas) return;
+            if ("ontouchstart" in document.documentElement) return; // prenvent mouse move event on touch event
 
             if (this.isMouseDown) {
 
