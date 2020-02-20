@@ -2,6 +2,13 @@ import {tr} from "../../tr/tr.js";
 import { quantityToHuman as valStr} from '../quantitytohuman.js';
 import {isTouchScreen,isMobile,isSmallScreen} from '../screenDetection.js';
 
+import PvDetails from './help/pvdetails.js';
+import NukeDetails from './help/nukedetails.js';
+import WindDetails from './help/winddetails.js';
+import CcgtDetails from './help/ccgtdetails.js';
+import BatteryDetails from './help/batterydetails.js';
+import FusionDetails from './help/fusiondetails.js';
+
 ///////////////////////////////////////////////////////////////////////////////
     // List props for this Component :
     // buildMenuSelectionCallback = function setNewTarget(target)
@@ -43,6 +50,14 @@ export default class BuildDock extends React.Component{
             "ccgt":false,
             "wind":true,
         };
+        const detailForTech ={
+            "pv":PvDetails,
+            "nuke":NukeDetails,
+            "fusion":FusionDetails,
+            "battery":BatteryDetails,
+            "ccgt":CcgtDetails,
+            "wind":WindDetails,
+        };
 
         let restyle = {}
         let optionTable = undefined;
@@ -56,7 +71,7 @@ export default class BuildDock extends React.Component{
                 style = {{bottom: 0, height: dockheight,width: dockwidth}}
                 needsSlider= {needSlider[this.props.target.toLowerCase()]}
                 onBack = {() => {this.props.buildMenuSelectionCallback(undefined)}}
-                detailsRequested={this.props.detailsRequested}
+                detailsRequested={() => this.props.detailsRequested(detailForTech[this.props.target.toLowerCase()])}
             />)
         }
 

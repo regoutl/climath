@@ -16,7 +16,9 @@ var PvDetails = function (_React$Component) {
     _inherits(PvDetails, _React$Component);
 
     /* accepted props
-    efficiency : Raw Time varying input
+    productionMeans = this.simu.cProd.productionMeans
+    countries       = this.simu.cProd.countries
+    closeRequested
     */
     function PvDetails(props) {
         _classCallCheck(this, PvDetails);
@@ -26,20 +28,25 @@ var PvDetails = function (_React$Component) {
         _this.cEffi = React.createRef(); //canvas of the effi plot
         _this.cBuildEn = React.createRef(); //canvas of the effi plot
         _this.cBuildCost = React.createRef(); //canvas of the effi plot
+        _this.cPerYearCost = React.createRef(); //canvas of the effi plot
         return _this;
     }
 
     _createClass(PvDetails, [{
         key: 'componentDidMount',
         value: function componentDidMount() {
-            var p = new Plot(this.props.efficiency, 300, 200);
+            var pv = this.props.productionMeans.pv;
+            var p = new Plot(pv.efficiency, 300, 200);
             p.draw(this.cEffi.current.getContext('2d'));
 
-            p = new Plot(this.props.buildEnergy, 300, 200);
+            p = new Plot(pv.build.energy, 300, 200);
             p.draw(this.cBuildEn.current.getContext('2d'));
 
-            p = new Plot(this.props.buildCost, 300, 200);
+            p = new Plot(pv.build.cost, 300, 200);
             p.draw(this.cBuildCost.current.getContext('2d'));
+
+            p = new Plot(pv.perYear.cost, 300, 200);
+            p.draw(this.cPerYearCost.current.getContext('2d'));
         }
     }, {
         key: 'componentWillUnmount',
@@ -47,9 +54,11 @@ var PvDetails = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var pv = this.props.productionMeans.pv;
+
             return React.createElement(
                 'div',
-                null,
+                { className: 'detailContent' },
                 React.createElement(
                     'h3',
                     null,
@@ -63,46 +72,158 @@ var PvDetails = function (_React$Component) {
                 React.createElement(
                     'p',
                     null,
-                    tr('They are caracterised by their efficiency : the proportion of sun power transformed into electric power. ')
+                    tr('The production of PV is '),
+                    React.createElement('img', { src: 'data/pv/eq.svg', alt: 'Pv production eq' }),
+                    tr('where')
                 ),
                 React.createElement(
-                    'h4',
+                    'ul',
                     null,
-                    tr('Efficiency evolution')
+                    React.createElement(
+                        'li',
+                        null,
+                        React.createElement('img', { src: 'data/pv/radFlux.svg', alt: 'Pv production eq' }),
+                        tr('is the maximal radiant flux (W/m2)')
+                    ),
+                    React.createElement(
+                        'li',
+                        null,
+                        React.createElement('img', { src: 'data/pv/area.svg', alt: 'Pv production eq' }),
+                        ' ',
+                        tr('is the area (m2)')
+                    ),
+                    React.createElement(
+                        'li',
+                        null,
+                        React.createElement('img', { src: 'data/pv/efficiency.svg', alt: 'Pv production eq' }),
+                        ' ',
+                        tr('is the pannel efficiency')
+                    ),
+                    React.createElement(
+                        'li',
+                        null,
+                        React.createElement('img', { src: 'data/pv/capaFact.svg', alt: 'Pv production eq' }),
+                        ' ',
+                        tr('is the capacity factor at that hour')
+                    )
                 ),
-                React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
                 React.createElement(
-                    'p',
-                    { className: 'pSource' },
-                    this.props.efficiency.comment
+                    'div',
+                    { className: 'hWrapLayout' },
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Efficiency evolution')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Proportion of sun power transformed into electric power. ')
+                        ),
+                        React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            pv.efficiency.source
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Build energy')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Solar pannel manufacturing requires some energy. ')
+                        ),
+                        React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            pv.build.energy.source
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Build cost')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Solar pannel manufacturing cost. ')
+                        ),
+                        React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            pv.build.cost.source
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Operation and maintenance costs')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Yearly cost per m2')
+                        ),
+                        React.createElement('canvas', { ref: this.cPerYearCost, width: '300', height: '200' }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            pv.perYear.cost.source
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Capacity factor')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Naturally, photovoltaic panels do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')
+                        ),
+                        React.createElement(
+                            'a',
+                            { href: 'data/pv/allBePvCapaFact.csv' },
+                            tr('Download the historic data for Belgium (1985-2016)')
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            'https://www.renewables.ninja/downloads'
+                        )
+                    )
                 ),
                 React.createElement(
-                    'h4',
-                    null,
-                    tr('Build energy')
-                ),
-                React.createElement(
-                    'p',
-                    null,
-                    tr('Solar pannel manufacturing cost some energy. ')
-                ),
-                React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
-                React.createElement(
-                    'p',
-                    null,
-                    tr('This implies that, depending on the country, the pollution varies')
-                ),
-                React.createElement(
-                    'h4',
-                    null,
-                    tr('Build cost')
-                ),
-                React.createElement(
-                    'p',
-                    null,
-                    tr('Solar pannel manufacturing cost. ')
-                ),
-                React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' })
+                    'div',
+                    { className: 'hLayout' },
+                    React.createElement(
+                        'div',
+                        { className: 'button black', onClick: this.props.closeRequested },
+                        tr('Close')
+                    )
+                )
             );
         }
     }]);
