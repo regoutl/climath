@@ -20,14 +20,18 @@ export default class MapLayers extends React.Component{
             'energyGrid':'electricEnergy.png',
             'flows':'flows.png',
         }
-
+        let isSelected = (label) => {
+            if (label in bases)
+                return this.props.base === label;
+            else
+                return this.props[label]
+        }
         let mapListToIm = (label) =>
             <img
                 src = {"res/icons/" + name2icon[label]}
                 className = "mapButton"
                 style = {{
-                    filter: (this.props.base  == label ?
-                                                "none": 'grayscale(100%)'),
+                    filter: (isSelected(label) ? "none": 'grayscale(100%)'),
                 }}
                 onClick = {this.handleClick}
                 data-target = {label}

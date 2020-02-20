@@ -38,13 +38,15 @@ var MapLayers = function (_React$Component) {
                 'energyGrid': 'electricEnergy.png',
                 'flows': 'flows.png'
             };
-
+            var isSelected = function isSelected(label) {
+                if (label in bases) return _this2.props.base === label;else return _this2.props[label];
+            };
             var mapListToIm = function mapListToIm(label) {
                 return React.createElement('img', {
                     src: "res/icons/" + name2icon[label],
                     className: 'mapButton',
                     style: {
-                        filter: _this2.props.base == label ? "none" : 'grayscale(100%)'
+                        filter: isSelected(label) ? "none" : 'grayscale(100%)'
                     },
                     onClick: _this2.handleClick,
                     'data-target': label,
