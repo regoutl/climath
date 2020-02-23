@@ -10,5 +10,8 @@ function isSmallScreen(){
 function screenSize(){
     return {height: window.innerHeight, width: window.innerWidth,};
 }
+function isLandscape(){
+    return window.innerHeight < window.innerWidth;
+}
 
-export {isTouchScreen, isMobile,isSmallScreen, screenSize}
+export {isTouchScreen, isMobile,isSmallScreen, screenSize, isLandscape}

@@ -46,10 +46,11 @@ export default class GameWin extends React.Component{
                 explCost: 0,
                 coolingWaterRate: 0,
                 storageCapacity: 0,
+                confirmOnDock: false,
             },
             money: 0,
             currentDialog: NewGameDialog,
-            help: NullHelp
+            help: NullHelp,
         };
 
 
@@ -84,7 +85,7 @@ export default class GameWin extends React.Component{
         set the current location of the cursor as {pos:{x:,y:}, radius:}
     */
     setTargetBuildLoc({pos=this.targetBuildLoc.pos,
-                                    radius=this.targetBuildLoc.radius}){
+                    radius=this.targetBuildLoc.radius, confirmOnDock=false}){
         if(this.targetBuild.type === undefined)
             return;
 
@@ -114,8 +115,6 @@ export default class GameWin extends React.Component{
 
         let avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
 
-
-
         this.setState({
             currentBuildInfo:{
                 theoReason: info.theorical,
@@ -128,6 +127,7 @@ export default class GameWin extends React.Component{
                 explCost: info.expl_cost,
                 coolingWaterRate: info.coolingWaterRate,
                 storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
+                confirmOnDock: confirmOnDock,
             }});
     }
 
@@ -220,13 +220,25 @@ export default class GameWin extends React.Component{
         if(this.state.help != NullHelp){
             let Help = this.state.help;
             helpDialog = (
-                <div className="dialog" style={{left: '5%', right:'5%', top: 60, bottom: 30, background:'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto'}}>
-                    <CloseButton closeRequested={() => this.setState({help: NullHelp})}/>
-                    <Help
-                        productionMeans={cProd.productionMeans}
-                        countries={cProd.countries}
-                    />
-                </div>);
+                <div
+                    className="dialog"
+                    style={{
+                        left: '5%',
+                        right:'5%',
+                        top: 'calc(var(--status-bar-height) + 20px)',// 60px
+                        bottom: 30,
+                        background:'white',
+                        boxShadow: '0 0 50px 10px black',
+                        color: 'black',
+                        overflow: 'auto'
+                    }}
+                >
+                <Help
+                    productionMeans={this.simu.cProd.productionMeans}
+                    countries={this.simu.cProd.countries}
+                    closeRequested={() => this.setState({help: NullHelp})}
+                />
+            </div>);
         }
 
         let currentDate = this.simu.year;
@@ -247,17 +259,18 @@ export default class GameWin extends React.Component{
         />
 
         <MapView
-            scene={this.scene}
-            onMouseMove={(curPos) => this.setTargetBuildLoc({pos: curPos})}
-            onClick={this.confirmBuild.bind(this)}
+            scene = {this.scene}
+            onBuildChange = {this.setTargetBuildLoc.bind(this)}
+            onConfirmBuild = {this.confirmBuild.bind(this)}
         />
 
         <BuildDock
             buildMenuSelectionCallback = {this.setTargetBuild.bind(this)}
             target = {this.targetBuild.type}
-            info={this.state.currentBuildInfo}
+            info = {this.state.currentBuildInfo}
             sliderRadius = {this.slider}
             detailsRequested = {(c) => {this.setState({help: c})}}
+            onConfirmBuild = {() => this.confirmBuild(this.scene.cursor.pos)}
         />
 
         <div

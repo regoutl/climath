@@ -8,7 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { tr } from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import { isTouchScreen, isMobile, isSmallScreen } from '../screenDetection.js';
+import { isTouchScreen, isMobile, isSmallScreen, isLandscape } from '../screenDetection.js';
 
 import PvDetails from './help/pvdetails.js';
 import NukeDetails from './help/nukedetails.js';
@@ -56,8 +56,8 @@ var BuildDock = function (_React$Component) {
             var _this2 = this;
 
             var showdock = this.props.target !== undefined;
-            var dockheight = showdock ? 150 : 32;
-            var dockwidth = 350;
+            var dockheight = showdock ? 'var(--build-dock-height)' : 32;
+            var dockwidth = isMobile() || isSmallScreen() ? '95%' : 350;
             var defaultRadius = 50,
                 maxRadius = 100;
             var needSlider = {
@@ -83,6 +83,7 @@ var BuildDock = function (_React$Component) {
                 // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
                 optionTable = React.createElement(BuildDetailsAny, {
                     info: this.props.info,
+                    confirmBuild: this.props.onConfirmBuild,
                     slider: this.props.sliderRadius,
                     restyle: restyle,
                     style: { bottom: 0, height: dockheight, width: dockwidth },
@@ -101,7 +102,7 @@ var BuildDock = function (_React$Component) {
                 null,
                 React.createElement(BuildMenu, {
                     onClick: this.props.buildMenuSelectionCallback,
-                    style: { bottom: dockheight + 50 + 'px' },
+                    style: { bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))' },
                     showMenu: this.props.target === undefined ? true : this.props.target
                 }),
                 optionTable
@@ -219,13 +220,17 @@ function BuildDetailsAny(props) {
                 { className: 'button white', onClick: function onClick() {
                         return props.onBack(undefined);
                     } },
-                tr('Back'),
-                ' '
+                tr('Back')
             ),
             React.createElement(
                 'div',
                 { className: 'button white', onClick: props.detailsRequested },
                 tr('Details...')
+            ),
+            props.info.confirmOnDock && React.createElement(
+                'div',
+                { className: 'button white', onClick: props.confirmBuild },
+                tr('Confirm')
             )
         )
     );
@@ -235,19 +240,12 @@ function BuildDetailsAny(props) {
 ////// function building the left build Menu  (choose the building type) //////
 ///////////////////////////////////////////////////////////////////////////////
 var lastSelected = undefined;
-// let selecte;
+var selecte = void 0;
 function BuildMenu(props) {
-    // if(isTouchScreen() || isMobile() || isSmallScreen()){
-    //     selecte = (target) => {
-    //         lastSelected = (lastSelected === target) ? undefined: target;
-    //         return props.onClick(lastSelected)
-    //     }
-    // }else{
-    //     selecte = (target) => {
-    //         lastSelected = lastSelected === target ? undefined: target;
-    //         return props.onClick(lastSelected)
-    //     }
-    // }
+    selecte = function selecte(target) {
+        lastSelected = lastSelected === target ? undefined : target;
+        return props.onClick(lastSelected);
+    };
 
     return React.createElement(
         'div',
@@ -260,7 +258,7 @@ function BuildMenu(props) {
                 'data-target': nrj.target,
                 key: nrj.target + nrj.src,
                 onClick: function onClick() {
-                    return props.onClick(nrj.target);
+                    return selecte(nrj.target);
                 }
             }) : '';
         })

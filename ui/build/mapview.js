@@ -21,8 +21,9 @@ var MapView = function (_React$Component) {
     _inherits(MapView, _React$Component);
 
     /* accepted props :
-    onMouseMove : function(curPos)    -> called on mouse move && mouse leave  (then with null curPos)
-    onClick : function(curPos)        -> called on click
+    onBuildChange : function({pos: curPos, confirmOnDock: bool})
+            -> called on mouse move && mouse leave  (then with undefined curPos)
+    onConfirmBuild : function(curPos)        -> called on click
     cursor : {type, radius} type : undefined or string (pv, nuke, ...)
                             radius : undefined or Number. unit : px
     */
@@ -90,7 +91,6 @@ var MapView = function (_React$Component) {
             this.draw();
             window.addEventListener('resize', this.draw);
 
-            //        window.addEventListener('mousedown', this.mousedown);
             window.addEventListener('mousemove', this.mousemove);
             window.addEventListener('mouseup', this.mouseup);
 
@@ -104,7 +104,6 @@ var MapView = function (_React$Component) {
         value: function componentWillUnmount() {
             window.removeEventListener('resize', this.draw);
 
-            //        window.removeEventListener('mousedown', this.mousedown);
             window.removeEventListener('mousemove', this.mousemove);
             window.removeEventListener('mouseup', this.mouseup);
 
@@ -149,6 +148,20 @@ var MapView = function (_React$Component) {
             this.props.scene.draw(this.transform, this.state.base, this.state.energyGrid, this.state.flows);
         }
     }, {
+        key: 'onBuildTargetChange',
+        value: function onBuildTargetChange(_ref2) {
+            var rawPos = _ref2.rawPos,
+                _ref2$confirmOnDock = _ref2.confirmOnDock,
+                confirmOnDock = _ref2$confirmOnDock === undefined ? false : _ref2$confirmOnDock;
+
+            this.props.onBuildChange({ pos: {
+                    x: Math.round(rawPos.x / this.transform.scale - this.transform.x),
+                    y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
+                },
+                confirmOnDock: confirmOnDock
+            });
+        }
+    }, {
         key: 'onmousedown',
         value: function onmousedown(e) {
             if (e.target != this.canvas.current) return;
@@ -159,6 +172,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousemove',
         value: function onmousemove(e) {
+            if ("ontouchstart" in document.documentElement) return; // prenvent mouse move event on touch event
 
             if (this.isMouseDown) {
 
@@ -174,14 +188,7 @@ var MapView = function (_React$Component) {
             } else {
                 if (e.target != this.canvas.current) return;
 
-                var rawPos = { x: e.pageX, y: e.pageY };
-
-                var transformedPos = {
-                    x: Math.round(rawPos.x / this.transform.scale - this.transform.x),
-                    y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
-                };
-
-                this.props.onMouseMove(transformedPos);
+                this.onBuildTargetChange({ rawPos: { x: e.pageX, y: e.pageY } });
             }
         }
     }, {
@@ -207,12 +214,12 @@ var MapView = function (_React$Component) {
         }
     }, {
         key: 'zoom',
-        value: function zoom(_ref2) {
-            var curX = _ref2.curX,
-                curY = _ref2.curY,
-                deltaY = _ref2.deltaY,
-                _ref2$scale = _ref2.scale,
-                scale = _ref2$scale === undefined ? 0 : _ref2$scale;
+        value: function zoom(_ref3) {
+            var curX = _ref3.curX,
+                curY = _ref3.curY,
+                deltaY = _ref3.deltaY,
+                _ref3$scale = _ref3.scale,
+                scale = _ref3$scale === undefined ? 0 : _ref3$scale;
 
             var origin = {
                 x: curX / this.transform.scale - this.transform.x,
@@ -222,8 +229,8 @@ var MapView = function (_React$Component) {
             this.transform.scale *= scale === 0 ? deltaY > 0 ? 0.8 : 1.25 : scale;
 
             //bounds
-            this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4)); //unzoom
-            this.transform.scale = Math.min(this.transform.scale, Math.pow(1 / 0.8, 8)); //zoom
+            this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4));
+            this.transform.scale = Math.min(this.transform.scale, Math.pow(1 / 0.8, 8));
 
             this.transform.x = curX / this.transform.scale - origin.x;
             this.transform.y = curY / this.transform.scale - origin.y;
@@ -241,7 +248,7 @@ var MapView = function (_React$Component) {
                 y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
             };
 
-            this.props.onClick(transformedPos);
+            this.props.onConfirmBuild(transformedPos);
         }
 
         //called when cursor leaves direct contact with central area
@@ -249,7 +256,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmouseleave',
         value: function onmouseleave(e) {
-            this.props.onMouseMove(null);
+            this.props.onBuildChange({ pos: undefined });
         }
     }, {
         key: 'updatetouchstate',
@@ -261,61 +268,84 @@ var MapView = function (_React$Component) {
     }, {
         key: 'ontouchstart',
         value: function ontouchstart(e) {
-            this.updatetouchstate(new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.touches))))());
+            if (e.target === this.canvas.current) {
+                this.updatetouchstate(new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.touches))))());
+                if (e.touches.length === 1) {
+                    this.onBuildTargetChange({ rawPos: {
+                            x: e.touches[0].pageX,
+                            y: e.touches[0].pageY
+                        }, confirmOnDock: true });
+                }
+            }
         }
     }, {
         key: 'ontouchmove',
         value: function ontouchmove(e) {
-            e.preventDefault();
-            var touchstate = this.touchstate;
-            var touches = new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.targetTouches))))();
-            if (e.targetTouches.length > 1) {
-                //wheel
-                var middle = function middle(x0, x1) {
-                    return Math.abs(x0 + x1) / 2;
-                },
-                    d0 = {
-                    x: touches[0].pageX,
-                    y: touches[0].pageY
-                },
-                    d1 = {
-                    x: touches[1].pageX,
-                    y: touches[1].pageY
-                },
-                    oldd0 = touchstate.touches[0],
-                    oldd1 = touchstate.touches[1];
+            if (e.target === this.canvas.current) {
+                e.preventDefault();
+                var touchstate = this.touchstate;
+                var touches = new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.targetTouches))))();
+                if (e.targetTouches.length > 1) {
+                    //wheel
+                    var middle = function middle(x0, x1) {
+                        return Math.abs(x0 + x1) / 2;
+                    },
+                        d0 = {
+                        x: touches[0].pageX,
+                        y: touches[0].pageY
+                    },
+                        d1 = {
+                        x: touches[1].pageX,
+                        y: touches[1].pageY
+                    },
+                        oldd0 = touchstate.touches[0],
+                        oldd1 = touchstate.touches[1];
 
-                var zoomArg = {
-                    curX: middle(d0.x, d1.x),
-                    curY: middle(d0.y, d1.y)
-                };
+                    var zoomArg = {
+                        curX: middle(d0.x, d1.x),
+                        curY: middle(d0.y, d1.y)
+                    };
 
-                var dist = function dist(x0, y0, x1, y1) {
-                    return Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
-                };
-                var currDist = dist(d0.x, d0.y, d1.x, d1.y);
-                var oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
+                    var dist = function dist(x0, y0, x1, y1) {
+                        return Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
+                    };
+                    var currDist = dist(d0.x, d0.y, d1.x, d1.y);
+                    var oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
 
-                zoomArg.deltaY = Math.round(oldDist - currDist);
-                zoomArg.scale = currDist / oldDist;
+                    zoomArg.deltaY = Math.round(oldDist - currDist);
+                    zoomArg.scale = currDist / oldDist;
 
-                this.updatetouchstate(touches);
-                this.zoom(zoomArg);
-            } else {
-                this.transform.x += (touches[0].pageX - touchstate.touches[0].x) / this.transform.scale;
-                this.transform.y += (touches[0].pageY - touchstate.touches[0].y) / this.transform.scale;
+                    this.updatetouchstate(touches);
+                    this.zoom(zoomArg);
+                } else if (this.touchstate.touches.length > 0) {
+                    this.transform.x += (touches[0].pageX - touchstate.touches[0].x) / this.transform.scale;
+                    this.transform.y += (touches[0].pageY - touchstate.touches[0].y) / this.transform.scale;
 
-                this.dragging = true; //used to prevent click when drawing
+                    this.onBuildTargetChange({ rawPos: {
+                            x: touches[0].pageX,
+                            y: touches[0].pageY
+                        }, confirmOnDock: true });
 
-                this.updatetouchstate(touches);
-                this.draw();
+                    this.dragging = true; //used to prevent click when drawing
+
+                    this.updatetouchstate(touches);
+                    this.draw();
+                } else {
+                    this.dragging = true; //used to prevent click when drawing
+                    this.updatetouchstate(touches);
+                    this.draw();
+                }
             }
         }
     }, {
         key: 'ontouchend',
         value: function ontouchend(e) {
-            this.touchstate = { touches: [] };
-            this.dragging = false;
+            if (e.target === this.canvas.current) {
+                e.preventDefault();
+                this.draw();
+                this.touchstate = { touches: [] };
+                this.dragging = false;
+            }
         }
     }]);
 

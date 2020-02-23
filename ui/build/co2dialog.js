@@ -106,12 +106,17 @@ export var Co2Dialog = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            // <div className="button white" onClick={() => this.props.detailsRequested()}>{tr('Details...')}</div>
-
-
             return React.createElement(
                 'div',
-                { className: 'dialog vLayout', ref: this.me, style: { left: '50%', top: 60, marginLeft: -210 } },
+                {
+                    className: 'dialog vLayout',
+                    ref: this.me,
+                    style: {
+                        left: '50%',
+                        top: 'calc(var(--status-bar-height) + 20px)', //60,
+                        marginLeft: -210
+                    }
+                },
                 React.createElement(
                     'h3',
                     null,

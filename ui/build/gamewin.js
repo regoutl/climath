@@ -52,7 +52,8 @@ var GameWin = function (_React$Component) {
                 pop: 0,
                 explCost: 0,
                 coolingWaterRate: 0,
-                storageCapacity: 0
+                storageCapacity: 0,
+                confirmOnDock: false
             },
             money: 0,
             currentDialog: NewGameDialog,
@@ -100,7 +101,9 @@ var GameWin = function (_React$Component) {
             var _ref$pos = _ref.pos,
                 pos = _ref$pos === undefined ? this.targetBuildLoc.pos : _ref$pos,
                 _ref$radius = _ref.radius,
-                radius = _ref$radius === undefined ? this.targetBuildLoc.radius : _ref$radius;
+                radius = _ref$radius === undefined ? this.targetBuildLoc.radius : _ref$radius,
+                _ref$confirmOnDock = _ref.confirmOnDock,
+                confirmOnDock = _ref$confirmOnDock === undefined ? false : _ref$confirmOnDock;
 
             if (this.targetBuild.type === undefined) return;
 
@@ -139,7 +142,8 @@ var GameWin = function (_React$Component) {
                     pop: info.pop_affected,
                     explCost: info.expl_cost,
                     coolingWaterRate: info.coolingWaterRate,
-                    storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
+                    storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
+                    confirmOnDock: confirmOnDock
                 } });
         }
     }, {
@@ -240,13 +244,25 @@ var GameWin = function (_React$Component) {
                 var Help = this.state.help;
                 helpDialog = React.createElement(
                     'div',
-                    { className: 'dialog', style: { left: '5%', right: '5%', top: 60, bottom: 30, background: 'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto' } },
-                    React.createElement(CloseButton, { closeRequested: function closeRequested() {
-                            return _this2.setState({ help: NullHelp });
-                        } }),
+                    {
+                        className: 'dialog',
+                        style: {
+                            left: '5%',
+                            right: '5%',
+                            top: 'calc(var(--status-bar-height) + 20px)', // 60px
+                            bottom: 30,
+                            background: 'white',
+                            boxShadow: '0 0 50px 10px black',
+                            color: 'black',
+                            overflow: 'auto'
+                        }
+                    },
                     React.createElement(Help, {
-                        productionMeans: cProd.productionMeans,
-                        countries: cProd.countries
+                        productionMeans: this.simu.cProd.productionMeans,
+                        countries: this.simu.cProd.countries,
+                        closeRequested: function closeRequested() {
+                            return _this2.setState({ help: NullHelp });
+                        }
                     })
                 );
             }
@@ -270,10 +286,8 @@ var GameWin = function (_React$Component) {
                 }),
                 React.createElement(MapView, {
                     scene: this.scene,
-                    onMouseMove: function onMouseMove(curPos) {
-                        return _this2.setTargetBuildLoc({ pos: curPos });
-                    },
-                    onClick: this.confirmBuild.bind(this)
+                    onBuildChange: this.setTargetBuildLoc.bind(this),
+                    onConfirmBuild: this.confirmBuild.bind(this)
                 }),
                 React.createElement(BuildDock, {
                     buildMenuSelectionCallback: this.setTargetBuild.bind(this),
@@ -282,6 +296,9 @@ var GameWin = function (_React$Component) {
                     sliderRadius: this.slider,
                     detailsRequested: function detailsRequested(c) {
                         _this2.setState({ help: c });
+                    },
+                    onConfirmBuild: function onConfirmBuild() {
+                        return _this2.confirmBuild(_this2.scene.cursor.pos);
                     }
                 }),
                 React.createElement(
