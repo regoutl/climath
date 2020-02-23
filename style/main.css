@@ -214,36 +214,8 @@ canvas {
     cursor: pointer;
     width: 32px;
 }
-#bConfigure{
-    top: 10px;
-    left: 0;
-}
 
-#bStats{
-    top: 60px;
-    left: 0;
-    display: none;
-}
 
-#bClosePlot{
-    top: 0;
-    right: 0;
-    left: auto;
-}
-
-#bDownloadDic{
-    top: 120px;
-    left: 20px;
-}
-
-.scaleInvariant{
-    position: fixed;
-    transform-origin: center;
-    top: 300px;
-    left: 300px;
-    z-index: 50;
-    will-change: transform;
-}
 
 
 
@@ -505,4 +477,22 @@ canvas {
 .hWrapLayout > *{
     width: 400px;
     margin: 10px;
+}
+
+.plotContainer{
+	position: relative;
+}
+
+.bDownloadPlotCsv{
+	position: absolute;
+	right: -32px;
+	top: 0;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.1s;
+}
+
+
+.plotContainer:hover .bDownloadPlotCsv{
+	opacity: 1;
 }

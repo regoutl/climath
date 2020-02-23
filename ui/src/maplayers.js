@@ -21,7 +21,7 @@ export default class MapLayers extends React.Component{
             'flows':'flows.png',
         }
         let isSelected = (label) => {
-            if (label in bases)
+            if (bases.includes(label))
                 return this.props.base === label;
             else
                 return this.props[label]

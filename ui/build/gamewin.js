@@ -142,8 +142,7 @@ var GameWin = function (_React$Component) {
                     pop: info.pop_affected,
                     explCost: info.expl_cost,
                     coolingWaterRate: info.coolingWaterRate,
-                    storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
-                    confirmOnDock: confirmOnDock
+                    storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
                 } });
         }
     }, {
@@ -257,6 +256,9 @@ var GameWin = function (_React$Component) {
                             overflow: 'auto'
                         }
                     },
+                    React.createElement(CloseButton, { closeRequested: function closeRequested() {
+                            return _this2.setState({ help: NullHelp });
+                        } }),
                     React.createElement(Help, {
                         productionMeans: this.simu.cProd.productionMeans,
                         countries: this.simu.cProd.countries,

@@ -127,7 +127,6 @@ export default class GameWin extends React.Component{
                 explCost: info.expl_cost,
                 coolingWaterRate: info.coolingWaterRate,
                 storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
-                confirmOnDock: confirmOnDock,
             }});
     }
 
@@ -233,6 +232,7 @@ export default class GameWin extends React.Component{
                         overflow: 'auto'
                     }}
                 >
+                <CloseButton closeRequested={() => this.setState({help: NullHelp})}/>
                 <Help
                     productionMeans={this.simu.cProd.productionMeans}
                     countries={this.simu.cProd.countries}

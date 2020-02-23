@@ -39,7 +39,7 @@ var MapLayers = function (_React$Component) {
                 'flows': 'flows.png'
             };
             var isSelected = function isSelected(label) {
-                if (label in bases) return _this2.props.base === label;else return _this2.props[label];
+                if (bases.includes(label)) return _this2.props.base === label;else return _this2.props[label];
             };
             var mapListToIm = function mapListToIm(label) {
                 return React.createElement('img', {

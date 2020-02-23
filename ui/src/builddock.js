@@ -41,7 +41,7 @@ export default class BuildDock extends React.Component{
         let showdock = this.props.target !== undefined;
         let dockheight = showdock ?
                             'var(--build-dock-height)':32;
-        let dockwidth = isMobile() || isSmallScreen() ? '95%':350;
+        let dockwidth = (isMobile() || isSmallScreen()) ? '95%':350;
         const defaultRadius = 50, maxRadius = 100;
         const needSlider = {
             "pv":true,
