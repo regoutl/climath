@@ -7,7 +7,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { tr } from '../../../tr/tr.js';
-import { Plot } from '../../plot.js';
+import ReactPlot from '../reactplot.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -23,29 +23,10 @@ var BatteryDetails = function (_React$Component) {
     function BatteryDetails(props) {
         _classCallCheck(this, BatteryDetails);
 
-        var _this = _possibleConstructorReturn(this, (BatteryDetails.__proto__ || Object.getPrototypeOf(BatteryDetails)).call(this, props));
-
-        _this.cBuildEn = React.createRef(); //canvas of the effi plot
-        _this.cPerYearCost = React.createRef(); //canvas of the effi plot
-        return _this;
+        return _possibleConstructorReturn(this, (BatteryDetails.__proto__ || Object.getPrototypeOf(BatteryDetails)).call(this, props));
     }
 
     _createClass(BatteryDetails, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            var bat = this.props.productionMeans.storage.solutions.battery;
-            var p = void 0;
-
-            p = new Plot(bat.build.energy, 300, 200);
-            p.draw(this.cBuildEn.current.getContext('2d'));
-
-            p = new Plot(bat.perYear.cost, 300, 200);
-            p.draw(this.cPerYearCost.current.getContext('2d'));
-        }
-    }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {}
-    }, {
         key: 'render',
         value: function render() {
             var bat = this.props.productionMeans.storage.solutions.battery;
@@ -61,49 +42,57 @@ var BatteryDetails = function (_React$Component) {
                 React.createElement(
                     'p',
                     null,
-                    tr('Batteries devices that store electricity.')
-                ),
-                React.createElement(
-                    'p',
-                    null,
-                    tr('The storage capacity of a battery is '),
-                    React.createElement('img', { src: 'data/battery/capa.svg', alt: 'Pv production eq' }),
-                    tr('where')
-                ),
-                React.createElement(
-                    'ul',
-                    null,
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/nuke/nameplate.svg', alt: 'Pv production eq' }),
-                        tr('is the installed capacity')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/battery/storCapaDecl.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the yearly storage capacity decline')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/battery/curYear.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the current year')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/battery/buildYear.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the build year')
-                    )
+                    tr('Batteries are devices that store electricity.')
                 ),
                 React.createElement(
                     'div',
                     { className: 'hWrapLayout' },
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Storage capacity')
+                        ),
+                        React.createElement('img', { src: 'data/battery/capa.svg', alt: 'Pv production eq' }),
+                        React.createElement(
+                            'ul',
+                            null,
+                            [{ img: 'symbols/nameplate', descr: 'is the installed capacity' }, { img: 'symbols/decline', descr: 'is the yearly storage capacity decline' }, { img: 'symbols/year', descr: 'is the current year' }, { img: 'symbols/year0', descr: 'is the build year' }].map(function (i) {
+                                return React.createElement(
+                                    'li',
+                                    { key: i.img },
+                                    React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                                    ' ',
+                                    tr(i.descr)
+                                );
+                            })
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Stored energy')
+                        ),
+                        React.createElement('img', { src: 'data/battery/storedEq.svg', alt: 'Pv production eq' }),
+                        React.createElement(
+                            'ul',
+                            null,
+                            [{ img: 'battery/st', descr: 'is the energy stored at hour t' }, { img: 'symbols/decline', descr: 'is the yearly storage capacity decline' }, { img: 'battery/d', descr: 'is the hourly power loss' }, { img: 'symbols/capaFact', descr: 'is the round trip efficiency' }, { img: 'battery/it', descr: 'is the energy send to load the battery' }, { img: 'symbols/prod', descr: 'is the energy production of the battery' }, { img: 'battery/capacity', descr: 'is the storage capacity' }].map(function (i) {
+                                return React.createElement(
+                                    'li',
+                                    { key: i.img },
+                                    React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                                    ' ',
+                                    tr(i.descr)
+                                );
+                            })
+                        )
+                    ),
                     React.createElement(
                         'div',
                         null,
@@ -115,9 +104,9 @@ var BatteryDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             null,
-                            tr('Solar pannel manufacturing requires some energy. ')
+                            tr('Battery manufacturing requires some energy. ')
                         ),
-                        React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: bat.build.energy }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -137,21 +126,12 @@ var BatteryDetails = function (_React$Component) {
                             null,
                             tr('Yearly cost per storage capacity')
                         ),
-                        React.createElement('canvas', { ref: this.cPerYearCost, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: bat.perYear.cost }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
                             bat.perYear.cost.source
                         )
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'hLayout' },
-                    React.createElement(
-                        'div',
-                        { className: 'button black', onClick: this.props.closeRequested },
-                        tr('Close')
                     )
                 )
             );

@@ -569,7 +569,8 @@ export default class Scene{
         this.mvProj.uniform(gl, this._mvLocInPtsShader);
         gl.uniform2fv(this._invScreenSizePtsLocInPtsShader, [2.0/gl.canvas.width, 2.0/gl.canvas.height]); //no cursor : offset it
 
-        if(this.cursor.type === undefined)
+
+        if(this.cursor.type === undefined || this.cursor.pos === null)
             gl.uniform4fv(this._cursorLocInPtsShader, [-1000000, 0, 0, 0]); //no cursor : offset it
         else{
             gl.uniform4fv(this._cursorLocInPtsShader,

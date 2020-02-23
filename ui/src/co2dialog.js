@@ -3,16 +3,6 @@ import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import {pieChart} from '../charts.js';
 import {stackedLineChart} from '../charts.js';
 
-let palette =     {
-    nuke: 'yellow',
-    pv:'rgb(70, 85,180)',
-    fossil:'rgb(255, 124, 84)',
-    storage:'rgb(0, 255, 250)',
-    constructions:'red',
-    ccgt:'rgb(169, 202, 250)',
-    wind: 'white',
-    fusion: 'green',
-  };
 
 export class Co2Dialog extends React.Component{
 
@@ -76,7 +66,7 @@ export class Co2Dialog extends React.Component{
 
 
         stackedLineChart(ctx, values, {
-            palette: palette,
+            palette: 'energy',
             order: ['fossil', 'ccgt', 'nuke', 'fusion', 'constructions'],
             from: this.props.history[0].year,
             to: this.props.history[this.props.history.length-1].year,
@@ -92,12 +82,14 @@ export class Co2Dialog extends React.Component{
 
 
     render(){
+        // <div className="button white" onClick={() => this.props.detailsRequested()}>{tr('Details...')}</div>
+
+
         return (<div className="dialog vLayout" ref={this.me} style={{left: '50%', top: 60, marginLeft: -210}}>
         <h3>Emissions</h3>
         <canvas ref={this.pieCharts} width="400" height="200"/>
         <div className="hLayout">
             <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
-            <div className="button white" onClick={this.props.detailsRequested}>{tr('Details...')}</div>
         </div>
         </div>);
     }

@@ -7,7 +7,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { tr } from '../../../tr/tr.js';
-import { Plot } from '../../plot.js';
+import ReactPlot from '../reactplot.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -23,35 +23,10 @@ var PvDetails = function (_React$Component) {
     function PvDetails(props) {
         _classCallCheck(this, PvDetails);
 
-        var _this = _possibleConstructorReturn(this, (PvDetails.__proto__ || Object.getPrototypeOf(PvDetails)).call(this, props));
-
-        _this.cEffi = React.createRef(); //canvas of the effi plot
-        _this.cBuildEn = React.createRef(); //canvas of the effi plot
-        _this.cBuildCost = React.createRef(); //canvas of the effi plot
-        _this.cPerYearCost = React.createRef(); //canvas of the effi plot
-        return _this;
+        return _possibleConstructorReturn(this, (PvDetails.__proto__ || Object.getPrototypeOf(PvDetails)).call(this, props));
     }
 
     _createClass(PvDetails, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            var pv = this.props.productionMeans.pv;
-            var p = new Plot(pv.efficiency, 300, 200);
-            p.draw(this.cEffi.current.getContext('2d'));
-
-            p = new Plot(pv.build.energy, 300, 200);
-            p.draw(this.cBuildEn.current.getContext('2d'));
-
-            p = new Plot(pv.build.cost, 300, 200);
-            p.draw(this.cBuildCost.current.getContext('2d'));
-
-            p = new Plot(pv.perYear.cost, 300, 200);
-            p.draw(this.cPerYearCost.current.getContext('2d'));
-        }
-    }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {}
-    }, {
         key: 'render',
         value: function render() {
             var pv = this.props.productionMeans.pv;
@@ -70,46 +45,60 @@ var PvDetails = function (_React$Component) {
                     tr('Solar pannels are devices that transform sun into electricity.')
                 ),
                 React.createElement(
-                    'p',
-                    null,
-                    tr('The production of PV is '),
-                    React.createElement('img', { src: 'data/pv/eq.svg', alt: 'Pv production eq' }),
-                    tr('where')
-                ),
-                React.createElement(
-                    'ul',
-                    null,
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/radFlux.svg', alt: 'Pv production eq' }),
-                        tr('is the maximal radiant flux (W/m2)')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/area.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the area (m2)')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/efficiency.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the pannel efficiency')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/capaFact.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the capacity factor at that hour')
-                    )
-                ),
-                React.createElement(
                     'div',
                     { className: 'hWrapLayout' },
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Production')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            'Production of a PV farm of area ',
+                            React.createElement('img', { src: 'data/symbols/area.svg' }),
+                            ' is : '
+                        ),
+                        React.createElement('img', { src: 'data/pv/production.svg', alt: 'Pv production eq' }),
+                        React.createElement(
+                            'ul',
+                            null,
+                            [{ img: 'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)' }, { img: 'symbols/efficiency', descr: 'is the pannel efficiency' }, { img: 'symbols/capaFactT', descr: 'is the capacity factor at that hour' }, { img: 'symbols/decline', descr: 'is the yearly efficiency decline' }, { img: 'symbols/year', descr: 'is the current year' }, { img: 'symbols/year0', descr: 'is the build year' }].map(function (i) {
+                                return React.createElement(
+                                    'li',
+                                    { key: i.img },
+                                    React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                                    ' ',
+                                    tr(i.descr)
+                                );
+                            })
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Radiant flux')
+                        ),
+                        React.createElement('img', { src: 'data/pv/maxRadFlux.svg', alt: 'max rad flux eq' }),
+                        React.createElement(
+                            'p',
+                            null,
+                            React.createElement('img', { src: 'data/symbols/avgCapaFact.svg', alt: 'avgCapaFact' }),
+                            ' is the average capacity factor and GHI is'
+                        ),
+                        React.createElement('img', { src: 'data/pv/globalHorisontalIrradiance.png', alt: 'ghi be', width: '300' }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            'https://globalsolaratlas.info/'
+                        )
+                    ),
                     React.createElement(
                         'div',
                         null,
@@ -123,7 +112,7 @@ var PvDetails = function (_React$Component) {
                             null,
                             tr('Proportion of sun power transformed into electric power. ')
                         ),
-                        React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: pv.efficiency }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -143,7 +132,7 @@ var PvDetails = function (_React$Component) {
                             null,
                             tr('Solar pannel manufacturing requires some energy. ')
                         ),
-                        React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: pv.build.energy }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -163,7 +152,7 @@ var PvDetails = function (_React$Component) {
                             null,
                             tr('Solar pannel manufacturing cost. ')
                         ),
-                        React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: pv.build.cost }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -183,7 +172,7 @@ var PvDetails = function (_React$Component) {
                             null,
                             tr('Yearly cost per m2')
                         ),
-                        React.createElement('canvas', { ref: this.cPerYearCost, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: pv.perYear.cost }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -213,15 +202,6 @@ var PvDetails = function (_React$Component) {
                             { className: 'pSource' },
                             'https://www.renewables.ninja/downloads'
                         )
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'hLayout' },
-                    React.createElement(
-                        'div',
-                        { className: 'button black', onClick: this.props.closeRequested },
-                        tr('Close')
                     )
                 )
             );

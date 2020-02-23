@@ -51,6 +51,7 @@ export class Raw{
 		return this.years[this.histoUntill - 2000];
 	}
 
+
 	/// return the value of the input of the given year.
 	/// year must be in [1950; 2050[
 	at(year){
@@ -59,7 +60,7 @@ export class Raw{
 
 		if(year > 2050)
 			year = 2050;
-		
+
 		return this.years[year - 2000];
 
 

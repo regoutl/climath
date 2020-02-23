@@ -511,6 +511,7 @@ canvas {
 	padding: 20px;
 	border-radius: 10px;
 	overflow: visible;
+	user-select: text;
 }
 
 
@@ -562,7 +563,7 @@ canvas {
 /* Details  */
 .detailContent h3{
 	font-size: 1.4em;
-	
+
 }
 
 .detailContent h4{
@@ -582,4 +583,29 @@ canvas {
 .hWrapLayout > *{
 	width: 400px;
 	margin: 10px;
+	flex-grow: 1;
+}
+
+ul{
+   list-style-type: none;
+}
+
+
+
+.plotContainer{
+	position: relative;
+}
+
+.bDownloadPlotCsv{
+	position: absolute;
+	right: -32px;
+	top: 0;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.1s;
+}
+
+
+.plotContainer:hover .bDownloadPlotCsv{
+	opacity: 1;
 }

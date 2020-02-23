@@ -1,6 +1,7 @@
 
 import {tr} from '../../../tr/tr.js';
-import {Plot} from '../../plot.js';
+import ReactPlot from '../reactplot.js';
+import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -13,84 +14,73 @@ export default class CcgtDetails extends React.Component{
     */
     constructor(props){
         super(props);
-        this.cBuildCost = React.createRef();//canvas of the effi plot
-    }
-
-    componentDidMount(){
-        let nuke = this.props.productionMeans.nuke;
-        let p;
-
-
-        p = new Plot(nuke.build.cost, 300, 200);
-        p.draw(this.cBuildCost.current.getContext('2d'));
-
-    }
-
-    componentWillUnmount(){
-
     }
 
     render(){
-        let nuke = this.props.productionMeans.nuke;
+        let ccgt = this.props.productionMeans.centrals.ccgt;
+
+        const waterVapoNrg = 2250; // J / g
+        const waterTCapa = 4185; // J/ kg / K
+        const waterInitTemp = 20;
+        const jToVapM3 = (100 - waterInitTemp) * 1000 *waterTCapa + waterVapoNrg * 1000000;
+        const primEnergyPerProduced = 1 / ccgt.primEnergyEffi;
+        const heatPerEnProduced = primEnergyPerProduced * (1 - ccgt.primEnergyEffi); //
+
+        let m3PerJ = heatPerEnProduced / jToVapM3;
+        let m3PerWh = m3PerJ * 3600;
 
 
         return (<div className='detailContent'>
-            <h3>{tr('Nuclear reactors')}</h3>
-            <p>{tr('Solar pannels are devices that transform sun into electricity.')}</p>
+            <h3>{tr('Gas centrals')}</h3>
+            <p>{tr('Gas centrals transform chemical energy into electricity.')}</p>
 
-            <p>{tr('The production of PV is ')}
-            <img src="data/pv/eq.svg" alt="Pv production eq" />
-            {tr('where')}
-            </p>
-            <ul>
-            <li><img src="data/pv/radFlux.svg" alt="Pv production eq" />{tr('is the maximal radiant flux (W/m2)')}</li>
-            <li><img src="data/pv/area.svg" alt="Pv production eq" /> {tr('is the area (m2)')}</li>
-            <li><img src="data/pv/efficiency.svg" alt="Pv production eq" /> {tr('is the pannel efficiency')}</li>
-            <li><img src="data/pv/capaFact.svg" alt="Pv production eq" /> {tr('is the capacity factor at that hour')}</li>
-            </ul>
 
             <div className="hWrapLayout">
                 <div>
-                    <h4>{tr('Efficiency evolution')}</h4>
-                    <p>{tr('Proportion of sun power transformed into electric power. ')}</p>
-                    <canvas ref={this.cEffi} width="300" height="200"/>
-                    <p className="pSource">{pv.efficiency.source}</p>
-                </div>
-
-                <div>
-
-                    <h4>{tr('Build energy')}</h4>
-
-                    <p>{tr('Solar pannel manufacturing requires some energy. ')}</p>
-                    <canvas ref={this.cBuildEn} width="300" height="200"/>
-                    <p className="pSource">{pv.build.energy.source}</p>
+                    <h4>{tr('Production')}</h4>
+                    <img src="data/nuke/eq.svg" alt="Pv production eq" />
+                    {tr('where')}
+                    <ul>
+                    <li><img src="data/nuke/nameplate.svg" alt="Pv production eq" /> {tr('is the central pic production')}</li>
+                    <li><img src="data/nuke/capaFact.svg" alt="Pv production eq" /> {tr('is the capacity factor')}</li>
+                    </ul>
                 </div>
                 <div>
-
                     <h4>{tr('Build cost')}</h4>
-                    <p>{tr('Solar pannel manufacturing cost. ')}</p>
-                    <canvas ref={this.cBuildCost} width="300" height="200"/>
-                    <p className="pSource">{pv.build.cost.source}</p>
+                    <p>{tr('Gaz central construction cost. ')}</p>
+                    <ReactPlot data={ccgt.build.cost}/>
+                    <p className="pSource">{ccgt.build.cost.source}</p>
                 </div>
 
                 <div>
-
                     <h4>{tr('Operation and maintenance costs')}</h4>
 
-                    <p>{tr('Yearly cost per m2')}</p>
-                    <canvas ref={this.cPerYearCost} width="300" height="200"/>
-                    <p className="pSource">{pv.perYear.cost.source}</p>
+                    <p>{tr('Cost per Wh')}</p>
+                    <ReactPlot data={ccgt.perWh.cost}/>
+                    <p className="pSource">{ccgt.perWh.cost.source}</p>
                 </div>
                 <div>
-                    <h4>{tr('Capacity factor')}</h4>
-                    <p>{tr('Naturally, photovoltaic panels do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')}</p>
+                    <h4>{tr('Operation footprint')}</h4>
 
-                    <a href="data/pv/allBePvCapaFact.csv">{tr('Download the historic data for Belgium (1985-2016)')}</a>
-                    <p className="pSource">https://www.renewables.ninja/downloads</p>
+                    <p>{tr('Footprint per Wh')}</p>
+                    <ReactPlot data={ccgt.perWh.co2}/>
+                    <p className="pSource">{ccgt.perWh.co2.source}</p>
+                </div>
+                <div>
+                    <h4>{tr('Decommission')}</h4>
+                    <p>{tr('Deconstruction of a gas central have an estimated cost of 5% of the build cost')}</p>
+
+                    <p className="pSource">Source ?</p>
+                </div>
+                <div>
+                    <h4>{tr('Cooling')}</h4>
+                    <p>{tr('Primary energy efficiency is ') + ccgt.primEnergyEffi}</p>
+                    <p>{tr('This means that for 100 J of gas, ')+Math.round(ccgt.primEnergyEffi*100)+ tr(' J of electricity are produced, and ') + Math.round(100 - ccgt.primEnergyEffi*100) + tr(' J of heat must be dissipated.')}</p>
+                    <p>{tr('Evacuhating this heat by boiling 20 deg water requires ')  + valStr(m3PerWh, 'm3/Wh') + tr(' produced')}</p>
+
+                    <p className="pSource">Source ?</p>
                 </div>
             </div>
-
-            <div className="hLayout"><div className="button black" onClick={this.props.closeRequested}>{tr('Close')}</div></div>
         </div>);
     }
 }

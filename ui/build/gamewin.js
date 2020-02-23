@@ -15,6 +15,7 @@ import { ConsoDialog } from './consodialog.js';
 import { EndDialog } from './enddialog.js';
 import { NewGameDialog } from './newgamedialog.js';
 import { tr } from '../../tr/tr.js';
+import { CloseButton } from './closebutton.js';
 
 import Scene from '../scene.js';
 
@@ -77,31 +78,16 @@ var GameWin = function (_React$Component) {
     _createClass(GameWin, [{
         key: 'setTargetBuild',
         value: function setTargetBuild(target) {
-            if (target === undefined && this.targetBuild.type !== undefined) {
+            if (target === undefined && this.targetBuild.type === undefined) return;
+            if (target === undefined) {
                 //we just cleaered the cursor
-                // this.targetBuildLoc = targetBuildLoc;
-
                 this.scene.cursor.type = undefined;
-                this.setState({
-                    currentBuildInfo: {
-                        theoReason: undefined,
-                        buildCost: 0,
-                        buildCo2: 0,
-                        perYearCost: 0,
-                        perYearCo2: 0,
-                        nameplate: 0,
-                        pop: 0,
-                        explCost: 0,
-                        coolingWaterRate: 0,
-                        storageCapacity: 0
-                    }
-                });
             }
 
             this.targetBuild.type = target;
             this.targetBuildLoc = { pos: { x: 0, y: 0 }, radius: this.slider.default };
 
-            this.forceUpdate();
+            this.updateBuildDock();
         }
 
         /** callback
@@ -116,42 +102,45 @@ var GameWin = function (_React$Component) {
                 _ref$radius = _ref.radius,
                 radius = _ref$radius === undefined ? this.targetBuildLoc.radius : _ref$radius;
 
+            if (this.targetBuild.type === undefined) return;
 
-            var targetBuildLoc = {
+            this.targetBuildLoc = {
                 pos: pos,
                 radius: radius
-            },
-                vBMArea = "",
-                vBMBuildCost = 0;
+            };
 
-            if (this.targetBuild.type !== undefined) {
-                //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
-                var info = this.simu.onBuildMenuStateChanged(this.targetBuild, targetBuildLoc.pos, targetBuildLoc.radius).info;
-
-                var avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
-
-                this.targetBuildLoc = targetBuildLoc;
-
-                this.scene.cursor = {
-                    type: this.targetBuild.type,
-                    radius: this.targetBuildLoc.radius,
-                    pos: this.targetBuildLoc.pos
-                };
-
-                this.setState({
-                    currentBuildInfo: {
-                        theoReason: info.theorical,
-                        buildCost: info.build.cost,
-                        buildCo2: info.build.co2,
-                        perYearCost: info.perYear.cost + info.perWh.cost * avgProd,
-                        perYearCo2: info.perYear.co2 + info.perWh.co2 * avgProd,
-                        avgProd: avgProd,
-                        pop: info.pop_affected,
-                        explCost: info.expl_cost,
-                        coolingWaterRate: info.coolingWaterRate,
-                        storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
-                    } });
+            this.scene.cursor = {
+                type: this.targetBuild.type,
+                radius: this.targetBuildLoc.radius,
+                pos: this.targetBuildLoc.pos
+            };
+            this.updateBuildDock();
+        }
+    }, {
+        key: 'updateBuildDock',
+        value: function updateBuildDock() {
+            if (this.targetBuild.type === undefined) {
+                this.forceUpdate();
+                return;
             }
+
+            var info = this.simu.onBuildMenuStateChanged(this.targetBuild, this.targetBuildLoc.pos, this.targetBuildLoc.radius).info;
+
+            var avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
+
+            this.setState({
+                currentBuildInfo: {
+                    theoReason: info.theorical,
+                    buildCost: info.build.cost,
+                    buildCo2: info.build.co2,
+                    perYearCost: info.perYear.cost + info.perWh.cost * avgProd,
+                    perYearCo2: info.perYear.co2 + info.perWh.co2 * avgProd,
+                    avgProd: avgProd,
+                    pop: info.pop_affected,
+                    explCost: info.expl_cost,
+                    coolingWaterRate: info.coolingWaterRate,
+                    storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0
+                } });
         }
     }, {
         key: 'runYear',
@@ -215,11 +204,14 @@ var GameWin = function (_React$Component) {
                 );
             }
 
+            var cProd = this.simu.cProd;
+            var cMap = this.simu.cMap;
+
             var dialog = void 0;
             if (this.state.currentDialog == EndDialog) {
                 var areaAll = { center: { x: 0, y: 0 }, radius: 100000000 };
 
-                var energyGroundUseProp = this.simu.cMap.reduceIf(['area'], areaAll, ['energy']) / this.simu.cMap.reduceIf(['area'], areaAll);
+                var energyGroundUseProp = cMap.reduceIf(['area'], areaAll, ['energy']) / cMap.reduceIf(['area'], areaAll);
 
                 dialog = React.createElement(EndDialog, {
                     closeRequested: this.setDialog.bind(this, null),
@@ -236,7 +228,10 @@ var GameWin = function (_React$Component) {
                     taxRate: this.simu.taxRate,
                     onTaxRateChanged: this.onTaxRateChanged.bind(this),
                     closeRequested: this.setDialog.bind(this, null),
-                    history: this.simu.stats
+                    history: this.simu.stats,
+                    detailsRequested: function detailsRequested(c) {
+                        _this2.setState({ help: c });
+                    }
                 });
             }
 
@@ -246,26 +241,32 @@ var GameWin = function (_React$Component) {
                 helpDialog = React.createElement(
                     'div',
                     { className: 'dialog', style: { left: '5%', right: '5%', top: 60, bottom: 30, background: 'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto' } },
-                    React.createElement(Help, {
-                        productionMeans: this.simu.cProd.productionMeans,
-                        countries: this.simu.cProd.countries,
-                        closeRequested: function closeRequested() {
+                    React.createElement(CloseButton, { closeRequested: function closeRequested() {
                             return _this2.setState({ help: NullHelp });
-                        }
+                        } }),
+                    React.createElement(Help, {
+                        productionMeans: cProd.productionMeans,
+                        countries: cProd.countries
                     })
                 );
             }
+
+            var currentDate = this.simu.year;
+
+            var currentConso = cProd.countries.belgium.pop.at(currentDate) * //watt
+            cProd.countries.belgium.consoPerCap.at(currentDate);
 
             return React.createElement(
                 'div',
                 { className: 'vLayout', style: { width: '100%', height: '100%' } },
                 React.createElement(StatusBar, {
-                    date: this.simu.year,
+                    date: currentDate,
                     money: this.simu.money,
                     showBudgetDialog: this.setDialog.bind(this, BudgetDialog),
                     showCo2Dialog: this.setDialog.bind(this, Co2Dialog),
                     history: this.simu.stats,
-                    showConsoDialog: this.setDialog.bind(this, ConsoDialog)
+                    showConsoDialog: this.setDialog.bind(this, ConsoDialog),
+                    currentConso: currentConso
                 }),
                 React.createElement(MapView, {
                     scene: this.scene,

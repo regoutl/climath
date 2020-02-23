@@ -36,12 +36,12 @@ export default class StatusBar extends React.Component{
 
 
         //electricity origin
-        const consumed = this.props.history[this.props.history.length-1].consumedEnergy.total;
+        const consumed = this.props.currentConso;
 
         return (
         <div id="statusBar" className="hLayout" >
             <div
-                title={tr('Last year consumption')}
+                title={tr('Needed power')}
                 onClick={this.props.showConsoDialog}
             >
                 {this.props.date} <img width="25" src="res/icons/electricEnergy.png" /> {valStr(consumed, 'W')}
@@ -58,7 +58,7 @@ export default class StatusBar extends React.Component{
                         padding:'10px 0 0 10px',
                         verticalAlign: 'middle' ,
                         fontSize: '14px',
-                        color: (increase > 0 ? 'red': 'green')}}
+                        color: (increase > 0 ? 'red': 'lime')}}
                 >{sign + Math.abs(increase)} %</span>
             </div>
             <div title={tr("Set budget")} onClick={this.props.showBudgetDialog}>{valStr(this.props.money, '€')}</div>

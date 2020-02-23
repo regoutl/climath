@@ -49,7 +49,7 @@ var StatusBar = function (_React$Component) {
 
 
             //electricity origin
-            var consumed = this.props.history[this.props.history.length - 1].consumedEnergy.total;
+            var consumed = this.props.currentConso;
 
             return React.createElement(
                 'div',
@@ -57,7 +57,7 @@ var StatusBar = function (_React$Component) {
                 React.createElement(
                     'div',
                     {
-                        title: tr('Last year consumption'),
+                        title: tr('Needed power'),
                         onClick: this.props.showConsoDialog
                     },
                     this.props.date,
@@ -92,7 +92,7 @@ var StatusBar = function (_React$Component) {
                                 padding: '10px 0 0 10px',
                                 verticalAlign: 'middle',
                                 fontSize: '14px',
-                                color: increase > 0 ? 'red' : 'green' }
+                                color: increase > 0 ? 'red' : 'lime' }
                         },
                         sign + Math.abs(increase),
                         ' %'

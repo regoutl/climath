@@ -9,6 +9,7 @@ import {ConsoDialog} from './consodialog.js';
 import {EndDialog} from './enddialog.js';
 import {NewGameDialog} from './newgamedialog.js';
 import {tr} from '../../tr/tr.js';
+import {CloseButton} from './closebutton.js';
 
 import Scene from '../scene.js';
 
@@ -67,31 +68,16 @@ export default class GameWin extends React.Component{
         target is a string as specified in builddock.js
     */
     setTargetBuild(target){
-        if(target === undefined && this.targetBuild.type !== undefined){//we just cleaered the cursor
-            // this.targetBuildLoc = targetBuildLoc;
-
+        if(target === undefined && this.targetBuild.type === undefined)
+            return;
+        if(target === undefined){//we just cleaered the cursor
             this.scene.cursor.type = undefined;
-            this.setState({
-                currentBuildInfo:{
-                    theoReason: undefined,
-                    buildCost: 0,
-                    buildCo2: 0,
-                    perYearCost: 0,
-                    perYearCo2: 0,
-                    nameplate: 0,
-                    pop: 0,
-                    explCost: 0,
-                    coolingWaterRate: 0,
-                    storageCapacity: 0,
-                }
-            });
-
         }
 
         this.targetBuild.type = target;
         this.targetBuildLoc = {pos:{x:0, y:0}, radius: this.slider.default};
 
-        this.forceUpdate();
+        this.updateBuildDock();
     }
 
     /** callback
@@ -99,49 +85,50 @@ export default class GameWin extends React.Component{
     */
     setTargetBuildLoc({pos=this.targetBuildLoc.pos,
                                     radius=this.targetBuildLoc.radius}){
+        if(this.targetBuild.type === undefined)
+            return;
 
-
-
-        let targetBuildLoc = {
+        this.targetBuildLoc = {
             pos: pos,
             radius: radius,
-        }, vBMArea = "", vBMBuildCost = 0;
+        };
 
+        this.scene.cursor={
+                        type:this.targetBuild.type,
+                        radius: this.targetBuildLoc.radius,
+                        pos:this.targetBuildLoc.pos
+                    };
+        this.updateBuildDock();
+    }
 
-
-        if(this.targetBuild.type !== undefined ){
-        //     && targetBuildLoc.pos !== undefined){  -> non : target buid loc undefined := "valeur moyenne"
-            const info = this.simu.onBuildMenuStateChanged(
-                this.targetBuild, targetBuildLoc.pos,
-                targetBuildLoc.radius).info;
-
-
-            let avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
-
-            this.targetBuildLoc = targetBuildLoc;
-
-
-            this.scene.cursor={
-                            type:this.targetBuild.type,
-                            radius: this.targetBuildLoc.radius,
-                            pos:this.targetBuildLoc.pos
-                        };
-
-            this.setState({
-                currentBuildInfo:{
-                    theoReason: info.theorical,
-                    buildCost: info.build.cost,
-                    buildCo2: info.build.co2,
-                    perYearCost: info.perYear.cost + info.perWh.cost * avgProd,
-                    perYearCo2: info.perYear.co2 + info.perWh.co2 * avgProd,
-                    avgProd: avgProd,
-                    pop: info.pop_affected,
-                    explCost: info.expl_cost,
-                    coolingWaterRate: info.coolingWaterRate,
-                    storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
-                }});
+    updateBuildDock(){
+        if(this.targetBuild.type === undefined){
+            this.forceUpdate();
+            return;
         }
 
+        const info = this.simu.onBuildMenuStateChanged(
+            this.targetBuild, this.targetBuildLoc.pos,
+            this.targetBuildLoc.radius).info;
+
+
+        let avgProd = info.nameplate ? info.nameplate.at(info.build.end) * info.avgCapacityFactor : 0;
+
+
+
+        this.setState({
+            currentBuildInfo:{
+                theoReason: info.theorical,
+                buildCost: info.build.cost,
+                buildCo2: info.build.co2,
+                perYearCost: info.perYear.cost + info.perWh.cost * avgProd,
+                perYearCo2: info.perYear.co2 + info.perWh.co2 * avgProd,
+                avgProd: avgProd,
+                pop: info.pop_affected,
+                explCost: info.expl_cost,
+                coolingWaterRate: info.coolingWaterRate,
+                storageCapacity: info.storageCapacity ? info.storageCapacity.at(info.build.end) : 0,
+            }});
     }
 
     runYear(){
@@ -195,12 +182,15 @@ export default class GameWin extends React.Component{
             return <p>Chargement ... </p>;
         }
 
+        let cProd = this.simu.cProd;
+        let cMap = this.simu.cMap;
+
 
         let dialog;
         if(this.state.currentDialog == EndDialog){
             let areaAll = {center:{x:0, y: 0}, radius: 100000000};
 
-            let  energyGroundUseProp = this.simu.cMap.reduceIf(['area'], areaAll, ['energy']) / this.simu.cMap.reduceIf(['area'], areaAll);
+            let  energyGroundUseProp = cMap.reduceIf(['area'], areaAll, ['energy']) / cMap.reduceIf(['area'], areaAll);
 
 
             dialog = (<EndDialog
@@ -221,6 +211,7 @@ export default class GameWin extends React.Component{
                onTaxRateChanged={this.onTaxRateChanged.bind(this)}
                closeRequested={this.setDialog.bind(this, null)}
                history={this.simu.stats}
+               detailsRequested = {(c) => {this.setState({help: c})}}
            />);
 
         }
@@ -230,23 +221,29 @@ export default class GameWin extends React.Component{
             let Help = this.state.help;
             helpDialog = (
                 <div className="dialog" style={{left: '5%', right:'5%', top: 60, bottom: 30, background:'white', boxShadow: '0 0 50px 10px black', color: 'black', overflow: 'auto'}}>
-                <Help
-                    productionMeans={this.simu.cProd.productionMeans}
-                    countries={this.simu.cProd.countries}
-                    closeRequested={() => this.setState({help: NullHelp})}
-                />
-            </div>);
+                    <CloseButton closeRequested={() => this.setState({help: NullHelp})}/>
+                    <Help
+                        productionMeans={cProd.productionMeans}
+                        countries={cProd.countries}
+                    />
+                </div>);
         }
+
+        let currentDate = this.simu.year;
+
+        let currentConso  = cProd.countries.belgium.pop.at(currentDate) *    //watt
+							cProd.countries.belgium.consoPerCap.at(currentDate);
 
         return (
         <div className="vLayout" style={{width: '100%', height: '100%'}}>
         <StatusBar
-            date = {this.simu.year}
+            date = {currentDate}
             money = {this.simu.money}
             showBudgetDialog={this.setDialog.bind(this, BudgetDialog)}
             showCo2Dialog={this.setDialog.bind(this, Co2Dialog)}
             history={this.simu.stats}
             showConsoDialog={this.setDialog.bind(this, ConsoDialog)}
+            currentConso={currentConso}
         />
 
         <MapView

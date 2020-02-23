@@ -1,6 +1,6 @@
 
 import {tr} from '../../../tr/tr.js';
-import {Plot} from '../../plot.js';
+import ReactPlot from '../reactplot.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -13,30 +13,8 @@ export default class PvDetails extends React.Component{
     */
     constructor(props){
         super(props);
-        this.cEffi = React.createRef();//canvas of the effi plot
-        this.cBuildEn = React.createRef();//canvas of the effi plot
-        this.cBuildCost = React.createRef();//canvas of the effi plot
-        this.cPerYearCost = React.createRef();//canvas of the effi plot
     }
 
-    componentDidMount(){
-        let pv = this.props.productionMeans.pv;
-        let p = new Plot(pv.efficiency, 300, 200);
-        p.draw(this.cEffi.current.getContext('2d'));
-
-        p = new Plot(pv.build.energy, 300, 200);
-        p.draw(this.cBuildEn.current.getContext('2d'));
-
-        p = new Plot(pv.build.cost, 300, 200);
-        p.draw(this.cBuildCost.current.getContext('2d'));
-
-        p = new Plot(pv.perYear.cost, 300, 200);
-        p.draw(this.cPerYearCost.current.getContext('2d'));
-    }
-
-    componentWillUnmount(){
-
-    }
 
     render(){
         let pv = this.props.productionMeans.pv;
@@ -46,22 +24,37 @@ export default class PvDetails extends React.Component{
             <h3>{tr('Solar panels')}</h3>
             <p>{tr('Solar pannels are devices that transform sun into electricity.')}</p>
 
-            <p>{tr('The production of PV is ')}
-            <img src="data/pv/eq.svg" alt="Pv production eq" />
-            {tr('where')}
-            </p>
-            <ul>
-            <li><img src="data/pv/radFlux.svg" alt="Pv production eq" />{tr('is the maximal radiant flux (W/m2)')}</li>
-            <li><img src="data/pv/area.svg" alt="Pv production eq" /> {tr('is the area (m2)')}</li>
-            <li><img src="data/pv/efficiency.svg" alt="Pv production eq" /> {tr('is the pannel efficiency')}</li>
-            <li><img src="data/pv/capaFact.svg" alt="Pv production eq" /> {tr('is the capacity factor at that hour')}</li>
-            </ul>
 
             <div className="hWrapLayout">
                 <div>
+                    <h4>{tr('Production')}</h4>
+                    <p>Production of a PV farm of area <img src='data/symbols/area.svg'/> is : </p>
+                    <img src="data/pv/production.svg" alt="Pv production eq" />
+                    <ul>
+                    {[{img:'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)'},
+                    {img:'symbols/efficiency', descr: 'is the pannel efficiency'},
+                    {img:'symbols/capaFactT', descr: 'is the capacity factor at that hour'},
+                    {img:'symbols/decline', descr: 'is the yearly efficiency decline'},
+                    {img:'symbols/year', descr: 'is the current year'},
+                    {img:'symbols/year0', descr: 'is the build year'},
+                ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>{tr('Radiant flux')}</h4>
+                    <img src="data/pv/maxRadFlux.svg" alt="max rad flux eq" />
+                    <p>
+                    <img src='data/symbols/avgCapaFact.svg' alt='avgCapaFact' /> is the average capacity factor and GHI is
+                    </p>
+                    <img src='data/pv/globalHorisontalIrradiance.png' alt='ghi be' width="300"/>
+                    <p className="pSource">https://globalsolaratlas.info/</p>
+                </div>
+
+                <div>
                     <h4>{tr('Efficiency evolution')}</h4>
                     <p>{tr('Proportion of sun power transformed into electric power. ')}</p>
-                    <canvas ref={this.cEffi} width="300" height="200"/>
+                    <ReactPlot data={pv.efficiency} />
                     <p className="pSource">{pv.efficiency.source}</p>
                 </div>
 
@@ -70,14 +63,14 @@ export default class PvDetails extends React.Component{
                     <h4>{tr('Build energy')}</h4>
 
                     <p>{tr('Solar pannel manufacturing requires some energy. ')}</p>
-                    <canvas ref={this.cBuildEn} width="300" height="200"/>
+                    <ReactPlot data={pv.build.energy} />
                     <p className="pSource">{pv.build.energy.source}</p>
                 </div>
                 <div>
 
                     <h4>{tr('Build cost')}</h4>
                     <p>{tr('Solar pannel manufacturing cost. ')}</p>
-                    <canvas ref={this.cBuildCost} width="300" height="200"/>
+                    <ReactPlot data={pv.build.cost} />
                     <p className="pSource">{pv.build.cost.source}</p>
                 </div>
 
@@ -86,7 +79,7 @@ export default class PvDetails extends React.Component{
                     <h4>{tr('Operation and maintenance costs')}</h4>
 
                     <p>{tr('Yearly cost per m2')}</p>
-                    <canvas ref={this.cPerYearCost} width="300" height="200"/>
+                    <ReactPlot data={pv.perYear.cost} />
                     <p className="pSource">{pv.perYear.cost.source}</p>
                 </div>
                 <div>
@@ -97,8 +90,6 @@ export default class PvDetails extends React.Component{
                     <p className="pSource">https://www.renewables.ninja/downloads</p>
                 </div>
             </div>
-
-            <div className="hLayout"><div className="button black" onClick={this.props.closeRequested}>{tr('Close')}</div></div>
         </div>);
     }
 }

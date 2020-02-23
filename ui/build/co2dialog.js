@@ -11,17 +11,6 @@ import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { pieChart } from '../charts.js';
 import { stackedLineChart } from '../charts.js';
 
-var palette = {
-    nuke: 'yellow',
-    pv: 'rgb(70, 85,180)',
-    fossil: 'rgb(255, 124, 84)',
-    storage: 'rgb(0, 255, 250)',
-    constructions: 'red',
-    ccgt: 'rgb(169, 202, 250)',
-    wind: 'white',
-    fusion: 'green'
-};
-
 export var Co2Dialog = function (_React$Component) {
     _inherits(Co2Dialog, _React$Component);
 
@@ -100,7 +89,7 @@ export var Co2Dialog = function (_React$Component) {
             });
 
             stackedLineChart(ctx, values, {
-                palette: palette,
+                palette: 'energy',
                 order: ['fossil', 'ccgt', 'nuke', 'fusion', 'constructions'],
                 from: this.props.history[0].year,
                 to: this.props.history[this.props.history.length - 1].year,
@@ -117,6 +106,9 @@ export var Co2Dialog = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            // <div className="button white" onClick={() => this.props.detailsRequested()}>{tr('Details...')}</div>
+
+
             return React.createElement(
                 'div',
                 { className: 'dialog vLayout', ref: this.me, style: { left: '50%', top: 60, marginLeft: -210 } },
@@ -133,11 +125,6 @@ export var Co2Dialog = function (_React$Component) {
                         'div',
                         { className: 'button white', ref: this.bOk },
                         tr("Ok")
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'button white', onClick: this.props.detailsRequested },
-                        tr('Details...')
                     )
                 )
             );

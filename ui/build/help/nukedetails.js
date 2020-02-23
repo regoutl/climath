@@ -7,7 +7,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { tr } from '../../../tr/tr.js';
-import { Plot } from '../../plot.js';
+import ReactPlot from '../reactplot.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -23,33 +23,10 @@ var NukeDetails = function (_React$Component) {
     function NukeDetails(props) {
         _classCallCheck(this, NukeDetails);
 
-        var _this = _possibleConstructorReturn(this, (NukeDetails.__proto__ || Object.getPrototypeOf(NukeDetails)).call(this, props));
-
-        _this.cBuildCost = React.createRef(); //canvas of the effi plot
-        _this.cPerWhCost = React.createRef(); //canvas of the effi plot
-        _this.cPerWhCo2 = React.createRef(); //canvas of the effi plot
-        return _this;
+        return _possibleConstructorReturn(this, (NukeDetails.__proto__ || Object.getPrototypeOf(NukeDetails)).call(this, props));
     }
 
     _createClass(NukeDetails, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            var nuke = this.props.productionMeans.centrals.nuke;
-            var p = void 0;
-
-            p = new Plot(nuke.build.cost, 300, 200);
-            p.draw(this.cBuildCost.current.getContext('2d'));
-
-            p = new Plot(nuke.perWh.cost, 300, 200);
-            p.draw(this.cPerWhCost.current.getContext('2d'));
-
-            p = new Plot(nuke.perWh.co2, 300, 200);
-            p.draw(this.cPerWhCo2.current.getContext('2d'));
-        }
-    }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {}
-    }, {
         key: 'render',
         value: function render() {
             var nuke = this.props.productionMeans.centrals.nuke;
@@ -68,33 +45,36 @@ var NukeDetails = function (_React$Component) {
                     tr('Nuclear reactors are devices that transform radioactivity into electricity.')
                 ),
                 React.createElement(
-                    'p',
-                    null,
-                    tr('The production of a central is '),
-                    React.createElement('img', { src: 'data/nuke/eq.svg', alt: 'Pv production eq' }),
-                    tr('where')
-                ),
-                React.createElement(
-                    'ul',
-                    null,
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/nuke/nameplate.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the central pic production')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/nuke/capaFact.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the capacity factor')
-                    )
-                ),
-                React.createElement(
                     'div',
                     { className: 'hWrapLayout' },
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Production')
+                        ),
+                        React.createElement('img', { src: 'data/nuke/production.svg', alt: 'Pv production eq' }),
+                        React.createElement(
+                            'ul',
+                            null,
+                            React.createElement(
+                                'li',
+                                null,
+                                React.createElement('img', { src: 'data/symbols/nameplate.svg', alt: 'Nuke' }),
+                                ' ',
+                                tr('is the central pic production')
+                            ),
+                            React.createElement(
+                                'li',
+                                null,
+                                React.createElement('img', { src: 'data/symbols/capaFact.svg', alt: 'Nuke' }),
+                                ' ',
+                                tr('is the capacity factor')
+                            )
+                        )
+                    ),
                     React.createElement(
                         'div',
                         null,
@@ -108,7 +88,7 @@ var NukeDetails = function (_React$Component) {
                             null,
                             tr('Nuclear central construction cost. ')
                         ),
-                        React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: nuke.build.cost }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -128,7 +108,7 @@ var NukeDetails = function (_React$Component) {
                             null,
                             tr('Cost per Wh')
                         ),
-                        React.createElement('canvas', { ref: this.cPerWhCost, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: nuke.perWh.cost }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -148,7 +128,7 @@ var NukeDetails = function (_React$Component) {
                             null,
                             tr('Footprint per Wh')
                         ),
-                        React.createElement('canvas', { ref: this.cPerWhCo2, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: nuke.perWh.co2 }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
@@ -240,15 +220,6 @@ var NukeDetails = function (_React$Component) {
                             { className: 'pSource' },
                             'Source ?'
                         )
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'hLayout' },
-                    React.createElement(
-                        'div',
-                        { className: 'button black', onClick: this.props.closeRequested },
-                        tr('Close')
                     )
                 )
             );

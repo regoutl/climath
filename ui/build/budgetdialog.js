@@ -9,6 +9,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import { tr } from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { pieChart } from '../charts.js';
+import TaxDetails from './help/taxdetails.js';
 
 /** @brief fancy slider for tax rates. Note that everyting is is range [0-1] */
 
@@ -114,16 +115,6 @@ var TaxSlider = function (_React$Component) {
     return TaxSlider;
 }(React.Component);
 
-var palette = { nuke: 'yellow',
-    pv: 'rgb(70, 85,180)',
-    fossil: 'rgb(255, 124, 84)',
-    storage: 'rgb(0, 255, 250)',
-    constructions: 'red',
-    ccgt: 'rgb(169, 202, 250)',
-    wind: 'white',
-    fusion: 'green'
-};
-
 var BudgetDialog = function (_React$Component2) {
     _inherits(BudgetDialog, _React$Component2);
 
@@ -187,7 +178,7 @@ var BudgetDialog = function (_React$Component2) {
 
             ctx.translate(50, 50);
 
-            pieChart(ctx, allOnM, palette, { fontColor: 'white', legend: 'text' });
+            pieChart(ctx, allOnM, 'energy', { fontColor: 'white', legend: 'text' });
             ctx.translate(-50, -50);
         }
     }, {
@@ -199,6 +190,8 @@ var BudgetDialog = function (_React$Component2) {
     }, {
         key: 'render',
         value: function render() {
+            var _this4 = this;
+
             var lastYearCosts = this.props.history[this.props.history.length - 1].cost;
 
             var allOnM = {
@@ -314,7 +307,9 @@ var BudgetDialog = function (_React$Component2) {
                     ),
                     React.createElement(
                         'div',
-                        { className: 'button white', onClick: this.props.detailsRequested },
+                        { className: 'button white', onClick: function onClick() {
+                                return _this4.props.detailsRequested(TaxDetails);
+                            } },
                         tr('Details...')
                     )
                 )

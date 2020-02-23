@@ -10,17 +10,7 @@ import { tr } from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { pieChart } from '../charts.js';
 import { stackedLineChart } from '../charts.js';
-
-var palette = {
-    nuke: 'yellow',
-    pv: 'rgb(70, 85,180)',
-    fossil: 'rgb(255, 124, 84)',
-    storage: 'rgb(0, 255, 250)',
-    constructions: 'red',
-    ccgt: 'rgb(169, 202, 250)',
-    wind: 'white',
-    fusion: 'green'
-};
+import OriginDetails from './help/origindetails.js';
 
 export var ConsoDialog = function (_React$Component) {
     _inherits(ConsoDialog, _React$Component);
@@ -86,7 +76,7 @@ export var ConsoDialog = function (_React$Component) {
 
             ctx.translate(50, 50);
 
-            pieChart(ctx, lastYearConso.origin, palette, { fontColor: 'white', legend: 'text' });
+            pieChart(ctx, lastYearConso.origin, 'energy', { fontColor: 'white', legend: 'text' });
 
             ctx.translate(-50, -50);
         }
@@ -99,13 +89,15 @@ export var ConsoDialog = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var _this3 = this;
+
             return React.createElement(
                 'div',
                 { className: 'dialog vLayout', ref: this.me, style: { left: '100px', top: 60 } },
                 React.createElement(
                     'h3',
                     null,
-                    tr("Energy origin")
+                    tr("Power origin in %d", '', this.props.history[this.props.history.length - 1].year)
                 ),
                 React.createElement('canvas', { ref: this.pieChart, width: '200', height: '110' }),
                 React.createElement(
@@ -118,7 +110,9 @@ export var ConsoDialog = function (_React$Component) {
                     ),
                     React.createElement(
                         'div',
-                        { className: 'button white', onClick: this.props.detailsRequested },
+                        { className: 'button white', onClick: function onClick() {
+                                return _this3.props.detailsRequested(OriginDetails);
+                            } },
                         tr('Details...')
                     )
                 )

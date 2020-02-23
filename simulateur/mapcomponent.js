@@ -40,7 +40,7 @@ const totalpop = 11.4e6;
 const nPixInCountry = 30600e6 / pixelArea;
 const averagePopDensity = totalpop / nPixInCountry;
 
-const avgIrradiance =  300; //W/m2 @see parameters.countries.belgium.irradiance
+const avgIrradiance =  1030; //W/m2 @see parameters.countries.belgium.irradiance
 const avgWindPowerDensity50 = 400; //W/m2 @see wind map
 const avgPopDensity = totalpop / 30600e6; // average pop/m2
 
@@ -130,7 +130,7 @@ export default class MapComponent{
     @warning this function modifies 'fields' and 'conditions'
     */
     reduceIf(fields, area, conditions){
-        if(/*area.center == undefined ||*/ !this._areaIntersectWithCountry(area)){
+        if(area.center == null || !this._areaIntersectWithCountry(area)){
             return this._theoricReduce(fields, area, conditions);
         }
 

@@ -382,8 +382,8 @@
 		}
 	},
 	"belgium":{
-		"irradiance":300,
-		"_src_irradiance":"Estime via les stats des fermes solaires allemandes de berlin (irradiance similaire a la belgique)",
+		"irradiance":1030,
+		"_src_irradiance":"global wind atlas. yearly global hori irr -> avg hourly irr -> pic hourly irr",
 		"_unit_irradiance":"N/m2",
 		"pop":{
 			"years": [1024, 1026, 1031, 1036, 1040,

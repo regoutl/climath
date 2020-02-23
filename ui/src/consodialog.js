@@ -2,17 +2,8 @@ import {tr} from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import {pieChart} from '../charts.js';
 import {stackedLineChart} from '../charts.js';
+import OriginDetails from './help/origindetails.js';
 
-let palette =     {
-    nuke: 'yellow',
-    pv:'rgb(70, 85,180)',
-    fossil:'rgb(255, 124, 84)',
-    storage:'rgb(0, 255, 250)',
-    constructions:'red',
-    ccgt:'rgb(169, 202, 250)',
-    wind: 'white',
-    fusion: 'green',
-  };
 
 export class ConsoDialog extends React.Component{
 
@@ -64,7 +55,7 @@ export class ConsoDialog extends React.Component{
 
         ctx.translate(50, 50);
 
-        pieChart(ctx, lastYearConso.origin, palette, {fontColor: 'white', legend: 'text'});
+        pieChart(ctx, lastYearConso.origin, 'energy', {fontColor: 'white', legend: 'text'});
 
         ctx.translate(-50, -50);
     }
@@ -77,11 +68,11 @@ export class ConsoDialog extends React.Component{
 
     render(){
         return (<div className="dialog vLayout" ref={this.me} style={{left: '100px', top: 60}}>
-        <h3>{tr("Energy origin")}</h3>
+        <h3>{tr("Power origin in %d", '', this.props.history[this.props.history.length - 1].year)}</h3>
         <canvas ref={this.pieChart} width="200" height="110"/>
         <div className="hLayout">
             <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
-            <div className="button white" onClick={this.props.detailsRequested}>{tr('Details...')}</div>
+            <div className="button white" onClick={() => this.props.detailsRequested(OriginDetails)}>{tr('Details...')}</div>
         </div>
         </div>);
     }

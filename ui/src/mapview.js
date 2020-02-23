@@ -9,7 +9,7 @@ function isCentral(type){
 export default class MapView extends React.Component{
 
     /* accepted props :
-    onMouseMove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
+    onMouseMove : function(curPos)    -> called on mouse move && mouse leave  (then with null curPos)
     onClick : function(curPos)        -> called on click
     cursor : {type, radius} type : undefined or string (pv, nuke, ...)
                             radius : undefined or Number. unit : px
@@ -80,10 +80,9 @@ export default class MapView extends React.Component{
         this.draw();
         window.addEventListener('resize', this.draw);
 
-        window.addEventListener('mousedown', this.mousedown);
+//        window.addEventListener('mousedown', this.mousedown);
         window.addEventListener('mousemove', this.mousemove);
         window.addEventListener('mouseup', this.mouseup);
-        // window.addEventListener('wheel', this.wheel);
 
         window.addEventListener('touchstart', this.touchstart);
         window.addEventListener('touchmove', this.touchmove, {passive: false});
@@ -94,10 +93,9 @@ export default class MapView extends React.Component{
     componentWillUnmount(){
         window.removeEventListener('resize', this.draw);
 
-        window.removeEventListener('mousedown', this.mousedown);
+//        window.removeEventListener('mousedown', this.mousedown);
         window.removeEventListener('mousemove', this.mousemove);
         window.removeEventListener('mouseup', this.mouseup);
-        window.removeEventListener('wheel', this.wheel);
 
         window.removeEventListener('touchstart', this.touchstart);
         window.removeEventListener('touchmove', this.touchmove);
@@ -126,6 +124,7 @@ export default class MapView extends React.Component{
                         onMouseLeave={this.mouseleave}
                         onClick={this.click}
                         onWheel={this.wheel}
+                        onMouseDown={this.mousedown}
                     >
                         {tr("Your browser is not supported")}
                     </canvas>
@@ -147,8 +146,6 @@ export default class MapView extends React.Component{
         this.physMousePos = {x:e.pageX , y:e.pageY};
     }
     onmousemove(e){
-        // if(e.target != this.canvas)
-        //     return;
 
         if(this.isMouseDown){
 
@@ -163,6 +160,9 @@ export default class MapView extends React.Component{
             this.draw();
         }
         else {
+            if(e.target != this.canvas.current)
+                return;
+
             let rawPos = {x:e.pageX, y : e.pageY};
 
             let transformedPos = {
@@ -220,7 +220,7 @@ export default class MapView extends React.Component{
 
     //called when cursor leaves direct contact with central area
     onmouseleave(e){
-        this.props.onMouseMove(undefined);
+        this.props.onMouseMove(null);
     }
 
     updatetouchstate(touches){

@@ -1,6 +1,6 @@
 
 import {tr} from '../../../tr/tr.js';
-import {Plot} from '../../plot.js';
+import ReactPlot from '../reactplot.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -13,53 +13,30 @@ export default class NukeDetails extends React.Component{
     */
     constructor(props){
         super(props);
-        this.cBuildCost = React.createRef();//canvas of the effi plot
-        this.cPerWhCost = React.createRef();//canvas of the effi plot
-        this.cPerWhCo2 = React.createRef();//canvas of the effi plot
     }
 
-    componentDidMount(){
-        let nuke = this.props.productionMeans.centrals.nuke;
-        let p;
-
-
-        p = new Plot(nuke.build.cost, 300, 200);
-        p.draw(this.cBuildCost.current.getContext('2d'));
-
-        p = new Plot(nuke.perWh.cost, 300, 200);
-        p.draw(this.cPerWhCost.current.getContext('2d'));
-
-        p = new Plot(nuke.perWh.co2, 300, 200);
-        p.draw(this.cPerWhCo2.current.getContext('2d'));
-    }
-
-    componentWillUnmount(){
-
-    }
 
     render(){
         let nuke = this.props.productionMeans.centrals.nuke;
-
 
         return (<div className='detailContent'>
             <h3>{tr('Nuclear reactors')}</h3>
             <p>{tr('Nuclear reactors are devices that transform radioactivity into electricity.')}</p>
 
-            <p>{tr('The production of a central is ')}
-            <img src="data/nuke/eq.svg" alt="Pv production eq" />
-            {tr('where')}
-            </p>
-            <ul>
-            <li><img src="data/nuke/nameplate.svg" alt="Pv production eq" /> {tr('is the central pic production')}</li>
-            <li><img src="data/nuke/capaFact.svg" alt="Pv production eq" /> {tr('is the capacity factor')}</li>
-            </ul>
 
             <div className="hWrapLayout">
                 <div>
-
+                    <h4>{tr('Production')}</h4>
+                    <img src="data/nuke/production.svg" alt="Pv production eq" />
+                    <ul>
+                    <li><img src="data/symbols/nameplate.svg" alt="Nuke" /> {tr('is the central pic production')}</li>
+                    <li><img src="data/symbols/capaFact.svg" alt="Nuke" /> {tr('is the capacity factor')}</li>
+                    </ul>
+                </div>
+                <div>
                     <h4>{tr('Build cost')}</h4>
                     <p>{tr('Nuclear central construction cost. ')}</p>
-                    <canvas ref={this.cBuildCost} width="300" height="200"/>
+                    <ReactPlot data={nuke.build.cost} />
                     <p className="pSource">{nuke.build.cost.source}</p>
                 </div>
 
@@ -67,14 +44,14 @@ export default class NukeDetails extends React.Component{
                     <h4>{tr('Operation and maintenance costs')}</h4>
 
                     <p>{tr('Cost per Wh')}</p>
-                    <canvas ref={this.cPerWhCost} width="300" height="200"/>
+                    <ReactPlot data={nuke.perWh.cost} />
                     <p className="pSource">{nuke.perWh.cost.source}</p>
                 </div>
                 <div>
                     <h4>{tr('Operation footprint')}</h4>
 
                     <p>{tr('Footprint per Wh')}</p>
-                    <canvas ref={this.cPerWhCo2} width="300" height="200"/>
+                    <ReactPlot data={nuke.perWh.co2} />
                     <p className="pSource">{nuke.perWh.co2.source}</p>
                 </div>
                 <div>
@@ -104,8 +81,6 @@ export default class NukeDetails extends React.Component{
                     <p className="pSource">Source ?</p>
                 </div>
             </div>
-
-            <div className="hLayout"><div className="button black" onClick={this.props.closeRequested}>{tr('Close')}</div></div>
         </div>);
     }
 }

@@ -167,7 +167,7 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
                                                             {center: build.area.center, radius: nuclearDisasterRadius});
         }
 
-        if(build.area.center !== undefined)    {
+        if(build.area.center !== null){
             let pool = this.simu.cMap.poolIndexAt(build.area.center);
 
             if(pool == null){

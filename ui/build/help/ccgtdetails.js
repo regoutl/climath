@@ -7,7 +7,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { tr } from '../../../tr/tr.js';
-import { Plot } from '../../plot.js';
+import ReactPlot from '../reactplot.js';
+import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -23,28 +24,23 @@ var CcgtDetails = function (_React$Component) {
     function CcgtDetails(props) {
         _classCallCheck(this, CcgtDetails);
 
-        var _this = _possibleConstructorReturn(this, (CcgtDetails.__proto__ || Object.getPrototypeOf(CcgtDetails)).call(this, props));
-
-        _this.cBuildCost = React.createRef(); //canvas of the effi plot
-        return _this;
+        return _possibleConstructorReturn(this, (CcgtDetails.__proto__ || Object.getPrototypeOf(CcgtDetails)).call(this, props));
     }
 
     _createClass(CcgtDetails, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            var nuke = this.props.productionMeans.nuke;
-            var p = void 0;
-
-            p = new Plot(nuke.build.cost, 300, 200);
-            p.draw(this.cBuildCost.current.getContext('2d'));
-        }
-    }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {}
-    }, {
         key: 'render',
         value: function render() {
-            var nuke = this.props.productionMeans.nuke;
+            var ccgt = this.props.productionMeans.centrals.ccgt;
+
+            var waterVapoNrg = 2250; // J / g
+            var waterTCapa = 4185; // J/ kg / K
+            var waterInitTemp = 20;
+            var jToVapM3 = (100 - waterInitTemp) * 1000 * waterTCapa + waterVapoNrg * 1000000;
+            var primEnergyPerProduced = 1 / ccgt.primEnergyEffi;
+            var heatPerEnProduced = primEnergyPerProduced * (1 - ccgt.primEnergyEffi); //
+
+            var m3PerJ = heatPerEnProduced / jToVapM3;
+            var m3PerWh = m3PerJ * 3600;
 
             return React.createElement(
                 'div',
@@ -52,50 +48,12 @@ var CcgtDetails = function (_React$Component) {
                 React.createElement(
                     'h3',
                     null,
-                    tr('Nuclear reactors')
+                    tr('Gas centrals')
                 ),
                 React.createElement(
                     'p',
                     null,
-                    tr('Solar pannels are devices that transform sun into electricity.')
-                ),
-                React.createElement(
-                    'p',
-                    null,
-                    tr('The production of PV is '),
-                    React.createElement('img', { src: 'data/pv/eq.svg', alt: 'Pv production eq' }),
-                    tr('where')
-                ),
-                React.createElement(
-                    'ul',
-                    null,
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/radFlux.svg', alt: 'Pv production eq' }),
-                        tr('is the maximal radiant flux (W/m2)')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/area.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the area (m2)')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/efficiency.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the pannel efficiency')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/capaFact.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the capacity factor at that hour')
-                    )
+                    tr('Gas centrals transform chemical energy into electricity.')
                 ),
                 React.createElement(
                     'div',
@@ -106,38 +64,27 @@ var CcgtDetails = function (_React$Component) {
                         React.createElement(
                             'h4',
                             null,
-                            tr('Efficiency evolution')
+                            tr('Production')
                         ),
+                        React.createElement('img', { src: 'data/nuke/eq.svg', alt: 'Pv production eq' }),
+                        tr('where'),
                         React.createElement(
-                            'p',
+                            'ul',
                             null,
-                            tr('Proportion of sun power transformed into electric power. ')
-                        ),
-                        React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.efficiency.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Build energy')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Solar pannel manufacturing requires some energy. ')
-                        ),
-                        React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.build.energy.source
+                            React.createElement(
+                                'li',
+                                null,
+                                React.createElement('img', { src: 'data/nuke/nameplate.svg', alt: 'Pv production eq' }),
+                                ' ',
+                                tr('is the central pic production')
+                            ),
+                            React.createElement(
+                                'li',
+                                null,
+                                React.createElement('img', { src: 'data/nuke/capaFact.svg', alt: 'Pv production eq' }),
+                                ' ',
+                                tr('is the capacity factor')
+                            )
                         )
                     ),
                     React.createElement(
@@ -151,13 +98,13 @@ var CcgtDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             null,
-                            tr('Solar pannel manufacturing cost. ')
+                            tr('Gaz central construction cost. ')
                         ),
-                        React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: ccgt.build.cost }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            pv.build.cost.source
+                            ccgt.build.cost.source
                         )
                     ),
                     React.createElement(
@@ -171,13 +118,13 @@ var CcgtDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             null,
-                            tr('Yearly cost per m2')
+                            tr('Cost per Wh')
                         ),
-                        React.createElement('canvas', { ref: this.cPerYearCost, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: ccgt.perWh.cost }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            pv.perYear.cost.source
+                            ccgt.perWh.cost.source
                         )
                     ),
                     React.createElement(
@@ -186,32 +133,67 @@ var CcgtDetails = function (_React$Component) {
                         React.createElement(
                             'h4',
                             null,
-                            tr('Capacity factor')
+                            tr('Operation footprint')
                         ),
                         React.createElement(
                             'p',
                             null,
-                            tr('Naturally, photovoltaic panels do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')
+                            tr('Footprint per Wh')
+                        ),
+                        React.createElement(ReactPlot, { data: ccgt.perWh.co2 }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            ccgt.perWh.co2.source
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Decommission')
                         ),
                         React.createElement(
-                            'a',
-                            { href: 'data/pv/allBePvCapaFact.csv' },
-                            tr('Download the historic data for Belgium (1985-2016)')
+                            'p',
+                            null,
+                            tr('Deconstruction of a gas central have an estimated cost of 5% of the build cost')
                         ),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            'https://www.renewables.ninja/downloads'
+                            'Source ?'
                         )
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'hLayout' },
+                    ),
                     React.createElement(
                         'div',
-                        { className: 'button black', onClick: this.props.closeRequested },
-                        tr('Close')
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Cooling')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Primary energy efficiency is ') + ccgt.primEnergyEffi
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('This means that for 100 J of gas, ') + Math.round(ccgt.primEnergyEffi * 100) + tr(' J of electricity are produced, and ') + Math.round(100 - ccgt.primEnergyEffi * 100) + tr(' J of heat must be dissipated.')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            tr('Evacuhating this heat by boiling 20 deg water requires ') + valStr(m3PerWh, 'm3/Wh') + tr(' produced')
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            'Source ?'
+                        )
                     )
                 )
             );

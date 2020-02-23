@@ -21,7 +21,7 @@ var MapView = function (_React$Component) {
     _inherits(MapView, _React$Component);
 
     /* accepted props :
-    onMouseMove : function(curPos)    -> called on mouse move && mouse leave  (then with undefined curPos)
+    onMouseMove : function(curPos)    -> called on mouse move && mouse leave  (then with null curPos)
     onClick : function(curPos)        -> called on click
     cursor : {type, radius} type : undefined or string (pv, nuke, ...)
                             radius : undefined or Number. unit : px
@@ -90,10 +90,9 @@ var MapView = function (_React$Component) {
             this.draw();
             window.addEventListener('resize', this.draw);
 
-            window.addEventListener('mousedown', this.mousedown);
+            //        window.addEventListener('mousedown', this.mousedown);
             window.addEventListener('mousemove', this.mousemove);
             window.addEventListener('mouseup', this.mouseup);
-            // window.addEventListener('wheel', this.wheel);
 
             window.addEventListener('touchstart', this.touchstart);
             window.addEventListener('touchmove', this.touchmove, { passive: false });
@@ -105,10 +104,9 @@ var MapView = function (_React$Component) {
         value: function componentWillUnmount() {
             window.removeEventListener('resize', this.draw);
 
-            window.removeEventListener('mousedown', this.mousedown);
+            //        window.removeEventListener('mousedown', this.mousedown);
             window.removeEventListener('mousemove', this.mousemove);
             window.removeEventListener('mouseup', this.mouseup);
-            window.removeEventListener('wheel', this.wheel);
 
             window.removeEventListener('touchstart', this.touchstart);
             window.removeEventListener('touchmove', this.touchmove);
@@ -138,7 +136,8 @@ var MapView = function (_React$Component) {
                         ref: this.canvas,
                         onMouseLeave: this.mouseleave,
                         onClick: this.click,
-                        onWheel: this.wheel
+                        onWheel: this.wheel,
+                        onMouseDown: this.mousedown
                     },
                     tr("Your browser is not supported")
                 )
@@ -160,8 +159,6 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousemove',
         value: function onmousemove(e) {
-            // if(e.target != this.canvas)
-            //     return;
 
             if (this.isMouseDown) {
 
@@ -175,6 +172,8 @@ var MapView = function (_React$Component) {
 
                 this.draw();
             } else {
+                if (e.target != this.canvas.current) return;
+
                 var rawPos = { x: e.pageX, y: e.pageY };
 
                 var transformedPos = {
@@ -250,7 +249,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmouseleave',
         value: function onmouseleave(e) {
-            this.props.onMouseMove(undefined);
+            this.props.onMouseMove(null);
         }
     }, {
         key: 'updatetouchstate',

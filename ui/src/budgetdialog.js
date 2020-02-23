@@ -1,7 +1,7 @@
 import {tr} from "../../tr/tr.js";
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import {pieChart} from '../charts.js';
-
+import TaxDetails from './help/taxdetails.js';
 
 /** @brief fancy slider for tax rates. Note that everyting is is range [0-1] */
 class TaxSlider extends React.Component {
@@ -89,15 +89,6 @@ class TaxSlider extends React.Component {
     }
 }
 
-let palette =     {nuke: 'yellow',
-    pv:'rgb(70, 85,180)',
-    fossil:'rgb(255, 124, 84)',
-    storage:'rgb(0, 255, 250)',
-    constructions:'red',
-    ccgt:'rgb(169, 202, 250)',
-    wind: 'white',
-    fusion: 'green',
-  };
 
 export default class BudgetDialog extends React.Component{
 
@@ -156,7 +147,7 @@ export default class BudgetDialog extends React.Component{
         ctx.translate(50, 50);
 
 
-        pieChart(ctx, allOnM, palette, {fontColor: 'white', legend: 'text'});
+        pieChart(ctx, allOnM, 'energy', {fontColor: 'white', legend: 'text'});
         ctx.translate(-50, -50);
 
     }
@@ -210,7 +201,7 @@ export default class BudgetDialog extends React.Component{
         </tbody></table>
         <div className="hLayout">
             <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
-            <div className="button white" onClick={this.props.detailsRequested}>{tr('Details...')}</div>
+            <div className="button white" onClick={() => this.props.detailsRequested(TaxDetails)}>{tr('Details...')}</div>
         </div>
         </div>);
     }

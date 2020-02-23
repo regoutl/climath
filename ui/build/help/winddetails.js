@@ -7,7 +7,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { tr } from '../../../tr/tr.js';
-import { Plot } from '../../plot.js';
+import ReactPlot from '../reactplot.js';
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -23,28 +23,15 @@ var WindDetails = function (_React$Component) {
     function WindDetails(props) {
         _classCallCheck(this, WindDetails);
 
-        var _this = _possibleConstructorReturn(this, (WindDetails.__proto__ || Object.getPrototypeOf(WindDetails)).call(this, props));
-
-        _this.cBuildCost = React.createRef(); //canvas of the effi plot
-        return _this;
+        return _possibleConstructorReturn(this, (WindDetails.__proto__ || Object.getPrototypeOf(WindDetails)).call(this, props));
     }
 
     _createClass(WindDetails, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            var nuke = this.props.productionMeans.nuke;
-            var p = void 0;
-
-            p = new Plot(nuke.build.cost, 300, 200);
-            p.draw(this.cBuildCost.current.getContext('2d'));
-        }
-    }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {}
-    }, {
         key: 'render',
         value: function render() {
-            var nuke = this.props.productionMeans.nuke;
+            var wind = this.props.productionMeans.wind;
+
+            var turbDensTxt = 'is turbin density. Const ' + (0.1 * Math.round(wind.density.at(2020) * 1e7) + ' turbine/km2');
 
             return React.createElement(
                 'div',
@@ -52,50 +39,12 @@ var WindDetails = function (_React$Component) {
                 React.createElement(
                     'h3',
                     null,
-                    tr('Nuclear reactors')
+                    tr('Wind turbines (onshore @50m)')
                 ),
                 React.createElement(
                     'p',
                     null,
-                    tr('Solar pannels are devices that transform sun into electricity.')
-                ),
-                React.createElement(
-                    'p',
-                    null,
-                    tr('The production of PV is '),
-                    React.createElement('img', { src: 'data/pv/eq.svg', alt: 'Pv production eq' }),
-                    tr('where')
-                ),
-                React.createElement(
-                    'ul',
-                    null,
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/radFlux.svg', alt: 'Pv production eq' }),
-                        tr('is the maximal radiant flux (W/m2)')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/area.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the area (m2)')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/efficiency.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the pannel efficiency')
-                    ),
-                    React.createElement(
-                        'li',
-                        null,
-                        React.createElement('img', { src: 'data/pv/capaFact.svg', alt: 'Pv production eq' }),
-                        ' ',
-                        tr('is the capacity factor at that hour')
-                    )
+                    tr('Wind turbines are devices that transform wind kinetic energy into electricity.')
                 ),
                 React.createElement(
                     'div',
@@ -106,18 +55,28 @@ var WindDetails = function (_React$Component) {
                         React.createElement(
                             'h4',
                             null,
-                            tr('Efficiency evolution')
+                            tr('Production')
                         ),
                         React.createElement(
                             'p',
                             null,
-                            tr('Proportion of sun power transformed into electric power. ')
+                            'Production of a wind farm of area ',
+                            React.createElement('img', { src: 'data/symbols/area.svg' }),
+                            ' is : '
                         ),
-                        React.createElement('canvas', { ref: this.cEffi, width: '300', height: '200' }),
+                        React.createElement('img', { src: 'data/wind/production.svg' }),
                         React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.efficiency.source
+                            'ul',
+                            null,
+                            [{ img: 'wind/turbDens', descr: turbDensTxt }, { img: 'wind/rotRad', descr: 'is the rotor radius. Const. 45m' }, { img: 'wind/wpd', descr: 'is the wind power density (W/m2)' }, { img: 'symbols/efficiency', descr: 'is the efficiency' }, { img: 'symbols/capaFactT', descr: 'is the capacity factor at hour t' }].map(function (i) {
+                                return React.createElement(
+                                    'li',
+                                    { key: i.img },
+                                    React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                                    ' ',
+                                    tr(i.descr)
+                                );
+                            })
                         )
                     ),
                     React.createElement(
@@ -126,58 +85,18 @@ var WindDetails = function (_React$Component) {
                         React.createElement(
                             'h4',
                             null,
-                            tr('Build energy')
+                            tr('Efficiency')
                         ),
                         React.createElement(
                             'p',
                             null,
-                            tr('Solar pannel manufacturing requires some energy. ')
+                            tr('Proportion of wind energy transformed into electricity. ')
                         ),
-                        React.createElement('canvas', { ref: this.cBuildEn, width: '300', height: '200' }),
+                        React.createElement(ReactPlot, { data: wind.efficiency }),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
-                            pv.build.energy.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Build cost')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Solar pannel manufacturing cost. ')
-                        ),
-                        React.createElement('canvas', { ref: this.cBuildCost, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.build.cost.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Operation and maintenance costs')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Yearly cost per m2')
-                        ),
-                        React.createElement('canvas', { ref: this.cPerYearCost, width: '300', height: '200' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            pv.perYear.cost.source
+                            wind.efficiency.source
                         )
                     ),
                     React.createElement(
@@ -191,27 +110,82 @@ var WindDetails = function (_React$Component) {
                         React.createElement(
                             'p',
                             null,
-                            tr('Naturally, photovoltaic panels do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')
+                            tr('Naturally, wind turbines do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')
                         ),
                         React.createElement(
                             'a',
-                            { href: 'data/pv/allBePvCapaFact.csv' },
-                            tr('Download the historic data for Belgium (1985-2016)')
+                            { href: 'data/wind/wind_onshore_capaFact.csv' },
+                            tr('Download the historic data for Belgium (2013-2017)')
                         ),
                         React.createElement(
                             'p',
                             { className: 'pSource' },
                             'https://www.renewables.ninja/downloads'
                         )
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'hLayout' },
+                    ),
                     React.createElement(
                         'div',
-                        { className: 'button black', onClick: this.props.closeRequested },
-                        tr('Close')
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Wind power density')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            'The wind power density is the wind power flux. '
+                        ),
+                        React.createElement(
+                            'a',
+                            { href: 'data/wind/meanWindPowerDensity50.png', title: tr('Click to download') },
+                            React.createElement('img', { src: 'data/wind/meanWindPowerDensity50.png', width: '300' })
+                        ),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            'https://globalwindatlas.info/'
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Build cost')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            'Build cost per item'
+                        ),
+                        React.createElement(ReactPlot, { data: wind.build.cost }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            wind.build.cost.source
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'h4',
+                            null,
+                            tr('Maintenance cost')
+                        ),
+                        React.createElement(
+                            'p',
+                            null,
+                            'Yearly cost per item'
+                        ),
+                        React.createElement(ReactPlot, { data: wind.perYear.cost }),
+                        React.createElement(
+                            'p',
+                            { className: 'pSource' },
+                            wind.perYear.cost.source
+                        )
                     )
                 )
             );

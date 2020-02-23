@@ -2,6 +2,18 @@ import { quantityToHuman as valStr } from './quantitytohuman.js';
 import {tr} from "../tr/tr.js";
 
 
+let energyPalette =     {
+    nuke: 'yellow',
+    pv:'rgb(70, 85,180)',
+    fossil:'rgb(255, 124, 84)',
+    storage:'rgb(0, 255, 250)',
+    constructions:'red',
+    ccgt:'rgb(169, 202, 250)',
+    wind: 'white',
+    fusion: 'green',
+  };
+
+
 /** draw a legend at 0 0.
 @param  items : array of obj {color: '', text: ''}
 */
@@ -25,6 +37,9 @@ options :
                 'hide' : no legend
 */
 export function pieChart(ctx, values, palette, {fontColor= 'black', legend= 'percent'}) {
+    if(palette == 'energy')
+        palette = energyPalette;
+
   var defaultColors = ['red', 'green', 'blue', 'yellow', 'pink'];
 
   var vals = Object.entries(values);
@@ -103,6 +118,9 @@ export function stackedLineChart(ctx, values, {palette= null, unit='', from=null
     if(order === undefined){
         order = Object.keys(values[0]);
     }
+
+    if(palette == 'energy')
+        palette = energyPalette;
 
     if(palette === null){
         palette = {};
@@ -200,10 +218,10 @@ function xAxis(ctx, width, height, values, hScale, from, to){
     ctx.save();
     ctx.translate(0, height);
 
-    ctx.strokeStyle = 'grey';
+    ctx.strokeStyle = 'white';
     ctx.strokeWidth = 1;
     ctx.textAlign= 'center';
-    ctx.fillStyle = 'grey';
+    ctx.fillStyle = 'white';
 
     let widthPerYear = width / (values.length);
     let mod;
@@ -265,8 +283,8 @@ function yAxis(ctx, width, height, max, unit){
 
     //axis itself
     ctx.strokeWidth = 1;
-    ctx.strokeStyle = 'grey';
-    ctx.fillStyle = 'grey';
+    ctx.strokeStyle = 'white';
+    ctx.fillStyle = 'white';
     ctx.beginPath();
     ctx.moveTo(2, 0);
     ctx.lineTo(2, height);
