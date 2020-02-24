@@ -12,7 +12,6 @@
 sup{
     vertical-align: super;
     font-size: smaller;
-
 }
 
 #root{
@@ -24,8 +23,7 @@ sup{
 html, body{
     width: 100%;
     height: 100%;
-    max-height: 100%;
-    min-height: 0;
+    min-width: 320px;
 }
 
 body{
@@ -48,119 +46,19 @@ h1{
     padding: 10px;
 }
 
-
-
-#dCorps{
-    width: 100%;
-    flex-grow: 1;
-    overflow: auto;
-    box-sizing: border-box;
-
-    display: flex;
-    flex-direction: row;
+ul{
+   list-style-type: none;
 }
 
-
-#dLeftDock, #dRightDock{
-    box-sizing: border-box;
-    display: flex;
-    min-height: 0;
-
-    flex-direction: column;
-    overflow: auto;
-    display:none;
+table{
+    border-collapse: collapse;
 }
 
-#dRightDock{
-    border-left: 1px solid gray;
-    width: 350px;
-
+td{
+    padding: 2px;
 }
-#dLeftDock{
-    width: 300px;
-    border-right: 1px solid gray;
-    position: relative;
-}
-
-#bMaskLeftDock{
-    position: absolute;
-    top: 50%;
-    left: -24px;
-    width: 40px;
-    height: 40px;
-    background:white;
-    border: 1px solid gray;
-    border-radius: 50%;
-    z-index: 1000000000;
-    transform: translate(0, -40px);
-    cursor:pointer;
-    display:none;
-}
-
-
-
-#dCentralArea{
-    flex: 1 1;
-    overflow: hidden;
-    position: relative;
-}
-
-
-#dMap{
-    transform-origin: 0 0;
-    overflow: visible;
-    position: relative;
-    width: 100px;
-    height: 100px;
-    will-change: transform;
-    filter: grayscale(1%);
-    display:none;
-}
-
-#dCoefs  > *{
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid rgb(220, 220, 220);
-    transition: 0.2s;
-}
-
-#dCoefs  > *:hover{
-    padding-left: 12px;
-    padding-right: 8px;
-}
-
-
-#dPlotDisplay{
-    display:none;
-    padding: 50px;
-}
-
-#dPlotDisplay h2{
-    font-size: 1.2em;
-}
-.pSource{
-    font-size: 10px;
-}
-
 
 /** BUILD MENU ----------------------------------*/
-#buildMenu{
-    border-top: 1px solid gray;
-    margin: 20px 0;
-
-    padding: 5px;
-}
-
-#buildMenu h3{
-    font-weight: bold;
-
-}
-
-#buildMenuOptionTable{
-    display: flex;
-    flex-direction: row;
-    width: min-content;
-}
 
 .bBuild{
     height: var(--menu-icon-size);
@@ -172,82 +70,12 @@ h1{
     transform: scale(1.2);
 }
 
-#dBuildDetails{
-    /* display: none; */
-    max-width: max-content;
-    width: 100%;
-    background-color: rgba(76, 175, 80, 0.3);
-    padding-left: 10px;
-    padding-right: 20px;
-    white-space: nowrap;
-}
-#dBuildDetails th{
-    text-align:left;
-    vertical-align: top;
-}
-
-.bmInf{
-    height: 12px;
-}
-
-
-#pv-radius{
-    position: relative;
-    background-color: coral;
-    visibility:hidden;
-    z-index: 1000;
-}
-
-canvas {
-    image-rendering: optimizeSpeed;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: optimize-contrast;
-    -ms-interpolation-mode: nearest-neighbor;
+.pSource{
+    font-size: 10px;
 }
 
 
 
-.mainButton{
-    position:absolute;
-    z-index: 10000;
-    cursor: pointer;
-    width: 32px;
-}
-
-
-
-
-
-/* dMainMenu ----------------------------------------- */
-
-#dMainMenu{
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    height: 100%;
-}
-
-#dMainMenu > div{
-    display: flex;
-    flex-direction: column;
-}
-
-#dMainMenu > div > *{
-    padding: 20px;
-}
-
-#dMainMenu a{
-    cursor: pointer;
-}
-
-#dMainMenu a:hover{
-    text-decoration: underline;
-}
 
 #author{
     padding: 10px;
@@ -344,8 +172,6 @@ canvas {
 
 
 #dMapBox canvas{
-    width: 100%;
-    height: 100%;
     border: 0;
     padding: 0;
     margin: 0;
@@ -456,6 +282,9 @@ canvas {
 
 
 /* Details  */
+.detailContent{
+    user-select: text;
+}
 .detailContent h3{
     font-size: 1.4em;
 }
@@ -477,7 +306,11 @@ canvas {
 .hWrapLayout > *{
     width: 400px;
     margin: 10px;
+    flex-grow: 1;
 }
+
+
+
 
 .plotContainer{
 	position: relative;

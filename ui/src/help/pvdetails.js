@@ -43,12 +43,19 @@ export default class PvDetails extends React.Component{
 
                 <div>
                     <h4>{tr('Radiant flux')}</h4>
-                    <img src="data/pv/maxRadFlux.svg" alt="max rad flux eq" />
-                    <p>
-                    <img src='data/symbols/avgCapaFact.svg' alt='avgCapaFact' /> is the average capacity factor and GHI is
-                    </p>
-                    <img src='data/pv/globalHorisontalIrradiance.png' alt='ghi be' width="300"/>
-                    <p className="pSource">https://globalsolaratlas.info/</p>
+                    <div className='hLayout'>
+                        <div>
+                            <img src="data/pv/maxRadFlux.svg" alt="max rad flux eq" />
+                            <ul>
+                                <li><img src='data/symbols/avgCapaFact.svg' alt='avgCapaFact' /> is the average capacity factor</li>
+                                <li>{tr('GHI is the Global Horizontal Irradiance')}</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <img src='data/pv/globalHorisontalIrradiance.png' alt='ghi be' width="120"/>
+                            <p className="pSource">https://globalsolaratlas.info/</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div>

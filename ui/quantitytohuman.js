@@ -1,4 +1,4 @@
-/** option.compact : bool, true if you want the most compact possible. default false
+/** option.compact : [0-2], 0 = less compact, 2 = most compact. default 0
 options.mag int [-3, 5] : force mag order. 1 => k aso. default : auto detect.
 options.forceSign : bool. default false. if true, will write '+3' instead of '3'
 */
@@ -11,7 +11,7 @@ export function quantityToHuman(value, unit, options){
 	}
 
 	if(options.compact === undefined)
-		options.compact = false;
+		options.compact = 0;
 
 	let sign = '';
 
@@ -21,7 +21,7 @@ export function quantityToHuman(value, unit, options){
 
 	if(unit == '%')
 		return sign + Math.round(value * 1000) / 10 + ' %';
-	if(unit == '€' && !options.compact)
+	if(unit == '€' && options.compact==0)
 		return sign + plainTextEuro(value);
 
 	let yolo = 1000;
@@ -54,21 +54,29 @@ export function quantityToHuman(value, unit, options){
 
 
 	//max 3 digit sig
-	var div = value / divider;
-	if(div >= 100)
-		div = Math.round(div);
+	var orderVal = value / divider;
+
+	if(options.compact == 2)//if ultra compact, less sig digits
+		orderVal /= 10;
+
+	if(orderVal >= 100)
+		orderVal = Math.round(orderVal);
 	else
-		div = Math.round(div * 10) / 10;
+		orderVal = Math.round(orderVal * 10) / 10;
+
+	if(options.compact == 2)
+		orderVal *= 10;
+
 
 	if(value == 0)
-		div = 0;
+		orderVal = 0;
 
 
-	return sign + div + ' ' + unitToHuman(suffix + unit, options.compact);
+	return sign + orderVal + ' ' + unitToHuman(suffix + unit, options.compact);
 }
 
 
-export function unitToHuman(unit, compact = false){
+export function unitToHuman(unit, compact){
 	var tmp = unit;
 	if(unit.match(/^(m|μ|ν)(€|C)/) && unit.match(/\//)){
 		if(unit[0] == 'm')
@@ -77,7 +85,7 @@ export function unitToHuman(unit, compact = false){
 			tmp = unit.substring(1).replace('/', '/M');
 	}
 
-	if(!compact)
+	if(compact == 0)
 		tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('i', 'item').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (pic) ').replace('C', 'gCO2eq');
 	else
 		tmp = tmp.replace('N', 'Wp').replace('C', 'gCO2');
@@ -87,6 +95,10 @@ export function unitToHuman(unit, compact = false){
 
 	//storage
 	tmp = tmp.replace('S', 'Wh');
+
+	if(compact == 2){
+		tmp = tmp.replace('CO2', '').replace('G€', 'B').replace('M€', 'M');
+	}
 
 	return tmp.replace('  ', ' ');
 }

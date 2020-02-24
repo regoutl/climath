@@ -1,6 +1,9 @@
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import {tr} from '../../tr/tr.js';
 import {periodAvgCo2} from '../../periodavgco2.js';
+import BudgetDialog from './budgetdialog.js';
+import {Co2Dialog} from './co2dialog.js';
+import {ConsoDialog} from './consodialog.js';
 
 export default class StatusBar extends React.Component{
     /*
@@ -42,13 +45,13 @@ export default class StatusBar extends React.Component{
         <div id="statusBar" className="hLayout" >
             <div
                 title={tr('Needed power')}
-                onClick={this.props.showConsoDialog}
+                onClick={() => this.props.showDialog(ConsoDialog)}
             >
                 {this.props.date} <img width="25" src="res/icons/electricEnergy.png" /> {valStr(consumed, 'W')}
             </div>
             <div
                 title="Co2"
-                onClick={this.props.showCo2Dialog}
+                onClick={() => this.props.showDialog(Co2Dialog)}
 
             >
                 <span title={tr('Average of the last 20 years')}>{valStr(avgCo2, 'C').slice(0, -5)} CO<sup>2</sup></span>
@@ -61,7 +64,7 @@ export default class StatusBar extends React.Component{
                         color: (increase > 0 ? 'red': 'lime')}}
                 >{sign + Math.abs(increase)} %</span>
             </div>
-            <div title={tr("Set budget")} onClick={this.props.showBudgetDialog}>{valStr(this.props.money, '€')}</div>
+            <div title={tr("Set budget")} onClick={() => this.props.showDialog(BudgetDialog)}>{valStr(this.props.money, '€')}</div>
         </div>);
     }
 }

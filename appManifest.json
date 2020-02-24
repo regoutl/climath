@@ -1,0 +1,21 @@
+{
+    "name": "Climath",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "icons": [
+        {
+            "src": "res/icons/climath192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "res/icons/climath512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/",
+    "background_color": "green",
+    "scope": "/",
+    "version": "0.1"
+}

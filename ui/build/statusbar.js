@@ -9,6 +9,9 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { tr } from '../../tr/tr.js';
 import { periodAvgCo2 } from '../../periodavgco2.js';
+import BudgetDialog from './budgetdialog.js';
+import { Co2Dialog } from './co2dialog.js';
+import { ConsoDialog } from './consodialog.js';
 
 var StatusBar = function (_React$Component) {
     _inherits(StatusBar, _React$Component);
@@ -34,6 +37,8 @@ var StatusBar = function (_React$Component) {
     _createClass(StatusBar, [{
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             //compute co2 of the last 15 years
             var avgCo2 = periodAvgCo2(this.props.history, Math.max(0, this.props.history.length - 20), this.props.history.length);
             var firstYearCo2 = periodAvgCo2(this.props.history, 0, 1);
@@ -58,7 +63,9 @@ var StatusBar = function (_React$Component) {
                     'div',
                     {
                         title: tr('Needed power'),
-                        onClick: this.props.showConsoDialog
+                        onClick: function onClick() {
+                            return _this2.props.showDialog(ConsoDialog);
+                        }
                     },
                     this.props.date,
                     ' ',
@@ -70,7 +77,9 @@ var StatusBar = function (_React$Component) {
                     'div',
                     {
                         title: 'Co2',
-                        onClick: this.props.showCo2Dialog
+                        onClick: function onClick() {
+                            return _this2.props.showDialog(Co2Dialog);
+                        }
 
                     },
                     React.createElement(
@@ -100,7 +109,9 @@ var StatusBar = function (_React$Component) {
                 ),
                 React.createElement(
                     'div',
-                    { title: tr("Set budget"), onClick: this.props.showBudgetDialog },
+                    { title: tr("Set budget"), onClick: function onClick() {
+                            return _this2.props.showDialog(BudgetDialog);
+                        } },
                     valStr(this.props.money, '€')
                 )
             );

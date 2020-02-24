@@ -94,7 +94,7 @@ export class Co2Dialog extends React.Component{
         <h3>Emissions</h3>
         <canvas ref={this.pieCharts} width="400" height="200"/>
         <div className="hLayout">
-            <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
+            <div className="button white" ref={this.bOk} onClick={this.props.closeRequested}>{tr("Ok")}</div>
         </div>
         </div>);
     }

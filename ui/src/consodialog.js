@@ -78,7 +78,7 @@ export class ConsoDialog extends React.Component{
         <h3>{tr("Power origin in %d", '', this.props.history[this.props.history.length - 1].year)}</h3>
         <canvas ref={this.pieChart} width="200" height="110"/>
         <div className="hLayout">
-            <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
+            <div className="button white" ref={this.bOk} onClick={this.props.closeRequested}>{tr("Ok")}</div>
             <div className="button white" onClick={() => this.props.detailsRequested(OriginDetails)}>{tr('Details...')}</div>
         </div>
         </div>);

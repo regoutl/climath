@@ -193,9 +193,11 @@ export default class Scene{
         let displayWidth  =  window.innerWidth;
         let displayHeight =  window.innerHeight;
 
+
+        // console.log(displayWidth, displayHeight);
+
         // Check if the canvas is not the same size.
         if (canvas.width  != displayWidth || canvas.height != displayHeight) {
-            // console.log('resize', displayHeight);
 
             // Make the canvas the same size
             canvas.width  = displayWidth;
@@ -570,7 +572,7 @@ export default class Scene{
         gl.uniform2fv(this._invScreenSizePtsLocInPtsShader, [2.0/gl.canvas.width, 2.0/gl.canvas.height]); //no cursor : offset it
 
 
-        if(this.cursor.type === undefined || this.cursor.pos === null)
+        if(!this.cursor.type || !this.cursor.pos)
             gl.uniform4fv(this._cursorLocInPtsShader, [-1000000, 0, 0, 0]); //no cursor : offset it
         else{
             gl.uniform4fv(this._cursorLocInPtsShader,
@@ -608,7 +610,6 @@ export default class Scene{
 
             this.instancing.vertexAttribDivisorANGLE(0, 0); //reset instancing
             gl.disableVertexAttribArray(1);
-
     }
 }
 

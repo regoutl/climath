@@ -290,7 +290,7 @@ var BudgetDialog = function (_React$Component2) {
                         ),
                         React.createElement(
                             'tr',
-                            null,
+                            { style: { borderTop: '1px solid white' } },
                             React.createElement(
                                 'th',
                                 null,
@@ -309,7 +309,7 @@ var BudgetDialog = function (_React$Component2) {
                     { className: 'hLayout' },
                     React.createElement(
                         'div',
-                        { className: 'button white', ref: this.bOk },
+                        { className: 'button white', ref: this.bOk, onClick: this.props.closeRequested },
                         tr("Ok")
                     ),
                     React.createElement(

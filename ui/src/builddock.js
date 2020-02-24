@@ -8,39 +8,30 @@ import WindDetails from './help/winddetails.js';
 import CcgtDetails from './help/ccgtdetails.js';
 import BatteryDetails from './help/batterydetails.js';
 import FusionDetails from './help/fusiondetails.js';
+import {Simulateur} from '../../simulateur/simulateur.js';
+
+const energyIcons = [
+    {name: 'Solar panels',          src:'solar.png', target:'pv',     },
+    {name: 'Nuclear power plant',   src:'nuke.png',  target:'nuke',   },
+    {name: 'Battery',               src:'bat.png',   target:'battery',},
+    {name: 'Gas-fired power plant', src:'ccgt.png',  target:'ccgt',   },
+    {name: 'Wind turbine',          src:'wind.png',  target:'wind',   },
+    {name: 'Nuclear fusion',        src:'fusion.png',target:'fusion', },
+];
+
 
 ///////////////////////////////////////////////////////////////////////////////
     // List props for this Component :
-    // buildMenuSelectionCallback = function setNewTarget(target)
-    // target = var currentTarget
-    // info{
-    //     theoReason: "",
-    //     buildCost: 0,
-    //     buildCo2: 0,
-    //     perYearCost: 0,
-    //     perYearCo2: 0,
-    //     nameplate: 0,
-    //     pop: 0,
-    //     explCost: 0,
-    //     coolingWaterRate: 0,
-    //     storageCapacity: 0,
-    //
-    // }
-    // sliderRadius = {default:, min:, max:, sliderChange: r=>f(r)}
-    // detailsRequested : function called when details is clicked
-///////////////////////////////////////////////////////////////////////////////
-// List possible target :
-//     ['pv', 'nuke', 'battery', 'ccgt', 'wind', 'fusion']
-///////////////////////////////////////////////////////////////////////////////
-export default class BuildDock extends React.Component{
-    constructor(props){
-        super(props);
-    }
-
+    // onTypeChanged = function setTargetBuild({type: newType})
+    // onDetailsRequested : function called when details is clicked
+    // onBuildConfirmed : function called on build confirmation
+    // simu : the simulater
+    // targetBuild
+export class BuildDock extends React.Component{
     render(){
-        let showdock = this.props.target !== undefined;
-        let dockheight = showdock ?
-                            'var(--build-dock-height)':32;
+        let showdock = this.props.targetBuild.type;
+        let dockheight =
+                            'var(--build-dock-height)';
         let dockwidth = (isMobile() || isSmallScreen()) ? '95%':350;
         const defaultRadius = 50, maxRadius = 100;
         const needSlider = {
@@ -62,19 +53,38 @@ export default class BuildDock extends React.Component{
 
         let restyle = {}
         let optionTable = undefined;
-        if(this.props.target !== undefined){
-            // let Type = ; //buildDetailsChoice[this.props.target.toLowerCase()];
+
+        if(this.props.targetBuild.type ){
+            const rawInfo = this.props.simu.onBuildMenuStateChanged(this.props.targetBuild).info;
+
+            let avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
+
+            let info={
+                theoReason: rawInfo.theorical,
+                buildCost: rawInfo.build.cost,
+                buildCo2: rawInfo.build.co2,
+                perYearCost: rawInfo.perYear.cost + rawInfo.perWh.cost * avgProd,
+                perYearCo2: rawInfo.perYear.co2 + rawInfo.perWh.co2 * avgProd,
+                avgProd: avgProd,
+                pop: rawInfo.pop_affected,
+                explCost: rawInfo.expl_cost,
+                coolingWaterRate: rawInfo.coolingWaterRate,
+                storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+            };
+
+
+            // let Type = ; //buildDetailsChoice[this.props.type.toLowerCase()];
             optionTable = (<BuildDetailsAny
-                info = {this.props.info}
-                confirmBuild = {this.props.onConfirmBuild}
-                slider = {this.props.sliderRadius}
+                info = {info}
+                confirmBuild = {this.props.onBuildConfirmed}
+                slider = {this.props.targetBuild.slider}
                 restyle = {restyle}
-                style = {{bottom: 0, height: dockheight,width: dockwidth}}
-                needsSlider= {needSlider[this.props.target.toLowerCase()]}
-                onBack = {() => {this.props.buildMenuSelectionCallback(undefined)}}
+                style = {{bottom: 0, height: dockheight,width: dockwidth, overflow: 'hidden '}}
+                needsSlider= {needSlider[this.props.targetBuild.type.toLowerCase()]}
+                onBack = {() => {this.props.onTypeChanged({type: null})}}
                 detailsRequested={() =>
-                    this.props.detailsRequested(detailForTech[
-                                                this.props.target.toLowerCase()])}
+                    this.props.onDetailsRequested(detailForTech[
+                                                this.props.targetBuild.type.toLowerCase()])}
             />)
         }
 
@@ -82,16 +92,16 @@ export default class BuildDock extends React.Component{
         return (
             <div>
                 <BuildMenu
-                    onClick = {this.props.buildMenuSelectionCallback}
+                    onClick = {this.props.onTypeChanged}
                     style = {{bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))'}}
-                    showMenu = {this.props.target === undefined ?
-                                                    true : this.props.target}
+                    showMenu = {this.props.targetBuild.type === null ?
+                                                    true : this.props.targetBuild.type}
                 />
                 {optionTable}
             </div>);
 
 
-        // if(this.props.info.theoReason !== undefined){
+        // if(this.props.rawInfo.theoReason !== undefined){
         //     restyle[this.props.info.theoReason] = {"color": "red"};
         // }
         //
@@ -108,8 +118,8 @@ export default class BuildDock extends React.Component{
         //     <BuildMenu
         //         onClick = {this.props.buildMenuSelectionCallback}
         //         style = {{bottom: (dockheight + 50) +'px'}}
-        //         showMenu = {this.props.target === undefined ?
-        //                                         true : this.props.target}
+        //         showMenu = {this.props.type === undefined ?
+        //                                         true : this.props.type}
         //     />
         //     {optionTable}
         // </div>);
@@ -158,7 +168,7 @@ function InputSlider(props){
         id = 'BMRange'
         defaultValue = {props.slider.default}
         onChange = {(event) =>
-                    props.slider.sliderChange(event.target.value)}
+                    props.slider.onValueChanged(event.target.value)}
         min = {props.slider.min}
         max = {props.slider.max}
     />);
@@ -184,9 +194,8 @@ function BuildDetailsAny(props){
                 {show.map(mapLineFct(props))}
             </tbody>
         </table>
-        {props.needsSlider &&  <InputSlider slider = {props.slider}/>}
         <div className='hLayout'>
-            <div className='button white' onClick={()=>props.onBack(undefined)}>
+            <div className='button white' onClick={props.onBack}>
                 {tr('Back')}
             </div>
             <div className="button white" onClick={props.detailsRequested}>
@@ -201,6 +210,7 @@ function BuildDetailsAny(props){
     </div>);
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 ////// function building the left build Menu  (choose the building type) //////
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,19 +218,12 @@ let lastSelected = undefined;
 let selecte;
 function BuildMenu(props){
     selecte = (target) => {
-            lastSelected = (lastSelected === target) ? undefined: target;
-            return props.onClick(lastSelected)
+            lastSelected = (lastSelected === target) ? null: target;
+            return props.onClick({type: lastSelected})
         };
 
     return( <div id = "BuildMenu" className = "vLayout" style = {props.style}>
-        {[
-            {name: 'Solar panels',          src:'solar.png', target:'pv',     },
-            {name: 'Nuclear power plant',   src:'nuke.png',  target:'nuke',   },
-            {name: 'Battery',               src:'bat.png',   target:'battery',},
-            {name: 'Gas-fired power plant', src:'ccgt.png',  target:'ccgt',   },
-            {name: 'Wind turbine',          src:'wind.png',  target:'wind',   },
-            {name: 'Nuclear fusion',        src:'fusion.png',target:'fusion', },
-        ].map(nrj => (props.showMenu === true?   nrj.target !== undefined:
+        {energyIcons.map(nrj => (props.showMenu === true?   nrj.target !== undefined:
                     props.showMenu === nrj.target || nrj.target === undefined)?
             (<img
                 src = {'res/icons/'+nrj.src}
@@ -245,3 +248,130 @@ function ShowDockButton(props){
     />)
 }
 ///////////////////////////////////////////////////////////////////////////////
+
+function CircularBuildMenuIcon(props){
+    let index = props.index;
+    let nrj = props.nrj;
+    let radius = props.radius;
+
+    let transforms =[
+        'rotate(' + (2*3.14*index/6) + 'rad)',
+        'translate(' + radius + 'px, 0)',
+        'rotate(' + (-2*3.14*index/6) + 'rad)',
+        'translate(-50%,-50%)',
+    ];
+
+    let theOne = props.targetBuild.type == nrj.target;
+
+    return (
+        <div
+            key={nrj.target}
+            style={{
+                position: 'absolute',
+                transform: transforms.join(' '),
+                background: "rgb(255, 255, 255)",
+                border: '3px solid grey',
+                borderRadius: 10,
+                width: 32,
+                padding: 5
+            }}
+            onTouchStart={theOne ? ()=>props.onBuildConfirmed() : ()=>props.onTypeChanged({type: nrj.target})}
+        >
+            <img
+                src={theOne ? 'res/icons/validate.png' : 'res/icons/'+nrj.src}
+                width="100%"
+            />
+        </div>);
+
+}
+
+/** @brief a circular build menu around a point
+@param props : accepted fields :
+    [All those of BuildDock]
+    center : {x, y} coord (in px, page relative) of the center
+*/
+export class TouchBuildDock extends React.Component{
+    render(){
+        let props = this.props;
+
+        const radius = 60;
+
+        let buildDetails = null;
+        if(props.targetBuild.type){ //target is defined
+            const rawInfo = props.simu.onBuildMenuStateChanged(props.targetBuild).info;
+
+            let avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
+
+            let info={
+                theoReason: rawInfo.theorical,
+                buildCost: rawInfo.build.cost,
+                buildCo2: rawInfo.build.co2,
+                perYearCost: rawInfo.perYear.cost + rawInfo.perWh.cost * avgProd,
+                perYearCo2: rawInfo.perYear.co2 + rawInfo.perWh.co2 * avgProd,
+                avgProd: avgProd,
+                pop: rawInfo.pop_affected,
+                explCost: rawInfo.expl_cost,
+                coolingWaterRate: rawInfo.coolingWaterRate,
+                storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+            };
+
+            buildDetails = (
+                <div style={{
+                    position: 'absolute',
+                    top: -radius,
+                    left: radius + 32,
+                    background: "white",
+                    border: '3px solid grey',
+                    borderRadius: 10,
+                    padding: 5
+                }}>
+                    <h3>{tr(props.targetBuild.type)}</h3>
+                    <div className='hLayout' style={{width: 'max-content'}}>
+                        <div>
+                            <img src='res/icons/bill.png' height="18"/>
+                            {valStr(info.buildCost, '€', {compact:2})}
+                        </div>
+                        {info.storageCapacity > 0 && <div>
+                            <img src='res/icons/bat.png' height="18"/>
+                            {valStr(info.storageCapacity, 'Wh',  {compact:2})}
+                        </div>}
+
+                        {info.avgProd > 0 && <div>
+                            <img src='res/icons/electricEnergy.png' height="18"/>
+                            {valStr(info.avgProd, 'W',  {compact:2})}
+                        </div>}
+                        {info.buildCo2 > 0 && <div>
+                            <img src='res/icons/pollution.png' height="18"/>
+                            {valStr(info.buildCo2, 'C', {compact:2})}
+                        </div>}
+                    </div>
+                </div>);
+        }
+
+
+
+        return (
+            <div style={{
+                position:'absolute',
+                top: props.center.y,
+                left: props.center.x ,
+                width: 0,
+                height: 0
+            }}
+            >
+                {energyIcons.map((nrj, index) => {
+                    return (
+                    <CircularBuildMenuIcon
+                        nrj={nrj}
+                        index={index}
+                        targetBuild={props.targetBuild}
+                        onBuildConfirmed={props.onBuildConfirmed}
+                        onTypeChanged={props.onTypeChanged}
+                        radius={radius}
+                    />);
+                })}
+
+                {buildDetails}
+            </div>)
+    }
+}

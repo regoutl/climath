@@ -1,43 +1,52 @@
 import {tr} from '../../tr/tr.js';
 import MapLayers from './maplayers.js';
+import {BuildDock, TouchBuildDock} from './builddock.js';
+import {isTouchScreen,isMobile,isSmallScreen,isLandscape} from '../screenDetection.js';
 
 function isCentral(type){
     return type == 'nuke' || type == 'ccgt' || type == 'fusion';
 }
 
+/* The map view is responsible for :
+-the map canvas (not the centent, see Scene)
+-The map layers buttons
+- the build menus
+*/
 export default class MapView extends React.Component{
 
     /* accepted props :
-    onBuildChange : function({pos: curPos, confirmOnDock: bool})
+    onBuildPosChanged : function({pos: curPos, confirmOnDock: bool})
             -> called on mouse move && mouse leave  (then with undefined curPos)
-    onConfirmBuild : function(curPos)        -> called on click
+    onBuildConfirmed : function(curPos)        -> called on click
     cursor : {type, radius} type : undefined or string (pv, nuke, ...)
                             radius : undefined or Number. unit : px
+    onBuildMenuRequested()
+    scene : a Scene
     */
     constructor(props){
         //react
         super(props);
 
+        this.targetBuild = { //the current sheduled build
+            type: null,
+            loc: {pos:{x:0, y:0}, radius:50},
+        };
+
+
+
         this.state = {
             energyGrid: true,
             flows: false,
-            base: 'groundUse'
+            base: 'groundUse',
+            touchBuildMenuPos: null,
         };
 
         this._toogleLayer = this._toogleLayer.bind(this);
 
         //callbacks ----------------------------------------------------
         this.draw = this.draw.bind(this);
-        this.mousedown = this.onmousedown.bind(this);
         this.mousemove = this.onmousemove.bind(this);
         this.mouseup = this.onmouseup.bind(this);
-        this.wheel = this.onwheel.bind(this);
-        this.touchstart = this.ontouchstart.bind(this);
-        this.touchmove = this.ontouchmove.bind(this);
-        this.touchend = this.ontouchend.bind(this);
-        this.click = this.onclick.bind(this);
-
-        this.mouseleave = this.onmouseleave.bind(this);
 
 
         //about mouse
@@ -56,7 +65,34 @@ export default class MapView extends React.Component{
         this.canvas = React.createRef();
     }
 
+    /** callback
+        set the current location of the cursor as {pos:{x:,y:}, radius:}
+    */
+    setTargetBuild({type=this.targetBuild.type,
+                    pos=this.targetBuild.loc.pos,
+                    radius=this.targetBuild.loc.radius}){
 
+
+        this.targetBuild.loc = {
+            pos: pos,
+            radius: radius,
+        };
+
+        //we were builing nothing and it will not change, stop
+        if(!this.targetBuild.type  && !type)
+            return;
+
+        //set the new values
+        this.targetBuild.type = type;
+
+        this.props.scene.cursor={
+                        type:this.targetBuild.type,
+                        radius: this.targetBuild.loc.radius,
+                        pos:this.targetBuild.loc.pos
+                    };
+
+        this.forceUpdate();
+    }
 
 
 
@@ -82,11 +118,6 @@ export default class MapView extends React.Component{
 
         window.addEventListener('mousemove', this.mousemove);
         window.addEventListener('mouseup', this.mouseup);
-
-        window.addEventListener('touchstart', this.touchstart);
-        window.addEventListener('touchmove', this.touchmove, {passive: false});
-        window.addEventListener('touchend', this.touchend);
-        window.addEventListener('touchcancel', this.touchend);
     }
 
     componentWillUnmount(){
@@ -94,11 +125,6 @@ export default class MapView extends React.Component{
 
         window.removeEventListener('mousemove', this.mousemove);
         window.removeEventListener('mouseup', this.mouseup);
-
-        window.removeEventListener('touchstart', this.touchstart);
-        window.removeEventListener('touchmove', this.touchmove);
-        window.removeEventListener('touchend', this.touchend);
-        window.removeEventListener('touchcancel', this.touchend);
     }
 
 
@@ -119,16 +145,22 @@ export default class MapView extends React.Component{
 
                     <canvas
                         ref={this.canvas}
-                        onMouseLeave={this.mouseleave}
-                        onClick={this.click}
-                        onWheel={this.wheel}
-                        onMouseDown={this.mousedown}
+                        onMouseLeave={this.onmouseleave.bind(this)}
+                        onWheel={this.onwheel.bind(this)}
+                        onMouseDown={this.onmousedown.bind(this)}
+                        onTouchStart={this.ontouchstart.bind(this)}
+                        onTouchMove={this.ontouchmove.bind(this)}
+                        onTouchEnd={this.ontouchend.bind(this)}
+                        onTouchCancel={this.ontouchend.bind(this)}
+                        onClick={(e) => e.preventDefault()}
                     >
                         {tr("Your browser is not supported")}
                     </canvas>
+
+                    {this._makeDesktopBuildDock()}
+                    {this._makeTouchBuildMenu()}
                 </div>);
     }
-
 
     draw(){
         this.props.scene.draw(
@@ -139,12 +171,73 @@ export default class MapView extends React.Component{
     }
 
 
+
+    /** @brief returns a react component for a detailed build dock
+    @note : desktop build dock is alwas visible, and detailed
+    */
+    _makeDesktopBuildDock(){
+        //no detailed build dock
+        if(isTouchScreen() && isMobile())
+            return null;
+
+
+        return (<BuildDock
+                    simu={this.props.simu}
+                    targetBuild={this.targetBuild}
+
+                    onTypeChanged = {this.setTargetBuild.bind(this)}
+                    onDetailsRequested = {(c) => {this.setState({help: c})}}
+                    onBuildConfirmed = {() => this.confirmBuild(this.scene.cursor.pos)}
+                />);
+    }
+
+    _makeTouchBuildMenu(){
+        if(!this.state.touchBuildMenuPos)
+            return null;
+
+
+
+        return (<TouchBuildDock
+                    simu={this.props.simu}
+                    targetBuild={this.targetBuild}
+                    center={this.state.touchBuildMenuPos}
+
+                    onTypeChanged = {this.setTargetBuild.bind(this)}
+                    onDetailsRequested = {(c) => {this.setState({help: c})}}
+                    onBuildConfirmed = {() => {
+                        this.props.onBuildConfirmed(); //normal, confirm the build
+                        this.setTargetBuild({type: null});
+                        this.setState({touchBuildMenuPos: null}); //hide the menu
+                    }}
+                />);
+    }
+
+
+    toogleTouchBuildMenu(pos){
+        this.setState((state) => {
+            let ans;
+            if(!state.touchBuildMenuPos){
+                this.setTargetBuild({pos:{
+                    x: Math.round((pos.x / this.transform.scale) - this.transform.x),
+                    y: Math.round((pos.y / this.transform.scale) - this.transform.y),
+
+                }})
+                ans = pos;
+            }
+            else
+                ans = null;
+
+            return {touchBuildMenuPos: ans};
+        });
+    }
+
+
     onBuildTargetChange({rawPos, confirmOnDock=false}){
-        this.props.onBuildChange({pos: {
-                x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
-                y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
-            },
-            confirmOnDock: confirmOnDock,
+        this.setTargetBuild({
+            pos: {
+                    x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
+                    y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
+                }
         });
     }
 
@@ -160,16 +253,14 @@ export default class MapView extends React.Component{
             return; // prenvent mouse move event on touch event
 
         if(this.isMouseDown){
-
-            this.transform.x += (e.pageX - this.physMousePos.x) / this.transform.scale;
-            this.transform.y += (e.pageY - this.physMousePos.y) / this.transform.scale;
-
-            this.physMousePos.x = e.pageX;
-            this.physMousePos.y = e.pageY;
-            this.dragging = true;//used to prevent click when drawing
+            if(this.genericDrag({x: this.physMousePos.x, y: this.physMousePos.y}, {x: e.pageX, y: e.pageY})){
+                //on drag success, update mouse pos
+                this.physMousePos.x = e.pageX;
+                this.physMousePos.y = e.pageY;
+            }
 
 
-            this.draw();
+
         }
         else {
             if(e.target != this.canvas.current)
@@ -179,12 +270,19 @@ export default class MapView extends React.Component{
         }
     }
     onmouseup(e){
+        if(!this.dragging){//we were not dragging, count as a click
+            let rawPos = {x:e.pageX, y : e.pageY};
+
+            let transformedPos = {
+                x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
+                y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
+            };
+
+            this.props.onBuildConfirmed(transformedPos);
+        }
+
         this.isMouseDown = false;
-        setTimeout(() => {this.dragging = false}, 0);
-
-        if(e.target != this.canvas.current)
-            return;
-
+        this.dragging = false;
     }
     onwheel(e){
         this.zoom({
@@ -210,22 +308,10 @@ export default class MapView extends React.Component{
 
         this.draw();
     }
-    onclick(e){
-        if(this.dragging)
-            return;
-        let rawPos = {x:e.pageX, y : e.pageY};
-
-        let transformedPos = {
-            x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
-            y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
-        };
-
-        this.props.onConfirmBuild(transformedPos);
-    }
 
     //called when cursor leaves direct contact with central area
     onmouseleave(e){
-        this.props.onBuildChange({pos: undefined});
+        this.setTargetBuild({pos: null});
     }
 
     updatetouchstate(touches){
@@ -235,78 +321,110 @@ export default class MapView extends React.Component{
     }
 
     ontouchstart(e){
-        if(e.target === this.canvas.current){
-            this.updatetouchstate(new Array(...e.touches));
-            if(e.touches.length === 1){
-                this.onBuildTargetChange({rawPos: {
-                    x : e.touches[0].pageX,
-                    y : e.touches[0].pageY,
-                }, confirmOnDock: true,})
-            }
+        //maybe we clicked on a map layer button or else. do nothing in that case
+        if(e.target != this.canvas.current)
+            return;
+        e.preventDefault();
+        this.updatetouchstate(new Array(...e.touches));
+        if(e.touches.length === 1){
+            // this.onBuildTargetChange({rawPos: {
+            //     x : e.touches[0].pageX,
+            //     y : e.touches[0].pageY,
+            // }, confirmOnDock: true,})
         }
     }
     ontouchmove(e){
-        if(e.target === this.canvas.current){
-            e.preventDefault();
-            let touchstate = this.touchstate;
-            let touches = new Array(...e.targetTouches);
-            if(e.targetTouches.length > 1){//wheel
-                let middle = (x0,x1) => Math.abs(x0 + x1)/2,
-                    d0 = {
-                        x: touches[0].pageX,
-                        y: touches[0].pageY,
-                    },
-                    d1 = {
-                        x: touches[1].pageX,
-                        y: touches[1].pageY,
-                    },
-                    oldd0 = touchstate.touches[0],
-                    oldd1 = touchstate.touches[1];
+        if(e.target != this.canvas.current)
+            return;
+        let touchstate = this.touchstate;
+        let touches = new Array(...e.targetTouches);
+        if(e.targetTouches.length > 1){//wheel
+            let middle = (x0,x1) => Math.abs(x0 + x1)/2,
+                d0 = {
+                    x: touches[0].pageX,
+                    y: touches[0].pageY,
+                },
+                d1 = {
+                    x: touches[1].pageX,
+                    y: touches[1].pageY,
+                },
+                oldd0 = touchstate.touches[0],
+                oldd1 = touchstate.touches[1];
 
-                let zoomArg = {
-                        curX: middle(d0.x, d1.x),
-                        curY: middle(d0.y, d1.y),
-                    };
+            let zoomArg = {
+                    curX: middle(d0.x, d1.x),
+                    curY: middle(d0.y, d1.y),
+                };
 
-                let dist = (x0, y0, x1, y1) =>
-                    Math.sqrt( Math.pow(x1-x0,2) + Math.pow(y1-y0,2) );
-                let currDist = dist(d0.x, d0.y, d1.x, d1.y);
-                let oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
+            let dist = (x0, y0, x1, y1) =>
+                Math.sqrt( Math.pow(x1-x0,2) + Math.pow(y1-y0,2) );
+            let currDist = dist(d0.x, d0.y, d1.x, d1.y);
+            let oldDist = dist(oldd0.x, oldd0.y, oldd1.x, oldd1.y);
 
-                zoomArg.deltaY = Math.round(oldDist - currDist);
-                zoomArg.scale = (currDist/oldDist);
+            zoomArg.deltaY = Math.round(oldDist - currDist);
+            zoomArg.scale = (currDist/oldDist);
 
+            this.updatetouchstate(touches);
+            this.zoom(zoomArg);
+
+        }
+        else if(this.touchstate.touches.length > 0){
+            if(this.genericDrag({x:touchstate.touches[0].x, y:touchstate.touches[0].y}, {x:touches[0].pageX, y:touches[0].pageY})){
                 this.updatetouchstate(touches);
-                this.zoom(zoomArg);
-            }else if(this.touchstate.touches.length > 0){
-                this.transform.x += (touches[0].pageX - touchstate.touches[0].x)
-                                                        / this.transform.scale;
-                this.transform.y += (touches[0].pageY - touchstate.touches[0].y)
-                                                        / this.transform.scale;
 
-                this.onBuildTargetChange({rawPos: {
-                    x : touches[0].pageX,
-                    y : touches[0].pageY,
-                }, confirmOnDock: true,});
-
-                this.dragging = true;//used to prevent click when drawing
-
-                this.updatetouchstate(touches);
-                this.draw();
-            }else{
-                this.dragging = true;//used to prevent click when drawing
-                this.updatetouchstate(touches);
-                this.draw();
             }
         }
+
+        let pos = this.state.touchBuildMenuPos;
+        this.setTargetBuild({pos:{
+            x: Math.round((pos.x / this.transform.scale) - this.transform.x),
+            y: Math.round((pos.y / this.transform.scale) - this.transform.y),
+        }});
+
+        this.setTargetBuild({radius:Math.round(50/this.transform.scale)});
+
+        //whut ? move on 0 touches ?
+        // else{
+        //     this.dragging = true;//used to prevent click when drawing
+        //     this.updatetouchstate(touches);
+        //     this.draw();
+        // }
     }
     ontouchend(e){
-        if(e.target === this.canvas.current){
-            e.preventDefault();
-            this.draw();
-            this.touchstate = {touches:[], };
-            this.dragging = false;
+        if(e.target != this.canvas.current)
+            return;
+        e.preventDefault();
+
+        //it is a click from touch : display the small build menu
+        if(!this.dragging){
+            let touch = this.touchstate.touches[0];
+            this.toogleTouchBuildMenu({x: touch.x, y: touch.y});
         }
+
+        this.touchstate = {touches:[], };
+        this.dragging = false;
     }
+
+
+    // do a drag. return true if drag hapenned
+    genericDrag(oldPos, newPos){
+        //prevent drag on very small movement
+        if(!this.dragging && Math.abs(newPos.x - oldPos.x) + Math.abs(newPos.y - oldPos.y) < 5)
+            return false;
+
+        //update transform
+        this.dragging = true;
+
+        this.transform.x += (newPos.x - oldPos.x) / this.transform.scale;
+        this.transform.y += (newPos.y - oldPos.y) / this.transform.scale;
+
+        this.draw();
+
+        return true;
+    }
+
+
+
+
 
 }

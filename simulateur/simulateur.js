@@ -83,9 +83,9 @@ export class Simulateur{
     get year(){return this.yStats.year;}
 
     /// called for each change in what to build, or where to
-    onBuildMenuStateChanged(buildMenuState, curPos, radius){
+    onBuildMenuStateChanged(buildMenuState){
     // nothin to build, skip
-        if(buildMenuState === undefined)
+        if(!buildMenuState || !buildMenuState.type)
             return;
 
 
@@ -95,7 +95,7 @@ export class Simulateur{
         this._currentBuild.parameters = {...buildMenuState}; // copy bc can change
         this._currentBuild.parameters.year = this.year;
 
-        this._currentBuild.area =  {center:curPos, radius:radius};
+        this._currentBuild.area =  {center:buildMenuState.loc.pos, radius:buildMenuState.loc.radius};
 
         this._currentBuild.info = {
             type: buildMenuState.type,
@@ -137,13 +137,12 @@ export class Simulateur{
     confirmCurrentBuild(){
         /// STEP 1 : check the build is valid-----------------------------------
 
-        // only build in present
-        if(this._currentBuild === undefined){
+        if(!this._currentBuild){
             return;
         }
 
         // dirty fix for click on buttons part of central area
-        if(this._currentBuild.area.center === undefined)
+        if(!this._currentBuild.area.center)
             return;
 
         if(this._currentBuild.info.theorical){

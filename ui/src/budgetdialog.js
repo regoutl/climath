@@ -201,13 +201,13 @@ export default class BudgetDialog extends React.Component{
                 <th>{tr("Energy maintenace (value of %d)", '', this.props.history[this.props.history.length - 1].year)}</th>
                 <td><div> - {valStr(energySpend, '€')}</div><canvas ref={this.pieChart} width="250" height="100"/></td>
             </tr>
-            <tr>
+            <tr style={{borderTop: '1px solid white'}}>
                 <th>{tr('Balance')}</th>
                 <td>{valStr(taxIn - regSpend - energySpend, '€', {forceSign: true})}</td>
             </tr>
         </tbody></table>
         <div className="hLayout">
-            <div className="button white" ref={this.bOk}>{tr("Ok")}</div>
+            <div className="button white" ref={this.bOk}  onClick={this.props.closeRequested}>{tr("Ok")}</div>
             <div className="button white" onClick={() => this.props.detailsRequested(TaxDetails)}>{tr('Details...')}</div>
         </div>
         </div>);

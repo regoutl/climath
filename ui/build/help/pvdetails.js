@@ -85,18 +85,39 @@ var PvDetails = function (_React$Component) {
                             null,
                             tr('Radiant flux')
                         ),
-                        React.createElement('img', { src: 'data/pv/maxRadFlux.svg', alt: 'max rad flux eq' }),
                         React.createElement(
-                            'p',
-                            null,
-                            React.createElement('img', { src: 'data/symbols/avgCapaFact.svg', alt: 'avgCapaFact' }),
-                            ' is the average capacity factor and GHI is'
-                        ),
-                        React.createElement('img', { src: 'data/pv/globalHorisontalIrradiance.png', alt: 'ghi be', width: '300' }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            'https://globalsolaratlas.info/'
+                            'div',
+                            { className: 'hLayout' },
+                            React.createElement(
+                                'div',
+                                null,
+                                React.createElement('img', { src: 'data/pv/maxRadFlux.svg', alt: 'max rad flux eq' }),
+                                React.createElement(
+                                    'ul',
+                                    null,
+                                    React.createElement(
+                                        'li',
+                                        null,
+                                        React.createElement('img', { src: 'data/symbols/avgCapaFact.svg', alt: 'avgCapaFact' }),
+                                        ' is the average capacity factor'
+                                    ),
+                                    React.createElement(
+                                        'li',
+                                        null,
+                                        tr('GHI is the Global Horizontal Irradiance')
+                                    )
+                                )
+                            ),
+                            React.createElement(
+                                'div',
+                                null,
+                                React.createElement('img', { src: 'data/pv/globalHorisontalIrradiance.png', alt: 'ghi be', width: '120' }),
+                                React.createElement(
+                                    'p',
+                                    { className: 'pSource' },
+                                    'https://globalsolaratlas.info/'
+                                )
+                            )
                         )
                     ),
                     React.createElement(

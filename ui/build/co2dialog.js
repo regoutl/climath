@@ -128,7 +128,7 @@ export var Co2Dialog = function (_React$Component) {
                     { className: 'hLayout' },
                     React.createElement(
                         'div',
-                        { className: 'button white', ref: this.bOk },
+                        { className: 'button white', ref: this.bOk, onClick: this.props.closeRequested },
                         tr("Ok")
                     )
                 )
