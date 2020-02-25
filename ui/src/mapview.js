@@ -15,30 +15,23 @@ function isCentral(type){
 export default class MapView extends React.Component{
 
     /* accepted props :
-    onBuildPosChanged : function({pos: curPos, confirmOnDock: bool})
-            -> called on mouse move && mouse leave  (then with undefined curPos)
     onBuildConfirmed : function(curPos)        -> called on click
-    cursor : {type, radius} type : undefined or string (pv, nuke, ...)
-                            radius : undefined or Number. unit : px
-    onBuildMenuRequested()
     scene : a Scene
     */
     constructor(props){
         //react
         super(props);
 
-        this.targetBuild = { //the current sheduled build
-            type: null,
-            loc: {pos:{x:0, y:0}, radius:50},
-        };
-
-
-
         this.state = {
             energyGrid: true,
             flows: false,
             base: 'groundUse',
             touchBuildMenuPos: null,
+            targetBuild: { //the current sheduled build
+                type: null,
+                pos:{x:0, y:0},
+                radius:50
+            }
         };
 
         this._toogleLayer = this._toogleLayer.bind(this);
@@ -47,7 +40,6 @@ export default class MapView extends React.Component{
         this.draw = this.draw.bind(this);
         this.mousemove = this.onmousemove.bind(this);
         this.mouseup = this.onmouseup.bind(this);
-
 
         //about mouse
         this.physMousePos = {x: 0, y:0}; // cursor pos (px) in window coord
@@ -65,35 +57,13 @@ export default class MapView extends React.Component{
         this.canvas = React.createRef();
     }
 
-    /** callback
-        set the current location of the cursor as {pos:{x:,y:}, radius:}
-    */
-    setTargetBuild({type=this.targetBuild.type,
-                    pos=this.targetBuild.loc.pos,
-                    radius=this.targetBuild.loc.radius}){
 
-
-        this.targetBuild.loc = {
-            pos: pos,
-            radius: radius,
-        };
-
-        //we were builing nothing and it will not change, stop
-        if(!this.targetBuild.type  && !type)
-            return;
-
-        //set the new values
-        this.targetBuild.type = type;
-
-        this.props.scene.cursor={
-                        type:this.targetBuild.type,
-                        radius: this.targetBuild.loc.radius,
-                        pos:this.targetBuild.loc.pos
-                    };
-
-        this.forceUpdate();
+    setTargetBuildState(attrName, val){
+        this.setState((state) => {
+            let ans = {targetBuild: {...state.targetBuild, [attrName]: val}};
+            return ans;
+        });
     }
-
 
 
     //internal functions--------------------------------------------------------
@@ -120,6 +90,10 @@ export default class MapView extends React.Component{
         window.addEventListener('mouseup', this.mouseup);
     }
 
+    componentDidUpdate(){
+        this.draw();
+    }
+
     componentWillUnmount(){
         window.removeEventListener('resize', this.draw);
 
@@ -129,7 +103,6 @@ export default class MapView extends React.Component{
 
 
     render(){
-
         // return <div>{this.myProp}</div>;
         this.draw();
 
@@ -152,7 +125,6 @@ export default class MapView extends React.Component{
                         onTouchMove={this.ontouchmove.bind(this)}
                         onTouchEnd={this.ontouchend.bind(this)}
                         onTouchCancel={this.ontouchend.bind(this)}
-                        onClick={(e) => e.preventDefault()}
                     >
                         {tr("Your browser is not supported")}
                     </canvas>
@@ -163,14 +135,19 @@ export default class MapView extends React.Component{
     }
 
     draw(){
+        //update the cursor
+        this.props.scene.cursor={
+                        type:this.state.targetBuild.type,
+                        radius: this.state.targetBuild.radius,
+                        pos:this.state.targetBuild.pos
+                    };
+
         this.props.scene.draw(
                 this.transform,
                 this.state.base,
                 this.state.energyGrid,
                 this.state.flows);
     }
-
-
 
     /** @brief returns a react component for a detailed build dock
     @note : desktop build dock is alwas visible, and detailed
@@ -183,10 +160,10 @@ export default class MapView extends React.Component{
 
         return (<BuildDock
                     simu={this.props.simu}
-                    targetBuild={this.targetBuild}
+                    targetBuild={this.state.targetBuild}
 
-                    onTypeChanged = {this.setTargetBuild.bind(this)}
-                    onDetailsRequested = {(c) => {this.setState({help: c})}}
+                    onTypeChanged = {this.setTargetBuildState.bind(this, 'type')}
+                    onDetailsRequested = {this.props.onDetailsRequested}
                     onBuildConfirmed = {() => this.confirmBuild(this.scene.cursor.pos)}
                 />);
     }
@@ -199,15 +176,16 @@ export default class MapView extends React.Component{
 
         return (<TouchBuildDock
                     simu={this.props.simu}
-                    targetBuild={this.targetBuild}
+                    targetBuild={this.state.targetBuild}
                     center={this.state.touchBuildMenuPos}
 
-                    onTypeChanged = {this.setTargetBuild.bind(this)}
-                    onDetailsRequested = {(c) => {this.setState({help: c})}}
+                    onTypeChanged = {this.setTargetBuildState.bind(this, 'type')}
+                    onDetailsRequested = {this.props.onDetailsRequested}
                     onBuildConfirmed = {() => {
                         this.props.onBuildConfirmed(); //normal, confirm the build
-                        this.setTargetBuild({type: null});
-                        this.setState({touchBuildMenuPos: null}); //hide the menu
+                        this.setTargetBuildState('type', null);
+                        //hide the menu
+                        this.setState({touchBuildMenuPos: null});
                     }}
                 />);
     }
@@ -215,36 +193,35 @@ export default class MapView extends React.Component{
 
     toogleTouchBuildMenu(pos){
         this.setState((state) => {
-            let ans;
+            let ans, np;
             if(!state.touchBuildMenuPos){
-                this.setTargetBuild({pos:{
+                np={
                     x: Math.round((pos.x / this.transform.scale) - this.transform.x),
                     y: Math.round((pos.y / this.transform.scale) - this.transform.y),
-
-                }})
+                };
                 ans = pos;
             }
-            else
+            else{
                 ans = null;
+                np = null;
+            }
 
-            return {touchBuildMenuPos: ans};
+            return {touchBuildMenuPos: ans, targetBuild: {...state.targetBuild, pos: np, type: null}};
         });
     }
 
 
     onBuildTargetChange({rawPos, confirmOnDock=false}){
-        this.setTargetBuild({
-            pos: {
-                    x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
-                    y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
-                }
-        });
+        //update target build pos
+        this.setTargetBuildState('pos', {
+                x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
+                y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
+            });
     }
 
     onmousedown(e){
         if(e.target != this.canvas.current)
             return;
-
         this.isMouseDown = true;
         this.physMousePos = {x:e.pageX , y:e.pageY};
     }
@@ -258,9 +235,6 @@ export default class MapView extends React.Component{
                 this.physMousePos.x = e.pageX;
                 this.physMousePos.y = e.pageY;
             }
-
-
-
         }
         else {
             if(e.target != this.canvas.current)
@@ -270,7 +244,9 @@ export default class MapView extends React.Component{
         }
     }
     onmouseup(e){
-        if(!this.dragging){//we were not dragging, count as a click
+        //we were not dragging, count as a click
+        //note : the check 'isMouseDown' is necessary; else, toucheend triger the build confirmation
+        if(!this.dragging && this.isMouseDown && this.state.targetBuild.type ){
             let rawPos = {x:e.pageX, y : e.pageY};
 
             let transformedPos = {
@@ -311,7 +287,7 @@ export default class MapView extends React.Component{
 
     //called when cursor leaves direct contact with central area
     onmouseleave(e){
-        this.setTargetBuild({pos: null});
+        this.setTargetBuildState('pos', null);
     }
 
     updatetouchstate(touches){
@@ -322,10 +298,12 @@ export default class MapView extends React.Component{
 
     ontouchstart(e){
         //maybe we clicked on a map layer button or else. do nothing in that case
+        e.preventDefault();
         if(e.target != this.canvas.current)
             return;
-        e.preventDefault();
         this.updatetouchstate(new Array(...e.touches));
+
+
         if(e.touches.length === 1){
             // this.onBuildTargetChange({rawPos: {
             //     x : e.touches[0].pageX,
@@ -334,6 +312,7 @@ export default class MapView extends React.Component{
         }
     }
     ontouchmove(e){
+        e.preventDefault();
         if(e.target != this.canvas.current)
             return;
         let touchstate = this.touchstate;
@@ -366,7 +345,9 @@ export default class MapView extends React.Component{
 
             this.updatetouchstate(touches);
             this.zoom(zoomArg);
+            this.dragging = true;
 
+            this.setTargetBuildState('radius',Math.round(50/this.transform.scale));
         }
         else if(this.touchstate.touches.length > 0){
             if(this.genericDrag({x:touchstate.touches[0].x, y:touchstate.touches[0].y}, {x:touches[0].pageX, y:touches[0].pageY})){
@@ -376,12 +357,13 @@ export default class MapView extends React.Component{
         }
 
         let pos = this.state.touchBuildMenuPos;
-        this.setTargetBuild({pos:{
-            x: Math.round((pos.x / this.transform.scale) - this.transform.x),
-            y: Math.round((pos.y / this.transform.scale) - this.transform.y),
-        }});
+        if(pos){
+            this.setTargetBuildState('pos', {
+                x: Math.round((pos.x / this.transform.scale) - this.transform.x),
+                y: Math.round((pos.y / this.transform.scale) - this.transform.y),
+            });
+        }
 
-        this.setTargetBuild({radius:Math.round(50/this.transform.scale)});
 
         //whut ? move on 0 touches ?
         // else{
@@ -391,9 +373,10 @@ export default class MapView extends React.Component{
         // }
     }
     ontouchend(e){
+        e.preventDefault();
         if(e.target != this.canvas.current)
             return;
-        e.preventDefault();
+        // e.stopImmediatePropagation();
 
         //it is a click from touch : display the small build menu
         if(!this.dragging){

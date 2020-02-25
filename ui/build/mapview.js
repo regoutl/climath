@@ -29,12 +29,7 @@ var MapView = function (_React$Component) {
     _inherits(MapView, _React$Component);
 
     /* accepted props :
-    onBuildPosChanged : function({pos: curPos, confirmOnDock: bool})
-            -> called on mouse move && mouse leave  (then with undefined curPos)
     onBuildConfirmed : function(curPos)        -> called on click
-    cursor : {type, radius} type : undefined or string (pv, nuke, ...)
-                            radius : undefined or Number. unit : px
-    onBuildMenuRequested()
     scene : a Scene
     */
     function MapView(props) {
@@ -44,16 +39,16 @@ var MapView = function (_React$Component) {
         //react
 
 
-        _this.targetBuild = { //the current sheduled build
-            type: null,
-            loc: { pos: { x: 0, y: 0 }, radius: 50 }
-        };
-
         _this.state = {
             energyGrid: true,
             flows: false,
             base: 'groundUse',
-            touchBuildMenuPos: null
+            touchBuildMenuPos: null,
+            targetBuild: { //the current sheduled build
+                type: null,
+                pos: { x: 0, y: 0 },
+                radius: 50
+            }
         };
 
         _this._toogleLayer = _this._toogleLayer.bind(_this);
@@ -80,40 +75,13 @@ var MapView = function (_React$Component) {
         return _this;
     }
 
-    /** callback
-        set the current location of the cursor as {pos:{x:,y:}, radius:}
-    */
-
-
     _createClass(MapView, [{
-        key: 'setTargetBuild',
-        value: function setTargetBuild(_ref) {
-            var _ref$type = _ref.type,
-                type = _ref$type === undefined ? this.targetBuild.type : _ref$type,
-                _ref$pos = _ref.pos,
-                pos = _ref$pos === undefined ? this.targetBuild.loc.pos : _ref$pos,
-                _ref$radius = _ref.radius,
-                radius = _ref$radius === undefined ? this.targetBuild.loc.radius : _ref$radius;
-
-
-            this.targetBuild.loc = {
-                pos: pos,
-                radius: radius
-            };
-
-            //we were builing nothing and it will not change, stop
-            if (!this.targetBuild.type && !type) return;
-
-            //set the new values
-            this.targetBuild.type = type;
-
-            this.props.scene.cursor = {
-                type: this.targetBuild.type,
-                radius: this.targetBuild.loc.radius,
-                pos: this.targetBuild.loc.pos
-            };
-
-            this.forceUpdate();
+        key: 'setTargetBuildState',
+        value: function setTargetBuildState(attrName, val) {
+            this.setState(function (state) {
+                var ans = { targetBuild: Object.assign({}, state.targetBuild, _defineProperty({}, attrName, val)) };
+                return ans;
+            });
         }
 
         //internal functions--------------------------------------------------------
@@ -139,6 +107,11 @@ var MapView = function (_React$Component) {
             window.addEventListener('mouseup', this.mouseup);
         }
     }, {
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate() {
+            this.draw();
+        }
+    }, {
         key: 'componentWillUnmount',
         value: function componentWillUnmount() {
             window.removeEventListener('resize', this.draw);
@@ -149,7 +122,6 @@ var MapView = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-
             // return <div>{this.myProp}</div>;
             this.draw();
 
@@ -173,10 +145,7 @@ var MapView = function (_React$Component) {
                         onTouchStart: this.ontouchstart.bind(this),
                         onTouchMove: this.ontouchmove.bind(this),
                         onTouchEnd: this.ontouchend.bind(this),
-                        onTouchCancel: this.ontouchend.bind(this),
-                        onClick: function onClick(e) {
-                            return e.preventDefault();
-                        }
+                        onTouchCancel: this.ontouchend.bind(this)
                     },
                     tr("Your browser is not supported")
                 ),
@@ -187,6 +156,13 @@ var MapView = function (_React$Component) {
     }, {
         key: 'draw',
         value: function draw() {
+            //update the cursor
+            this.props.scene.cursor = {
+                type: this.state.targetBuild.type,
+                radius: this.state.targetBuild.radius,
+                pos: this.state.targetBuild.pos
+            };
+
             this.props.scene.draw(this.transform, this.state.base, this.state.energyGrid, this.state.flows);
         }
 
@@ -204,12 +180,10 @@ var MapView = function (_React$Component) {
 
             return React.createElement(BuildDock, {
                 simu: this.props.simu,
-                targetBuild: this.targetBuild,
+                targetBuild: this.state.targetBuild,
 
-                onTypeChanged: this.setTargetBuild.bind(this),
-                onDetailsRequested: function onDetailsRequested(c) {
-                    _this2.setState({ help: c });
-                },
+                onTypeChanged: this.setTargetBuildState.bind(this, 'type'),
+                onDetailsRequested: this.props.onDetailsRequested,
                 onBuildConfirmed: function onBuildConfirmed() {
                     return _this2.confirmBuild(_this2.scene.cursor.pos);
                 }
@@ -224,17 +198,16 @@ var MapView = function (_React$Component) {
 
             return React.createElement(TouchBuildDock, {
                 simu: this.props.simu,
-                targetBuild: this.targetBuild,
+                targetBuild: this.state.targetBuild,
                 center: this.state.touchBuildMenuPos,
 
-                onTypeChanged: this.setTargetBuild.bind(this),
-                onDetailsRequested: function onDetailsRequested(c) {
-                    _this3.setState({ help: c });
-                },
+                onTypeChanged: this.setTargetBuildState.bind(this, 'type'),
+                onDetailsRequested: this.props.onDetailsRequested,
                 onBuildConfirmed: function onBuildConfirmed() {
                     _this3.props.onBuildConfirmed(); //normal, confirm the build
-                    _this3.setTargetBuild({ type: null });
-                    _this3.setState({ touchBuildMenuPos: null }); //hide the menu
+                    _this3.setTargetBuildState('type', null);
+                    //hide the menu
+                    _this3.setState({ touchBuildMenuPos: null });
                 }
             });
         }
@@ -244,38 +217,39 @@ var MapView = function (_React$Component) {
             var _this4 = this;
 
             this.setState(function (state) {
-                var ans = void 0;
+                var ans = void 0,
+                    np = void 0;
                 if (!state.touchBuildMenuPos) {
-                    _this4.setTargetBuild({ pos: {
-                            x: Math.round(pos.x / _this4.transform.scale - _this4.transform.x),
-                            y: Math.round(pos.y / _this4.transform.scale - _this4.transform.y)
-
-                        } });
+                    np = {
+                        x: Math.round(pos.x / _this4.transform.scale - _this4.transform.x),
+                        y: Math.round(pos.y / _this4.transform.scale - _this4.transform.y)
+                    };
                     ans = pos;
-                } else ans = null;
+                } else {
+                    ans = null;
+                    np = null;
+                }
 
-                return { touchBuildMenuPos: ans };
+                return { touchBuildMenuPos: ans, targetBuild: Object.assign({}, state.targetBuild, { pos: np, type: null }) };
             });
         }
     }, {
         key: 'onBuildTargetChange',
-        value: function onBuildTargetChange(_ref3) {
-            var rawPos = _ref3.rawPos,
-                _ref3$confirmOnDock = _ref3.confirmOnDock,
-                confirmOnDock = _ref3$confirmOnDock === undefined ? false : _ref3$confirmOnDock;
+        value: function onBuildTargetChange(_ref2) {
+            var rawPos = _ref2.rawPos,
+                _ref2$confirmOnDock = _ref2.confirmOnDock,
+                confirmOnDock = _ref2$confirmOnDock === undefined ? false : _ref2$confirmOnDock;
 
-            this.setTargetBuild({
-                pos: {
-                    x: Math.round(rawPos.x / this.transform.scale - this.transform.x),
-                    y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
-                }
+            //update target build pos
+            this.setTargetBuildState('pos', {
+                x: Math.round(rawPos.x / this.transform.scale - this.transform.x),
+                y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
             });
         }
     }, {
         key: 'onmousedown',
         value: function onmousedown(e) {
             if (e.target != this.canvas.current) return;
-
             this.isMouseDown = true;
             this.physMousePos = { x: e.pageX, y: e.pageY };
         }
@@ -299,8 +273,9 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmouseup',
         value: function onmouseup(e) {
-            if (!this.dragging) {
-                //we were not dragging, count as a click
+            //we were not dragging, count as a click
+            //note : the check 'isMouseDown' is necessary; else, toucheend triger the build confirmation
+            if (!this.dragging && this.isMouseDown && this.state.targetBuild.type) {
                 var rawPos = { x: e.pageX, y: e.pageY };
 
                 var transformedPos = {
@@ -325,12 +300,12 @@ var MapView = function (_React$Component) {
         }
     }, {
         key: 'zoom',
-        value: function zoom(_ref4) {
-            var curX = _ref4.curX,
-                curY = _ref4.curY,
-                deltaY = _ref4.deltaY,
-                _ref4$scale = _ref4.scale,
-                scale = _ref4$scale === undefined ? 0 : _ref4$scale;
+        value: function zoom(_ref3) {
+            var curX = _ref3.curX,
+                curY = _ref3.curY,
+                deltaY = _ref3.deltaY,
+                _ref3$scale = _ref3.scale,
+                scale = _ref3$scale === undefined ? 0 : _ref3$scale;
 
             var origin = {
                 x: curX / this.transform.scale - this.transform.x,
@@ -354,7 +329,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmouseleave',
         value: function onmouseleave(e) {
-            this.setTargetBuild({ pos: null });
+            this.setTargetBuildState('pos', null);
         }
     }, {
         key: 'updatetouchstate',
@@ -367,9 +342,10 @@ var MapView = function (_React$Component) {
         key: 'ontouchstart',
         value: function ontouchstart(e) {
             //maybe we clicked on a map layer button or else. do nothing in that case
-            if (e.target != this.canvas.current) return;
             e.preventDefault();
+            if (e.target != this.canvas.current) return;
             this.updatetouchstate(new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.touches))))());
+
             if (e.touches.length === 1) {
                 // this.onBuildTargetChange({rawPos: {
                 //     x : e.touches[0].pageX,
@@ -380,6 +356,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'ontouchmove',
         value: function ontouchmove(e) {
+            e.preventDefault();
             if (e.target != this.canvas.current) return;
             var touchstate = this.touchstate;
             var touches = new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.targetTouches))))();
@@ -415,6 +392,9 @@ var MapView = function (_React$Component) {
 
                 this.updatetouchstate(touches);
                 this.zoom(zoomArg);
+                this.dragging = true;
+
+                this.setTargetBuildState('radius', Math.round(50 / this.transform.scale));
             } else if (this.touchstate.touches.length > 0) {
                 if (this.genericDrag({ x: touchstate.touches[0].x, y: touchstate.touches[0].y }, { x: touches[0].pageX, y: touches[0].pageY })) {
                     this.updatetouchstate(touches);
@@ -422,12 +402,12 @@ var MapView = function (_React$Component) {
             }
 
             var pos = this.state.touchBuildMenuPos;
-            this.setTargetBuild({ pos: {
+            if (pos) {
+                this.setTargetBuildState('pos', {
                     x: Math.round(pos.x / this.transform.scale - this.transform.x),
                     y: Math.round(pos.y / this.transform.scale - this.transform.y)
-                } });
-
-            this.setTargetBuild({ radius: Math.round(50 / this.transform.scale) });
+                });
+            }
 
             //whut ? move on 0 touches ?
             // else{
@@ -439,8 +419,9 @@ var MapView = function (_React$Component) {
     }, {
         key: 'ontouchend',
         value: function ontouchend(e) {
-            if (e.target != this.canvas.current) return;
             e.preventDefault();
+            if (e.target != this.canvas.current) return;
+            // e.stopImmediatePropagation();
 
             //it is a click from touch : display the small build menu
             if (!this.dragging) {

@@ -18,11 +18,19 @@ const energyIcons = [
     {name: 'Wind turbine',          src:'wind.png',  target:'wind',   },
     {name: 'Nuclear fusion',        src:'fusion.png',target:'fusion', },
 ];
+const detailForTech ={
+    "pv":PvDetails,
+    "nuke":NukeDetails,
+    "fusion":FusionDetails,
+    "battery":BatteryDetails,
+    "ccgt":CcgtDetails,
+    "wind":WindDetails,
+};
 
 
 ///////////////////////////////////////////////////////////////////////////////
     // List props for this Component :
-    // onTypeChanged = function setTargetBuild({type: newType})
+    // onTypeChanged = function setTargetBuild( newType)
     // onDetailsRequested : function called when details is clicked
     // onBuildConfirmed : function called on build confirmation
     // simu : the simulater
@@ -30,8 +38,7 @@ const energyIcons = [
 export class BuildDock extends React.Component{
     render(){
         let showdock = this.props.targetBuild.type;
-        let dockheight =
-                            'var(--build-dock-height)';
+        let dockheight = 'var(--build-dock-height)';
         let dockwidth = (isMobile() || isSmallScreen()) ? '95%':350;
         const defaultRadius = 50, maxRadius = 100;
         const needSlider = {
@@ -41,14 +48,6 @@ export class BuildDock extends React.Component{
             "battery":true,
             "ccgt":false,
             "wind":true,
-        };
-        const detailForTech ={
-            "pv":PvDetails,
-            "nuke":NukeDetails,
-            "fusion":FusionDetails,
-            "battery":BatteryDetails,
-            "ccgt":CcgtDetails,
-            "wind":WindDetails,
         };
 
         let restyle = {}
@@ -81,7 +80,7 @@ export class BuildDock extends React.Component{
                 restyle = {restyle}
                 style = {{bottom: 0, height: dockheight,width: dockwidth, overflow: 'hidden '}}
                 needsSlider= {needSlider[this.props.targetBuild.type.toLowerCase()]}
-                onBack = {() => {this.props.onTypeChanged({type: null})}}
+                onBack = {() => {this.props.onTypeChanged(null)}}
                 detailsRequested={() =>
                     this.props.onDetailsRequested(detailForTech[
                                                 this.props.targetBuild.type.toLowerCase()])}
@@ -219,7 +218,7 @@ let selecte;
 function BuildMenu(props){
     selecte = (target) => {
             lastSelected = (lastSelected === target) ? null: target;
-            return props.onClick({type: lastSelected})
+            return props.onClick(lastSelected);
         };
 
     return( <div id = "BuildMenu" className = "vLayout" style = {props.style}>
@@ -249,7 +248,12 @@ function ShowDockButton(props){
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-function CircularBuildMenuIcon(props){
+
+
+
+/// tactile build menu
+
+function CircularBuildMenuIcon (props){
     let index = props.index;
     let nrj = props.nrj;
     let radius = props.radius;
@@ -265,24 +269,88 @@ function CircularBuildMenuIcon(props){
 
     return (
         <div
-            key={nrj.target}
             style={{
                 position: 'absolute',
                 transform: transforms.join(' '),
                 background: "rgb(255, 255, 255)",
                 border: '3px solid grey',
-                borderRadius: 10,
+                borderRadius: 20,
                 width: 32,
                 padding: 5
             }}
-            onTouchStart={theOne ? ()=>props.onBuildConfirmed() : ()=>props.onTypeChanged({type: nrj.target})}
+            onTouchStart={(e) => {
+
+                if(theOne)
+                    props.onBuildConfirmed();
+                else
+                    props.onTypeChanged( nrj.target);
+            }}
         >
             <img
                 src={theOne ? 'res/icons/validate.png' : 'res/icons/'+nrj.src}
                 width="100%"
             />
         </div>);
+}
 
+function QuickStat(props){
+    if(!props.targetBuild.type) //target is undefined
+        return null;
+
+    let radius = props.radius;
+
+    const rawInfo = props.simu.onBuildMenuStateChanged(props.targetBuild).info;
+
+    let avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
+
+    let info={
+        theoReason: rawInfo.theorical,
+        buildCost: rawInfo.build.cost,
+        buildCo2: rawInfo.build.co2,
+        avgProd: avgProd,
+        storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+    };
+
+    return (
+        <div style={{
+            position: 'absolute',
+            top: -radius,
+            left: radius + 32,
+            background: "white",
+            border: '3px solid grey',
+            borderRadius: 10,
+            padding: 5
+        }}>
+            <div
+                className='hLayout' style={{justifyContent: 'space-between'}}
+            >
+                <h3>{tr(props.targetBuild.type)}</h3>
+                <img src='res/icons/info.png' height="20"
+                    onClick={() =>
+                        props.onDetailsRequested(detailForTech[props.targetBuild.type])}
+
+                />
+            </div>
+            <div className='hLayout' style={{width: 'max-content'}}>
+                <div>
+                    <img src='res/icons/bill.png' height="18"/>
+                    {valStr(info.buildCost, '€', {compact:2})}
+                </div>
+                {info.storageCapacity > 0 && <div>
+                    <img src='res/icons/bat.png' height="18"/>
+                    {valStr(info.storageCapacity, 'Wh',  {compact:2})}
+                </div>}
+
+                {info.avgProd > 0 && <div>
+                    <img src='res/icons/electricEnergy.png' height="18"/>
+                    {valStr(info.avgProd, 'W',  {compact:2})}
+                </div>}
+                {info.buildCo2 > 0 && <div>
+                    <img src='res/icons/pollution.png' height="18"/>
+                    {valStr(info.buildCo2, 'C', {compact:2})}
+                </div>}
+            </div>
+        </div>);
 }
 
 /** @brief a circular build menu around a point
@@ -295,60 +363,6 @@ export class TouchBuildDock extends React.Component{
         let props = this.props;
 
         const radius = 60;
-
-        let buildDetails = null;
-        if(props.targetBuild.type){ //target is defined
-            const rawInfo = props.simu.onBuildMenuStateChanged(props.targetBuild).info;
-
-            let avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
-
-            let info={
-                theoReason: rawInfo.theorical,
-                buildCost: rawInfo.build.cost,
-                buildCo2: rawInfo.build.co2,
-                perYearCost: rawInfo.perYear.cost + rawInfo.perWh.cost * avgProd,
-                perYearCo2: rawInfo.perYear.co2 + rawInfo.perWh.co2 * avgProd,
-                avgProd: avgProd,
-                pop: rawInfo.pop_affected,
-                explCost: rawInfo.expl_cost,
-                coolingWaterRate: rawInfo.coolingWaterRate,
-                storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
-            };
-
-            buildDetails = (
-                <div style={{
-                    position: 'absolute',
-                    top: -radius,
-                    left: radius + 32,
-                    background: "white",
-                    border: '3px solid grey',
-                    borderRadius: 10,
-                    padding: 5
-                }}>
-                    <h3>{tr(props.targetBuild.type)}</h3>
-                    <div className='hLayout' style={{width: 'max-content'}}>
-                        <div>
-                            <img src='res/icons/bill.png' height="18"/>
-                            {valStr(info.buildCost, '€', {compact:2})}
-                        </div>
-                        {info.storageCapacity > 0 && <div>
-                            <img src='res/icons/bat.png' height="18"/>
-                            {valStr(info.storageCapacity, 'Wh',  {compact:2})}
-                        </div>}
-
-                        {info.avgProd > 0 && <div>
-                            <img src='res/icons/electricEnergy.png' height="18"/>
-                            {valStr(info.avgProd, 'W',  {compact:2})}
-                        </div>}
-                        {info.buildCo2 > 0 && <div>
-                            <img src='res/icons/pollution.png' height="18"/>
-                            {valStr(info.buildCo2, 'C', {compact:2})}
-                        </div>}
-                    </div>
-                </div>);
-        }
-
-
 
         return (
             <div style={{
@@ -371,7 +385,12 @@ export class TouchBuildDock extends React.Component{
                     />);
                 })}
 
-                {buildDetails}
+                <QuickStat
+                    targetBuild={props.targetBuild}
+                    simu={props.simu}
+                    radius={radius}
+                    onDetailsRequested={props.onDetailsRequested}
+                />
             </div>)
     }
 }

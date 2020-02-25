@@ -88,6 +88,8 @@ var GameWin = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             if (this.state.currentDialog == NewGameDialog) {
                 return React.createElement(NewGameDialog, {
                     startRequested: this.startGame.bind(this),
@@ -123,7 +125,10 @@ var GameWin = function (_React$Component) {
                 React.createElement(MapView, {
                     scene: this.scene,
                     onBuildConfirmed: this.confirmBuild.bind(this),
-                    simu: this.simu
+                    simu: this.simu,
+                    onDetailsRequested: function onDetailsRequested(c) {
+                        _this2.setState({ help: c });
+                    }
                 }),
                 this._makeNextTurnButton(),
                 this._makeDialog(),
@@ -138,7 +143,7 @@ var GameWin = function (_React$Component) {
     }, {
         key: '_makeDialog',
         value: function _makeDialog() {
-            var _this2 = this;
+            var _this3 = this;
 
             if (this.state.currentDialog == EndDialog) {
                 var cProd = this.simu.cProd;
@@ -164,7 +169,7 @@ var GameWin = function (_React$Component) {
                     closeRequested: this.setDialog.bind(this, null),
                     history: this.simu.stats,
                     detailsRequested: function detailsRequested(c) {
-                        _this2.setState({ help: c });
+                        _this3.setState({ help: c });
                     }
                 });
             }
@@ -177,7 +182,7 @@ var GameWin = function (_React$Component) {
     }, {
         key: '_makeHelp',
         value: function _makeHelp() {
-            var _this3 = this;
+            var _this4 = this;
 
             if (this.state.help != NullHelp) {
                 var Help = this.state.help;
@@ -197,7 +202,7 @@ var GameWin = function (_React$Component) {
                         }
                     },
                     React.createElement(CloseButton, { closeRequested: function closeRequested() {
-                            return _this3.setState({ help: NullHelp });
+                            return _this4.setState({ help: NullHelp });
                         } }),
                     React.createElement(Help, {
                         productionMeans: this.simu.cProd.productionMeans,

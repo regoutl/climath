@@ -109,6 +109,7 @@ export default class GameWin extends React.Component{
                 scene = {this.scene}
                 onBuildConfirmed = {this.confirmBuild.bind(this)}
                 simu = {this.simu}
+                onDetailsRequested = {(c) => {this.setState({help: c})}}
             />
 
             {this._makeNextTurnButton()}

@@ -95,7 +95,7 @@ export class Simulateur{
         this._currentBuild.parameters = {...buildMenuState}; // copy bc can change
         this._currentBuild.parameters.year = this.year;
 
-        this._currentBuild.area =  {center:buildMenuState.loc.pos, radius:buildMenuState.loc.radius};
+        this._currentBuild.area =  {center:buildMenuState.pos, radius:buildMenuState.radius};
 
         this._currentBuild.info = {
             type: buildMenuState.type,

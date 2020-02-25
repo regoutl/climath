@@ -19,10 +19,18 @@ import FusionDetails from './help/fusiondetails.js';
 import { Simulateur } from '../../simulateur/simulateur.js';
 
 var energyIcons = [{ name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }];
+var detailForTech = {
+    "pv": PvDetails,
+    "nuke": NukeDetails,
+    "fusion": FusionDetails,
+    "battery": BatteryDetails,
+    "ccgt": CcgtDetails,
+    "wind": WindDetails
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // List props for this Component :
-// onTypeChanged = function setTargetBuild({type: newType})
+// onTypeChanged = function setTargetBuild( newType)
 // onDetailsRequested : function called when details is clicked
 // onBuildConfirmed : function called on build confirmation
 // simu : the simulater
@@ -53,14 +61,6 @@ export var BuildDock = function (_React$Component) {
                 "battery": true,
                 "ccgt": false,
                 "wind": true
-            };
-            var detailForTech = {
-                "pv": PvDetails,
-                "nuke": NukeDetails,
-                "fusion": FusionDetails,
-                "battery": BatteryDetails,
-                "ccgt": CcgtDetails,
-                "wind": WindDetails
             };
 
             var restyle = {};
@@ -93,7 +93,7 @@ export var BuildDock = function (_React$Component) {
                     style: { bottom: 0, height: dockheight, width: dockwidth, overflow: 'hidden ' },
                     needsSlider: needSlider[this.props.targetBuild.type.toLowerCase()],
                     onBack: function onBack() {
-                        _this2.props.onTypeChanged({ type: null });
+                        _this2.props.onTypeChanged(null);
                     },
                     detailsRequested: function detailsRequested() {
                         return _this2.props.onDetailsRequested(detailForTech[_this2.props.targetBuild.type.toLowerCase()]);
@@ -242,7 +242,7 @@ var selecte = void 0;
 function BuildMenu(props) {
     selecte = function selecte(target) {
         lastSelected = lastSelected === target ? null : target;
-        return props.onClick({ type: lastSelected });
+        return props.onClick(lastSelected);
     };
 
     return React.createElement(
@@ -278,6 +278,9 @@ function ShowDockButton(props) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
+
+/// tactile build menu
+
 function CircularBuildMenuIcon(props) {
     var index = props.index;
     var nrj = props.nrj;
@@ -290,26 +293,101 @@ function CircularBuildMenuIcon(props) {
     return React.createElement(
         'div',
         {
-            key: nrj.target,
             style: {
                 position: 'absolute',
                 transform: transforms.join(' '),
                 background: "rgb(255, 255, 255)",
                 border: '3px solid grey',
-                borderRadius: 10,
+                borderRadius: 20,
                 width: 32,
                 padding: 5
             },
-            onTouchStart: theOne ? function () {
-                return props.onBuildConfirmed();
-            } : function () {
-                return props.onTypeChanged({ type: nrj.target });
+            onTouchStart: function onTouchStart(e) {
+
+                if (theOne) props.onBuildConfirmed();else props.onTypeChanged(nrj.target);
             }
         },
         React.createElement('img', {
             src: theOne ? 'res/icons/validate.png' : 'res/icons/' + nrj.src,
             width: '100%'
         })
+    );
+}
+
+function QuickStat(props) {
+    if (!props.targetBuild.type) //target is undefined
+        return null;
+
+    var radius = props.radius;
+
+    var rawInfo = props.simu.onBuildMenuStateChanged(props.targetBuild).info;
+
+    var avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
+
+    var info = {
+        theoReason: rawInfo.theorical,
+        buildCost: rawInfo.build.cost,
+        buildCo2: rawInfo.build.co2,
+        avgProd: avgProd,
+        storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0
+    };
+
+    return React.createElement(
+        'div',
+        { style: {
+                position: 'absolute',
+                top: -radius,
+                left: radius + 32,
+                background: "white",
+                border: '3px solid grey',
+                borderRadius: 10,
+                padding: 5
+            } },
+        React.createElement(
+            'div',
+            {
+                className: 'hLayout', style: { justifyContent: 'space-between' }
+            },
+            React.createElement(
+                'h3',
+                null,
+                tr(props.targetBuild.type)
+            ),
+            React.createElement('img', { src: 'res/icons/info.png', height: '20',
+                onClick: function onClick() {
+                    return props.onDetailsRequested(detailForTech[props.targetBuild.type]);
+                }
+
+            })
+        ),
+        React.createElement(
+            'div',
+            { className: 'hLayout', style: { width: 'max-content' } },
+            React.createElement(
+                'div',
+                null,
+                React.createElement('img', { src: 'res/icons/bill.png', height: '18' }),
+                valStr(info.buildCost, '€', { compact: 2 })
+            ),
+            info.storageCapacity > 0 && React.createElement(
+                'div',
+                null,
+                React.createElement('img', { src: 'res/icons/bat.png', height: '18' }),
+                valStr(info.storageCapacity, 'Wh', { compact: 2 })
+            ),
+            info.avgProd > 0 && React.createElement(
+                'div',
+                null,
+                React.createElement('img', { src: 'res/icons/electricEnergy.png', height: '18' }),
+                valStr(info.avgProd, 'W', { compact: 2 })
+            ),
+            info.buildCo2 > 0 && React.createElement(
+                'div',
+                null,
+                React.createElement('img', { src: 'res/icons/pollution.png', height: '18' }),
+                valStr(info.buildCo2, 'C', { compact: 2 })
+            )
+        )
     );
 }
 
@@ -334,73 +412,6 @@ export var TouchBuildDock = function (_React$Component2) {
 
             var radius = 60;
 
-            var buildDetails = null;
-            if (props.targetBuild.type) {
-                //target is defined
-                var rawInfo = props.simu.onBuildMenuStateChanged(props.targetBuild).info;
-
-                var avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
-
-                var info = {
-                    theoReason: rawInfo.theorical,
-                    buildCost: rawInfo.build.cost,
-                    buildCo2: rawInfo.build.co2,
-                    perYearCost: rawInfo.perYear.cost + rawInfo.perWh.cost * avgProd,
-                    perYearCo2: rawInfo.perYear.co2 + rawInfo.perWh.co2 * avgProd,
-                    avgProd: avgProd,
-                    pop: rawInfo.pop_affected,
-                    explCost: rawInfo.expl_cost,
-                    coolingWaterRate: rawInfo.coolingWaterRate,
-                    storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0
-                };
-
-                buildDetails = React.createElement(
-                    'div',
-                    { style: {
-                            position: 'absolute',
-                            top: -radius,
-                            left: radius + 32,
-                            background: "white",
-                            border: '3px solid grey',
-                            borderRadius: 10,
-                            padding: 5
-                        } },
-                    React.createElement(
-                        'h3',
-                        null,
-                        tr(props.targetBuild.type)
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'hLayout', style: { width: 'max-content' } },
-                        React.createElement(
-                            'div',
-                            null,
-                            React.createElement('img', { src: 'res/icons/bill.png', height: '18' }),
-                            valStr(info.buildCost, '€', { compact: 2 })
-                        ),
-                        info.storageCapacity > 0 && React.createElement(
-                            'div',
-                            null,
-                            React.createElement('img', { src: 'res/icons/bat.png', height: '18' }),
-                            valStr(info.storageCapacity, 'Wh', { compact: 2 })
-                        ),
-                        info.avgProd > 0 && React.createElement(
-                            'div',
-                            null,
-                            React.createElement('img', { src: 'res/icons/electricEnergy.png', height: '18' }),
-                            valStr(info.avgProd, 'W', { compact: 2 })
-                        ),
-                        info.buildCo2 > 0 && React.createElement(
-                            'div',
-                            null,
-                            React.createElement('img', { src: 'res/icons/pollution.png', height: '18' }),
-                            valStr(info.buildCo2, 'C', { compact: 2 })
-                        )
-                    )
-                );
-            }
-
             return React.createElement(
                 'div',
                 { style: {
@@ -421,7 +432,12 @@ export var TouchBuildDock = function (_React$Component2) {
                         radius: radius
                     });
                 }),
-                buildDetails
+                React.createElement(QuickStat, {
+                    targetBuild: props.targetBuild,
+                    simu: props.simu,
+                    radius: radius,
+                    onDetailsRequested: props.onDetailsRequested
+                })
             );
         }
     }]);
