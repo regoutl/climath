@@ -298,9 +298,9 @@ export default class MapView extends React.Component{
 
     ontouchstart(e){
         //maybe we clicked on a map layer button or else. do nothing in that case
-        e.preventDefault();
         if(e.target != this.canvas.current)
             return;
+            e.preventDefault();
         this.updatetouchstate(new Array(...e.touches));
 
 
@@ -312,9 +312,9 @@ export default class MapView extends React.Component{
         }
     }
     ontouchmove(e){
-        e.preventDefault();
         if(e.target != this.canvas.current)
             return;
+            e.preventDefault();
         let touchstate = this.touchstate;
         let touches = new Array(...e.targetTouches);
         if(e.targetTouches.length > 1){//wheel
@@ -373,9 +373,9 @@ export default class MapView extends React.Component{
         // }
     }
     ontouchend(e){
-        e.preventDefault();
         if(e.target != this.canvas.current)
             return;
+            e.preventDefault();
         // e.stopImmediatePropagation();
 
         //it is a click from touch : display the small build menu
@@ -405,9 +405,6 @@ export default class MapView extends React.Component{
 
         return true;
     }
-
-
-
 
 
 }

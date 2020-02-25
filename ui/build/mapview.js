@@ -342,8 +342,8 @@ var MapView = function (_React$Component) {
         key: 'ontouchstart',
         value: function ontouchstart(e) {
             //maybe we clicked on a map layer button or else. do nothing in that case
-            e.preventDefault();
             if (e.target != this.canvas.current) return;
+            e.preventDefault();
             this.updatetouchstate(new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.touches))))());
 
             if (e.touches.length === 1) {
@@ -356,8 +356,8 @@ var MapView = function (_React$Component) {
     }, {
         key: 'ontouchmove',
         value: function ontouchmove(e) {
-            e.preventDefault();
             if (e.target != this.canvas.current) return;
+            e.preventDefault();
             var touchstate = this.touchstate;
             var touches = new (Function.prototype.bind.apply(Array, [null].concat(_toConsumableArray(e.targetTouches))))();
             if (e.targetTouches.length > 1) {
@@ -419,8 +419,8 @@ var MapView = function (_React$Component) {
     }, {
         key: 'ontouchend',
         value: function ontouchend(e) {
-            e.preventDefault();
             if (e.target != this.canvas.current) return;
+            e.preventDefault();
             // e.stopImmediatePropagation();
 
             //it is a click from touch : display the small build menu

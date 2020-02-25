@@ -31,13 +31,13 @@ export default class PvDetails extends React.Component{
                     <p>Production of a PV farm of area <img src='data/symbols/area.svg'/> is : </p>
                     <img src="data/pv/production.svg" alt="Pv production eq" />
                     <ul>
-                    {[{img:'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)'},
-                    {img:'symbols/efficiency', descr: 'is the pannel efficiency'},
-                    {img:'symbols/capaFactT', descr: 'is the capacity factor at that hour'},
-                    {img:'symbols/decline', descr: 'is the yearly efficiency decline'},
-                    {img:'symbols/year', descr: 'is the current year'},
-                    {img:'symbols/year0', descr: 'is the build year'},
-                ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+                        {[{img:'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)'},
+                            {img:'symbols/efficiency', descr: 'is the pannel efficiency at y0'},
+                            {img:'symbols/capaFactT', descr: 'is the capacity factor at that hour'},
+                            {img:'symbols/decline', descr: 'is the yearly efficiency decline at y0'},
+                            {img:'symbols/year', descr: 'is the current year'},
+                            {img:'symbols/year0', descr: 'is the build year'},
+                        ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
                     </ul>
                 </div>
 

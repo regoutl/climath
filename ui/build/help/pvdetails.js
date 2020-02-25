@@ -66,7 +66,7 @@ var PvDetails = function (_React$Component) {
                         React.createElement(
                             'ul',
                             null,
-                            [{ img: 'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)' }, { img: 'symbols/efficiency', descr: 'is the pannel efficiency' }, { img: 'symbols/capaFactT', descr: 'is the capacity factor at that hour' }, { img: 'symbols/decline', descr: 'is the yearly efficiency decline' }, { img: 'symbols/year', descr: 'is the current year' }, { img: 'symbols/year0', descr: 'is the build year' }].map(function (i) {
+                            [{ img: 'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)' }, { img: 'symbols/efficiency', descr: 'is the pannel efficiency at y0' }, { img: 'symbols/capaFactT', descr: 'is the capacity factor at that hour' }, { img: 'symbols/decline', descr: 'is the yearly efficiency decline at y0' }, { img: 'symbols/year', descr: 'is the current year' }, { img: 'symbols/year0', descr: 'is the build year' }].map(function (i) {
                                 return React.createElement(
                                     'li',
                                     { key: i.img },

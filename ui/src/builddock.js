@@ -382,6 +382,7 @@ export class TouchBuildDock extends React.Component{
                         onBuildConfirmed={props.onBuildConfirmed}
                         onTypeChanged={props.onTypeChanged}
                         radius={radius}
+                        key={index}
                     />);
                 })}
 

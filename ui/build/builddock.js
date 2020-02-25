@@ -429,7 +429,8 @@ export var TouchBuildDock = function (_React$Component2) {
                         targetBuild: props.targetBuild,
                         onBuildConfirmed: props.onBuildConfirmed,
                         onTypeChanged: props.onTypeChanged,
-                        radius: radius
+                        radius: radius,
+                        key: index
                     });
                 }),
                 React.createElement(QuickStat, {
