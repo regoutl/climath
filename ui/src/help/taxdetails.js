@@ -1,7 +1,29 @@
 
 import {tr} from '../../../tr/tr.js';
-import ReactPlot from '../reactplot.js';
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+
+import {PlotTile, MathTextTile} from './sharedtiles.js';
+
+
+function Computation(props){
+    let math = [
+        <img src="data/tax/in.svg" alt="Pv production eq" />,
+        <ul>
+            {[
+            {img:'tax/rate', descr: 'is the tax rate'},
+            {img:'tax/minRate', descr: 'is the minimum tax rate (other government spendings)'},
+            {img:'tax/pop', descr: 'is the population'},
+            {img:'tax/gdp', descr: 'is the gdp per capita'},
+            {img:'tax/costOnM', descr: 'is the operating and maintenance cost'},
+        ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+        </ul>    ];
+
+    let text = ['Between each year you gain money, proportionnaly to your tax rate. ',
+    'However, the country must still run, thus not all tax money goes into your pocket.',
+    ].map((i) => <p>{tr(i)}</p>);
+
+    return <MathTextTile title='Computation' math={math} text={text} />
+}
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -24,31 +46,19 @@ export default class TaxDetails extends React.Component{
 
 
             <div className="hWrapLayout">
-                <div>
-                    <h4>{tr('Computation')}</h4>
-                    <img src="data/tax/in.svg" alt="Pv production eq" />
-                    <ul>
-                    {[
-                    {img:'tax/rate', descr: 'is the tax rate'},
-                    {img:'tax/minRate', descr: 'is the minimum tax rate (other government spendings)'},
-                    {img:'tax/pop', descr: 'is the population'},
-                    {img:'tax/gdp', descr: 'is the gdp per capita'},
-                    {img:'tax/costOnM', descr: 'is the operating and maintenance cost'},
-                ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
-                    </ul>
-                </div>
+                <Computation />
 
-                <div>
-                    <h4>{tr('Population')}</h4>
-                    <ReactPlot data={be.pop}/>
-                    <p className="pSource">{be.pop.source}</p>
-                </div>
 
-                <div>
-                    <h4>{tr('GDP per capita')}</h4>
-                    <ReactPlot data={be.gdpPerCap}/>
-                    <p className="pSource">{be.gdpPerCap.source}</p>
-                </div>
+
+                <PlotTile
+                    title='Population'
+                    plot={be.pop}
+                />
+
+                <PlotTile
+                    title='GDP per capita'
+                    plot={be.gdpPerCap}
+                />
             </div>
         </div>);
     }

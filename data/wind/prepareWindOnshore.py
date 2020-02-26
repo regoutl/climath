@@ -147,9 +147,24 @@ if(dsg == 'y'):
 # for col, index in dic.items():
 #     print col, ':', index, ','
 
-with open("../res/windPowDens50.bin", "wb") as fout:
+with open("windPowDens50.bin", "wb") as fout:
     fout.write(outBytes)
 
 
-print('\n\n../res/windPowDens50.bin updated ! \n Format : 1 octet per pix. Real val := 8 * pixVal\n\n')
+print('\n\nwindPowDens50.bin updated ! \n Format : 1 octet per pix. Real val := 8 * pixVal\n\n')
 print('done')
+
+
+
+
+
+
+#tmp, for plot
+f = open("colorPlot.csv", "w")
+
+f.write('Val, r, g, b\n')
+
+for c in dic:
+	(r, g, b, a) = c
+	f.write(str(dic[c]) + "," + str(r) + "," + str(g) + "," + str(b) + "\n")
+f.close()

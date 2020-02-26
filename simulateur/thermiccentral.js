@@ -31,6 +31,8 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         this.ccgt = new Kind(parameters.ccgt, 'ccgt');
         this.fusion = new Kind(parameters.fusion, 'fusion');
 
+        this.nuke.boom = {probability: 3/15080}; 
+
         this.nuke.defaultNameplate = 3e9;
         this.ccgt.defaultNameplate = 1.6e9;
         this.fusion.defaultNameplate = 3e9;

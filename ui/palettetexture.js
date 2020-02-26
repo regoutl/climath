@@ -84,4 +84,50 @@ export default class PaletteTexture{
 
     return this.palette.index++;
   }
+
+    //this will create a palette withe the default gradiant.
+    // min will be associated to the default gradiant lowest, and max the opposite
+    defaultGradiant(min, max){
+        let d = max - min;
+
+        if(min > 255)
+            throw 'did you forget to scale ? Min should be under 255';
+
+        //everything undex min is white
+        let i = 0;
+        for(; i < min; i++)
+            this.appendPalette(255, 255, 255);
+
+        const pts =[
+            {val: 0, r: 255, g: 255, b: 255},
+            {val: 0.13, r: 72, g: 142, b: 202},
+            {val: 0.23, r: 72, g: 187, b: 70},
+            {val: 0.345, r: 250, g: 232, b: 92},
+            {val: 0.537, r: 240, g: 120, b: 41},
+            {val: 0.69, r: 210, g: 31, b: 40},
+            {val: 1.0, r: 165, g: 47, b: 90},
+        ];
+
+        let index = 0;
+        for(; i <= max && i < 256; i++){
+            let a = (i - min) / (d);//prop dans le degrade
+
+            while(pts[index + 1].val < a)
+                index ++;
+
+            //interpolate bw pts[index] et pts[index+1]. mix = 0 : full pts[index]
+            let mix = (a - pts[index].val) / (pts[index + 1].val - pts[index].val);
+
+
+
+            this.appendPalette(
+                pts[index+1].r *mix + pts[index].r *(1-mix),
+                pts[index+1].g *mix + pts[index].g *(1-mix),
+                pts[index+1].b *mix + pts[index].b *(1-mix),
+            );
+
+        }
+
+
+    }
 };

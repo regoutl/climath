@@ -48,6 +48,10 @@ h1{
 ul{
    list-style-type: none;
 }
+ul.default{
+    list-style-type: disc;
+    list-style-position: inside;
+}
 
 table{
     border-collapse: collapse;

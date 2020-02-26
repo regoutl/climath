@@ -1,7 +1,23 @@
 
 import {tr} from '../../../tr/tr.js';
-import ReactPlot from '../reactplot.js';
+import {PlotTile, MathTextTile} from './sharedtiles.js';
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+
+function Demand(props){
+    let math =[
+        <img src="data/conso/eq.svg" alt="Pv production eq" />,
+        <ul>{[
+            {img:'tax/pop', descr: 'is the population'},
+            {img:'conso/powerDemandPerCap', descr: 'is the power consumption per capita'},
+            ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+        </ul>
+    ];
+
+    let text = <p>{tr('The energy demand represent how much energy your population consumes. ')}</p>;
+
+    return <MathTextTile title='Energy demand' math={math} text={text} />
+
+}
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -23,28 +39,17 @@ export default class OriginDetails extends React.Component{
             <h3>{tr('Energy origin')}</h3>
 
             <div className="hWrapLayout">
-                <div>
-                    <h4>{tr('Demand')}</h4>
-                    <img src="data/conso/eq.svg" alt="Pv production eq" />
-                    <ul>
-                    {[
-                        {img:'tax/pop', descr: 'is the population'},
-                        {img:'conso/powerDemandPerCap', descr: 'is the power consumption per capita'},
-                ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
-                    </ul>
-                </div>
+                <Demand />
 
-                <div>
-                    <h4>{tr('Population')}</h4>
-                    <ReactPlot data={be.pop}/>
-                    <p className="pSource">{be.pop.source}</p>
-                </div>
+                <PlotTile
+                    title='Population'
+                    plot={be.pop}
+                />
 
-                <div>
-                    <h4>{tr('Power consumption per capita')}</h4>
-                    <ReactPlot data={be.consoPerCap}/>
-                    <p className="pSource">{be.consoPerCap.source}</p>
-                </div>
+                <PlotTile
+                    title='Power consumption per capita'
+                    plot={be.consoPerCap}
+                />
             </div>
         </div>);
     }

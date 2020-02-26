@@ -70,7 +70,7 @@ export default class Pv extends IntermittentProductionMean{
         if(parameters.installedIn === undefined)
           parameters.installedIn = 'belgium';
         if(parameters.powerDecline === undefined)
-          parameters.powerDecline = 1;
+          parameters.powerDecline = Math.pow(0.95, 1/25);
         if(parameters.priceMul === undefined)
           parameters.priceMul = 1;
 

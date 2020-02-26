@@ -51,8 +51,6 @@ var MapView = function (_React$Component) {
             }
         };
 
-        _this._toogleLayer = _this._toogleLayer.bind(_this);
-
         //callbacks ----------------------------------------------------
         _this.draw = _this.draw.bind(_this);
         _this.mousemove = _this.onmousemove.bind(_this);
@@ -87,8 +85,8 @@ var MapView = function (_React$Component) {
         //internal functions--------------------------------------------------------
 
     }, {
-        key: '_toogleLayer',
-        value: function _toogleLayer(name) {
+        key: '_toggleLayer',
+        value: function _toggleLayer(name) {
             if (['energyGrid', 'flows'].includes(name)) this.setState(function (state) {
                 return _defineProperty({}, name, !state[name]);
             });else this.setState({ base: name });
@@ -134,7 +132,7 @@ var MapView = function (_React$Component) {
                     base: this.state.base,
                     energyGrid: this.state.energyGrid,
                     flows: this.state.flows,
-                    setVisible: this._toogleLayer }),
+                    onLayerToggled: this._toggleLayer.bind(this) }),
                 React.createElement(
                     'canvas',
                     {
@@ -256,7 +254,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousemove',
         value: function onmousemove(e) {
-            if ("ontouchstart" in document.documentElement) return; // prenvent mouse move event on touch event
+            if ("ontouchstart" in document.documentElement || !this.state.targetBuild.type) return; // prenvent mouse move event on touch event
 
             if (this.isMouseDown) {
                 if (this.genericDrag({ x: this.physMousePos.x, y: this.physMousePos.y }, { x: e.pageX, y: e.pageY })) {

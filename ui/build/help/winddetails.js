@@ -7,7 +7,53 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { tr } from '../../../tr/tr.js';
-import ReactPlot from '../reactplot.js';
+import { PlotTile, MathTextTile } from './sharedtiles.js';
+
+function Production(props) {
+    var turbDensTxt = 'is turbin density. Const ' + (0.1 * Math.round(props.turbineDensity * 1e7) + ' turbine/km2');
+
+    var math = [React.createElement(
+        'p',
+        null,
+        'Production of a wind farm of area ',
+        React.createElement('img', { src: 'data/symbols/area.svg' }),
+        ' is : '
+    ), React.createElement('img', { src: 'data/wind/production.svg' }), React.createElement(
+        'ul',
+        null,
+        [{ img: 'wind/turbDens', descr: turbDensTxt }, { img: 'wind/rotRad', descr: 'is the rotor radius. Const. 45m' }, { img: 'wind/wpd', descr: 'is the wind power density (W/m2)' }, { img: 'symbols/efficiency', descr: 'is the efficiency' }, { img: 'symbols/capaFactT', descr: 'is the capacity factor at hour t' }].map(function (i) {
+            return React.createElement(
+                'li',
+                { key: i.img },
+                React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                ' ',
+                tr(i.descr)
+            );
+        })
+    )];
+
+    var text = [React.createElement(
+        'p',
+        null,
+        tr('The production depends on :')
+    ), React.createElement(
+        'ul',
+        { className: 'default' },
+        ['The area. ', 'The number of turbines per km2.', 'The turbine size', 'The amount of wind. ' + 'The amount of wind depends on the location (we call it \'Wind power density\') ' + 'and the time of the day/year (we call it \'Capacity factor\').', 'The wind turbine efficiency.  '].map(function (i) {
+            return React.createElement(
+                'li',
+                null,
+                tr(i)
+            );
+        })
+    )];
+
+    return React.createElement(MathTextTile, {
+        title: 'Production',
+        math: math,
+        text: text
+    });
+}
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -31,8 +77,6 @@ var WindDetails = function (_React$Component) {
         value: function render() {
             var wind = this.props.productionMeans.wind;
 
-            var turbDensTxt = 'is turbin density. Const ' + (0.1 * Math.round(wind.density.at(2020) * 1e7) + ' turbine/km2');
-
             return React.createElement(
                 'div',
                 { className: 'detailContent' },
@@ -49,56 +93,14 @@ var WindDetails = function (_React$Component) {
                 React.createElement(
                     'div',
                     { className: 'hWrapLayout' },
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Production')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            'Production of a wind farm of area ',
-                            React.createElement('img', { src: 'data/symbols/area.svg' }),
-                            ' is : '
-                        ),
-                        React.createElement('img', { src: 'data/wind/production.svg' }),
-                        React.createElement(
-                            'ul',
-                            null,
-                            [{ img: 'wind/turbDens', descr: turbDensTxt }, { img: 'wind/rotRad', descr: 'is the rotor radius. Const. 45m' }, { img: 'wind/wpd', descr: 'is the wind power density (W/m2)' }, { img: 'symbols/efficiency', descr: 'is the efficiency' }, { img: 'symbols/capaFactT', descr: 'is the capacity factor at hour t' }].map(function (i) {
-                                return React.createElement(
-                                    'li',
-                                    { key: i.img },
-                                    React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
-                                    ' ',
-                                    tr(i.descr)
-                                );
-                            })
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Efficiency')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            tr('Proportion of wind energy transformed into electricity. ')
-                        ),
-                        React.createElement(ReactPlot, { data: wind.efficiency }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            wind.efficiency.source
-                        )
-                    ),
+                    React.createElement(Production, {
+                        turbineDensity: wind.density.at(2020)
+                    }),
+                    React.createElement(PlotTile, {
+                        title: 'Efficiency',
+                        caption: 'Proportion of wind energy transformed into electricity. ',
+                        plot: wind.efficiency
+                    }),
                     React.createElement(
                         'div',
                         null,
@@ -147,46 +149,16 @@ var WindDetails = function (_React$Component) {
                             'https://globalwindatlas.info/'
                         )
                     ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Build cost')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            'Build cost per item'
-                        ),
-                        React.createElement(ReactPlot, { data: wind.build.cost }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            wind.build.cost.source
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                            'h4',
-                            null,
-                            tr('Maintenance cost')
-                        ),
-                        React.createElement(
-                            'p',
-                            null,
-                            'Yearly cost per item'
-                        ),
-                        React.createElement(ReactPlot, { data: wind.perYear.cost }),
-                        React.createElement(
-                            'p',
-                            { className: 'pSource' },
-                            wind.perYear.cost.source
-                        )
-                    )
+                    React.createElement(PlotTile, {
+                        title: 'Build cost',
+                        caption: 'Build cost per item. ',
+                        plot: wind.build.cost
+                    }),
+                    React.createElement(PlotTile, {
+                        title: 'Maintenance cost',
+                        caption: 'Yearly cost per item. ',
+                        plot: wind.perYear.cost
+                    })
                 )
             );
         }

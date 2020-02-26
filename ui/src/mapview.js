@@ -34,8 +34,6 @@ export default class MapView extends React.Component{
             }
         };
 
-        this._toogleLayer = this._toogleLayer.bind(this);
-
         //callbacks ----------------------------------------------------
         this.draw = this.draw.bind(this);
         this.mousemove = this.onmousemove.bind(this);
@@ -68,7 +66,7 @@ export default class MapView extends React.Component{
 
     //internal functions--------------------------------------------------------
 
-    _toogleLayer(name){
+    _toggleLayer(name){
         if(['energyGrid', 'flows'].includes(name))
             this.setState((state) => {
                 return {[name]: !state[name]};
@@ -114,7 +112,7 @@ export default class MapView extends React.Component{
                         base={this.state.base}
                         energyGrid={this.state.energyGrid}
                         flows={this.state.flows}
-                        setVisible={this._toogleLayer} />
+                        onLayerToggled={this._toggleLayer.bind(this)} />
 
                     <canvas
                         ref={this.canvas}
@@ -131,6 +129,7 @@ export default class MapView extends React.Component{
 
                     {this._makeDesktopBuildDock()}
                     {this._makeTouchBuildMenu()}
+
                 </div>);
     }
 
@@ -226,7 +225,7 @@ export default class MapView extends React.Component{
         this.physMousePos = {x:e.pageX , y:e.pageY};
     }
     onmousemove(e){
-        if ("ontouchstart" in document.documentElement)
+        if ("ontouchstart" in document.documentElement || !this.state.targetBuild.type)
             return; // prenvent mouse move event on touch event
 
         if(this.isMouseDown){

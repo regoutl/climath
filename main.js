@@ -13,7 +13,7 @@ Copyright 2020, louis-amedee regout, charles edwin de brouwer
 // import {Plot, canvasEnablePloting, quantityToHuman as valStr} from './ui/build/plot.js';
 import {tr, setLang} from './tr/tr.js';
 
-import App from './ui/build/app.js';
+import {App} from './ui/build/app.js';
 
 //window.location.hash : get anchor
 

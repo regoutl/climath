@@ -1,6 +1,46 @@
 
 import {tr} from '../../../tr/tr.js';
-import ReactPlot from '../reactplot.js';
+import {PlotTile, MathTextTile} from './sharedtiles.js';
+
+function Production(props){
+    let turbDensTxt = ('is turbin density. Const ' + (0.1*Math.round(props.turbineDensity * 1e7) + ' turbine/km2'));
+
+    let math =  [
+        <p>Production of a wind farm of area <img src='data/symbols/area.svg'/> is : </p>,
+        <img src='data/wind/production.svg' />,
+        <ul>
+            {[{img:'wind/turbDens', descr: turbDensTxt},
+            {img:'wind/rotRad', descr: 'is the rotor radius. Const. 45m'},
+            {img:'wind/wpd', descr: 'is the wind power density (W/m2)'},
+            {img:'symbols/efficiency', descr: 'is the efficiency'},
+            {img:'symbols/capaFactT', descr: 'is the capacity factor at hour t'},
+        ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+        </ul>];
+
+    let text = [<p>{tr('The production depends on :')}</p>,
+        <ul className='default'>
+            {[
+                'The area. ',
+                'The number of turbines per km2.',
+                'The turbine size',
+                'The amount of wind. ' +
+                'The amount of wind depends on the location (we call it \'Wind power density\') ' +
+                'and the time of the day/year (we call it \'Capacity factor\').',
+                'The wind turbine efficiency.  ',
+            ].map((i) => <li>{tr(i)}</li>)}
+        </ul>
+    ];
+
+    return (
+        <MathTextTile
+            title="Production"
+            math={math}
+            text={text}
+        />
+    );
+}
+
+
 
 /** @brief this class provide a lot of explainations about pv
 */
@@ -18,7 +58,6 @@ export default class WindDetails extends React.Component{
     render(){
         let wind = this.props.productionMeans.wind;
 
-        let turbDensTxt = ('is turbin density. Const ' + (0.1*Math.round(wind.density.at(2020) * 1e7) + ' turbine/km2'));
 
         return (<div className='detailContent'>
             <h3>{tr('Wind turbines (onshore @50m)')}</h3>
@@ -26,26 +65,16 @@ export default class WindDetails extends React.Component{
 
 
             <div className="hWrapLayout">
-                <div>
-                    <h4>{tr('Production')}</h4>
-                    <p>Production of a wind farm of area <img src='data/symbols/area.svg'/> is : </p>
-                    <img src='data/wind/production.svg' />
-                    <ul>
-                    {[{img:'wind/turbDens', descr: turbDensTxt},
-                    {img:'wind/rotRad', descr: 'is the rotor radius. Const. 45m'},
-                    {img:'wind/wpd', descr: 'is the wind power density (W/m2)'},
-                    {img:'symbols/efficiency', descr: 'is the efficiency'},
-                    {img:'symbols/capaFactT', descr: 'is the capacity factor at hour t'},
-                ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
-                    </ul>
-                </div>
+                <Production
+                    turbineDensity={wind.density.at(2020)}
+                />
 
-                <div>
-                    <h4>{tr('Efficiency')}</h4>
-                    <p>{tr('Proportion of wind energy transformed into electricity. ')}</p>
-                    <ReactPlot data={wind.efficiency} />
-                    <p className="pSource">{wind.efficiency.source}</p>
-                </div>
+                <PlotTile
+                    title='Efficiency'
+                    caption="Proportion of wind energy transformed into electricity. "
+                    plot={wind.efficiency}
+                />
+
 
                 <div>
                     <h4>{tr('Capacity factor')}</h4>
@@ -63,19 +92,17 @@ export default class WindDetails extends React.Component{
                     <p className="pSource">https://globalwindatlas.info/</p>
                 </div>
 
-                <div>
-                    <h4>{tr('Build cost')}</h4>
-                    <p>Build cost per item</p>
-                    <ReactPlot data={wind.build.cost} />
-                    <p className="pSource">{wind.build.cost.source}</p>
-                </div>
+                <PlotTile
+                    title='Build cost'
+                    caption="Build cost per item. "
+                    plot={wind.build.cost}
+                />
 
-                <div>
-                    <h4>{tr('Maintenance cost')}</h4>
-                    <p>Yearly cost per item</p>
-                    <ReactPlot data={wind.perYear.cost} />
-                    <p className="pSource">{wind.perYear.cost.source}</p>
-                </div>
+                <PlotTile
+                    title='Maintenance cost'
+                    caption="Yearly cost per item. "
+                    plot={wind.perYear.cost}
+                />
             </div>
 
         </div>);
