@@ -225,6 +225,7 @@ var lastSelected = undefined;
 var selecte = void 0;
 function BuildMenu(props) {
     selecte = function selecte(target) {
+        localStorage.setItem('buildMenuClickedOnce', true);
         lastSelected = lastSelected === target ? null : target;
         return props.onClick(lastSelected);
     };
@@ -243,7 +244,13 @@ function BuildMenu(props) {
                     return selecte(nrj.target);
                 }
             }) : '';
-        })
+        }),
+        !localStorage.getItem('buildMenuClickedOnce') && //add help
+        React.createElement(
+            'div',
+            { className: 'balloon' },
+            tr('Select what to build !')
+        )
     );
 }
 ///////////////////////////////////////////////////////////////////////////////

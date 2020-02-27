@@ -44,7 +44,7 @@ export default class GameWin extends React.Component{
 
     runYear(){
         this.simu.run();
-        if(this.simu.year == 2021){
+        if(this.simu.year == 2070){
             this.setState({
                 currentDialog: EndDialog,
             });
@@ -72,7 +72,8 @@ export default class GameWin extends React.Component{
 
     startGame(simu){
         this.simu = simu;
-        this.setDialog(TutoDialog);
+
+        this.setDialog(localStorage.getItem('skipTuto') ? undefined: TutoDialog);
     }
 
 
@@ -81,6 +82,14 @@ export default class GameWin extends React.Component{
             return (<NewGameDialog
                         startRequested={this.startGame.bind(this)}
                         scene={this.scene}/>);
+        }
+        else if(this.state.currentDialog == TutoDialog){
+            return (
+                <div className="vLayout" style={{width: '100%', height: '100%'}}>
+                    {this._makeMapView()}
+                    {this._makeDialog()}
+                 </div>
+            );
         }
 
         if(!this.simu){
@@ -106,17 +115,24 @@ export default class GameWin extends React.Component{
                 currentConso={currentConso}
             />
 
-            <MapView
-                scene = {this.scene}
-                onBuildConfirmed = {this.confirmBuild.bind(this)}
-                simu = {this.simu}
-                onDetailsRequested = {(c) => {this.setState({help: c})}}
-            />
+            {this._makeMapView()}
 
             {this._makeNextTurnButton()}
             {this._makeDialog()}
             {this._makeHelp()}
          </div>);
+    }
+
+    _makeMapView(){
+        return (
+            <MapView
+                scene = {this.scene}
+                onBuildConfirmed = {this.confirmBuild.bind(this)}
+                simu = {this.simu}
+                onDetailsRequested = {(c) => {this.setState({help: c})}}
+                showOnlyMap = {this.state.currentDialog == TutoDialog}
+            />
+        );
     }
 
     /** @brief returns a react component for the currentDialog
@@ -192,9 +208,16 @@ export default class GameWin extends React.Component{
             id="bNextTurn"
             className="button black"
             title={tr("Go to the next year")}
-            onClick={this.runYear.bind(this)}
+            onClick={() => {localStorage.setItem('nextYearClickedOnce', true); this.runYear();}}
         >
             {tr("Next turn")}
+
+            {   localStorage.getItem('buildMenuClickedOnce') &&
+                !localStorage.getItem('nextYearClickedOnce') && //add help
+                (<div className='balloon'>
+                    {tr('Next year !')}
+                </div>)
+            }
         </div>);
     }
 }

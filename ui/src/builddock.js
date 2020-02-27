@@ -103,6 +103,7 @@ export class BuildDock extends React.Component{
                     showMenu = {this.props.targetBuild.type === null ?
                                                     true : this.props.targetBuild.type}
                 />
+
                 {optionTable}
             </div>);
 
@@ -211,6 +212,7 @@ let lastSelected = undefined;
 let selecte;
 function BuildMenu(props){
     selecte = (target) => {
+            localStorage.setItem('buildMenuClickedOnce', true);
             lastSelected = (lastSelected === target) ? null: target;
             return props.onClick(lastSelected);
         };
@@ -226,6 +228,11 @@ function BuildMenu(props){
                 key = {nrj.target + nrj.src}
                 onClick={() => selecte(nrj.target)}
             />) : '' )}
+            {!localStorage.getItem('buildMenuClickedOnce') && //add help
+                (<div className='balloon'>
+                    {tr('Select what to build !')}
+                </div>)
+            }
     </div>);
 }
 ///////////////////////////////////////////////////////////////////////////////

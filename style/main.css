@@ -137,6 +137,7 @@ td{
     border-bottom: 2px solid white;
     color: white;
     font-family: futura;
+    overflow: visible;
 }
 #statusBar > * {
     margin: 0 10px;
@@ -212,6 +213,7 @@ td{
     text-align:center;
     transition: all 0.2s;
     cursor: pointer;
+    height: 35px;
 }
 
 .button.black{
@@ -390,4 +392,74 @@ td{
 .tuto > .hLayout > .vLayout p{
     font-size: 0.8em;
 
+}
+
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1, 1);
+  }
+
+  50% {
+    transform: scale(0.97, 0.97);
+  }
+}
+
+.balloon {
+    animation-timing-function: ease-in-out;
+    color : white;
+    background: rgb(50, 50, 50);
+    border-radius: 5px;
+    position: absolute;
+    padding: 5px 15px;
+    font-size: 1.2em;
+    width: max-content;
+}
+
+.balloon::after{
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    content: "";
+    position: absolute;
+}
+
+#bNextTurn .balloon{
+    animation: breathe 1s infinite;
+    top: -45px;
+    right: 5px;
+    width: max-content;
+}
+#bNextTurn .balloon::after{
+    border-top: 8px solid rgb(50, 50, 50);
+    left: 50%;
+    bottom: -15px;
+    transform: translate(-50%, 0);
+}
+
+#statusBar .balloon{
+    top: 45px;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+#statusBar .balloon::after{
+    border-bottom: 8px solid rgb(50, 50, 50);
+    left: 50%;
+    top: -15px;
+    transform: translate(-50%, 0);
+}
+
+
+#BuildMenu .balloon{
+    animation: breathe 1s infinite;
+    bottom: 50px;
+    left: 50px;
+}
+
+#BuildMenu .balloon::after{
+    border-right: 8px solid rgb(50, 50, 50);
+    top: 50%;
+    left: -15px;
+    transform: translate(0, -50%);
 }

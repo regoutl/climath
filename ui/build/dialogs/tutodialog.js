@@ -8,6 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { tr } from "../../../tr/tr.js";
 import { Dialog } from './dialog.js';
+import { isTouchScreen } from '../../screenDetection.js';
 
 export var TutoDialog = function (_React$Component) {
     _inherits(TutoDialog, _React$Component);
@@ -28,6 +29,77 @@ export var TutoDialog = function (_React$Component) {
 
             var props = this.props;
 
+            //build on mobile
+            var touchBuild = [React.createElement(
+                'div',
+                { className: 'hLayout' },
+                React.createElement(
+                    'div',
+                    { className: 'vLayout' },
+                    React.createElement('img', { src: 'res/tuto/slide2tap.png', height: '80' }),
+                    React.createElement(
+                        'p',
+                        null,
+                        tr('Tap anywhere')
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'vLayout', style: { borderLeft: '1px solid white' } },
+                    React.createElement('img', { src: 'res/tuto/slide2select.png', height: '80' }),
+                    React.createElement(
+                        'p',
+                        null,
+                        tr('Select the plant you want to build')
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'vLayout', style: { borderLeft: '1px solid white' } },
+                    React.createElement('img', { src: 'res/tuto/slide2done.png', height: '80' }),
+                    React.createElement(
+                        'p',
+                        null,
+                        tr('Production start soon !')
+                    )
+                )
+            )];
+
+            var desktopBuild = [React.createElement(
+                'div',
+                { className: 'hLayout' },
+                React.createElement(
+                    'div',
+                    { className: 'vLayout' },
+                    React.createElement('img', { src: 'res/tuto/slide2select.png', height: '80' }),
+                    React.createElement(
+                        'p',
+                        null,
+                        tr('Select type')
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'vLayout', style: { borderLeft: '1px solid white' } },
+                    React.createElement('img', { src: 'res/tuto/slide2loc.png', height: '80' }),
+                    React.createElement(
+                        'p',
+                        null,
+                        tr('Select location')
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'vLayout', style: { borderLeft: '1px solid white' } },
+                    React.createElement('img', { src: 'res/tuto/slide2done.png', height: '80' }),
+                    React.createElement(
+                        'p',
+                        null,
+                        tr('Production start soon !')
+                    )
+                )
+            )];
+
             var slide = [{ title: 'Objective', body: [React.createElement(
                     'p',
                     null,
@@ -36,7 +108,7 @@ export var TutoDialog = function (_React$Component) {
                     'p',
                     null,
                     tr('Build low carbon power plants')
-                )] }, { title: 'Power plants construction', body: [React.createElement('img', { src: 'res/tuto/slide2.png', width: '300' })] }, { title: 'Power plants types', body: [React.createElement(
+                )] }, { title: 'Power plants construction', body: isTouchScreen() ? touchBuild : desktopBuild }, { title: 'Power plants types', body: [React.createElement(
                     'div',
                     { className: 'hLayout' },
                     React.createElement(
@@ -91,14 +163,17 @@ export var TutoDialog = function (_React$Component) {
                 {
                     className: 'tuto',
                     title: slide[this.state.slide].title,
-                    onNext: function onNext() {
-                        _this2.state.slide == slide.length - 1 ? props.closeRequested() : _this2.setState(function (state) {
+                    onNext: this.state.slide == slide.length - 1 ? undefined : function () {
+                        _this2.setState(function (state) {
                             return { slide: state.slide + 1 };
                         });
                     },
-                    onSkip: function onSkip() {
+                    onSkip: this.state.slide == slide.length - 1 ? undefined : function () {
+                        localStorage.setItem('skipTuto', true);props.closeRequested();
+                    },
+                    onOk: this.state.slide == slide.length - 1 ? function () {
                         return props.closeRequested();
-                    }
+                    } : undefined
                 },
                 slide[this.state.slide].body
             );

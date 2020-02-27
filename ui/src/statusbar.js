@@ -51,8 +51,7 @@ export default class StatusBar extends React.Component{
             </div>
             <div
                 title="Co2"
-                onClick={() => this.props.showDialog(Co2Dialog)}
-
+                onClick={() => {localStorage.setItem('co2StatusClickedOnce', true); this.props.showDialog(Co2Dialog);}}
             >
                 <span title={tr('Average of the last 20 years')}>{valStr(avgCo2, 'C').slice(0, -5)} CO<sup>2</sup></span>
                 <span
@@ -61,8 +60,18 @@ export default class StatusBar extends React.Component{
                         padding:'10px 0 0 10px',
                         verticalAlign: 'middle' ,
                         fontSize: '14px',
-                        color: (increase > 0 ? 'red': 'lime')}}
-                >{sign + Math.abs(increase)} %</span>
+                        color: (increase > 0 ? 'red': 'lime'),
+                        position: 'relative',
+                    }}
+                >{sign + Math.abs(increase)} %
+                {!localStorage.getItem('co2StatusClickedOnce') && //add help
+                    (<div className='balloon'>
+                        {tr('Score')}
+                    </div>)
+                }
+
+                </span>
+
             </div>
             <div title={tr("Set budget")} onClick={() => this.props.showDialog(BudgetDialog)}>{valStr(this.props.money, '€')}</div>
         </div>);

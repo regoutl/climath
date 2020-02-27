@@ -120,6 +120,8 @@ var MapView = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var props = this.props;
+
             // return <div>{this.myProp}</div>;
             this.draw();
 
@@ -128,7 +130,7 @@ var MapView = function (_React$Component) {
             return React.createElement(
                 'div',
                 { id: 'dMapBox' },
-                React.createElement(MapLayers, {
+                !props.showOnlyMap && React.createElement(MapLayers, {
                     base: this.state.base,
                     energyGrid: this.state.energyGrid,
                     flows: this.state.flows,
@@ -147,8 +149,8 @@ var MapView = function (_React$Component) {
                     },
                     tr("Your browser is not supported")
                 ),
-                this._makeDesktopBuildDock(),
-                this._makeTouchBuildMenu()
+                !props.showOnlyMap && this._makeDesktopBuildDock(),
+                !props.showOnlyMap && this._makeTouchBuildMenu()
             );
         }
     }, {
@@ -218,6 +220,7 @@ var MapView = function (_React$Component) {
                 var ans = void 0,
                     np = void 0;
                 if (!state.touchBuildMenuPos) {
+
                     np = {
                         x: Math.round(pos.x / _this4.transform.scale - _this4.transform.x),
                         y: Math.round(pos.y / _this4.transform.scale - _this4.transform.y)
@@ -314,13 +317,13 @@ var MapView = function (_React$Component) {
             this.transform.scale *= scale === 0 ? deltaY > 0 ? 0.8 : 1.25 : scale;
 
             //bounds
-            this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4));
+            this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 8));
             this.transform.scale = Math.min(this.transform.scale, Math.pow(1 / 0.8, 8));
 
             this.transform.x = curX / this.transform.scale - origin.x;
             this.transform.y = curY / this.transform.scale - origin.y;
 
-            this.draw();
+            if (this.state.touchBuildMenuPos && this.state.targetBuild.type) this.updateTouchBuildCursor();else this.draw();
         }
 
         //called when cursor leaves direct contact with central area
@@ -392,20 +395,10 @@ var MapView = function (_React$Component) {
                 this.updatetouchstate(touches);
                 this.zoom(zoomArg);
                 this.dragging = true;
-
-                this.setTargetBuildState('radius', Math.round(50 / this.transform.scale));
             } else if (this.touchstate.touches.length > 0) {
                 if (this.genericDrag({ x: touchstate.touches[0].x, y: touchstate.touches[0].y }, { x: touches[0].pageX, y: touches[0].pageY })) {
                     this.updatetouchstate(touches);
                 }
-            }
-
-            var pos = this.state.touchBuildMenuPos;
-            if (pos) {
-                this.setTargetBuildState('pos', {
-                    x: Math.round(pos.x / this.transform.scale - this.transform.x),
-                    y: Math.round(pos.y / this.transform.scale - this.transform.y)
-                });
             }
 
             //whut ? move on 0 touches ?
@@ -446,9 +439,25 @@ var MapView = function (_React$Component) {
             this.transform.x += (newPos.x - oldPos.x) / this.transform.scale;
             this.transform.y += (newPos.y - oldPos.y) / this.transform.scale;
 
+            if (this.state.touchBuildMenuPos && this.state.targetBuild.type) this.updateTouchBuildCursor();
+
             this.draw();
 
             return true;
+        }
+
+        //update the cursor of the build menu
+
+    }, {
+        key: 'updateTouchBuildCursor',
+        value: function updateTouchBuildCursor() {
+            this.setTargetBuildState('radius', Math.round(50 / this.transform.scale));
+            var pos = this.state.touchBuildMenuPos;
+
+            this.setTargetBuildState('pos', {
+                x: Math.round(pos.x / this.transform.scale - this.transform.x),
+                y: Math.round(pos.y / this.transform.scale - this.transform.y)
+            });
         }
     }]);
 

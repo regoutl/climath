@@ -101,6 +101,8 @@ export default class MapView extends React.Component{
 
 
     render(){
+        let props = this.props;
+
         // return <div>{this.myProp}</div>;
         this.draw();
 
@@ -108,11 +110,11 @@ export default class MapView extends React.Component{
 
 
         return (<div id="dMapBox">
-                    <MapLayers
+                    {!props.showOnlyMap && <MapLayers
                         base={this.state.base}
                         energyGrid={this.state.energyGrid}
                         flows={this.state.flows}
-                        onLayerToggled={this._toggleLayer.bind(this)} />
+                        onLayerToggled={this._toggleLayer.bind(this)} />}
 
                     <canvas
                         ref={this.canvas}
@@ -127,8 +129,8 @@ export default class MapView extends React.Component{
                         {tr("Your browser is not supported")}
                     </canvas>
 
-                    {this._makeDesktopBuildDock()}
-                    {this._makeTouchBuildMenu()}
+                    {!props.showOnlyMap &&this._makeDesktopBuildDock()}
+                    {!props.showOnlyMap &&this._makeTouchBuildMenu()}
 
                 </div>);
     }
@@ -194,6 +196,7 @@ export default class MapView extends React.Component{
         this.setState((state) => {
             let ans, np;
             if(!state.touchBuildMenuPos){
+
                 np={
                     x: Math.round((pos.x / this.transform.scale) - this.transform.x),
                     y: Math.round((pos.y / this.transform.scale) - this.transform.y),
@@ -276,13 +279,18 @@ export default class MapView extends React.Component{
         this.transform.scale *= (scale === 0? (deltaY > 0? 0.8:1.25):scale);
 
         //bounds
-        this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 4));
+        this.transform.scale = Math.max(this.transform.scale, Math.pow(0.8, 8));
         this.transform.scale = Math.min(this.transform.scale, Math.pow(1/0.8, 8));
 
         this.transform.x = curX / this.transform.scale - origin.x;
         this.transform.y = curY / this.transform.scale - origin.y;
 
-        this.draw();
+        if(this.state.touchBuildMenuPos
+             && this.state.targetBuild.type)
+            this.updateTouchBuildCursor();
+        else
+
+            this.draw();
     }
 
     //called when cursor leaves direct contact with central area
@@ -347,7 +355,6 @@ export default class MapView extends React.Component{
             this.zoom(zoomArg);
             this.dragging = true;
 
-            this.setTargetBuildState('radius',Math.round(50/this.transform.scale));
         }
         else if(this.touchstate.touches.length > 0){
             if(this.genericDrag({x:touchstate.touches[0].x, y:touchstate.touches[0].y}, {x:touches[0].pageX, y:touches[0].pageY})){
@@ -356,13 +363,6 @@ export default class MapView extends React.Component{
             }
         }
 
-        let pos = this.state.touchBuildMenuPos;
-        if(pos){
-            this.setTargetBuildState('pos', {
-                x: Math.round((pos.x / this.transform.scale) - this.transform.x),
-                y: Math.round((pos.y / this.transform.scale) - this.transform.y),
-            });
-        }
 
 
         //whut ? move on 0 touches ?
@@ -401,10 +401,25 @@ export default class MapView extends React.Component{
         this.transform.x += (newPos.x - oldPos.x) / this.transform.scale;
         this.transform.y += (newPos.y - oldPos.y) / this.transform.scale;
 
+        if(this.state.touchBuildMenuPos
+             && this.state.targetBuild.type)
+            this.updateTouchBuildCursor();
+
+
         this.draw();
 
         return true;
     }
 
 
+    //update the cursor of the build menu
+    updateTouchBuildCursor(){
+        this.setTargetBuildState('radius',Math.round(50/this.transform.scale));
+        let pos = this.state.touchBuildMenuPos;
+
+        this.setTargetBuildState('pos',{
+            x: Math.round((pos.x / this.transform.scale) - this.transform.x),
+            y: Math.round((pos.y / this.transform.scale) - this.transform.y),
+        });
+    }
 }

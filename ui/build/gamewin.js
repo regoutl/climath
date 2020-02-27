@@ -55,7 +55,7 @@ var GameWin = function (_React$Component) {
         key: 'runYear',
         value: function runYear() {
             this.simu.run();
-            if (this.simu.year == 2021) {
+            if (this.simu.year == 2070) {
                 this.setState({
                     currentDialog: EndDialog
                 });
@@ -85,17 +85,23 @@ var GameWin = function (_React$Component) {
         key: 'startGame',
         value: function startGame(simu) {
             this.simu = simu;
-            this.setDialog(TutoDialog);
+
+            this.setDialog(localStorage.getItem('skipTuto') ? undefined : TutoDialog);
         }
     }, {
         key: 'render',
         value: function render() {
-            var _this2 = this;
-
             if (this.state.currentDialog == NewGameDialog) {
                 return React.createElement(NewGameDialog, {
                     startRequested: this.startGame.bind(this),
                     scene: this.scene });
+            } else if (this.state.currentDialog == TutoDialog) {
+                return React.createElement(
+                    'div',
+                    { className: 'vLayout', style: { width: '100%', height: '100%' } },
+                    this._makeMapView(),
+                    this._makeDialog()
+                );
             }
 
             if (!this.simu) {
@@ -124,18 +130,26 @@ var GameWin = function (_React$Component) {
                     history: this.simu.stats,
                     currentConso: currentConso
                 }),
-                React.createElement(MapView, {
-                    scene: this.scene,
-                    onBuildConfirmed: this.confirmBuild.bind(this),
-                    simu: this.simu,
-                    onDetailsRequested: function onDetailsRequested(c) {
-                        _this2.setState({ help: c });
-                    }
-                }),
+                this._makeMapView(),
                 this._makeNextTurnButton(),
                 this._makeDialog(),
                 this._makeHelp()
             );
+        }
+    }, {
+        key: '_makeMapView',
+        value: function _makeMapView() {
+            var _this2 = this;
+
+            return React.createElement(MapView, {
+                scene: this.scene,
+                onBuildConfirmed: this.confirmBuild.bind(this),
+                simu: this.simu,
+                onDetailsRequested: function onDetailsRequested(c) {
+                    _this2.setState({ help: c });
+                },
+                showOnlyMap: this.state.currentDialog == TutoDialog
+            });
         }
 
         /** @brief returns a react component for the currentDialog
@@ -218,15 +232,25 @@ var GameWin = function (_React$Component) {
     }, {
         key: '_makeNextTurnButton',
         value: function _makeNextTurnButton() {
+            var _this5 = this;
+
             return React.createElement(
                 'div',
                 {
                     id: 'bNextTurn',
                     className: 'button black',
                     title: tr("Go to the next year"),
-                    onClick: this.runYear.bind(this)
+                    onClick: function onClick() {
+                        localStorage.setItem('nextYearClickedOnce', true);_this5.runYear();
+                    }
                 },
-                tr("Next turn")
+                tr("Next turn"),
+                localStorage.getItem('buildMenuClickedOnce') && !localStorage.getItem('nextYearClickedOnce') && //add help
+                React.createElement(
+                    'div',
+                    { className: 'balloon' },
+                    tr('Next year !')
+                )
             );
         }
     }]);

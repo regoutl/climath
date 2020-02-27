@@ -17,6 +17,7 @@ import {App} from './ui/build/app.js';
 
 //window.location.hash : get anchor
 
+localStorage.clear();
 
 
 setLang().then(() => {
@@ -27,7 +28,6 @@ setLang().then(() => {
     );
 	// console.log(tr('%d little kitten', 'test', 2));
 })
-
 
 let deferredPrompt;
 

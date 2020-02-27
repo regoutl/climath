@@ -78,9 +78,8 @@ var StatusBar = function (_React$Component) {
                     {
                         title: 'Co2',
                         onClick: function onClick() {
-                            return _this2.props.showDialog(Co2Dialog);
+                            localStorage.setItem('co2StatusClickedOnce', true);_this2.props.showDialog(Co2Dialog);
                         }
-
                     },
                     React.createElement(
                         'span',
@@ -101,10 +100,18 @@ var StatusBar = function (_React$Component) {
                                 padding: '10px 0 0 10px',
                                 verticalAlign: 'middle',
                                 fontSize: '14px',
-                                color: increase > 0 ? 'red' : 'lime' }
+                                color: increase > 0 ? 'red' : 'lime',
+                                position: 'relative'
+                            }
                         },
                         sign + Math.abs(increase),
-                        ' %'
+                        ' %',
+                        !localStorage.getItem('co2StatusClickedOnce') && //add help
+                        React.createElement(
+                            'div',
+                            { className: 'balloon' },
+                            tr('Score')
+                        )
                     )
                 ),
                 React.createElement(
