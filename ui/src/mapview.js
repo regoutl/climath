@@ -170,6 +170,7 @@ export default class MapView extends React.Component{
     }
 
     _makeTouchBuildMenu(){
+        
         if(!this.state.touchBuildMenuPos)
             return null;
 

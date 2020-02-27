@@ -1,32 +1,3 @@
-Screen 1 : Obj
-
-    Ojectif : as little carbon emmission from 50 to 70 as possible
-
-    Comment : Build low carbon electricity plants
-
-    [image : -25% : this is how close you are to the goal. ]
-
-
-Screen 2 : Plant construction :
-    (sur mobile)
-
-    [img]
-    Click anywhere on the map => choose type => [delay] => Ready for production
-
-    (sur desktop)
-    Choisi un type => Clic sur la carte => [delay] => Ready
-
-Screen 3 : Types of plant
-
-    renewables : low carbon. Does not produce all time | storage : Store energy | centrals : Stable production
-
-
-
-(fin des dialog)
-
--> tooltip sur 'next turn' : Passer a l'an prochain
-
-[...]
 
 
 

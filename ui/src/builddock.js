@@ -73,6 +73,7 @@ export class BuildDock extends React.Component{
                 explCost: rawInfo.expl_cost,
                 coolingWaterRate: rawInfo.coolingWaterRate,
                 storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+                buildDelay: rawInfo.build.end - rawInfo.build.begin,
             };
 
 
@@ -193,6 +194,7 @@ function BuildDetailsAny(props){
         {"n":"Explosion cost",      "cn":"explCost",        "unit":"€"},
         {"n":"Cooling",             "cn":"coolingWaterRate","unit":"m3/s"},
         {"n":"Storage capacity",    "cn":"storageCapacity", "unit":"S",},
+        {"n":"Build time",          "cn":"buildDelay",      "unit":"y",},
     ];
 
     return (
@@ -310,6 +312,7 @@ function QuickStat(props){
         buildCo2: rawInfo.build.co2,
         avgProd: avgProd,
         storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+        buildDelay: rawInfo.build.end - rawInfo.build.begin,
     };
 
     return (
@@ -333,10 +336,6 @@ function QuickStat(props){
                 />
             </div>
             <div className='hLayout' style={{width: 'max-content'}}>
-                <div>
-                    <img src='res/icons/bill.png' height="18"/>
-                    {valStr(info.buildCost, '€', {compact:2})}
-                </div>
                 {info.storageCapacity > 0 && <div>
                     <img src='res/icons/bat.png' height="18"/>
                     {valStr(info.storageCapacity, 'Wh',  {compact:2})}
@@ -350,6 +349,10 @@ function QuickStat(props){
                     <img src='res/icons/pollution.png' height="18"/>
                     {valStr(info.buildCo2, 'C', {compact:2})}
                 </div>}
+                <div>
+                    <img src='res/icons/bill.png' height="18"/>
+                    {valStr(info.buildCost, '€', {compact:2})}
+                </div>
             </div>
         </div>);
 }

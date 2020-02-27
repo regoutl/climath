@@ -83,7 +83,8 @@ export var BuildDock = function (_React$Component) {
                     pop: rawInfo.pop_affected,
                     explCost: rawInfo.expl_cost,
                     coolingWaterRate: rawInfo.coolingWaterRate,
-                    storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0
+                    storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+                    buildDelay: rawInfo.build.end - rawInfo.build.begin
                 };
 
                 optionTable = React.createElement(
@@ -205,7 +206,7 @@ function InputSlider(props) {
 }
 
 function BuildDetailsAny(props) {
-    var show = [{ "n": "Installation cost", "cn": "buildCost", "unit": "€" }, { "n": "Installation co2", "cn": "buildCo2", "unit": "C" }, { "n": "Per year cost", "cn": "perYearCost", "unit": "€" }, { "n": "Per year co2", "cn": "perYearCo2", "unit": "C" }, { "n": "Production", "cn": "avgProd", "unit": "W" }, { "n": "Population", "cn": "pop", "unit": "H" }, { "n": "Explosion cost", "cn": "explCost", "unit": "€" }, { "n": "Cooling", "cn": "coolingWaterRate", "unit": "m3/s" }, { "n": "Storage capacity", "cn": "storageCapacity", "unit": "S" }];
+    var show = [{ "n": "Installation cost", "cn": "buildCost", "unit": "€" }, { "n": "Installation co2", "cn": "buildCo2", "unit": "C" }, { "n": "Per year cost", "cn": "perYearCost", "unit": "€" }, { "n": "Per year co2", "cn": "perYearCo2", "unit": "C" }, { "n": "Production", "cn": "avgProd", "unit": "W" }, { "n": "Population", "cn": "pop", "unit": "H" }, { "n": "Explosion cost", "cn": "explCost", "unit": "€" }, { "n": "Cooling", "cn": "coolingWaterRate", "unit": "m3/s" }, { "n": "Storage capacity", "cn": "storageCapacity", "unit": "S" }, { "n": "Build time", "cn": "buildDelay", "unit": "y" }];
 
     return React.createElement(
         'table',
@@ -320,7 +321,8 @@ function QuickStat(props) {
         buildCost: rawInfo.build.cost,
         buildCo2: rawInfo.build.co2,
         avgProd: avgProd,
-        storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0
+        storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+        buildDelay: rawInfo.build.end - rawInfo.build.begin
     };
 
     return React.createElement(
@@ -354,12 +356,6 @@ function QuickStat(props) {
         React.createElement(
             'div',
             { className: 'hLayout', style: { width: 'max-content' } },
-            React.createElement(
-                'div',
-                null,
-                React.createElement('img', { src: 'res/icons/bill.png', height: '18' }),
-                valStr(info.buildCost, '€', { compact: 2 })
-            ),
             info.storageCapacity > 0 && React.createElement(
                 'div',
                 null,
@@ -377,6 +373,12 @@ function QuickStat(props) {
                 null,
                 React.createElement('img', { src: 'res/icons/pollution.png', height: '18' }),
                 valStr(info.buildCo2, 'C', { compact: 2 })
+            ),
+            React.createElement(
+                'div',
+                null,
+                React.createElement('img', { src: 'res/icons/bill.png', height: '18' }),
+                valStr(info.buildCost, '€', { compact: 2 })
             )
         )
     );

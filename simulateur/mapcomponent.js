@@ -1,7 +1,5 @@
 "use strict";
 
-// import MapDrawer from '../ui/mapdrawer.js';
-// import PaletteTexture from '../ui/palettetexture.js';
 
 const GroundUsage = {
     out:0,
@@ -15,48 +13,50 @@ const GroundUsage = {
     city:8,
     forest2:9,
 }
+
+//hab/m2
 const popDensitylegend = {
-    0:0,
-    1:1,
-    2:50,
-    3:100,
-    4:200,
-    5:500,
-    6:1000,
-    7:2000,
-    8:5000,
+    0:0e-6,
+    1:1e-6,
+    2:50e-6,
+    3:100e-6,
+    4:200e-6,
+    5:500e-6,
+    6:1000e-6,
+    7:2000e-6,
+    8:5000e-6,
 }
 
-const plank = 200;
-const pixelArea = plank * plank;
+const plank = 200; //m / pix side
+const pixelArea = plank * plank; //m2 / pix
 
-//Const for our current map
-const kmpixratio = 30688/(1625442-854086);
-const nuclearDisasterRadius = 50/*pix*/;
-const nuclearDisasterArea = nuclearDisasterRadius * nuclearDisasterRadius * 3.14; /*same unit power 2*/
-const meanCostToRelocate = 197000;
-const cleaningcost = 150000000;
+// //Const for our current map
+// const kmpixratio = 30688/(1625442-854086);
+// const nuclearDisasterRadius = 50/*pix*/;
+// const nuclearDisasterArea = nuclearDisasterRadius * nuclearDisasterRadius * 3.14; /*same unit power 2*/
+// const meanCostToRelocate = 197000;
+// const cleaningcost = 150000000;
 const totalpop = 11.4e6;
-const nPixInCountry = 30600e6 / pixelArea;
-const averagePopDensity = totalpop / nPixInCountry;
+// const nPixInCountry = 30600e6 / pixelArea;
+// const averagePopDensity = totalpop / nPixInCountry;
 
 const avgIrradiance =  1030; //W/m2 @see parameters.countries.belgium.irradiance
 const avgWindPowerDensity50 = 400; //W/m2 @see wind map
 const avgPopDensity = totalpop / 30600e6; // average pop/m2
 
-let densityMapPixPerCol = {// is it correct ?
-    0:854086,
-    1:223678,
-    2:171151,
-    3:141713,
-    4:100527,
-    5:38765,
-    6:42552,
-    7:32710,
-    8:20260,
-};
+// let densityMapPixPerCol = {// is it correct ?
+//     0:854086,
+//     1:223678,
+//     2:171151,
+//     3:141713,
+//     4:100527,
+//     5:38765,
+//     6:42552,
+//     7:32710,
+//     8:20260,
+// };
 
-const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
+// const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
 
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
@@ -82,21 +82,22 @@ export default class MapComponent{
         this.buildParameters = [{}];// first one is the null build
     }
 
-    /** [TODO]
+    /** return hab/m2
+    * [TODO]
     * Should find the correction factor in fct of:
     *       - current pop
     *       - number of available living pixel
     *                   (removing those where an explosion has occured)
     */
     getPopDensity(x,y){
-        // km2 / pix
+        // 
         //1.06 is a correction factor to match current population of 11.4e6 hab
-        let popfactor = totalpop / (kmpixratio*
-            Object.keys(popDensitylegend).reduce((a,key) =>
-                a+(densityMapPixPerCol[key]*popDensitylegend[key])
-            , 0));
+        // let popfactor = totalpop / (kmpixratio*
+        //     Object.keys(popDensitylegend).reduce((a,key) =>
+        //         a+(densityMapPixPerCol[key]*popDensitylegend[key])
+        //     , 0));
         let popDensity = popDensitylegend[this.popDensity[y*1374+x]];
-        return Math.floor(popDensity * kmpixratio * 1.06);
+        return popDensity  * 1.06/*kmpixratio **/ ;
     }
 
     getNrj(x,y){

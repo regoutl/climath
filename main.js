@@ -17,7 +17,7 @@ import {App} from './ui/build/app.js';
 
 //window.location.hash : get anchor
 
-localStorage.clear();
+// localStorage.clear();
 
 
 setLang().then(() => {

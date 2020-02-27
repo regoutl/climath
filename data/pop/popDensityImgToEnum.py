@@ -7,6 +7,10 @@ from tqdm import tqdm
 
 im = Image.open("popDensity.png")
 
+if(im.width!= 1374 || im.height != 1183):
+    print('width / height invalid\n\n');
+    raise Exception;
+
 pix = im.load()
 
 # PopDensitylegend = {
