@@ -1,7 +1,7 @@
-import {tr} from "../../tr/tr.js";
-import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import {pieChart} from '../charts.js';
-import TaxDetails from './help/taxdetails.js';
+import {tr} from "../../../tr/tr.js";
+import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+import {pieChart} from '../../charts.js';
+import TaxDetails from '../help/taxdetails.js';
 
 /** @brief fancy slider for tax rates. Note that everyting is is range [0-1] */
 class TaxSlider extends React.Component {
@@ -88,6 +88,7 @@ class TaxSlider extends React.Component {
         </div>)
     }
 }
+import {Dialog} from './dialog.js';
 
 
 export default class BudgetDialog extends React.Component{
@@ -98,37 +99,11 @@ export default class BudgetDialog extends React.Component{
     constructor(props){
         super(props);
 
-        this.click = this.onClick.bind(this);
-        this.key = this.onKey.bind(this);
-
-        this.me = React.createRef();
-        this.bOk = React.createRef();
         this.pieChart = React.createRef();
     }
 
-    onClick(e){
-        if(this.me.current.contains(e.target) && this.bOk.current != e.target) //the dialog was clicked
-            return;
-
-        this.props.closeRequested();
-    }
-
-    onKey(e){
-        if(e.key === "Escape") {
-            this.props.closeRequested();
-        }
-    }
 
     componentDidMount(){
-        //use a timeout, else the open click is catched by this event listener
-        setTimeout(() => window.addEventListener("mousedown", this.click), 0);
-        window.addEventListener("keydown", this.key)
-
-
-
-
-
-
         let lastYearCosts = this.props.history[this.props.history.length - 1].cost;
 
         let allOnM = {
@@ -152,13 +127,10 @@ export default class BudgetDialog extends React.Component{
 
     }
 
-    componentWillUnmount(){
-        window.removeEventListener("mousedown", this.click);
-        window.removeEventListener("keydown", this.key)
-    }
 
 
     render(){
+        let props = this.props;
         let lastYearCosts = this.props.history[this.props.history.length - 1].cost;
 
         let allOnM = {
@@ -176,40 +148,37 @@ export default class BudgetDialog extends React.Component{
         let regSpend = this.props.gdp * this.props.regularTaxRate;
         let energySpend = allOnM.nuke + allOnM.pv + allOnM.fossil + allOnM.storage + allOnM.ccgt + allOnM.wind + allOnM.fusion;
 
-        return (<div
-            className="dialog vLayout"
-            ref={this.me}
+        return (
+        <Dialog
             style={{
                 right: 50,
-                top:'calc(var(--status-bar-height) + 20px)', //60
+                top:'statusbar',
             }}
-            >
-        <table><tbody>
-            <tr>
-                <th style={{verticalAlign: 'middle'}}>{tr("Tax rate (average)")}</th>
-                <td><TaxSlider oninput={this.props.onTaxRateChanged} value={this.props.taxRate}  /></td>
-            </tr>
-            <tr>
-                <th>{tr("Taxes income")}</th>
-                <td> + {valStr(taxIn, '€')}</td>
-            </tr>
-            <tr>
-                <th>{tr("Regular government spendings")}</th>
-                <td> - {valStr(regSpend, '€')}</td>
-            </tr>
-            <tr>
-                <th>{tr("Energy maintenace (value of %d)", '', this.props.history[this.props.history.length - 1].year)}</th>
-                <td><div> - {valStr(energySpend, '€')}</div><canvas ref={this.pieChart} width="250" height="100"/></td>
-            </tr>
-            <tr style={{borderTop: '1px solid white'}}>
-                <th>{tr('Balance')}</th>
-                <td>{valStr(taxIn - regSpend - energySpend, '€', {forceSign: true})}</td>
-            </tr>
-        </tbody></table>
-        <div className="hLayout">
-            <div className="button white" ref={this.bOk}  onClick={this.props.closeRequested}>{tr("Ok")}</div>
-            <div className="button white" onClick={() => this.props.detailsRequested(TaxDetails)}>{tr('Details...')}</div>
-        </div>
-        </div>);
+            onOk={props.closeRequested}
+            onDetails = {() => props.detailsRequested(TaxDetails)}
+        >
+            <table><tbody>
+                <tr>
+                    <th style={{verticalAlign: 'middle'}}>{tr("Tax rate (average)")}</th>
+                    <td><TaxSlider oninput={this.props.onTaxRateChanged} value={this.props.taxRate}  /></td>
+                </tr>
+                <tr>
+                    <th>{tr("Taxes income")}</th>
+                    <td> + {valStr(taxIn, '€')}</td>
+                </tr>
+                <tr>
+                    <th>{tr("Regular government spendings")}</th>
+                    <td> - {valStr(regSpend, '€')}</td>
+                </tr>
+                <tr>
+                    <th>{tr("Energy maintenace (value of %d)", '', this.props.history[this.props.history.length - 1].year)}</th>
+                    <td><div> - {valStr(energySpend, '€')}</div><canvas ref={this.pieChart} width="250" height="100"/></td>
+                </tr>
+                <tr style={{borderTop: '1px solid white'}}>
+                    <th>{tr('Balance')}</th>
+                    <td>{valStr(taxIn - regSpend - energySpend, '€', {forceSign: true})}</td>
+                </tr>
+            </tbody></table>
+        </Dialog>);
     }
 }

@@ -225,7 +225,7 @@ export default class MapView extends React.Component{
         this.physMousePos = {x:e.pageX , y:e.pageY};
     }
     onmousemove(e){
-        if ("ontouchstart" in document.documentElement || !this.state.targetBuild.type)
+        if ("ontouchstart" in document.documentElement)
             return; // prenvent mouse move event on touch event
 
         if(this.isMouseDown){
@@ -236,7 +236,8 @@ export default class MapView extends React.Component{
             }
         }
         else {
-            if(e.target != this.canvas.current)
+            //avoid state update if not necessary
+            if(e.target != this.canvas.current || !this.state.targetBuild.type)
                 return;
 
             this.onBuildTargetChange({rawPos: {x:e.pageX, y : e.pageY}})

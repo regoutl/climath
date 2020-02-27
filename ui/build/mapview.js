@@ -254,7 +254,7 @@ var MapView = function (_React$Component) {
     }, {
         key: 'onmousemove',
         value: function onmousemove(e) {
-            if ("ontouchstart" in document.documentElement || !this.state.targetBuild.type) return; // prenvent mouse move event on touch event
+            if ("ontouchstart" in document.documentElement) return; // prenvent mouse move event on touch event
 
             if (this.isMouseDown) {
                 if (this.genericDrag({ x: this.physMousePos.x, y: this.physMousePos.y }, { x: e.pageX, y: e.pageY })) {
@@ -263,7 +263,8 @@ var MapView = function (_React$Component) {
                     this.physMousePos.y = e.pageY;
                 }
             } else {
-                if (e.target != this.canvas.current) return;
+                //avoid state update if not necessary
+                if (e.target != this.canvas.current || !this.state.targetBuild.type) return;
 
                 this.onBuildTargetChange({ rawPos: { x: e.pageX, y: e.pageY } });
             }

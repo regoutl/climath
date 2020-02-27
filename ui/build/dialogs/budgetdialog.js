@@ -6,10 +6,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-import { tr } from "../../tr/tr.js";
-import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import { pieChart } from '../charts.js';
-import TaxDetails from './help/taxdetails.js';
+import { tr } from "../../../tr/tr.js";
+import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+import { pieChart } from '../../charts.js';
+import TaxDetails from '../help/taxdetails.js';
 
 /** @brief fancy slider for tax rates. Note that everyting is is range [0-1] */
 
@@ -180,7 +180,7 @@ var BudgetDialog = function (_React$Component2) {
                 {
                     style: {
                         right: 50,
-                        top: 'calc(var(--status-bar-height) + 20px)' //60
+                        top: 'statusbar'
                     },
                     onOk: props.closeRequested,
                     onDetails: function onDetails() {

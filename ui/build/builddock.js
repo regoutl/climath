@@ -18,6 +18,8 @@ import BatteryDetails from './help/batterydetails.js';
 import FusionDetails from './help/fusiondetails.js';
 import { Simulateur } from '../../simulateur/simulateur.js';
 
+import { Dialog } from './dialogs/dialog.js';
+
 var energyIcons = [{ name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }];
 var detailForTech = {
     "pv": PvDetails,
@@ -47,7 +49,7 @@ export var BuildDock = function (_React$Component) {
     _createClass(BuildDock, [{
         key: 'render',
         value: function render() {
-            var _this2 = this;
+            var props = this.props;
 
             var showdock = this.props.targetBuild.type;
             var dockheight = 'var(--build-dock-height)';
@@ -84,21 +86,26 @@ export var BuildDock = function (_React$Component) {
                     storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0
                 };
 
-                // let Type = ; //buildDetailsChoice[this.props.type.toLowerCase()];
-                optionTable = React.createElement(BuildDetailsAny, {
-                    info: info,
-                    confirmBuild: this.props.onBuildConfirmed,
-                    slider: this.props.targetBuild.slider,
-                    restyle: restyle,
-                    style: { bottom: 0, height: dockheight, width: dockwidth, overflow: 'hidden ' },
-                    needsSlider: needSlider[this.props.targetBuild.type.toLowerCase()],
-                    onBack: function onBack() {
-                        _this2.props.onTypeChanged(null);
+                optionTable = React.createElement(
+                    Dialog,
+                    {
+                        onBack: function onBack() {
+                            props.onTypeChanged(null);
+                        },
+                        onDetails: function onDetails() {
+                            return props.onDetailsRequested(detailForTech[props.targetBuild.type.toLowerCase()]);
+                        },
+
+                        style: { bottom: 0, left: 0, height: dockheight, width: dockwidth, overflow: 'hidden ' }
                     },
-                    detailsRequested: function detailsRequested() {
-                        return _this2.props.onDetailsRequested(detailForTech[_this2.props.targetBuild.type.toLowerCase()]);
-                    }
-                });
+                    React.createElement(BuildDetailsAny, {
+                        info: info,
+                        confirmBuild: props.onBuildConfirmed,
+                        slider: props.targetBuild.slider,
+                        restyle: restyle,
+                        needsSlider: needSlider[props.targetBuild.type.toLowerCase()]
+                    })
+                );
             }
 
             return React.createElement(
@@ -201,35 +208,12 @@ function BuildDetailsAny(props) {
     var show = [{ "n": "Installation cost", "cn": "buildCost", "unit": "€" }, { "n": "Installation co2", "cn": "buildCo2", "unit": "C" }, { "n": "Per year cost", "cn": "perYearCost", "unit": "€" }, { "n": "Per year co2", "cn": "perYearCo2", "unit": "C" }, { "n": "Production", "cn": "avgProd", "unit": "W" }, { "n": "Population", "cn": "pop", "unit": "H" }, { "n": "Explosion cost", "cn": "explCost", "unit": "€" }, { "n": "Cooling", "cn": "coolingWaterRate", "unit": "m3/s" }, { "n": "Storage capacity", "cn": "storageCapacity", "unit": "S" }];
 
     return React.createElement(
-        'div',
-        { className: 'dialog', style: props.style },
+        'table',
+        null,
         React.createElement(
-            'table',
+            'tbody',
             null,
-            React.createElement(
-                'tbody',
-                null,
-                show.map(mapLineFct(props))
-            )
-        ),
-        React.createElement(
-            'div',
-            { className: 'hLayout' },
-            React.createElement(
-                'div',
-                { className: 'button white', onClick: props.onBack },
-                tr('Back')
-            ),
-            React.createElement(
-                'div',
-                { className: 'button white', onClick: props.detailsRequested },
-                tr('Details...')
-            ),
-            props.info.confirmOnDock && React.createElement(
-                'div',
-                { className: 'button white', onClick: props.confirmBuild },
-                tr('Confirm')
-            )
+            show.map(mapLineFct(props))
         )
     );
 }

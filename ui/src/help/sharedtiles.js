@@ -77,15 +77,14 @@ export class MathTextTile extends React.Component{
 
 
         return (
-            <div style={{position:'relative'}}>
-                <h4 className='hLayout' style={{justifyContent:'space-between'}}>
+            <div className='mathTextTile'>
+                <h4>
                     <span>{tr(props.title)}</span>
                     <div>
                     <img
                         onClick={this.context.toggleEquationDisplay}
                         title={tr(this.context.equationDisplay == 'math' ? 'Display as text':'Display the equation')}
                         width="32"
-                        style={{cursor: 'pointer', verticalAlign: 'middle'}}
                         src={'res/icons/' + (this.context.equationDisplay == 'math' ? 'text.png' : 'math.png')}
                     />
                     </div>

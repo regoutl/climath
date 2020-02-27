@@ -18,7 +18,7 @@ export class App extends React.Component{
                 // text : plain text description of the equation
                 // math : math description, with a quick explaination of the parameters
                 equationDisplay: 'text',
-                toggleEquationDisplay: this.toggleEquationDisplay.bind(this)
+                toggleEquationDisplay: this.toggleEquationDisplay.bind(this),
             }
         };
     }

@@ -11,6 +11,7 @@ import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { pieChart } from '../charts.js';
 import { stackedLineChart } from '../charts.js';
 import OriginDetails from './help/origindetails.js';
+import { Dialog } from './dialog.js';
 
 export var ConsoDialog = function (_React$Component) {
     _inherits(ConsoDialog, _React$Component);
@@ -24,41 +25,13 @@ export var ConsoDialog = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (ConsoDialog.__proto__ || Object.getPrototypeOf(ConsoDialog)).call(this, props));
 
-        _this.click = _this.onClick.bind(_this);
-        _this.key = _this.onKey.bind(_this);
-
-        _this.me = React.createRef();
-        _this.bOk = React.createRef();
         _this.pieChart = React.createRef();
         return _this;
     }
 
     _createClass(ConsoDialog, [{
-        key: 'onClick',
-        value: function onClick(e) {
-            if ( /*this.me.current.contains(e.target) && */this.bOk.current != e.target) //the dialog was clicked
-                return;
-
-            this.props.closeRequested();
-        }
-    }, {
-        key: 'onKey',
-        value: function onKey(e) {
-            if (e.key === "Escape") {
-                this.props.closeRequested();
-            }
-        }
-    }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
-            var _this2 = this;
-
-            //use a timeout, else the open click is catched by this event listener
-            setTimeout(function () {
-                return window.addEventListener("mousedown", _this2.click);
-            }, 0);
-            window.addEventListener("keydown", this.key);
-
             this.update();
         }
     }, {
@@ -81,24 +54,22 @@ export var ConsoDialog = function (_React$Component) {
             ctx.translate(-50, -50);
         }
     }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {
-            window.removeEventListener("mousedown", this.click);
-            window.removeEventListener("keydown", this.key);
-        }
-    }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this2 = this;
+
+            var props = this.props;
 
             return React.createElement(
-                'div',
+                Dialog,
                 {
-                    className: 'dialog vLayout',
-                    ref: this.me,
                     style: {
                         left: '100px',
                         top: 'calc(var(--status-bar-height) + 20px)' //60
+                    },
+                    onOk: props.closeRequested,
+                    onDetails: function onDetails() {
+                        return _this2.props.detailsRequested(OriginDetails);
                     }
                 },
                 React.createElement(
@@ -106,23 +77,7 @@ export var ConsoDialog = function (_React$Component) {
                     null,
                     tr("Power origin in %d", '', this.props.history[this.props.history.length - 1].year)
                 ),
-                React.createElement('canvas', { ref: this.pieChart, width: '200', height: '110' }),
-                React.createElement(
-                    'div',
-                    { className: 'hLayout' },
-                    React.createElement(
-                        'div',
-                        { className: 'button white', ref: this.bOk, onClick: this.props.closeRequested },
-                        tr("Ok")
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'button white', onClick: function onClick() {
-                                return _this3.props.detailsRequested(OriginDetails);
-                            } },
-                        tr('Details...')
-                    )
-                )
+                React.createElement('canvas', { ref: this.pieChart, width: '200', height: '110' })
             );
         }
     }]);

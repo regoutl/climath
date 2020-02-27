@@ -6,28 +6,27 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-import GameWin from './gamewin.js';
+export var TutoDialog = function (_React$Component) {
+    _inherits(TutoDialog, _React$Component);
 
-/** @brief : allows to switch betwiin completely different pages
- */
+    function TutoDialog(props) {
+        _classCallCheck(this, TutoDialog);
 
-var MainWin = function (_React$Component) {
-    _inherits(MainWin, _React$Component);
-
-    function MainWin() {
-        _classCallCheck(this, MainWin);
-
-        return _possibleConstructorReturn(this, (MainWin.__proto__ || Object.getPrototypeOf(MainWin)).apply(this, arguments));
+        return _possibleConstructorReturn(this, (TutoDialog.__proto__ || Object.getPrototypeOf(TutoDialog)).call(this, props));
     }
 
-    _createClass(MainWin, [{
-        key: 'render',
+    _createClass(TutoDialog, [{
+        key: "render",
         value: function render() {
-            return React.createElement(GameWin, null);
+            var props = this.props;
+
+            return React.createElement(
+                "div",
+                null,
+                "Coucou"
+            );
         }
     }]);
 
-    return MainWin;
+    return TutoDialog;
 }(React.Component);
-
-export default MainWin;

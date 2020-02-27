@@ -2,12 +2,13 @@
 
 import MapView from './mapview.js';
 import StatusBar from './statusbar.js';
-import {EndDialog} from './enddialog.js';
-import {NewGameDialog} from './newgamedialog.js';
+import {EndDialog} from './dialogs/enddialog.js';
+import {NewGameDialog} from './dialogs/newgamedialog.js';
 import {tr} from '../../tr/tr.js';
 import {CloseButton} from './closebutton.js';
 import {isTouchScreen,isMobile,isSmallScreen,isLandscape} from '../screenDetection.js';
 
+import {TutoDialog} from './dialogs/tutodialog.js';
 
 import Scene from '../scene.js';
 
@@ -43,7 +44,7 @@ export default class GameWin extends React.Component{
 
     runYear(){
         this.simu.run();
-        if(this.simu.year == 2070){
+        if(this.simu.year == 2021){
             this.setState({
                 currentDialog: EndDialog,
             });
@@ -71,7 +72,7 @@ export default class GameWin extends React.Component{
 
     startGame(simu){
         this.simu = simu;
-        this.setDialog(undefined);
+        this.setDialog(TutoDialog);
     }
 
 
@@ -131,7 +132,7 @@ export default class GameWin extends React.Component{
 
 
             return (<EndDialog
-                closeRequested={this.setDialog.bind(this, null)}
+                onClose={this.setDialog.bind(this, null)}
                 history={this.simu.stats}
                 energyGroundUseProp={energyGroundUseProp}
                 newGame={this.setDialog.bind(this, NewGameDialog)}

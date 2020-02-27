@@ -1,10 +1,3 @@
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { tr } from '../../../tr/tr.js';
 import { PlotTile, MathTextTile } from './sharedtiles.js';
@@ -35,10 +28,10 @@ function StorageCapacity(props) {
     ), React.createElement(
         'ul',
         { className: 'default' },
-        ['The size of the battery.', 'How dense the energy is stored. ', 'The battery\'s age. Batteries storage capacity declines over time. '].map(function (i) {
+        ['The size of the battery.', 'Amount of energy stored per unit volume. ', 'The battery\'s age. Batteries storage capacity declines over time. '].map(function (i) {
             return React.createElement(
                 'li',
-                null,
+                { key: i.substr(10, 12) },
                 tr(i)
             );
         })
@@ -85,7 +78,7 @@ function StorageCapacityDecline(props) {
     return React.createElement(MathTextTile, { title: 'Storage capacity decline', math: math, text: text });
 }
 
-function HourlyPowerLoss(props) {
+function PowerLoss(props) {
     var math = [React.createElement(
         'p',
         null,
@@ -106,7 +99,7 @@ function HourlyPowerLoss(props) {
         tr('It is estimated that, every month, the stored energy decrease by 2%.')
     );
 
-    return React.createElement(MathTextTile, { title: 'Hourly power loss', math: math, text: text });
+    return React.createElement(MathTextTile, { title: 'Power loss', math: math, text: text });
 }
 
 function RoundTripEfficiency(props) {
@@ -140,68 +133,45 @@ function RoundTripEfficiency(props) {
 
 /** @brief this class provide a lot of explainations about pv
 */
+export default function BatteryDetails(props) {
+    var bat = props.productionMeans.storage.solutions.battery;
 
-var BatteryDetails = function (_React$Component) {
-    _inherits(BatteryDetails, _React$Component);
-
-    /* accepted props
-    productionMeans = this.simu.cProd.productionMeans
-    countries       = this.simu.cProd.countries
-    closeRequested
-    */
-    function BatteryDetails(props) {
-        _classCallCheck(this, BatteryDetails);
-
-        return _possibleConstructorReturn(this, (BatteryDetails.__proto__ || Object.getPrototypeOf(BatteryDetails)).call(this, props));
-    }
-
-    _createClass(BatteryDetails, [{
-        key: 'render',
-        value: function render() {
-            var bat = this.props.productionMeans.storage.solutions.battery;
-
-            return React.createElement(
-                'div',
-                { className: 'detailContent' },
-                React.createElement(
-                    'h3',
-                    null,
-                    tr('Batteries (Li-ion)')
-                ),
-                React.createElement(
-                    'p',
-                    null,
-                    tr('Batteries are devices that store electricity.')
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'hWrapLayout' },
-                    React.createElement(StorageCapacity, null),
-                    React.createElement(StoredEnergy, null),
-                    React.createElement(PlotTile, {
-                        title: 'Build energy',
-                        caption: 'Battery manufacturing requires some energy.',
-                        plot: bat.build.energy
-                    }),
-                    React.createElement(PlotTile, {
-                        title: 'Operation and maintenance costs',
-                        caption: 'Yearly cost per storage capacity.',
-                        plot: bat.perYear.cost
-                    }),
-                    React.createElement(PlotTile, {
-                        title: 'Storage density',
-                        caption: 'Energy stored per volume.',
-                        plot: bat.energyDensity
-                    }),
-                    React.createElement(StorageCapacityDecline, null),
-                    React.createElement(HourlyPowerLoss, null),
-                    React.createElement(RoundTripEfficiency, null)
-                )
-            );
-        }
-    }]);
-
-    return BatteryDetails;
-}(React.Component);
-
-export default BatteryDetails;
+    return React.createElement(
+        'div',
+        { className: 'detailContent' },
+        React.createElement(
+            'h3',
+            null,
+            tr('Batteries (Li-ion)')
+        ),
+        React.createElement(
+            'p',
+            null,
+            tr('Batteries are devices that store electricity.')
+        ),
+        React.createElement(
+            'div',
+            { className: 'hWrapLayout' },
+            React.createElement(StorageCapacity, null),
+            React.createElement(StoredEnergy, null),
+            React.createElement(PlotTile, {
+                title: 'Build energy',
+                caption: 'Battery manufacturing requires some energy.',
+                plot: bat.build.energy
+            }),
+            React.createElement(PlotTile, {
+                title: 'Operation and maintenance costs',
+                caption: 'Yearly cost per storage capacity.',
+                plot: bat.perYear.cost
+            }),
+            React.createElement(PlotTile, {
+                title: 'Storage density',
+                caption: 'Energy stored per volume.',
+                plot: bat.energyDensity
+            }),
+            React.createElement(StorageCapacityDecline, null),
+            React.createElement(PowerLoss, null),
+            React.createElement(RoundTripEfficiency, null)
+        )
+    );
+}

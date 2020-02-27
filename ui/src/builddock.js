@@ -10,6 +10,8 @@ import BatteryDetails from './help/batterydetails.js';
 import FusionDetails from './help/fusiondetails.js';
 import {Simulateur} from '../../simulateur/simulateur.js';
 
+import {Dialog} from './dialogs/dialog.js';
+
 const energyIcons = [
     {name: 'Solar panels',          src:'solar.png', target:'pv',     },
     {name: 'Nuclear power plant',   src:'nuke.png',  target:'nuke',   },
@@ -37,6 +39,8 @@ const detailForTech ={
     // targetBuild
 export class BuildDock extends React.Component{
     render(){
+        let props = this.props;
+
         let showdock = this.props.targetBuild.type;
         let dockheight = 'var(--build-dock-height)';
         let dockwidth = (isMobile() || isSmallScreen()) ? '95%':350;
@@ -72,19 +76,22 @@ export class BuildDock extends React.Component{
             };
 
 
-            // let Type = ; //buildDetailsChoice[this.props.type.toLowerCase()];
-            optionTable = (<BuildDetailsAny
-                info = {info}
-                confirmBuild = {this.props.onBuildConfirmed}
-                slider = {this.props.targetBuild.slider}
-                restyle = {restyle}
-                style = {{bottom: 0, height: dockheight,width: dockwidth, overflow: 'hidden '}}
-                needsSlider= {needSlider[this.props.targetBuild.type.toLowerCase()]}
-                onBack = {() => {this.props.onTypeChanged(null)}}
-                detailsRequested={() =>
-                    this.props.onDetailsRequested(detailForTech[
-                                                this.props.targetBuild.type.toLowerCase()])}
-            />)
+            optionTable = (
+                <Dialog
+                    onBack={() => {props.onTypeChanged(null)}}
+                    onDetails={() => props.onDetailsRequested(detailForTech[props.targetBuild.type.toLowerCase()])}
+
+                    style = {{bottom: 0, left:0, height: dockheight,width: dockwidth, overflow: 'hidden '}}
+                >
+                    <BuildDetailsAny
+                        info = {info}
+                        confirmBuild = {props.onBuildConfirmed}
+                        slider = {props.targetBuild.slider}
+                        restyle = {restyle}
+                        needsSlider= {needSlider[props.targetBuild.type.toLowerCase()]}
+                    />
+                </Dialog>
+            )
         }
 
 
@@ -187,26 +194,13 @@ function BuildDetailsAny(props){
         {"n":"Storage capacity",    "cn":"storageCapacity", "unit":"S",},
     ];
 
-    return (<div className = "dialog" style = {props.style}>
+    return (
         <table>
             <tbody>
                 {show.map(mapLineFct(props))}
             </tbody>
         </table>
-        <div className='hLayout'>
-            <div className='button white' onClick={props.onBack}>
-                {tr('Back')}
-            </div>
-            <div className="button white" onClick={props.detailsRequested}>
-                {tr('Details...')}
-            </div>
-            {props.info.confirmOnDock &&
-                <div className="button white" onClick={props.confirmBuild}>
-                    {tr('Confirm')}
-                </div>
-            }
-        </div>
-    </div>);
+    );
 }
 
 

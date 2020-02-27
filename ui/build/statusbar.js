@@ -9,9 +9,9 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import { tr } from '../../tr/tr.js';
 import { periodAvgCo2 } from '../../periodavgco2.js';
-import BudgetDialog from './budgetdialog.js';
-import { Co2Dialog } from './co2dialog.js';
-import { ConsoDialog } from './consodialog.js';
+import BudgetDialog from './dialogs/budgetdialog.js';
+import { Co2Dialog } from './dialogs/co2dialog.js';
+import { ConsoDialog } from './dialogs/consodialog.js';
 
 var StatusBar = function (_React$Component) {
     _inherits(StatusBar, _React$Component);

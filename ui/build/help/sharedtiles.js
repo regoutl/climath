@@ -132,10 +132,10 @@ export var MathTextTile = function (_React$Component) {
 
             return React.createElement(
                 'div',
-                { style: { position: 'relative' } },
+                { className: 'mathTextTile' },
                 React.createElement(
                     'h4',
-                    { className: 'hLayout', style: { justifyContent: 'space-between' } },
+                    null,
                     React.createElement(
                         'span',
                         null,
@@ -148,7 +148,6 @@ export var MathTextTile = function (_React$Component) {
                             onClick: this.context.toggleEquationDisplay,
                             title: tr(this.context.equationDisplay == 'math' ? 'Display as text' : 'Display the equation'),
                             width: '32',
-                            style: { cursor: 'pointer', verticalAlign: 'middle' },
                             src: 'res/icons/' + (this.context.equationDisplay == 'math' ? 'text.png' : 'math.png')
                         })
                     )

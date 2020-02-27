@@ -1,6 +1,6 @@
-import { tr } from "../../tr/tr.js";
-import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import { periodAvgCo2 } from '../../periodavgco2.js';
+import { tr } from "../../../tr/tr.js";
+import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+import { periodAvgCo2 } from '../../../periodavgco2.js';
 import { Dialog } from './dialog.js';
 
 /** @details props

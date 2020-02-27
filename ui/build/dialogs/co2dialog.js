@@ -6,10 +6,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-import { tr } from "../../tr/tr.js";
-import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import { pieChart } from '../charts.js';
-import { stackedLineChart } from '../charts.js';
+import { tr } from "../../../tr/tr.js";
+import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+import { pieChart, stackedLineChart } from '../../charts.js';
 import { Dialog } from './dialog.js';
 
 export var Co2Dialog = function (_React$Component) {
@@ -78,12 +77,8 @@ export var Co2Dialog = function (_React$Component) {
                 Dialog,
                 {
                     onOk: props.closeRequested,
-                    style: {
-                        left: '50%',
-                        top: 'calc(var(--status-bar-height) + 20px)', //60,
-                        marginLeft: -210
-                    },
-                    title: 'Emissions'
+                    title: 'Emissions',
+                    style: { top: 'statusbar' }
                 },
                 React.createElement('canvas', { ref: this.pieCharts, width: '400', height: '200' })
             );

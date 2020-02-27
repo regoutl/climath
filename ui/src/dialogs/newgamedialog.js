@@ -1,6 +1,6 @@
-import {tr} from "../../tr/tr.js";
-import { quantityToHuman as valStr } from '../quantitytohuman.js';
-import {Simulateur, promiseSimulater} from '../../simulateur/simulateur.js';
+import {tr} from "../../../tr/tr.js";
+import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+import {Simulateur, promiseSimulater} from '../../../simulateur/simulateur.js';
 
 
 
@@ -47,7 +47,6 @@ export class NewGameDialog extends React.Component{
         .catch(err => {
             alert(err);
         });
-
     }
 
     handleRegionChange(){

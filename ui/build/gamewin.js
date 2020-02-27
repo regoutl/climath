@@ -8,11 +8,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import MapView from './mapview.js';
 import StatusBar from './statusbar.js';
-import { EndDialog } from './enddialog.js';
-import { NewGameDialog } from './newgamedialog.js';
+import { EndDialog } from './dialogs/enddialog.js';
+import { NewGameDialog } from './dialogs/newgamedialog.js';
 import { tr } from '../../tr/tr.js';
 import { CloseButton } from './closebutton.js';
 import { isTouchScreen, isMobile, isSmallScreen, isLandscape } from '../screenDetection.js';
+
+import { TutoDialog } from './dialogs/tutodialog.js';
 
 import Scene from '../scene.js';
 
@@ -53,7 +55,7 @@ var GameWin = function (_React$Component) {
         key: 'runYear',
         value: function runYear() {
             this.simu.run();
-            if (this.simu.year == 2070) {
+            if (this.simu.year == 2021) {
                 this.setState({
                     currentDialog: EndDialog
                 });
@@ -83,7 +85,7 @@ var GameWin = function (_React$Component) {
         key: 'startGame',
         value: function startGame(simu) {
             this.simu = simu;
-            this.setDialog(undefined);
+            this.setDialog(TutoDialog);
         }
     }, {
         key: 'render',
@@ -153,7 +155,7 @@ var GameWin = function (_React$Component) {
                 var energyGroundUseProp = cMap.reduceIf(['area'], areaAll, ['energy']) / cMap.reduceIf(['area'], areaAll);
 
                 return React.createElement(EndDialog, {
-                    closeRequested: this.setDialog.bind(this, null),
+                    onClose: this.setDialog.bind(this, null),
                     history: this.simu.stats,
                     energyGroundUseProp: energyGroundUseProp,
                     newGame: this.setDialog.bind(this, NewGameDialog)

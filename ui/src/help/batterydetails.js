@@ -22,9 +22,9 @@ function StorageCapacity(props){
         <ul className='default'>
             {[
                 'The size of the battery.',
-                'How dense the energy is stored. ',
+                'Amount of energy stored per unit volume. ',
                 'The battery\'s age. Batteries storage capacity declines over time. ',
-            ].map((i) => <li>{tr(i)}</li>)}
+            ].map((i) => <li key={i.substr(10, 12)}>{tr(i)}</li>)}
         </ul>
     ];
 
@@ -60,7 +60,7 @@ function StorageCapacityDecline(props){
     return <MathTextTile title= 'Storage capacity decline' math={math} text={text} />
 }
 
-function HourlyPowerLoss(props){
+function PowerLoss(props){
     let math =[<p>{tr('It is estimated that, every month, the stored energy decrease by 2%.')}</p>,
     <p>{tr('The hourly power loss is then simply :')}</p>,
     <img src='data/battery/lossMtoH.svg' />,
@@ -69,7 +69,7 @@ function HourlyPowerLoss(props){
 
     let text= <p>{tr('It is estimated that, every month, the stored energy decrease by 2%.')}</p>;
 
-    return <MathTextTile title= 'Hourly power loss' math={math} text={text} />
+    return <MathTextTile title= 'Power loss' math={math} text={text} />
 }
 
 function RoundTripEfficiency(props){
@@ -88,57 +88,46 @@ function RoundTripEfficiency(props){
 
 /** @brief this class provide a lot of explainations about pv
 */
-export default class BatteryDetails extends React.Component{
-
-    /* accepted props
-    productionMeans = this.simu.cProd.productionMeans
-    countries       = this.simu.cProd.countries
-    closeRequested
-    */
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        let bat = this.props.productionMeans.storage.solutions.battery;
+export default function BatteryDetails (props){
+    let bat = props.productionMeans.storage.solutions.battery;
 
 
-        return (<div className='detailContent'>
-            <h3>{tr('Batteries (Li-ion)')}</h3>
-            <p>{tr('Batteries are devices that store electricity.')}</p>
+    return (<div className='detailContent'>
+        <h3>{tr('Batteries (Li-ion)')}</h3>
+        <p>{tr('Batteries are devices that store electricity.')}</p>
 
 
-            <div className="hWrapLayout">
-                <StorageCapacity />
+        <div className="hWrapLayout">
+            <StorageCapacity />
 
-                <StoredEnergy />
+            <StoredEnergy />
 
-                <PlotTile
-                    title='Build energy'
-                    caption='Battery manufacturing requires some energy.'
-                    plot={bat.build.energy}
-                />
+            <PlotTile
+                title='Build energy'
+                caption='Battery manufacturing requires some energy.'
+                plot={bat.build.energy}
+            />
 
-                <PlotTile
-                    title='Operation and maintenance costs'
-                    caption='Yearly cost per storage capacity.'
-                    plot={bat.perYear.cost}
-                />
+            <PlotTile
+                title='Operation and maintenance costs'
+                caption='Yearly cost per storage capacity.'
+                plot={bat.perYear.cost}
+            />
 
-                <PlotTile
-                    title='Storage density'
-                    caption='Energy stored per volume.'
-                    plot={bat.energyDensity}
-                />
+            <PlotTile
+                title='Storage density'
+                caption='Energy stored per volume.'
+                plot={bat.energyDensity}
+            />
 
-                <StorageCapacityDecline />
+            <StorageCapacityDecline />
 
-                <HourlyPowerLoss />
+            <PowerLoss />
 
-                <RoundTripEfficiency />
+            <RoundTripEfficiency />
 
 
-            </div>
-        </div>);
-    }
+        </div>
+    </div>);
+
 }
