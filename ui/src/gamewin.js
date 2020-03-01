@@ -32,13 +32,25 @@ export default class GameWin extends React.Component{
         this.simu= null; //the simulater, responsible for all computations
 
         this.state = {
-            currentDialog: NewGameDialog,
+            currentDialog: localStorage.getItem('skipTuto') ? NullDialog: TutoDialog,
             help: NullHelp,
         };
 
         this.scene = new Scene();
 
+
+        promiseSimulater(this.scene, this.props.strParameters, this.props.country).then(s =>{
+            this.scene.setMap(s.cMap);
+
+            this.simu = s;
+
+            this.forceUpdate();
+        })
+        .catch(err => {
+            alert(err);
+        });
     }
+
 
 
 
@@ -65,25 +77,10 @@ export default class GameWin extends React.Component{
         this.forceUpdate();
     }
 
-    confirmBuild(curPos){
-        this.simu.confirmCurrentBuild();
-        this.forceUpdate();
-    }
-
-    startGame(simu){
-        this.simu = simu;
-
-        this.setDialog(localStorage.getItem('skipTuto') ? undefined: TutoDialog);
-    }
 
 
     render(){
-        if(this.state.currentDialog == NewGameDialog){
-            return (<NewGameDialog
-                        startRequested={this.startGame.bind(this)}
-                        scene={this.scene}/>);
-        }
-        else if(this.state.currentDialog == TutoDialog){
+        if(this.state.currentDialog == TutoDialog){
             return (
                 <div className="vLayout" style={{width: '100%', height: '100%'}}>
                     {this._makeMapView()}
@@ -127,10 +124,10 @@ export default class GameWin extends React.Component{
         return (
             <MapView
                 scene = {this.scene}
-                onBuildConfirmed = {this.confirmBuild.bind(this)}
                 simu = {this.simu}
                 onDetailsRequested = {(c) => {this.setState({help: c})}}
                 showOnlyMap = {this.state.currentDialog == TutoDialog}
+                onMoneyChanged= {this.forceUpdate.bind(this)}
             />
         );
     }
@@ -192,8 +189,7 @@ export default class GameWin extends React.Component{
                 >
                 <CloseButton closeRequested={() => this.setState({help: NullHelp})}/>
                 <Help
-                    productionMeans={this.simu.cProd.productionMeans}
-                    countries={this.simu.cProd.countries}
+                    parameters = {this.props.strParameters}
                 />
             </div>);
         }

@@ -13,12 +13,14 @@ import {Simulateur} from '../../simulateur/simulateur.js';
 import {Dialog} from './dialogs/dialog.js';
 
 const energyIcons = [
-    {name: 'Solar panels',          src:'solar.png', target:'pv',     },
-    {name: 'Nuclear power plant',   src:'nuke.png',  target:'nuke',   },
-    {name: 'Battery',               src:'bat.png',   target:'battery',},
-    {name: 'Gas-fired power plant', src:'ccgt.png',  target:'ccgt',   },
-    {name: 'Wind turbine',          src:'wind.png',  target:'wind',   },
-    {name: 'Nuclear fusion',        src:'fusion.png',target:'fusion', },
+    {name: 'Solar panels',          src:'solar.png',    target:'pv',     },
+    {name: 'Nuclear power plant',   src:'nuke.png',     target:'nuke',   },
+    {name: 'Battery',               src:'bat.png',      target:'battery',},
+    {name: 'Gas-fired power plant', src:'ccgt.png',     target:'ccgt',   },
+    {name: 'Wind turbine',          src:'wind.png',     target:'wind',   },
+    {name: 'Nuclear fusion',        src:'fusion.png',   target:'fusion', },
+    {name: 'Demolish',              src:'demolish.png', target:'demolish',
+},
 ];
 const detailForTech ={
     "pv":PvDetails,
@@ -37,32 +39,31 @@ const detailForTech ={
     // onBuildConfirmed : function called on build confirmation
     // simu : the simulater
     // targetBuild
-export class BuildDock extends React.Component{
-    render(){
-        let props = this.props;
+export function BuildDock (props){
+    let showdock = props.targetBuild.type;
+    let dockheight = 'var(--build-dock-height)';
+    let dockwidth = (isMobile() || isSmallScreen()) ? '95%':350;
+    const defaultRadius = 50, maxRadius = 100;
+    const needSlider = {
+        "pv":true,
+        "nuke":false,
+        "fusion":false,
+        "battery":true,
+        "ccgt":false,
+        "wind":true,
+    };
 
-        let showdock = this.props.targetBuild.type;
-        let dockheight = 'var(--build-dock-height)';
-        let dockwidth = (isMobile() || isSmallScreen()) ? '95%':350;
-        const defaultRadius = 50, maxRadius = 100;
-        const needSlider = {
-            "pv":true,
-            "nuke":false,
-            "fusion":false,
-            "battery":true,
-            "ccgt":false,
-            "wind":true,
-        };
+    let restyle = {}
+    let optionTable = undefined;
 
-        let restyle = {}
-        let optionTable = undefined;
-
-        if(this.props.targetBuild.type ){
-            const rawInfo = this.props.simu.onBuildMenuStateChanged(this.props.targetBuild).info;
+    if(props.targetBuild.type){
+        let info;
+        if(props.targetBuild.type != 'demolish'){
+            const rawInfo = props.simu.buildInfo(props.targetBuild);
 
             let avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
 
-            let info={
+            info={
                 theoReason: rawInfo.theorical,
                 buildCost: rawInfo.build.cost,
                 buildCo2: rawInfo.build.co2,
@@ -75,63 +76,50 @@ export class BuildDock extends React.Component{
                 storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
                 buildDelay: rawInfo.build.end - rawInfo.build.begin,
             };
+        }
+        else{
 
-
-            optionTable = (
-                <Dialog
-                    onBack={() => {props.onTypeChanged(null)}}
-                    onDetails={() => props.onDetailsRequested(detailForTech[props.targetBuild.type.toLowerCase()])}
-
-                    style = {{bottom: 0, left:0, height: dockheight,width: dockwidth, overflow: 'hidden '}}
-                >
-                    <BuildDetailsAny
-                        info = {info}
-                        confirmBuild = {props.onBuildConfirmed}
-                        slider = {props.targetBuild.slider}
-                        restyle = {restyle}
-                        needsSlider= {needSlider[props.targetBuild.type.toLowerCase()]}
-                    />
-                </Dialog>
-            )
+            info = {
+                demolishCost: props.simu.demolishCost({center: props.targetBuild.pos, radius: props.targetBuild.radius}),
+            };
         }
 
 
-        return (
-            <div>
-                <BuildMenu
-                    onClick = {this.props.onTypeChanged}
-                    style = {{bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))'}}
-                    showMenu = {this.props.targetBuild.type === null ?
-                                                    true : this.props.targetBuild.type}
+        optionTable = (
+            <Dialog
+                onBack={() => {props.onTypeChanged(null)}}
+                onDetails={() => props.onDetailsRequested(detailForTech[props.targetBuild.type.toLowerCase()])}
+
+                style = {{bottom: 0, left:0, height: dockheight,width: dockwidth, overflow: 'hidden '}}
+            >
+                <BuildDetailsAny
+                    info = {info}
+                    confirmBuild = {props.onBuildConfirmed}
+                    slider = {props.targetBuild.slider}
+                    restyle = {restyle}
+                    needsSlider= {needSlider[props.targetBuild.type.toLowerCase()]}
                 />
-
-                {optionTable}
-            </div>);
-
-
-        // if(this.props.rawInfo.theoReason !== undefined){
-        //     restyle[this.props.info.theoReason] = {"color": "red"};
-        // }
-        //
-        //
-        // let hideDockButton = (<ShowDockButton
-        //                     dockheight = {dockheight}
-        //                     showdock = {showdock}
-        //                     onClick = {() => this.setState({showdock: !showdock})}
-        //                 />);
-        //
-        //
-        // return (
-        // <div className = "yLayout">
-        //     <BuildMenu
-        //         onClick = {this.props.buildMenuSelectionCallback}
-        //         style = {{bottom: (dockheight + 50) +'px'}}
-        //         showMenu = {this.props.type === undefined ?
-        //                                         true : this.props.type}
-        //     />
-        //     {optionTable}
-        // </div>);
+            </Dialog>
+        )
     }
+
+
+    return (
+        <div>
+            <BuildMenu
+                onClick = {props.onTypeChanged}
+                style = {{bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))'}}
+                showMenu = {props.targetBuild.type === null ?
+                                                true : props.targetBuild.type}
+            />
+
+            {optionTable}
+        </div>);
+
+
+    // if(props.rawInfo.theoReason !== undefined){
+    //     restyle[this.props.info.theoReason] = {"color": "red"};
+    // }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -195,6 +183,7 @@ function BuildDetailsAny(props){
         {"n":"Cooling",             "cn":"coolingWaterRate","unit":"m3/s"},
         {"n":"Storage capacity",    "cn":"storageCapacity", "unit":"S",},
         {"n":"Build time",          "cn":"buildDelay",      "unit":"y",},
+        {"n":"Demolish cost",       "cn":"demolishCost",    "unit":"€",},
     ];
 
     return (
@@ -282,7 +271,6 @@ function CircularBuildMenuIcon (props){
                 padding: 5
             }}
             onTouchStart={(e) => {
-
                 if(theOne)
                     props.onBuildConfirmed();
                 else
@@ -302,7 +290,7 @@ function QuickStat(props){
 
     let radius = props.radius;
 
-    const rawInfo = props.simu.onBuildMenuStateChanged(props.targetBuild).info;
+    const rawInfo = props.simu.buildInfo(props.targetBuild);
 
     let avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
 

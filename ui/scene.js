@@ -14,6 +14,7 @@ let curForType = {
     pv: 3,
     wind: 3,
     battery: 3,
+    demolish: 3,
 };
 
 /** @brief this class is only responsible for the drawing of the map
@@ -112,18 +113,14 @@ export default class Scene{
     }
 
     //removes a central
-    rmItem(type, pos){
-        if(!isCentral(type))
-            throw 'not possible';
-
-        let id = this.items.findIndex(v => v.type === type && v.pos.x === pos.x
+    rmItem(pos){
+        let id = this.items.findIndex(v => v.pos.x === pos.x
             && v.pos.y === pos.y);
 
         this.items.splice(id, 1);
 
         //update gl
         this._updatePtsBuf();
-        this.draw();
     }
 
 

@@ -16,7 +16,7 @@ function _base64ToUint8Array(base64) {
 /** PV and wind : 0 co2 per wh, variable capacity factor
 */
 export default class IntermittentProductionMean extends AbstractProductionMean{
-  constructor(parameters, meanName){
+  constructor(parameters, capaFact, meanName){
     super(parameters, meanName);
 
     this.capacity = parameters.init.capacity *
@@ -28,7 +28,7 @@ export default class IntermittentProductionMean extends AbstractProductionMean{
     this.currentYear.perWh.cost= new Yearly.Constant(0); //does not matter whether it produces or not
 
 
-    this._capacityFactor = _base64ToUint8Array(parameters.capacityFactor);
+    this._capacityFactor = capaFact;
 
     //capacity factor
     if(this._capacityFactor.length % (365*24) != 0){
@@ -44,7 +44,7 @@ export default class IntermittentProductionMean extends AbstractProductionMean{
             this._capacityFactor[t % this._capacityFactor.length] / 255.0;
   }
 
-  endOfBuild(build){
-      return this.build.delay + build.info.build.begin;
+  endOfBuild(info){
+      return this._build.delay + info.build.begin;
   }
 }

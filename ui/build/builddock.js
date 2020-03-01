@@ -20,7 +20,8 @@ import { Simulateur } from '../../simulateur/simulateur.js';
 
 import { Dialog } from './dialogs/dialog.js';
 
-var energyIcons = [{ name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }];
+var energyIcons = [{ name: 'Solar panels', src: 'solar.png', target: 'pv' }, { name: 'Nuclear power plant', src: 'nuke.png', target: 'nuke' }, { name: 'Battery', src: 'bat.png', target: 'battery' }, { name: 'Gas-fired power plant', src: 'ccgt.png', target: 'ccgt' }, { name: 'Wind turbine', src: 'wind.png', target: 'wind' }, { name: 'Nuclear fusion', src: 'fusion.png', target: 'fusion' }, { name: 'Demolish', src: 'demolish.png', target: 'demolish'
+}];
 var detailForTech = {
     "pv": PvDetails,
     "nuke": NukeDetails,
@@ -37,116 +38,88 @@ var detailForTech = {
 // onBuildConfirmed : function called on build confirmation
 // simu : the simulater
 // targetBuild
-export var BuildDock = function (_React$Component) {
-    _inherits(BuildDock, _React$Component);
+export function BuildDock(props) {
+    var showdock = props.targetBuild.type;
+    var dockheight = 'var(--build-dock-height)';
+    var dockwidth = isMobile() || isSmallScreen() ? '95%' : 350;
+    var defaultRadius = 50,
+        maxRadius = 100;
+    var needSlider = {
+        "pv": true,
+        "nuke": false,
+        "fusion": false,
+        "battery": true,
+        "ccgt": false,
+        "wind": true
+    };
 
-    function BuildDock() {
-        _classCallCheck(this, BuildDock);
+    var restyle = {};
+    var optionTable = undefined;
 
-        return _possibleConstructorReturn(this, (BuildDock.__proto__ || Object.getPrototypeOf(BuildDock)).apply(this, arguments));
+    if (props.targetBuild.type) {
+        var info = void 0;
+        if (props.targetBuild.type != 'demolish') {
+            var rawInfo = props.simu.buildInfo(props.targetBuild);
+
+            var avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
+
+            info = {
+                theoReason: rawInfo.theorical,
+                buildCost: rawInfo.build.cost,
+                buildCo2: rawInfo.build.co2,
+                perYearCost: rawInfo.perYear.cost + rawInfo.perWh.cost * avgProd,
+                perYearCo2: rawInfo.perYear.co2 + rawInfo.perWh.co2 * avgProd,
+                avgProd: avgProd,
+                pop: rawInfo.pop_affected,
+                explCost: rawInfo.expl_cost,
+                coolingWaterRate: rawInfo.coolingWaterRate,
+                storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
+                buildDelay: rawInfo.build.end - rawInfo.build.begin
+            };
+        } else {
+
+            info = {
+                demolishCost: props.simu.demolishCost({ center: props.targetBuild.pos, radius: props.targetBuild.radius })
+            };
+        }
+
+        optionTable = React.createElement(
+            Dialog,
+            {
+                onBack: function onBack() {
+                    props.onTypeChanged(null);
+                },
+                onDetails: function onDetails() {
+                    return props.onDetailsRequested(detailForTech[props.targetBuild.type.toLowerCase()]);
+                },
+
+                style: { bottom: 0, left: 0, height: dockheight, width: dockwidth, overflow: 'hidden ' }
+            },
+            React.createElement(BuildDetailsAny, {
+                info: info,
+                confirmBuild: props.onBuildConfirmed,
+                slider: props.targetBuild.slider,
+                restyle: restyle,
+                needsSlider: needSlider[props.targetBuild.type.toLowerCase()]
+            })
+        );
     }
 
-    _createClass(BuildDock, [{
-        key: 'render',
-        value: function render() {
-            var props = this.props;
+    return React.createElement(
+        'div',
+        null,
+        React.createElement(BuildMenu, {
+            onClick: props.onTypeChanged,
+            style: { bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))' },
+            showMenu: props.targetBuild.type === null ? true : props.targetBuild.type
+        }),
+        optionTable
+    );
 
-            var showdock = this.props.targetBuild.type;
-            var dockheight = 'var(--build-dock-height)';
-            var dockwidth = isMobile() || isSmallScreen() ? '95%' : 350;
-            var defaultRadius = 50,
-                maxRadius = 100;
-            var needSlider = {
-                "pv": true,
-                "nuke": false,
-                "fusion": false,
-                "battery": true,
-                "ccgt": false,
-                "wind": true
-            };
-
-            var restyle = {};
-            var optionTable = undefined;
-
-            if (this.props.targetBuild.type) {
-                var rawInfo = this.props.simu.onBuildMenuStateChanged(this.props.targetBuild).info;
-
-                var avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
-
-                var info = {
-                    theoReason: rawInfo.theorical,
-                    buildCost: rawInfo.build.cost,
-                    buildCo2: rawInfo.build.co2,
-                    perYearCost: rawInfo.perYear.cost + rawInfo.perWh.cost * avgProd,
-                    perYearCo2: rawInfo.perYear.co2 + rawInfo.perWh.co2 * avgProd,
-                    avgProd: avgProd,
-                    pop: rawInfo.pop_affected,
-                    explCost: rawInfo.expl_cost,
-                    coolingWaterRate: rawInfo.coolingWaterRate,
-                    storageCapacity: rawInfo.storageCapacity ? rawInfo.storageCapacity.at(rawInfo.build.end) : 0,
-                    buildDelay: rawInfo.build.end - rawInfo.build.begin
-                };
-
-                optionTable = React.createElement(
-                    Dialog,
-                    {
-                        onBack: function onBack() {
-                            props.onTypeChanged(null);
-                        },
-                        onDetails: function onDetails() {
-                            return props.onDetailsRequested(detailForTech[props.targetBuild.type.toLowerCase()]);
-                        },
-
-                        style: { bottom: 0, left: 0, height: dockheight, width: dockwidth, overflow: 'hidden ' }
-                    },
-                    React.createElement(BuildDetailsAny, {
-                        info: info,
-                        confirmBuild: props.onBuildConfirmed,
-                        slider: props.targetBuild.slider,
-                        restyle: restyle,
-                        needsSlider: needSlider[props.targetBuild.type.toLowerCase()]
-                    })
-                );
-            }
-
-            return React.createElement(
-                'div',
-                null,
-                React.createElement(BuildMenu, {
-                    onClick: this.props.onTypeChanged,
-                    style: { bottom: 'calc(var(--menu-icon-size) + var(--build-dock-height))' },
-                    showMenu: this.props.targetBuild.type === null ? true : this.props.targetBuild.type
-                }),
-                optionTable
-            );
-
-            // if(this.props.rawInfo.theoReason !== undefined){
-            //     restyle[this.props.info.theoReason] = {"color": "red"};
-            // }
-            //
-            //
-            // let hideDockButton = (<ShowDockButton
-            //                     dockheight = {dockheight}
-            //                     showdock = {showdock}
-            //                     onClick = {() => this.setState({showdock: !showdock})}
-            //                 />);
-            //
-            //
-            // return (
-            // <div className = "yLayout">
-            //     <BuildMenu
-            //         onClick = {this.props.buildMenuSelectionCallback}
-            //         style = {{bottom: (dockheight + 50) +'px'}}
-            //         showMenu = {this.props.type === undefined ?
-            //                                         true : this.props.type}
-            //     />
-            //     {optionTable}
-            // </div>);
-        }
-    }]);
-
-    return BuildDock;
-}(React.Component);
+    // if(props.rawInfo.theoReason !== undefined){
+    //     restyle[this.props.info.theoReason] = {"color": "red"};
+    // }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ////////////// fcts to Build the details about the future build  //////////////
@@ -206,7 +179,7 @@ function InputSlider(props) {
 }
 
 function BuildDetailsAny(props) {
-    var show = [{ "n": "Installation cost", "cn": "buildCost", "unit": "€" }, { "n": "Installation co2", "cn": "buildCo2", "unit": "C" }, { "n": "Per year cost", "cn": "perYearCost", "unit": "€" }, { "n": "Per year co2", "cn": "perYearCo2", "unit": "C" }, { "n": "Production", "cn": "avgProd", "unit": "W" }, { "n": "Population", "cn": "pop", "unit": "H" }, { "n": "Explosion cost", "cn": "explCost", "unit": "€" }, { "n": "Cooling", "cn": "coolingWaterRate", "unit": "m3/s" }, { "n": "Storage capacity", "cn": "storageCapacity", "unit": "S" }, { "n": "Build time", "cn": "buildDelay", "unit": "y" }];
+    var show = [{ "n": "Installation cost", "cn": "buildCost", "unit": "€" }, { "n": "Installation co2", "cn": "buildCo2", "unit": "C" }, { "n": "Per year cost", "cn": "perYearCost", "unit": "€" }, { "n": "Per year co2", "cn": "perYearCo2", "unit": "C" }, { "n": "Production", "cn": "avgProd", "unit": "W" }, { "n": "Population", "cn": "pop", "unit": "H" }, { "n": "Explosion cost", "cn": "explCost", "unit": "€" }, { "n": "Cooling", "cn": "coolingWaterRate", "unit": "m3/s" }, { "n": "Storage capacity", "cn": "storageCapacity", "unit": "S" }, { "n": "Build time", "cn": "buildDelay", "unit": "y" }, { "n": "Demolish cost", "cn": "demolishCost", "unit": "€" }];
 
     return React.createElement(
         'table',
@@ -295,7 +268,6 @@ function CircularBuildMenuIcon(props) {
                 padding: 5
             },
             onTouchStart: function onTouchStart(e) {
-
                 if (theOne) props.onBuildConfirmed();else props.onTypeChanged(nrj.target);
             }
         },
@@ -312,7 +284,7 @@ function QuickStat(props) {
 
     var radius = props.radius;
 
-    var rawInfo = props.simu.onBuildMenuStateChanged(props.targetBuild).info;
+    var rawInfo = props.simu.buildInfo(props.targetBuild);
 
     var avgProd = rawInfo.nameplate ? rawInfo.nameplate.at(rawInfo.build.end) * rawInfo.avgCapacityFactor : 0;
 
@@ -389,8 +361,8 @@ function QuickStat(props) {
     [All those of BuildDock]
     center : {x, y} coord (in px, page relative) of the center
 */
-export var TouchBuildDock = function (_React$Component2) {
-    _inherits(TouchBuildDock, _React$Component2);
+export var TouchBuildDock = function (_React$Component) {
+    _inherits(TouchBuildDock, _React$Component);
 
     function TouchBuildDock() {
         _classCallCheck(this, TouchBuildDock);

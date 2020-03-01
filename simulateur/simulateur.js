@@ -1,7 +1,6 @@
 import ProductionComponent from './productioncomponent.js';
 import MapComponent from './mapcomponent.js';
 import HydroComponent from './hydrocomponent.js';
-import BuildScheduler from './buildScheduler.js';
 import { quantityToHuman as valStr} from '../ui/quantitytohuman.js';
 import * as Yearly from "../timevarin.js";
 
@@ -29,7 +28,6 @@ export class Simulateur{
         this.cMap = new MapComponent(createInfo.map, this, createInfo.mapView);
         this.cHydro = new HydroComponent(createInfo.hydro);
         this.cProd = new ProductionComponent(createInfo.production, this);
-        this.cScheduler = new BuildScheduler();
 
 
         // they would pay 30% if all spending were only for other purposes
@@ -82,46 +80,46 @@ export class Simulateur{
 
     get year(){return this.yStats.year;}
 
-    /// called for each change in what to build, or where to
-    onBuildMenuStateChanged(buildMenuState){
-    // nothin to build, skip
-        if(!buildMenuState || !buildMenuState.type)
-            return;
-
-
-        //reset the current build
-        this._currentBuild = {};
-
-        this._currentBuild.parameters = {...buildMenuState}; // copy bc can change
-        this._currentBuild.parameters.year = this.year;
-
-        this._currentBuild.area =  {center:buildMenuState.pos, radius:buildMenuState.radius};
-
-        this._currentBuild.info = {
-            type: buildMenuState.type,
-            build:{begin: this.year},
-            perWh:{
-                cost: 0,
-                co2: 0
-            },
-            perYear:{
-                cost: 0,
-                co2: 0
-            }
-        };
-
-        this._c(buildMenuState.type).prepareCapex(this._currentBuild);
-
-        if(this._currentBuild.info.build.cost > this._money){
-            this._currentBuild.info.theorical = "cash";
-        }
-
-        if(this._currentBuild.info.build.begin != this.year){
-            this._currentBuild.info.theorical = "present";
-        }
-
-        return this._currentBuild;
+    _getBuildMenuStateParameters(buildMenuState){
+        //copy the build menu state (bc obj is modified )   NOTE : is copy desirable ?
+        // add year
+        return {...buildMenuState, year:this.year};
     }
+
+    _getBuildMenuStateZone(buildMenuState){
+        return {center:buildMenuState.pos, radius:buildMenuState.radius};
+    }
+
+    /// return the build info associated with a build menu state.
+    // return a BuildInfo object or null if build invalid
+    buildInfo(buildMenuState){
+        let a  =this._buildAllInfo(buildMenuState);
+        return a && a.info;
+    }
+
+    _buildAllInfo(buildMenuState){
+        // nothin to build, skip
+        if(!buildMenuState || !buildMenuState.type)
+            return null;
+
+        let parameters = this._getBuildMenuStateParameters(buildMenuState);
+
+        let area = this._getBuildMenuStateZone(buildMenuState);
+
+
+        let info = this._c(buildMenuState.type).buildInfo(parameters, area);
+
+        if(info.build.cost > this._money){
+            info.theorical = "cash";
+        }
+
+        if(info.build.begin != this.year){
+            info.theorical = "present";
+        }
+
+        return {info: info, parameters: parameters, zone: area};
+    }
+
 
     /** @brief return requested component (ex : pv -> pv, battery -> storage) */
     _c(type){
@@ -133,39 +131,40 @@ export class Simulateur{
             return this.cProd.productionMeans[type];
     }
 
-    //called on click on the map
-    confirmCurrentBuild(){
+    //build stuff
+    build(buildMenuState){
+        let {info, parameters, zone} = this._buildAllInfo(buildMenuState);
+
+
         /// STEP 1 : check the build is valid-----------------------------------
 
-        if(!this._currentBuild){
+        if(!info){
             return;
         }
 
         // dirty fix for click on buttons part of central area
-        if(!this._currentBuild.area.center)
-            return;
+        if(!zone.center)
+            return false;
 
-        if(this._currentBuild.info.theorical){
-          return false;
+        if(info.theorical){
+            return false;
         }
 
 
         /// do the build-----------------------------------
+        this._c(buildMenuState.type).build(info, parameters);
 
-        //schedule an event to execute on completion
-        this.cScheduler.push({
-            year: this._currentBuild.info.build.end,
-            action: 'build',
-            data: this._currentBuild
-        });
 
         //draw it
-        this.cMap.build(this._currentBuild);
+
+        this.cMap.build(parameters, info, zone);
+
+
 
         //record some stats
-        let action = this._currentBuild.info.build /*|| this._currentBuild.demolish*/;
+        let action = info.build /*|| cBuild.demolish*/;
 
-        let recorder = this._currentBuild.parameters.type;
+        let recorder = parameters.type;
         if(recorder == 'battery')
             recorder = 'storage';
         this.yStats.co2.build[recorder] += action.co2;
@@ -173,9 +172,8 @@ export class Simulateur{
 
         //and modify the actual value
         this.money -= action.cost;
-
-        this._currentBuild = undefined;
     }
+
     //run
     run(){
         // console.log(this.cMap.testBoom());
@@ -183,47 +181,6 @@ export class Simulateur{
         this.cProd.run(this.year, this.yStats);
 
         this._newYear();
-    }
-
-    //return a list of all the primary (yearly coefs) data there are
-    // todo ; check dirty
-    primaryDataList(){
-        let ans = [];
-
-        const prodMeans = this.cProd.productionMeans;
-        ans.push(prodMeans.pv.efficiency);
-        ans.push(prodMeans.pv.build.energy);
-        ans.push(prodMeans.pv.build.cost);
-        ans.push(prodMeans.pv.perYear.cost);
-
-        let nuke = prodMeans.centrals.nuke;
-        ans.push(nuke.build.cost);
-        ans.push(nuke.perWh.cost);
-        ans.push(nuke.perWh.co2);
-
-        let ccgt = prodMeans.centrals.ccgt;
-        ans.push(ccgt.build.cost);
-        ans.push(ccgt.perWh.cost);
-        ans.push(ccgt.perWh.co2);
-
-        const store = prodMeans.storage.solutions;
-        ans.push(store.battery.build.energy);
-        ans.push(store.battery.perYear.cost);
-
-        const wind = prodMeans.wind;
-        ans.push(wind.efficiency);
-        ans.push(wind.build.cost);
-        ans.push(wind.perYear.cost);
-        ans.push(wind.density);
-
-        const countries = this.cProd.countries;
-        ans.push(countries.belgium.pop);
-        ans.push(countries.belgium.gdpPerCap);
-        ans.push(countries.belgium.consoPerCap);
-        ans.push(countries.china.elecFootprint);
-        // ans.push(countries.usa.elecFootprint);
-
-        return ans;
     }
 
     //return current year gdp of current region
@@ -261,7 +218,7 @@ export class Simulateur{
       	for (let prodMean in this.cProd.productionMeans) {
 			this.cProd.productionMeans[prodMean].happyNYEve(this.yStats);
 		}
-        this.cScheduler.happyNYEve(this.yStats);
+        // this.cScheduler.happyNYEve(this.yStats);
 
         //warning : year -- todo correct
         this._lotsOfSavingOfStatisticsAboutLastYearAndCallbacks();
@@ -276,65 +233,60 @@ export class Simulateur{
         this._clearYearStats();
     }
 
+    /*return the cost of demolition of the area*/
+    demolishCost(zone){
+        if(!zone || !zone.center)
+            return;
 
-    /** @brief demolish prod means that were build via constructionParameters
+        let cost = 0;
+        let energies = this.cMap.energiesInArea(zone); //gimme everything in the area
 
-    @param constructionParameters : {}.
-        for non centrals : exactly build.parameters,
-        for centrals : {type: 'central', id} id : central id
-    @param deconstructionParameters : {} depends on the type
-        for pv : {area, extra} area : area to demolish, extra : radiant flux on that area
-        for wind : {area, extra} area : area to demolish, extra : wind power on that area
-        for storage : {area}
-        for centrals : undefined
-
-    @return cost of the demolition.
-
-    @note scheduledConstructions are also affected. demolishion of a partial construction still cost the full price
-    */
-    demolish(constructionParameters, deconstructionParameters){
-        if(constructionParameters.type == 'central'){
-            //check the schedule for the central
-             //note that it's fine to iterate over a priority queue, as long as you dont modify the priority of an item
-            for(let scheduled of this.cScheduler.pendingBuilds._heap){
-                if(scheduled.type == 'build' && scheduled.action.centralId === constructionParameters.id){
-                    //found the central !
-                    scheduled.action = null; //cancel the build action
-                    return this.cProd.productionMeans.centrals.costOfDemolish(scheduled.data);
-                }
-            }
-
-            //the central was not in the schedule, pass it to the component
-            return this.cProd.productionMeans.centrals.demolish(constructionParameters.id);
-        }
-        else if(['pv', 'storage', 'wind'].includes(constructionParameters.type)){
-            let currentDemolish = {
-                parameters: constructionParameters,
-                reductions:deconstructionParameters,
-                info:{type: constructionParameters.type, build:{begin: constructionParameters.year}},
-                year: this.year,
-                pm: this.cProd.productionMeans[constructionParameters.type]
-            };
-
-            let constructionFinishYear = currentDemolish.pm.endOfBuild(currentDemolish);
-
-            if(this.year < constructionFinishYear){
-                this.cScheduler.push({
-                    year: constructionFinishYear + 0.5, //guarantee the demolish after the build
-                    action: 'demolish',
-                    data:currentDemolish
-                });
-
-                return currentDemolish.pm.costOfDemolish(currentDemolish);
+        for(let building of energies){
+            // console.log(building.type);
+            if(building.type=='central'){
+                cost += this.cProd.productionMeans.centrals.centrals[building.id].demolishCost;
             }
             else{
-                return currentDemolish.pm.demolish(currentDemolish);
-
+                cost += this._c(building.type) //get the prod mean
+                              .demolishCost(building.buildParameters,  //ask it the demolish cost
+                                            building.area);
             }
         }
-        else {
-            throw 'to do';
+
+        return cost;
+    }
+
+    //demolish
+    demolish(zone){
+        if(!zone || !zone.center)
+            return 0;
+        let pm = this.cProd.productionMeans;
+
+        let cost = 0;
+        let energies = this.cMap.energiesInArea(zone); //gimme everything in the area
+
+
+        for(let building of energies){
+            // console.log(building.type);
+            if(building.type=='central'){
+                cost += pm.centrals.centrals[building.id].demolishCost;
+                delete pm.centrals.centrals[building.id] ;
+                this.cMap.demolishCentral(building.id);
+            }
+            else{
+                // console.log(building.buildParameters.madeIn);
+
+                cost += this._c(building.type) //get the prod mean
+                              .demolishCost(building.buildParameters,  //ask it the demolish cost
+                                            building.area);
+
+
+                this._c(building.type).demolish(this.year, building.buildParameters, building.area, building[building.extraDataLabel]);
+                this.cMap.demolishEnergyInArea(building.buildParametersIndex, zone);
+            }
         }
+
+        this.money -= cost;
     }
 
     _clearYearStats(){
@@ -381,51 +333,118 @@ export class Simulateur{
 
         this.stats.push(yStats);
     }
+
+
 }
 
 
 
 
+/** @brief check if any nuclear central explode.
+    @details : if a central explode, must reallocate surounding pop,
+                    and estimate cost
+*/
+function testBoom(){
+    let stat = this._centrals.reduce((tot, central, i) => {
+        if(central.type === 'nuke'){
+            if(rand()%nukeExplosionPeriod === 0){
+                let expl = this._simulateBoom({
+                    center:central.loc,
+                    radius:central.dangerRadius
+                }, true);
+                tot.cost += expl.cost;
+                tot.pop_affected += expl.pop_affected;
+            }
+        }
+        return tot;
+    }, {cost:0, pop_affected:0});
+    this._centrals.filter(e => e !== -1)
+    return stat;
+}
+
+function _simulateBoom(area, set){
+    set = set || false;
+    let topay = cleaningcost;
+    let pop_affected = 0;
+    let affected_central = 0;
+    area.radius = nuclearDisasterRadius;
+    this._forEach(area, (x,y) => {
+        let sameloc = v => v !== -1 && v.loc.x === x && v.loc.y === y;
+        let central_id = this._centrals.findIndex(sameloc);
+        pop_affected += this.getPopDensity(x,y);
+        if(set){
+            this.setPx(x, y, {
+                baseLandUse:0,
+                nrj:0,
+                pop:0,
+            })
+            if(central_id !== -1){
+                this._rmCentral(central_id);
+            }
+        } else{
+            affected_central += central_id !== -1 ? 1:0;
+        }
+    })
+    if(set){
+        ['energy','groundUse','popDensity'].forEach((layer, i) => {
+            // this.drawer.update(layer);
+        });
+        // this.drawer.draw();
+    }
+    topay += pop_affected * meanCostToRelocate
+    // TODO reallocate pop
+    return {
+        pop_affected: pop_affected,
+        cost: topay,
+        affected_central: affected_central,
+    };
+}
+
 /** @brief load all data needed for a simulater
 @param mapView is as defined in MapComponent's constructor
 @return a promise that is resolved when ready.
 **/
-export function promiseSimulater(mapView){
+export function promiseSimulater(mapView, strParameters, countryCode){
+
   return Promise.all([
-    fetch('res/parameters.json')
-        .then((response) => response.json()),
-    fetch('res/landUse.bin')
-        .then((response) => response.arrayBuffer()),
-    fetch('hydro/poolStations.bin')
-        .then((response) => response.arrayBuffer()),
-    fetch('hydro/pools.json')
-        .then((response) => response.json()),
-    fetch('hydro/poolMap.bin')
-        .then((response) => response.arrayBuffer()),
-    fetch('res/popDensity.bin')
-        .then(response => response.arrayBuffer()),
-    // fetch('hydro/sea.bin')
-    //     .then(response => response.arrayBuffer()),
-    fetch('res/windPowDens50.bin')
-        .then(response => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/landUse.bin')
+            .then((response) => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/pvcapfactAll365.bin')
+            .then((response) => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/windOnshoreCapaFact.bin')
+            .then((response) => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/poolStations.bin')
+            .then((response) => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/pools.json')
+            .then((response) => response.json()),
+        fetch('data/' + countryCode + '/gameRdy/poolMap.bin')
+            .then((response) => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/popDensity.bin')
+            .then(response => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/windPowDens50.bin')
+            .then(response => response.arrayBuffer()),
     ])
     //called when all simu related res are loaded
-    .then(function(values){
+    .then((values) => {
         let simuCreateInfo = {};
 
-        simuCreateInfo.production = values[0];
+        simuCreateInfo.production = {
+            parameters: JSON.parse(strParameters),
+            pvCapFact: new Uint8Array(values[1]),
+            windCapFact: new Uint8Array(values[2]),
+        };
 
         simuCreateInfo.map = {
-            groundUse: new Uint8Array(values[1]),
-            popDensity: new Uint8Array(values[5]),
-            windPowDens:{at50:new Uint8Array(values[6])},
-            pools: new Uint8Array(values[4]),
+            groundUse: new Uint8Array(values[0]),
+            popDensity: new Uint8Array(values[6]),
+            windPowDens:{at50:new Uint8Array(values[7])},
+            pools: new Uint8Array(values[5]),
         };
         simuCreateInfo.mapView = mapView;
 
         simuCreateInfo.hydro = {
-            stations: new Float32Array(values[2]),
-            pools:{links:values[3]},
+            stations: new Float32Array(values[3]),
+            pools:{links:values[4]},
         };
 
         simuCreateInfo.gameplay = {

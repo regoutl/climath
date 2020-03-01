@@ -3,16 +3,16 @@ import {tr} from '../../../tr/tr.js';
 import {PlotTile, MathTextTile} from './sharedtiles.js';
 
 function Production(props){
-    let math =  [<p>Production of a PV farm of area <img src='data/symbols/area.svg'/> is : </p>,
-            <img src="data/pv/production.svg" alt="Pv production eq" />,
+    let math =  [<p>Production of a PV farm of area <img src='res/symbols/shared/area.svg'/> is : </p>,
+            <img src="res/symbols/pv/production.svg" alt="Pv production eq" />,
             <ul>
-                {[{img:'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)'},
-                    {img:'symbols/efficiency', descr: 'is the pannel efficiency at y0'},
-                    {img:'symbols/capaFactT', descr: 'is the capacity factor at that hour'},
-                    {img:'symbols/decline', descr: 'is the yearly efficiency decline'},
-                    {img:'symbols/year', descr: 'is the current year'},
-                    {img:'symbols/year0', descr: 'is the build year'},
-                ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+                {[{img:'shared/radFlux', descr: 'is the maximal radiant flux (W/m2)'},
+                    {img:'shared/efficiency', descr: 'is the pannel efficiency at y0'},
+                    {img:'shared/capaFactT', descr: 'is the capacity factor at that hour'},
+                    {img:'shared/decline', descr: 'is the yearly efficiency decline'},
+                    {img:'shared/year', descr: 'is the current year'},
+                    {img:'shared/year0', descr: 'is the build year'},
+                ].map((i) => <li key={i.img}><img src={"res/symbols/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
             </ul>];
 
     let text = [<p>{tr('The production depends on :')}</p>,
@@ -23,7 +23,7 @@ function Production(props){
                 'The amount of sun depends on the location (we call it \'radiant flux\') ' +
                 'and the time of the day/year (we call it \'Capacity factor\').',
                 'The panel efficiency. This decrease with time. ',
-            ].map((i) => <li>{tr(i)}</li>)}
+            ].map((i) => <li key={i.substr(5, 2)}>{tr(i)}</li>)}
         </ul>
     ];
 
@@ -41,10 +41,10 @@ function RadFlux(props){
                     <h4>{tr('Radiant flux')}</h4>
                     <div className='hLayout'>
                         <div>
-                            <img src="data/pv/maxRadFlux.svg" alt="max rad flux eq" />
+                            <img src="res/symbols/pv/maxRadFlux.svg" alt="max rad flux eq" />
                             <ul>
-                                <li><img src='data/symbols/avgCapaFact.svg' alt='avgCapaFact' /> {tr('is the average capacity factor')}</li>
-                                <li><img src='data/pv/avgGhi.svg' alt='average global hori irradiance' /> {tr(' is the average Global Horizontal Irradiance')}</li>
+                                <li><img src='res/symbols/shared/avgCapaFact.svg' alt='avgCapaFact' /> {tr('is the average capacity factor')}</li>
+                                <li><img src='res/symbols/pv/avgGhi.svg' alt='average global hori irradiance' /> {tr(' is the average Global Horizontal Irradiance')}</li>
                             </ul>
                         </div>
                         <div>
@@ -67,26 +67,35 @@ function CapaFact(props){
 }
 
 function EffiDecl(props){
-    return (            <div>
-                    <h4>{tr('Efficiency decline')}</h4>
-                    <p>{tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')}</p>
+    let math = [
+        <p>{tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')}</p>,
 
-                    <p>{tr('The yearly efficiency decline is then simply :')}</p>
-                    <img src='data/pv/decl25Todecl.svg' />
-                    <p className="pSource"><a href='https://news.energysage.com/sunpower-solar-panels-complete-review'>Sumpower</a></p>
-                </div>
-);
+        <p>{tr('The yearly efficiency decline is then simply :')}</p>,
+        <img src='res/symbols/pv/decl25Todecl.svg' />,
+        <p className="pSource"><a href='https://news.energysage.com/sunpower-solar-panels-complete-review'>Sumpower</a></p>
+    ];
+
+    let text = [        <p>{tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')}</p>];
+
+    return (
+        <MathTextTile
+            title="Efficiency decline"
+            math={math}
+            text={text}
+        />
+    );
+
 }
 
 /** @brief this class provide a lot of explainations about pv
 */
 /* accepted props
-productionMeans = this.simu.cProd.productionMeans
-countries       = this.simu.cProd.countries
-closeRequested
+parameters : string. same format as parameters.json
 */
 export default function PvDetails (props){
-    let pv = props.productionMeans.pv;
+    let json = JSON.parse(props.parameters);
+
+    let pv = json.energies.pv;
 
 
     return (<div className='detailContent'>

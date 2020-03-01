@@ -69,8 +69,9 @@ var MapLayers = function (_React$Component) {
             } else {
                 ans.push(React.createElement(
                     'div',
-                    { id: 'dMapLayers', title: tr("Choose displayed layers"), className: 'vLayout' },
+                    { id: 'dMapLayers', title: tr("Choose displayed layers"), className: 'vLayout', key: 'mapLayerBox' },
                     React.createElement('img', {
+                        key: 'coucou',
                         src: 'res/icons/layers.png',
                         className: 'mapButton',
                         onClick: function onClick() {

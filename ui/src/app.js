@@ -1,6 +1,6 @@
 import GameWin from './gamewin.js';
 import {AppContext} from './appcontext.js';
-
+import {NewGameDialog} from './dialogs/newgamedialog.js';
 
 
 
@@ -11,7 +11,7 @@ export class App extends React.Component{
         super(props);
 
         this.state = {
-            currentPage: 'gameWin',
+            currentPage: 'newGame',
             context: {
                 //controls how the equations (typically in the details dialogs) are displayed
                 // valid values : ('text', 'math').
@@ -19,8 +19,12 @@ export class App extends React.Component{
                 // math : math description, with a quick explaination of the parameters
                 equationDisplay: 'text',
                 toggleEquationDisplay: this.toggleEquationDisplay.bind(this),
-            }
+            },
+            country: '',
+            strParameters: '', // it is the parameters as a json (easyer for react)
         };
+
+        this.setCountry('be');
     }
 
     toggleEquationDisplay(){
@@ -30,15 +34,45 @@ export class App extends React.Component{
         });
     }
 
+    //when menu ask for start
+    startGame(){
+        //todo : validations checks (is parameters loaded etc)
+
+        this.setState({currentPage: 'gameWin'});
+    }
+
+    setCountry(code){
+        fetch('data/' + code + '/defaultParameters.json')
+        .then((response) => response.text()) //   no txt to json conv
+        .then((params) => {
+            this.setState({country: code, strParameters: params});
+        });
+    }
+
     render(){
+        let content;
+
         if(this.state.currentPage == 'gameWin'){
-            return (
-                <AppContext.Provider value={this.state.context}>
-                        <GameWin />
-                </AppContext.Provider>);
+            content = <GameWin
+                country={this.state.country}
+                strParameters={this.state.strParameters}
+            />;
         }
+        else if(this.state.currentPage == 'newGame'){
+            content = <NewGameDialog
+                onStart = {this.startGame.bind(this)}
+                onCountryChange = {this.setCountry.bind(this)}
+                onParamChange = {(strParam) => this.setState({strParameters: strParam})}
+             />;
+        }
+        else
+            throw 'todo';
 
 
-        return <p>Coucou</p>;
+        return (
+            <AppContext.Provider value={this.state.context}>
+                    {content}
+            </AppContext.Provider>);
+
     }
 }

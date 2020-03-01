@@ -49,7 +49,7 @@ export class TutoDialog extends React.Component{
 
         let slide = [
             {title:'Objective', body:[
-                <p>{tr('Emmit 0 carbon between 2050 and 2070')}</p>,
+                <p>{tr('Emit 0 carbon between 2050 and 2070')}</p>,
                 <p>{tr('Build low carbon power plants')}</p>,
             ]},
             {title:'Power plants construction', body: isTouchScreen() ? touchBuild : desktopBuild},

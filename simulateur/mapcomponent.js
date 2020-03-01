@@ -14,7 +14,7 @@ const GroundUsage = {
     forest2:9,
 }
 
-//hab/m2
+//hab/m2. todo : be more generic. (other countries ?)
 const popDensitylegend = {
     0:0e-6,
     1:1e-6,
@@ -27,36 +27,6 @@ const popDensitylegend = {
     8:5000e-6,
 }
 
-const plank = 200; //m / pix side
-const pixelArea = plank * plank; //m2 / pix
-
-// //Const for our current map
-// const kmpixratio = 30688/(1625442-854086);
-// const nuclearDisasterRadius = 50/*pix*/;
-// const nuclearDisasterArea = nuclearDisasterRadius * nuclearDisasterRadius * 3.14; /*same unit power 2*/
-// const meanCostToRelocate = 197000;
-// const cleaningcost = 150000000;
-const totalpop = 11.4e6;
-// const nPixInCountry = 30600e6 / pixelArea;
-// const averagePopDensity = totalpop / nPixInCountry;
-
-const avgIrradiance =  1030; //W/m2 @see parameters.countries.belgium.irradiance
-const avgWindPowerDensity50 = 400; //W/m2 @see wind map
-const avgPopDensity = totalpop / 30600e6; // average pop/m2
-
-// let densityMapPixPerCol = {// is it correct ?
-//     0:854086,
-//     1:223678,
-//     2:171151,
-//     3:141713,
-//     4:100527,
-//     5:38765,
-//     6:42552,
-//     7:32710,
-//     8:20260,
-// };
-
-// const nukeExplosionPeriod = 7540; // 2/15080 => 1/7540
 
 /** @note : not DOM aware, defer all DOM interractions to MapDrawer */
 export default class MapComponent{
@@ -68,45 +38,37 @@ export default class MapComponent{
         - update(layername)
     */
     constructor(mapImgs, simu, view){
+        this.width = 1374;
+
+
         this.view = view;
 
         this.simu = simu;
 
         this._centrals = [];
-        this.energyGrid = new Uint16Array(1374 * 1183);
+        this.energyGrid = new Uint16Array(this.width * 1183);
         this.groundUse = mapImgs.groundUse;
         this.popDensity = mapImgs.popDensity;
         this.windPowDens = mapImgs.windPowDens;
         this.poolMap = mapImgs.pools;
 
         this.buildParameters = [{}];// first one is the null build
+
+
+
+        //lots of coefs, can be modified on a country basis------------------
+        this.plank = 200; //m / pix side
+        this.pixelArea = this.plank * this.plank; //m2 / pix
+
+        this.avgIrradiance = 1030; //W/m2
+        this.avgWindPowerDensity50 = 400; //W/m2
+        this.totalArea = 30600e6; //m2
+        this.totalPop = 11.4e6; //hab
+        this.avgPopDensity = this.totalPop / this.totalArea;
+        this.popGrowthSinceStart = 1.06;
+
     }
 
-    /** return hab/m2
-    * [TODO]
-    * Should find the correction factor in fct of:
-    *       - current pop
-    *       - number of available living pixel
-    *                   (removing those where an explosion has occured)
-    */
-    getPopDensity(x,y){
-        // 
-        //1.06 is a correction factor to match current population of 11.4e6 hab
-        // let popfactor = totalpop / (kmpixratio*
-        //     Object.keys(popDensitylegend).reduce((a,key) =>
-        //         a+(densityMapPixPerCol[key]*popDensitylegend[key])
-        //     , 0));
-        let popDensity = popDensitylegend[this.popDensity[y*1374+x]];
-        return popDensity  * 1.06/*kmpixratio **/ ;
-    }
-
-    getNrj(x,y){
-        return this.energyGrid[y*1374+x];
-    }
-
-    getGroundUse(x,y){
-        return this.groundUse[y*1374+x];
-    }
 
 
     /** @brief return the sum of values over an area satisfaying criterions
@@ -159,16 +121,16 @@ export default class MapComponent{
 
     //do the theorical val of reduce.
     _theoricReduce(fields, area, conditions){
-        let A = area.radius * area.radius * 3.14 * pixelArea;
+        let A = area.radius * area.radius * 3.14 * this.pixelArea;
         for(let i = 0; i < fields.length; i++){
             if(fields[i] == 'area')
                 fields[i] = A;
             else if(fields[i] == 'radiantFlux')
-                fields[i] = A * avgIrradiance;
+                fields[i] = A * this.avgIrradiance;
             else if(fields[i] == 'population')
-                fields[i] = A * avgPopDensity;
+                fields[i] = A * this.avgPopDensity;
             else if(fields[i] == 'windPower50')
-                fields[i] = A * avgWindPowerDensity50;
+                fields[i] = A * this.avgWindPowerDensity50;
             else
                 throw 'to do';
         }
@@ -186,7 +148,7 @@ export default class MapComponent{
         let box = {
             minX: Math.max(x-radius,    0)             -x,
             minY: Math.max(y-radius,    0)             -y,
-            maxX: Math.min(x+radius, 1374)             -x,
+            maxX: Math.min(x+radius, this.width)             -x,
             maxY: Math.min(y+radius, 1183)             -y,
         };
         // console.log(x, y, radius, box);
@@ -203,94 +165,113 @@ export default class MapComponent{
         return false;
     }
 
-    areaAt(x, y){return pixelArea;}
-    radiantFluxAt(x, y){return avgIrradiance * pixelArea;}
-    windPower50At(x, y){return this.windPowDens.at50[x + y * 1374] * 8.0 * pixelArea;}
-    populationAt(x, y){return this.getPopDensity(x, y) * pixelArea;}
+    //value getters. x & y must be valid
+    areaAt(x, y){return this.pixelArea;}
+    radiantFluxAt(x, y){return this.avgIrradiance * this.pixelArea;}
+    windPower50At(x, y){return this.windPowDens.at50[x + y * this.width] * 8.0 * this.pixelArea;}
+    populationAt(x, y){return popDensitylegend[this.popDensity[y*this.width+x]]* this.popGrowthSinceStart * this.pixelArea;}
+    energyAt(x, y){ return this.energyGrid[y*this.width+x]; }
+    groundUseAt(x,y){return this.groundUse[y*this.width+x];}
 
+    //bool getters
     isInCountry(x, y){
-        const lu = this.getGroundUse(x, y);
+        const lu = this.groundUseAt(x, y);
         return lu != GroundUsage.out;
     }
     isBuildable(x, y){
-        const lu = this.getGroundUse(x, y);
-        const nrj = this.getNrj(x,y);
+        const lu = this.groundUseAt(x, y);
+        const nrj = this.energyAt(x,y);
         return (lu == GroundUsage.field || lu == GroundUsage.field2
             || lu == GroundUsage.forest || lu == GroundUsage.forest2)
             && nrj == 0;
     }
     isEnergy(x, y){
-        return this.getNrj(x,y) != 0;
+        return this.energyAt(x,y) != 0;
     }
 
-    /** @brief delete energies in the given area.
-    @return cost
-    @todo filter
-
+    /** @brief return the content of area.
+    @return array of obj. obj has a field    type
+    for type in [pv, bat, wind], obj = {type, area, buildParameters, buildParametersIndex, extraDataLabel[, radiantFlux, windPower50 ]}
+    for centrals, obj = {type, id}
     */
-    demolish(area, filter){
-        let totalCost = 0;
+    energiesInArea(area){
+        let ans = [];
 
-        /// step 1 : list everything (pv, storage, wind)
+        /// step 1 : list (pv (area & radFlux), storage (area), wind (area & wpd))
         let dataPerBuildId = {};
         this._forEach(area, (x, y) => {
-            let buildId = this.getNrj(x,y);
+            let buildId = this.energyAt(x,y);
             if(buildId == 0) //skip the null build
                 return;
-            if(dataPerBuildId[buildId] === undefined){
-              dataPerBuildId[buildId] = {pixCount: 0};
-              if(this.buildParameters[buildId].extraSumDemolish){
-                  dataPerBuildId[buildId].label = this.buildParameters[buildId].extraSumDemolish + 'At';
-                  dataPerBuildId[buildId].extra = 0;
-              }
+            if(dataPerBuildId[buildId] === undefined){//it is a new record
+                dataPerBuildId[buildId] = {pixCount: 0}; //0 pixels
+                if(this.buildParameters[buildId].extraSumDemolish){//the nrj requires a reduction
+                    dataPerBuildId[buildId].label = this.buildParameters[buildId].extraSumDemolish + 'At';
+                    dataPerBuildId[buildId].extra = 0;
+                }
             }
+            //for each pix, increase pix count
             dataPerBuildId[buildId].pixCount++;
-            if(dataPerBuildId[buildId].label)
-              dataPerBuildId[buildId].extra += this[dataPerBuildId[buildId].label](x, y);
-
-            this.energyGrid[x + y * 1374] = 0;
+            if(dataPerBuildId[buildId].label) //and if an xtra data is needed
+                dataPerBuildId[buildId].extra += this[dataPerBuildId[buildId].label](x, y);
         });
 
-        for (let [buildParamIndex, demolishData] of Object.entries(pixList)) {
+
+        /// STEP 2 : add step 1 ans as a readable ans
+        for (let [buildParamIndex, demolishData] of Object.entries(dataPerBuildId)) {
             let bm = this.buildParameters[buildParamIndex];
-            totalCost += this.simu.demolish(bm, {    //old build parameters
-                                area: demolishData.pixCount * pixelArea,  //area
-                                extra:demolishData.extra});               //component specific data
+
+            let item = {
+                type: bm.type,
+                area: demolishData.pixCount * this.pixelArea,
+                buildParameters: bm,
+                buildParametersIndex: buildParamIndex,
+            };
+
+            if(bm.extraSumDemolish){
+                item[bm.extraSumDemolish] = demolishData.extra;//ex for pv : item.radiantFlux = x W
+                item.extraDataLabel = bm.extraSumDemolish;
+            }
+
+            ans.push(item);
         }
 
 
         // centrals-----------------------------
-        for(let c in this.centrals){
-            if(areaContains(area, this.centrals[c].loc)){
-                this.simu.demolish({type: 'central', id:this.centrals[c].id});
-                delete  this.centrals[c];
+        for(let c in this._centrals){
+            if(areaContains(area, this._centrals[c].loc)){
+                ans.push({
+                    type: 'central',
+                    id: this._centrals[c].id,
+                });
             }
         }
-        // throw 'todo : centrals'
 
-
-        return totalCost;
+        return ans;
     }
 
 
-    build(build){
-        if(['pv', 'battery', 'wind'].includes(build.info.type) ){
-            this.buildParameters.push(build.parameters);
+    build(buildParameters, buildInfo, buildZone){
+        if(['pv', 'battery', 'wind'].includes(buildInfo.type) ){
+            this.buildParameters.push(buildParameters);
 
-            let buildIndex = this.view.appendEnergyPalette(build.info.type);
+            let buildIndex = this.view.appendEnergyPalette(buildInfo.type);
 
-            this._forEachIf(build.area, (x, y) => {
-                this.energyGrid[x + y * 1374] = buildIndex;
+            if(buildIndex + 1!= this.buildParameters.length)
+                throw('insert mismatch. (buildIndex != palette index)');
+
+            this._forEachIf(buildZone, (x, y) => {
+                this.energyGrid[x + y * this.width] = buildIndex;
             }, ["buildable"]);
 
             this.view.update('energy');
             // this.drawer.draw();
         }
-        else if(['ccgt', 'nuke', 'fusion'].includes(build.info.type)){
-            this.view.addItem(build.info.type, build.area.center);
+        else if(['ccgt', 'nuke', 'fusion'].includes(buildInfo.type)){
+            this.view.addItem(buildInfo.type, buildZone.center);
             this._centrals.push({
-                id:  build.info.centralId,
-                loc: build.area.center
+                id:  buildInfo.centralId,
+                loc: buildZone.center
             });
         }
         else {
@@ -298,71 +279,22 @@ export default class MapComponent{
         }
     }
 
-    /** @brief check if any nuclear central explode.
-        @details : if a central explode, must reallocate surounding pop,
-                        and estimate cost
-    */
-    testBoom(){
-        let stat = this._centrals.reduce((tot, central, i) => {
-            if(central.type === 'nuke'){
-                if(rand()%nukeExplosionPeriod === 0){
-                    let expl = this._simulateBoom({
-                        center:central.loc,
-                        radius:central.dangerRadius
-                    }, true);
-                    tot.cost += expl.cost;
-                    tot.pop_affected += expl.pop_affected;
-                }
-            }
-            return tot;
-        }, {cost:0, pop_affected:0});
-        this._centrals.filter(e => e !== -1)
-        return stat;
+    //demolish a specific pv/wind/bat corresponding to buildParametersIndex in the zone.
+    demolishEnergyInArea(buildParametersIndex, zone){
+        this._forEach(zone, (x, y) => {
+            if(this.energyAt(x, y) == buildParametersIndex)
+                this.energyGrid[x + y * this.width] = 0;
+        });
+
+        this.view.update('energy');
     }
 
-    _rmCentral(id){
-        // this.drawer.rmItem(this._centrals[id].type, this._centrals[id].loc);
-        // this._centrals.splice(id, 1);
-        this._centrals[id] = -1;
+    //demolish a central
+    demolishCentral(id){
+        this.view.rmItem(this._centrals[id].loc);
+        delete this._centrals[id];
     }
 
-    _simulateBoom(area, set){
-        set = set || false;
-        let topay = cleaningcost;
-        let pop_affected = 0;
-        let affected_central = 0;
-        area.radius = nuclearDisasterRadius;
-        this._forEach(area, (x,y) => {
-            let sameloc = v => v !== -1 && v.loc.x === x && v.loc.y === y;
-            let central_id = this._centrals.findIndex(sameloc);
-            pop_affected += this.getPopDensity(x,y);
-            if(set){
-                this.setPx(x, y, {
-                    baseLandUse:0,
-                    nrj:0,
-                    pop:0,
-                })
-                if(central_id !== -1){
-                    this._rmCentral(central_id);
-                }
-            } else{
-                affected_central += central_id !== -1 ? 1:0;
-            }
-        })
-        if(set){
-            ['energy','groundUse','popDensity'].forEach((layer, i) => {
-                // this.drawer.update(layer);
-            });
-            // this.drawer.draw();
-        }
-        topay += pop_affected * meanCostToRelocate
-        // TODO reallocate pop
-        return {
-            pop_affected: pop_affected,
-            cost: topay,
-            affected_central: affected_central,
-        };
-    }
 
 
     /** @brief will call f(x, y) for each pixel in the given area */
@@ -373,7 +305,7 @@ export default class MapComponent{
         let box = {
             minX: Math.max(x-radius,    0)             -x,
             minY: Math.max(y-radius,    0)             -y,
-            maxX: Math.min(x+radius, 1374)             -x,
+            maxX: Math.min(x+radius, this.width)             -x,
             maxY: Math.min(y+radius, 1183)             -y,
         };
 
@@ -415,25 +347,6 @@ export default class MapComponent{
         this._forEach(area, fun);
     }
 
-    /// set pixel x, y with value with same format as get
-    setPx(x, y, changes){
-        let conv = {
-            'nrj':'energyGrid',
-            'energyGrid':'energyGrid',
-            'baseLandUse':'groundUse',
-            'groundUse':'groundUse',
-            'pop':'popDensity',
-            'popDensity':'popDensity',
-        }, maps = this;
-        Object.keys(changes).forEach(key => {
-            if(conv[key] == 'popDensity'){
-                densityMapPixPerCol[maps[conv[key]][y*1374+x]] -= 1;
-                densityMapPixPerCol[changes[key]] += 1;
-            }
-            maps[conv[key]][y*1374+x] = changes[key];
-        });
-    }
-
 
     /** @brief return the pool index at the given pixel.
     Null if no pool here
@@ -458,7 +371,7 @@ export default class MapComponent{
 
     clearEnergies(){
         //todo : also clear palette cursor.
-        this.energyGrid = new Uint16Array(1374 * 1183);
+        this.energyGrid = new Uint16Array(this.width * 1183);
     }
 }
 

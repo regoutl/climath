@@ -1,67 +1,65 @@
 import IntermittentProductionMean from './intermittentproductionmean.js';
 import * as Yearly from "../timevarin.js";
+import BuildInfo from './buildinfo.js';
 
 
 export default class Wind extends IntermittentProductionMean{
-  constructor(parameters, simu) {
-    super(parameters, 'wind');
+    constructor(parameters, capaFact, simu) {
+        super(parameters, capaFact, 'wind');
 
-    this.simu = simu;
+        this.simu = simu;
 
-    this.efficiency = new Yearly.Raw(0);
-    this.efficiency.fromJSON(parameters.efficiency);
+        this.efficiency = new Yearly.Raw(0);
+        this.efficiency.fromJSON(parameters.efficiency);
 
-    this.density =new Yearly.Raw( parameters.density);
+        this.density =new Yearly.Raw( parameters.density);
 
-    // this.build.energy = new Yearly.Raw(0);
-    // this.build.energy.fromJSON(parameters.build.energy);
-  }
+        // this._build.energy = new Yearly.Raw(0);
+        // this._build.energy.fromJSON(parameters.build.energy);
 
-  happyNYEve(yStats){
-    //compute fixed o & M
-    yStats.cost.perYear.wind +=
-          this.capacity * this.perYear.cost.at(yStats.year); // wind
-  }
-
-/**
-  * 		@param what.area : R. m^2 . required.
-  *      @param what.effiMul : [0-1], default val = 1
-  *      @param what.madeIn : {china, usa} , default val = china
-  *      @param what.powerDecline : [0, 1] , power decline per year.
-  * 						nextYearCapa = thisYearCapa * powerDecline.
-  * 						default val = 1.
-  *      @param what.priceMul : R, coef of price for installation.
-  * 						default val = 1
-  * @todo:		@param what.seller : {sunPower ,Panasonic, JinkoSolar}. set above params (see parameters.json)
-
-  @warning do not directly modify build.info in this function (leave it to _prepareCapex)
-**/
-  prepareCapex(build){
-    build.pm = this;
-
-    let parameters = build.parameters;
-
-    if(parameters.height === undefined){
-        parameters.height = 50;
-        // console.log('set default height');
+        //capex to add next year
+        this.nowBuilding = 0;
     }
 
-    parameters.extraSumDemolish = 'windPower50';
+    happyNYEve(yStats){
+        //compute fixed o & M
+        yStats.cost.perYear.wind +=
+            this.capacity * this.perYear.cost.at(yStats.year); // wind
 
-    let [area, windPower] = this.simu.cMap.reduceIf(['area', 'windPower50'], build.area,
-                                    ['buildable']);
+        //add constructions (bc 1 year)
+        this.capacity += this.nowBuilding;
+        this.nowBuilding = 0;
+    }
 
-    this._prepareCapex(build, area, windPower);
+    /** @brief compute info associated with the build.  Build is NOT executed.
+    @param parameters {
+        year : build begin year,
+    }.
+    @param zone.  a valid map area (see mapcomponent)
+    @return  info as defined in Simulateur.buildInfo.  BUT theorical is never set
 
-  }
+    @important parameters is modified
+    */
+    buildInfo(parameters, zone){
+        if(parameters.height === undefined){
+            parameters.height = 50;
+        }
+
+        parameters.extraSumDemolish = 'windPower50';
+
+        let [area, windPower] = this.simu.cMap.reduceIf(
+                                        ['area', 'windPower50'],
+                                        zone,
+                                        ['buildable']);
+
+        return this._buildInfo(parameters, area, windPower);
+    }
 
   //same spec as pv._prepareCapex
-  _prepareCapex(build, area, windPower){
-      const parameters = build.parameters; //leave this const alone !
-      let info = build.info;
-      info.area = area;
+  _buildInfo(parameters, area, windPower){
+      let info = new BuildInfo(parameters);
 
-      info.build.end = this.endOfBuild(build);
+      info.build.end = this.endOfBuild(info);
 
       let windPowerDensity = windPower / area;
       if(area == 0)
@@ -84,56 +82,61 @@ export default class Wind extends IntermittentProductionMean{
 
 
       info.build.co2 = 0; // C / Wh
-      info.build.cost  = count * // item
-          this.build.cost.at(info.build.begin);  // eur/item
+      info.build.cost  =  this._buildCost(parameters, area);
 
 
-      info.perYear = {cost: this.perYear.cost.at(info.build.end) * initNameplate, co2: 0};
-      info.perWh = {cost: 0, co2: 0};
+      info.perYear.cost = this.perYear.cost.at(info.build.end) * initNameplate;
       info.avgCapacityFactor = 0.229; //todo : do a real computation ?
+
+      return info;
   }
 
-  //note : must be called when simu.year = cmd.build.end
-  capex(build){
-    if(build.info.type != 'wind')
-      throw 'wind.capex; build.info.type != wind';
+    _buildCost(parameters, area){
+        const maxWindTurbinePerSquareMeter = this.density.at(parameters.year); //todo : check for onshore
 
-    let nameplate = build.info.nameplate.at(build.info.build.end);
+        let count = area * maxWindTurbinePerSquareMeter;
 
-    this.capacity += nameplate;
+        return count * // item
+            this._build.cost.at(parameters.year);  // eur/item
+    }
 
-  }
+    build(buildInfo){
+        if(buildInfo.type != 'wind')
+            throw 'wind.capex; build.info.type != wind';
 
-  costOfDemolish(demolish){
-      //get all the build informations
-      this._prepareCapex(demolish, demolish.reductions.area, demolish.reductions.extra);
+        let nameplate = buildInfo.nameplate.at(buildInfo.build.end);
 
-      return demolish.info.build.cost * this.demolishRatio;
-  }
+        this.nowBuilding += nameplate;
+    }
 
-  /** same as pv.demolish BUT demolish.reductions.extra is 'the wind power'
-  */
-  demolish(demolish){
-      //get all the build informations
-      this._prepareCapex(demolish, demolish.reductions.area, demolish.reductions.extra);
+    /** @brief return the cost of demolition. Dont apply the demoliton*/
+    demolishCost(parameters, area){
+        return this._buildCost(parameters, area) * this.demolishRatio;
+    }
 
-      //not build yet -> this a job for the scheduled build queue
-      /** reflexion : as (pv, wind, storage) are build in a year,
-      why not pre-remove the surface, and let the scheduled build happend normally ?
+    /** same as pv.demolish BUT demolish.reductions.extra is 'the wind power'
+    */
+    demolish(demolishYear, parameters, area, windPowerDensity){
+        //get all the build informations
+        let buildInfo = this._buildInfo(parameters, area, windPowerDensity);
 
-      To investigate
-      */
-      if(demolish.info.build.end < demolish.year)
-          return 0;
+        //get the current nameplate :
+        let nameplate = buildInfo.nameplate.at(demolishYear);
 
-      //get the current nameplate :
-      let nameplate = demolish.info.nameplate.at(demolish.year);
+        //not build yet -> this a job for the scheduled build queue
+        if(buildInfo.build.end > demolishYear){
+            this.nowBuilding -= nameplate;
+            if(this.nowBuilding < 0)
+                throw 'check failed';
+        }
+        else{
+            //diminish the area
+            this.capacity -= nameplate;
+            if(this.capacity < 0)
+                throw 'check failed';
+        }
 
-      //diminish the area
-      this.capacity -= nameplate;
 
-
-      return demolish.info.build.cost * this.demolishRatio;
-  }
+    }
 
 }

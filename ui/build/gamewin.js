@@ -42,12 +42,21 @@ var GameWin = function (_React$Component) {
         _this.simu = null; //the simulater, responsible for all computations
 
         _this.state = {
-            currentDialog: NewGameDialog,
+            currentDialog: localStorage.getItem('skipTuto') ? NullDialog : TutoDialog,
             help: NullHelp
         };
 
         _this.scene = new Scene();
 
+        promiseSimulater(_this.scene, _this.props.strParameters, _this.props.country).then(function (s) {
+            _this.scene.setMap(s.cMap);
+
+            _this.simu = s;
+
+            _this.forceUpdate();
+        }).catch(function (err) {
+            alert(err);
+        });
         return _this;
     }
 
@@ -76,26 +85,9 @@ var GameWin = function (_React$Component) {
             this.forceUpdate();
         }
     }, {
-        key: 'confirmBuild',
-        value: function confirmBuild(curPos) {
-            this.simu.confirmCurrentBuild();
-            this.forceUpdate();
-        }
-    }, {
-        key: 'startGame',
-        value: function startGame(simu) {
-            this.simu = simu;
-
-            this.setDialog(localStorage.getItem('skipTuto') ? undefined : TutoDialog);
-        }
-    }, {
         key: 'render',
         value: function render() {
-            if (this.state.currentDialog == NewGameDialog) {
-                return React.createElement(NewGameDialog, {
-                    startRequested: this.startGame.bind(this),
-                    scene: this.scene });
-            } else if (this.state.currentDialog == TutoDialog) {
+            if (this.state.currentDialog == TutoDialog) {
                 return React.createElement(
                     'div',
                     { className: 'vLayout', style: { width: '100%', height: '100%' } },
@@ -143,12 +135,12 @@ var GameWin = function (_React$Component) {
 
             return React.createElement(MapView, {
                 scene: this.scene,
-                onBuildConfirmed: this.confirmBuild.bind(this),
                 simu: this.simu,
                 onDetailsRequested: function onDetailsRequested(c) {
                     _this2.setState({ help: c });
                 },
-                showOnlyMap: this.state.currentDialog == TutoDialog
+                showOnlyMap: this.state.currentDialog == TutoDialog,
+                onMoneyChanged: this.forceUpdate.bind(this)
             });
         }
 
@@ -221,8 +213,7 @@ var GameWin = function (_React$Component) {
                             return _this4.setState({ help: NullHelp });
                         } }),
                     React.createElement(Help, {
-                        productionMeans: this.simu.cProd.productionMeans,
-                        countries: this.simu.cProd.countries
+                        parameters: this.props.strParameters
                     })
                 );
             } else {

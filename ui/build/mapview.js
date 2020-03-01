@@ -81,6 +81,23 @@ var MapView = function (_React$Component) {
                 return ans;
             });
         }
+    }, {
+        key: 'confirmBuild',
+        value: function confirmBuild() {
+            // console.log('confirm build');
+            this.props.simu.build(this.state.targetBuild);
+
+            //should make game win update
+            this.props.onMoneyChanged();
+        }
+    }, {
+        key: 'confirmDemolish',
+        value: function confirmDemolish() {
+            this.props.simu.demolish({ center: this.state.targetBuild.pos, radius: this.state.targetBuild.radius });
+
+            //should make game win update
+            this.props.onMoneyChanged();
+        }
 
         //internal functions--------------------------------------------------------
 
@@ -185,7 +202,7 @@ var MapView = function (_React$Component) {
                 onTypeChanged: this.setTargetBuildState.bind(this, 'type'),
                 onDetailsRequested: this.props.onDetailsRequested,
                 onBuildConfirmed: function onBuildConfirmed() {
-                    return _this2.confirmBuild(_this2.scene.cursor.pos);
+                    return _this2.confirmBuild();
                 }
             });
         }
@@ -204,7 +221,7 @@ var MapView = function (_React$Component) {
                 onTypeChanged: this.setTargetBuildState.bind(this, 'type'),
                 onDetailsRequested: this.props.onDetailsRequested,
                 onBuildConfirmed: function onBuildConfirmed() {
-                    _this3.props.onBuildConfirmed(); //normal, confirm the build
+                    _this3.confirmBuild(); //normal, confirm the build
                     _this3.setTargetBuildState('type', null);
                     //hide the menu
                     _this3.setState({ touchBuildMenuPos: null });
@@ -278,14 +295,14 @@ var MapView = function (_React$Component) {
             //we were not dragging, count as a click
             //note : the check 'isMouseDown' is necessary; else, toucheend triger the build confirmation
             if (!this.dragging && this.isMouseDown && this.state.targetBuild.type) {
-                var rawPos = { x: e.pageX, y: e.pageY };
+                // let rawPos = {x:e.pageX, y : e.pageY};
+                //
+                // let transformedPos = {
+                //     x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
+                //     y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
+                // };
 
-                var transformedPos = {
-                    x: Math.round(rawPos.x / this.transform.scale - this.transform.x),
-                    y: Math.round(rawPos.y / this.transform.scale - this.transform.y)
-                };
-
-                this.props.onBuildConfirmed(transformedPos);
+                if (this.state.targetBuild.type != 'demolish') this.confirmBuild();else this.confirmDemolish();
             }
 
             this.isMouseDown = false;

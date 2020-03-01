@@ -8,6 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { Plot } from '../plot.js';
 import { tr } from "../../tr/tr.js";
+import { Raw } from '../../timevarin.js';
 
 //to be checked
 function download(filename, text) {
@@ -35,6 +36,7 @@ var ReactPlot = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (ReactPlot.__proto__ || Object.getPrototypeOf(ReactPlot)).call(this, props));
 
+        _this.tvi = new Raw(_this.props.data);
         _this.cCanvas = new React.createRef();
         return _this;
     }
@@ -42,28 +44,28 @@ var ReactPlot = function (_React$Component) {
     _createClass(ReactPlot, [{
         key: 'componentDidMount',
         value: function componentDidMount() {
-            var p = new Plot(this.props.data, this.props.width || 300, this.props.height || 200);
+            var p = new Plot(this.tvi, this.props.width || 300, this.props.height || 200);
             p.draw(this.cCanvas.current.getContext('2d'));
         }
     }, {
         key: 'downloadAsCsv',
         value: function downloadAsCsv() {
             var csv = '';
-            csv += this.props.data.label + '\n';
+            csv += this.tvi.label + '\n';
 
-            if (this.props.data.unit) csv += 'unit,' + this.props.data.unit + '\n';
-            csv += 'source,' + this.props.data.source + '\n';
-            csv += 'source valid for, [2000-' + this.props.data.histoUntill + ']\n';
+            if (this.tvi.unit) csv += 'unit,' + this.tvi.unit + '\n';
+            csv += 'source,' + this.tvi.source + '\n';
+            csv += 'source valid for, [2000-' + this.tvi.histoUntill + ']\n';
             csv += 'country,belgium\n';
 
-            if (this.props.data.comment) csv += 'note,' + this.props.data.comment + '\n';
+            if (this.tvi.comment) csv += 'note,' + this.tvi.comment + '\n';
 
-            var years = this.props.data.years;
+            var years = this.tvi.years;
             years.forEach(function (v, year) {
                 csv += year + 2000 + ',' + v + '\n';
             });
 
-            download('be_' + this.props.data.label + '.csv', csv);
+            download('be_' + this.tvi.label + '.csv', csv);
         }
     }, {
         key: 'render',

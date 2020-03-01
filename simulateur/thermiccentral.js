@@ -1,5 +1,6 @@
 import * as Yearly from "../timevarin.js";
 import AbstractProductionMean from './abstractproductionmean.js';
+import BuildInfo from './buildinfo.js';
 
 class Kind extends AbstractProductionMean{
     constructor(parameters, label){
@@ -12,8 +13,6 @@ class Kind extends AbstractProductionMean{
 
         //capacity factor
         this._capacityFactor = parameters.capacityFactor ? parameters.capacityFactor: 1;
-
-        // this.demolishRatio = 0.15;
     }
 }
 
@@ -87,6 +86,9 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         //convert the dic to an array for yearly prod
         let centArr = [];
         for(let c in this.centrals){
+            if(this.centrals[c].productionStartYear > yStats.year) //central not rdy yet
+                continue;
+
             centArr.push(this.centrals[c]);
         }
 
@@ -107,16 +109,17 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         this.hourlyDemand.fill(0);
     }
 
-    prepareCapex(build){
-        let parameters = build.parameters;
-        let info = build.info;
+    buildInfo(parameters, zone){
+        if(!['nuke', 'ccgt', 'fusion'].includes(parameters.type))
+            throw 'wrong component';
+
+        let info = new BuildInfo(parameters);
 
         if(!['nuke', 'ccgt', 'fusion'].includes(parameters.type))
             throw 'wrong component';
 
-        build.pm = this;
 
-        info.build.end = this[parameters.type].build.delay +
+        info.build.end = this[parameters.type]._build.delay +
                         info.build.begin;
 
         //check for parameters
@@ -132,9 +135,9 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         info.nameplate.unit = 'N';
 
         info.build.co2 = nameplate // m2
-            * this[parameters.type].build.co2.at(info.build.begin);
+            * this[parameters.type]._build.co2.at(info.build.begin);
 
-        info.build.cost  =  this._computeBuildCost(build);
+        info.build.cost  =  this._computeBuildCost(parameters);
 
 
         info.perYear = {
@@ -161,16 +164,14 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
         info._m3PerJ = heatPerEnProduced / jToVapM3;
         info.coolingWaterRate = nameplate * info.avgCapacityFactor * info._m3PerJ;
 
-        info.centralId = this.nextCentralName;
-        this.nextCentralName++;
 
         if(parameters.type == 'nuke'){
             info.pop_affected = this.simu.cMap.reduceIf(['population'],
-                                                            {center: build.area.center, radius: nuclearDisasterRadius});
+                                                            {center: zone.center, radius: nuclearDisasterRadius});
         }
 
-        if(build.area.center !== null){
-            let pool = this.simu.cMap.poolIndexAt(build.area.center);
+        if(zone.center !== null){
+            let pool = this.simu.cMap.poolIndexAt(zone.center);
 
             if(pool == null){
                 info.theorical = "water";
@@ -180,58 +181,37 @@ export default class ThermicCentral /*extends AbstractProductionMean*/{
                 info.river = this.simu.cHydro.poolName(pool);
             }
 
-            if(!this.simu.cMap.isInCountry(build.area.center.x, build.area.center.y))
+            if(!this.simu.cMap.isInCountry(zone.center.x, zone.center.y))
                 info.theorical = "wrong space";
         }
+        return info;
     }
-    _computeBuildCost(build){
-        return build.parameters.nameplate * // w
-            this[build.parameters.type].build.cost.at(build.info.build.begin);  // eur/w
+    _computeBuildCost(parameters){
+        return parameters.nameplate * // w
+            this[parameters.type]._build.cost.at(parameters.year);  // eur/w
     }
 
     /// expand capacity
-    capex(build){
-        let parameters = build.parameters;
-        let info = build.info;
-
-        if(!['nuke', 'ccgt', 'fusion'].includes(parameters.type))
+    build(info){
+        if(!['nuke', 'ccgt', 'fusion'].includes(info.type))
             throw 'wrong component';
 
-        let nameplate = build.info.nameplate.at(build.info.build.end);
+        let nameplate = info.nameplate.at(info.build.end);
 
-        if(info.centralId in this.centrals)
-            throw 'appeler prepareCapex a chaque fois svp';
+        info.centralId = this.nextCentralName;
 
         this.centrals[info.centralId] = {
-            prodMax: nameplate * this[parameters.type]._capacityFactor,
+            prodMax: nameplate * this[info.type]._capacityFactor,
             co2PerWh:info.perWh.co2,
             m3PerJ: info._m3PerJ,
             pool: info._poolIndex,
             costPerWh: info.perWh.cost,
-            type: parameters.type,
-            demolishCost: info.build.cost * this[parameters.type].demolishRatio,
+            type: info.type,
+            demolishCost: info.build.cost * this[info.type].deconstructionRatio,
+            productionStartYear: info.build.end,
         };
 
-    }
-
-    /** same input as pv.demolish. return the cost of demolition. Dont apply the demoliton*/
-    costOfDemolish(demolish){
-        return this._computeBuildCost(demolish) * this.demolishRatio;
-    }
-
-    /**
-    demolish the given central.
-    @warning the central must exist (build complete)
-    @return demolition cost
-    */
-    demolish(centralId){
-        if(!centralId in this.centrals)
-            throw 'no in';
-
-        let cost = this.centrals[centralId].demolishCost;
-
-        delete this.centrals[centralId];
-        return cost;
+        this.nextCentralName++;
     }
 }
 

@@ -1,6 +1,6 @@
 import {Plot} from '../plot.js';
 import {tr} from "../../tr/tr.js";
-
+import {Raw} from '../../timevarin.js';
 
 //to be checked
 function download(filename, text) {
@@ -25,34 +25,36 @@ export default class ReactPlot extends React.Component{
     constructor(props){
         super(props);
 
+
+        this.tvi = new Raw(this.props.data);
         this.cCanvas = new React.createRef();
     }
 
     componentDidMount(){
-        let p = new Plot(this.props.data, this.props.width || 300, this.props.height || 200);
+        let p = new Plot(this.tvi, this.props.width || 300, this.props.height || 200);
         p.draw(this.cCanvas.current.getContext('2d'));
     }
 
     downloadAsCsv(){
         let csv = '';
-        csv += this.props.data.label + '\n';
+        csv += this.tvi.label + '\n';
 
-        if( this.props.data.unit)
-            csv += 'unit,' + this.props.data.unit + '\n';
-        csv += 'source,' + this.props.data.source + '\n';
-        csv += 'source valid for, [2000-' +this.props.data.histoUntill + ']\n';
+        if( this.tvi.unit)
+            csv += 'unit,' + this.tvi.unit + '\n';
+        csv += 'source,' + this.tvi.source + '\n';
+        csv += 'source valid for, [2000-' +this.tvi.histoUntill + ']\n';
         csv += 'country,belgium\n';
 
-        if(this.props.data.comment)
-            csv += 'note,' + this.props.data.comment + '\n';
+        if(this.tvi.comment)
+            csv += 'note,' + this.tvi.comment + '\n';
 
 
-        let years = this.props.data.years;
+        let years = this.tvi.years;
         years.forEach((v, year) => {
             csv += (year + 2000) + ',' + v +'\n';
         });
 
-        download('be_' + this.props.data.label + '.csv', csv);
+        download('be_' + this.tvi.label + '.csv', csv);
     }
 
     render(){

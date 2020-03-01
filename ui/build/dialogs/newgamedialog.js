@@ -8,7 +8,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { tr } from "../../../tr/tr.js";
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
-import { Simulateur, promiseSimulater } from '../../../simulateur/simulateur.js';
 
 /** @brief this dialog prompt user with choice of the region and parameters
 @note it prevent clicks on the page
@@ -43,28 +42,25 @@ export var NewGameDialog = function (_React$Component) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             window.addEventListener('keydown', this.key);
-
-            //auto start game. TMP
-            this.start();
         }
     }, {
         key: 'componentWillUnmount',
         value: function componentWillUnmount() {
             window.removeEventListener('keydown', this.key);
         }
-    }, {
-        key: 'start',
-        value: function start() {
-            var _this2 = this;
 
-            promiseSimulater(this.props.scene).then(function (s) {
-                _this2.props.scene.setMap(s.cMap);
+        // start(){
+        //     promiseSimulater(this.props.scene).then(s =>{
+        //         this.props.scene.setMap(s.cMap);
+        //
+        //         this.props.startRequested(s);
+        //     })
+        //     .catch(err => {
+        //         alert(err);
+        //     });
+        // }
+        //
 
-                _this2.props.startRequested(s);
-            }).catch(function (err) {
-                alert(err);
-            });
-        }
     }, {
         key: 'handleRegionChange',
         value: function handleRegionChange() {}
@@ -74,6 +70,7 @@ export var NewGameDialog = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+
             return React.createElement(
                 'div',
                 { style: { position: 'absolute', width: '100%', 'height': '100%', zIndex: 100000000, alignItems: 'center', justifyContent: 'center' }, className: 'vLayout' },
@@ -142,7 +139,7 @@ export var NewGameDialog = function (_React$Component) {
                         { className: 'hLayout' },
                         React.createElement(
                             'div',
-                            { className: 'button white', onClick: this.startClicked.bind(this) },
+                            { className: 'button white', onClick: this.props.onStart },
                             tr("Start")
                         )
                     )

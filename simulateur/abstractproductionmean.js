@@ -24,9 +24,9 @@ export default class AbstractProductionMean{
 
     this._currentYear = {};
 
-    this.build = {co2: new Yearly.Raw(0)};
-    this.build.delay = parameters.build.time;
-    this.build.cost = new Yearly.Raw(parameters.build.cost);
+    this._build = {co2: new Yearly.Raw(0)};
+    this._build.delay = parameters.build.time;
+    this._build.cost = new Yearly.Raw(parameters.build.cost);
 
     this.deconstructionRatio = parameters.deconstructionRatio;
 

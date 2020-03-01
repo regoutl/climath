@@ -22,7 +22,8 @@ export default class ProductionComponent{
 	 * 					if undefined, set to 1.0
 	 */
 	constructor(parameters, simu){
-		this._initCountries(parameters.countries);
+		let params = parameters.parameters;
+		this._initCountries(params.countries);
 
 		//sorted by priority (higher production mean will produce at max capa first)
 		//note : fossil means 'ppl use a fossil engine/ heater/wathever' aka, things that never use electricity
@@ -30,13 +31,13 @@ export default class ProductionComponent{
 
 
 		this.productionMeans = {
-			pv: new Pv(parameters.energies.pv, simu),
-			wind: new Wind(parameters.energies.wind, simu),
+			pv: new Pv(params.energies.pv, parameters.pvCapFact, simu),
+			wind: new Wind(params.energies.wind, parameters.windCapFact, simu),
 		  // nuke: new Nuke(parameters.energies.nuke, simu),
-			storage: new Storage(parameters.energies.storage, simu),
+			storage: new Storage(params.energies.storage, simu),
 			// ccgt: new Ccgt(parameters.energies.ccgt, simu),
 		  // fossil: new Fossil(parameters.energies.fossil, simu),
-			centrals : new ThermicCentral(parameters.energies, simu),
+			centrals : new ThermicCentral(params.energies, simu),
 		};
 	}
 

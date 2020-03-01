@@ -103,7 +103,7 @@ export var TutoDialog = function (_React$Component) {
             var slide = [{ title: 'Objective', body: [React.createElement(
                     'p',
                     null,
-                    tr('Emmit 0 carbon between 2050 and 2070')
+                    tr('Emit 0 carbon between 2050 and 2070')
                 ), React.createElement(
                     'p',
                     null,

@@ -63,6 +63,22 @@ export default class MapView extends React.Component{
         });
     }
 
+    confirmBuild(){
+        // console.log('confirm build');
+        this.props.simu.build(this.state.targetBuild);
+
+
+        //should make game win update
+        this.props.onMoneyChanged();
+    }
+
+    confirmDemolish(){
+        this.props.simu.demolish({center: this.state.targetBuild.pos, radius: this.state.targetBuild.radius});
+
+        //should make game win update
+        this.props.onMoneyChanged();
+    }
+
 
     //internal functions--------------------------------------------------------
 
@@ -165,12 +181,12 @@ export default class MapView extends React.Component{
 
                     onTypeChanged = {this.setTargetBuildState.bind(this, 'type')}
                     onDetailsRequested = {this.props.onDetailsRequested}
-                    onBuildConfirmed = {() => this.confirmBuild(this.scene.cursor.pos)}
+                    onBuildConfirmed = {() => this.confirmBuild()}
                 />);
     }
 
     _makeTouchBuildMenu(){
-        
+
         if(!this.state.touchBuildMenuPos)
             return null;
 
@@ -184,7 +200,7 @@ export default class MapView extends React.Component{
                     onTypeChanged = {this.setTargetBuildState.bind(this, 'type')}
                     onDetailsRequested = {this.props.onDetailsRequested}
                     onBuildConfirmed = {() => {
-                        this.props.onBuildConfirmed(); //normal, confirm the build
+                        this.confirmBuild(); //normal, confirm the build
                         this.setTargetBuildState('type', null);
                         //hide the menu
                         this.setState({touchBuildMenuPos: null});
@@ -251,14 +267,17 @@ export default class MapView extends React.Component{
         //we were not dragging, count as a click
         //note : the check 'isMouseDown' is necessary; else, toucheend triger the build confirmation
         if(!this.dragging && this.isMouseDown && this.state.targetBuild.type ){
-            let rawPos = {x:e.pageX, y : e.pageY};
+            // let rawPos = {x:e.pageX, y : e.pageY};
+            //
+            // let transformedPos = {
+            //     x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
+            //     y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
+            // };
 
-            let transformedPos = {
-                x: Math.round((rawPos.x / this.transform.scale) - this.transform.x),
-                y: Math.round((rawPos.y / this.transform.scale) - this.transform.y),
-            };
-
-            this.props.onBuildConfirmed(transformedPos);
+            if(this.state.targetBuild.type != 'demolish')
+                this.confirmBuild();
+            else
+                this.confirmDemolish();
         }
 
         this.isMouseDown = false;

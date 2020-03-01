@@ -8,6 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import GameWin from './gamewin.js';
 import { AppContext } from './appcontext.js';
+import { NewGameDialog } from './dialogs/newgamedialog.js';
 
 /** @brief switch between full layouts*/
 export var App = function (_React$Component) {
@@ -19,7 +20,7 @@ export var App = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
         _this.state = {
-            currentPage: 'gameWin',
+            currentPage: 'newGame',
             context: {
                 //controls how the equations (typically in the details dialogs) are displayed
                 // valid values : ('text', 'math').
@@ -27,8 +28,12 @@ export var App = function (_React$Component) {
                 // math : math description, with a quick explaination of the parameters
                 equationDisplay: 'text',
                 toggleEquationDisplay: _this.toggleEquationDisplay.bind(_this)
-            }
+            },
+            country: '',
+            strParameters: '' // it is the parameters as a json (easyer for react)
         };
+
+        _this.setCountry('be');
         return _this;
     }
 
@@ -40,21 +45,54 @@ export var App = function (_React$Component) {
                 return { context: Object.assign({}, state.context, { equationDisplay: ctx.equationDisplay == 'math' ? 'text' : 'math' }) };
             });
         }
+
+        //when menu ask for start
+
+    }, {
+        key: 'startGame',
+        value: function startGame() {
+            //todo : validations checks (is parameters loaded etc)
+
+            this.setState({ currentPage: 'gameWin' });
+        }
+    }, {
+        key: 'setCountry',
+        value: function setCountry(code) {
+            var _this2 = this;
+
+            fetch('data/' + code + '/defaultParameters.json').then(function (response) {
+                return response.text();
+            }) //   no txt to json conv
+            .then(function (params) {
+                _this2.setState({ country: code, strParameters: params });
+            });
+        }
     }, {
         key: 'render',
         value: function render() {
+            var _this3 = this;
+
+            var content = void 0;
+
             if (this.state.currentPage == 'gameWin') {
-                return React.createElement(
-                    AppContext.Provider,
-                    { value: this.state.context },
-                    React.createElement(GameWin, null)
-                );
-            }
+                content = React.createElement(GameWin, {
+                    country: this.state.country,
+                    strParameters: this.state.strParameters
+                });
+            } else if (this.state.currentPage == 'newGame') {
+                content = React.createElement(NewGameDialog, {
+                    onStart: this.startGame.bind(this),
+                    onCountryChange: this.setCountry.bind(this),
+                    onParamChange: function onParamChange(strParam) {
+                        return _this3.setState({ strParameters: strParam });
+                    }
+                });
+            } else throw 'todo';
 
             return React.createElement(
-                'p',
-                null,
-                'Coucou'
+                AppContext.Provider,
+                { value: this.state.context },
+                content
             );
         }
     }]);

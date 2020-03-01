@@ -7,16 +7,16 @@ function Production(props) {
         'p',
         null,
         'Production of a PV farm of area ',
-        React.createElement('img', { src: 'data/symbols/area.svg' }),
+        React.createElement('img', { src: 'res/symbols/shared/area.svg' }),
         ' is : '
-    ), React.createElement('img', { src: 'data/pv/production.svg', alt: 'Pv production eq' }), React.createElement(
+    ), React.createElement('img', { src: 'res/symbols/pv/production.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
         null,
-        [{ img: 'symbols/radFlux', descr: 'is the maximal radiant flux (W/m2)' }, { img: 'symbols/efficiency', descr: 'is the pannel efficiency at y0' }, { img: 'symbols/capaFactT', descr: 'is the capacity factor at that hour' }, { img: 'symbols/decline', descr: 'is the yearly efficiency decline' }, { img: 'symbols/year', descr: 'is the current year' }, { img: 'symbols/year0', descr: 'is the build year' }].map(function (i) {
+        [{ img: 'shared/radFlux', descr: 'is the maximal radiant flux (W/m2)' }, { img: 'shared/efficiency', descr: 'is the pannel efficiency at y0' }, { img: 'shared/capaFactT', descr: 'is the capacity factor at that hour' }, { img: 'shared/decline', descr: 'is the yearly efficiency decline' }, { img: 'shared/year', descr: 'is the current year' }, { img: 'shared/year0', descr: 'is the build year' }].map(function (i) {
             return React.createElement(
                 'li',
                 { key: i.img },
-                React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                React.createElement('img', { src: "res/symbols/" + i.img + ".svg", alt: i.descr }),
                 ' ',
                 tr(i.descr)
             );
@@ -33,7 +33,7 @@ function Production(props) {
         ['The area', 'The amount of sun. ' + 'The amount of sun depends on the location (we call it \'radiant flux\') ' + 'and the time of the day/year (we call it \'Capacity factor\').', 'The panel efficiency. This decrease with time. '].map(function (i) {
             return React.createElement(
                 'li',
-                null,
+                { key: i.substr(5, 2) },
                 tr(i)
             );
         })
@@ -61,21 +61,21 @@ function RadFlux(props) {
             React.createElement(
                 'div',
                 null,
-                React.createElement('img', { src: 'data/pv/maxRadFlux.svg', alt: 'max rad flux eq' }),
+                React.createElement('img', { src: 'res/symbols/pv/maxRadFlux.svg', alt: 'max rad flux eq' }),
                 React.createElement(
                     'ul',
                     null,
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/symbols/avgCapaFact.svg', alt: 'avgCapaFact' }),
+                        React.createElement('img', { src: 'res/symbols/shared/avgCapaFact.svg', alt: 'avgCapaFact' }),
                         ' ',
                         tr('is the average capacity factor')
                     ),
                     React.createElement(
                         'li',
                         null,
-                        React.createElement('img', { src: 'data/pv/avgGhi.svg', alt: 'average global hori irradiance' }),
+                        React.createElement('img', { src: 'res/symbols/pv/avgGhi.svg', alt: 'average global hori irradiance' }),
                         ' ',
                         tr(' is the average Global Horizontal Irradiance')
                     )
@@ -123,46 +123,46 @@ function CapaFact(props) {
 }
 
 function EffiDecl(props) {
-    return React.createElement(
-        'div',
+    var math = [React.createElement(
+        'p',
         null,
+        tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')
+    ), React.createElement(
+        'p',
+        null,
+        tr('The yearly efficiency decline is then simply :')
+    ), React.createElement('img', { src: 'res/symbols/pv/decl25Todecl.svg' }), React.createElement(
+        'p',
+        { className: 'pSource' },
         React.createElement(
-            'h4',
-            null,
-            tr('Efficiency decline')
-        ),
-        React.createElement(
-            'p',
-            null,
-            tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')
-        ),
-        React.createElement(
-            'p',
-            null,
-            tr('The yearly efficiency decline is then simply :')
-        ),
-        React.createElement('img', { src: 'data/pv/decl25Todecl.svg' }),
-        React.createElement(
-            'p',
-            { className: 'pSource' },
-            React.createElement(
-                'a',
-                { href: 'https://news.energysage.com/sunpower-solar-panels-complete-review' },
-                'Sumpower'
-            )
+            'a',
+            { href: 'https://news.energysage.com/sunpower-solar-panels-complete-review' },
+            'Sumpower'
         )
-    );
+    )];
+
+    var text = [React.createElement(
+        'p',
+        null,
+        tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')
+    )];
+
+    return React.createElement(MathTextTile, {
+        title: 'Efficiency decline',
+        math: math,
+        text: text
+    });
 }
 
 /** @brief this class provide a lot of explainations about pv
 */
 /* accepted props
-productionMeans = this.simu.cProd.productionMeans
-countries       = this.simu.cProd.countries
-closeRequested
+parameters : string. same format as parameters.json
 */
 export default function PvDetails(props) {
-    var pv = props.productionMeans.pv;
+    var json = JSON.parse(props.parameters);
+
+    var pv = json.energies.pv;
 
     return React.createElement(
         'div',

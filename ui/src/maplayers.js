@@ -49,8 +49,9 @@ export default class MapLayers extends React.Component{
         }
         else{
             ans.push(
-                <div id="dMapLayers" title={tr("Choose displayed layers")} className="vLayout">
+                <div id="dMapLayers" title={tr("Choose displayed layers")} className="vLayout" key="mapLayerBox">
                     <img
+                        key="coucou"
                         src='res/icons/layers.png'
                         className = "mapButton"
                         onClick={() => this.setState({open: true})}

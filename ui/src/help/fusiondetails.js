@@ -1,7 +1,8 @@
 
 import {tr} from '../../../tr/tr.js';
-import ReactPlot from '../reactplot.js';
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
+import {PlotTile, MathTextTile} from './sharedtiles.js';
+
 
 /** @brief this class provide a lot of explainations about pv
 */
