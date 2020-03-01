@@ -1,0 +1,465 @@
+@font-face {
+    font-family: futura;
+    src: url('../../res/FutuLt.ttf');
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font-size: var(--based-font-size);
+    text-decoration: none;
+    font-weight: normal;
+    text-align: left;
+
+    vertical-align: top;
+}
+
+sup{
+    vertical-align: super;
+    font-size: smaller;
+}
+
+#root{
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+html, body{
+    width: 100%;
+    height: 100%;
+}
+
+body{
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    width: 100%;
+    height: 60px;
+
+    text-align: center;
+
+    border-bottom: 1px solid gray;
+    display: none;
+}
+
+h1{
+    font-size: 30px;
+    padding: 10px;
+}
+
+h1, h2, h3, h4{
+    font-family: futura;
+}
+h3{
+    font-size: 1.5em;
+}
+
+ul{
+   list-style-type: none;
+}
+ul.default{
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+table{
+    border-collapse: collapse;
+}
+
+td{
+    padding: 2px;
+}
+
+/** BUILD MENU ----------------------------------*/
+
+.bBuild{
+    height: var(--menu-icon-size);
+    margin: 5px;
+    cursor: pointer;
+}
+
+.bBuild:hover{
+    transform: scale(1.2);
+}
+
+.pSource{
+    font-size: 10px;
+}
+
+
+
+
+#author{
+    padding: 10px;
+    font-size: 0.8em;
+}
+
+
+/** REACT =====================================================**/
+
+
+.hFlex{
+    display: flex;
+    flex-direction: row;
+
+}
+
+
+.hLayout{
+    display: flex;
+    flex-direction: row;
+
+    overflow: hidden;
+    flex: 1 1;
+}
+
+.vLayout{
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+    flex: 1 1;
+}
+
+
+#statusBar{
+    position: absolute;
+    width: 100%;
+    z-index:1000000;
+    justify-content: space-between;
+    height: var(--status-bar-height);
+    align-items: center;
+    font-size: 1.5em;
+    background: rgba(50, 50, 50, 0.9);
+    border-bottom: 2px solid white;
+    color: white;
+    font-family: futura;
+    overflow: visible;
+}
+#statusBar > * {
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+#dBuildDock{
+    position: absolute;
+    bottom: 0px;
+    /* width: 100%; */
+    width: min-content;
+    height: var(--build-dock-height);
+    z-index:1000000;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5em;
+    overflow: hidden;
+}
+
+#BuildMenu{
+    position: absolute;
+    bottom: var(--build-dock-height);
+    z-index:999;
+    justify-content: space-between;
+    align-items: center;
+    left: 0;
+    top: var(--status-bar-height);
+    flex-wrap: wrap;
+    overflow: visible;
+    justify-content: flex-end;
+}
+
+#dMapBox{
+    flex: 1 1;
+    position: relative;
+}
+
+#dMapLayers{
+    position: absolute;
+    right: 10px;
+    top: calc(var(--status-bar-height) + 10px);
+}
+
+.mapButton{
+    cursor: pointer;
+    width: var(--menu-icon-size);
+    border-radius: 16px;
+}
+
+
+#dMapBox canvas{
+    border: 0;
+    padding: 0;
+    margin: 0;
+    touch-action: none;
+}
+
+#bNextTurn{
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+.button{
+    display:block;
+    padding:0.35em 1.2em;
+    margin:0.3em;
+    border-radius:0.12em;
+    box-sizing: border-box;
+    text-decoration:none;
+    font-family: futura;
+    font-weight:300;
+    text-align:center;
+    transition: all 0.2s;
+    cursor: pointer;
+    height: 35px;
+}
+
+.button.black{
+    color:black;
+    border:0.1em solid black;
+
+}
+
+.button.black:hover{
+    color:white;
+    background-color:black;
+
+}
+
+
+.button.white{
+    color:white;
+    border:0.1em solid white;
+}
+.button.white:hover{
+    color:black;
+    background-color:white;
+}
+
+
+
+
+.dialog{
+    /* height: 100px;
+    width: 100px; */
+    z-index: 1000;
+    position: absolute;
+    background: rgba(50, 50, 50, 0.9);
+    color: white;
+
+    padding: 20px;
+    border-radius: 10px;
+    overflow: visible;
+}
+
+
+.dialog h3{
+    margin: 0 10px 10px 10px;
+    text-align: center;
+}
+
+
+.taxSlider{
+    width: 300px;
+    height: 8px;
+    border-radius: 4px;
+    background-image:
+        linear-gradient(
+            to right,
+            #4bc67d 30%, #f1c40f 45%, #b94a48 100%
+        );
+    position: relative;
+    margin: 25px 0;
+}
+
+.taxSlider .handle{
+    margin-left: -20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 400px;
+    background:
+    white;
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    color:
+    black;
+    line-height: 40px;
+    font-size: 16px;
+    border: 5px solid
+    green;
+    font-weight: 500;
+    font-family: Century Gothic,CenturyGothic,AppleGothic,sans-serif;
+    text-align: center;
+    cursor: pointer;
+}
+
+
+
+
+
+/* Details  */
+.detailContent{
+    user-select: text;
+}
+.detailContent h3{
+    font-size: 1.4em;
+}
+
+.detailContent h4{
+    border-bottom: 5px solid rgb(200, 200, 255);
+    font-size: 1.3em;
+    line-height: 3em;
+    margin-bottom: 10px;
+}
+
+
+.hWrapLayout{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.hWrapLayout > *{
+    width: 400px;
+    margin: 10px;
+    flex-grow: 1;
+}
+
+
+
+
+.plotContainer{
+	position: relative;
+}
+
+.bDownloadPlotCsv{
+	position: absolute;
+	right: -32px;
+	top: 0;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.1s;
+}
+
+
+.plotContainer:hover .bDownloadPlotCsv{
+	opacity: 1;
+}
+
+
+
+.mathTextTile h4{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.mathTextTile h4 img{
+    cursor: pointer;
+    vertical-align: middle;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.mathTextTile:hover h4 img{
+    opacity: 1;
+}
+
+.mathTextTile h4 img:hover{
+    transform: scale(1.1);
+}
+
+
+.tuto *{
+    text-align: center;
+}
+.tuto img{
+    object-fit:scale-down;
+}
+
+.tuto > .hLayout > .vLayout{
+    padding: 5px;
+    width: 150px;
+}
+
+.tuto > .hLayout > .vLayout h4{
+    font-size: 1.2em;
+}
+
+.tuto > .hLayout > .vLayout p{
+    font-size: 0.8em;
+
+}
+
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1, 1);
+  }
+
+  50% {
+    transform: scale(0.97, 0.97);
+  }
+}
+
+.balloon {
+    animation-timing-function: ease-in-out;
+    color : white;
+    background: rgb(50, 50, 50);
+    border-radius: 5px;
+    position: absolute;
+    padding: 5px 15px;
+    font-size: 1.2em;
+    width: max-content;
+}
+
+.balloon::after{
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    content: "";
+    position: absolute;
+}
+
+#bNextTurn .balloon{
+    animation: breathe 1s infinite;
+    top: -45px;
+    right: 5px;
+    width: max-content;
+}
+#bNextTurn .balloon::after{
+    border-top: 8px solid rgb(50, 50, 50);
+    left: 50%;
+    bottom: -15px;
+    transform: translate(-50%, 0);
+}
+
+#statusBar .balloon{
+    top: 45px;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+#statusBar .balloon::after{
+    border-bottom: 8px solid rgb(50, 50, 50);
+    left: 50%;
+    top: -15px;
+    transform: translate(-50%, 0);
+}
+
+
+#BuildMenu .balloon{
+    animation: breathe 1s infinite;
+    bottom: 50px;
+    left: 50px;
+}
+
+#BuildMenu .balloon::after{
+    border-right: 8px solid rgb(50, 50, 50);
+    top: 50%;
+    left: -15px;
+    transform: translate(0, -50%);
+}

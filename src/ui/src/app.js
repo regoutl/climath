@@ -24,7 +24,7 @@ export class App extends React.Component{
         };
         this.parameters = null;
 
-        // this.setCountry('be');
+        this.setCountry('be');
     }
 
     toggleEquationDisplay(){
@@ -47,9 +47,6 @@ export class App extends React.Component{
         .then((params) => {
             this.parameters = params;
             this.setState({country: code});
-        })
-        .catch((e) => {
-            alert('set counrty err' + e);
         });
     }
 
@@ -66,6 +63,7 @@ export class App extends React.Component{
             content = <NewGameDialog
                 onStart = {this.startGame.bind(this)}
                 onCountryChange = {this.setCountry.bind(this)}
+                onParamChange = {(strParam) => this.setState({strParameters: strParam})}
              />;
         }
         else
