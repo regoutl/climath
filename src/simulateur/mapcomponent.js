@@ -1,5 +1,4 @@
-"use strict";
-
+import Scene from '../ui/scene.js';
 
 const GroundUsage = {
     out:0,
@@ -37,11 +36,8 @@ export default class MapComponent{
         - appendEnergyPalette(type)
         - update(layername)
     */
-    constructor(mapImgs, simu, view){
+    constructor(mapImgs, simu){
         this.width = 1374;
-
-
-        this.view = view;
 
         this.simu = simu;
 

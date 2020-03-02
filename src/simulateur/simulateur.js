@@ -25,7 +25,7 @@ store general values
 */
 export class Simulateur{
     constructor(createInfo){
-        this.cMap = new MapComponent(createInfo.map, this, createInfo.mapView);
+        this.cMap = new MapComponent(createInfo.map, this);
         this.cHydro = new HydroComponent(createInfo.hydro);
         this.cProd = new ProductionComponent(createInfo.production, this);
 
@@ -404,7 +404,7 @@ function _simulateBoom(area, set){
 @param mapView is as defined in MapComponent's constructor
 @return a promise that is resolved when ready.
 **/
-export function promiseSimulater(mapView, parameters, countryCode){
+export function promiseSimulater(parameters, countryCode){
 
   return Promise.all([
         fetch('data/' + countryCode + '/gameRdy/landUse.bin')
@@ -423,6 +423,8 @@ export function promiseSimulater(mapView, parameters, countryCode){
             .then(response => response.arrayBuffer()),
         fetch('data/' + countryCode + '/gameRdy/windPowDens50.bin')
             .then(response => response.arrayBuffer()),
+        // fetch('data/' + countryCode + '/gameRdy/flowdisplay.bin')
+        //     .then(response => response.arrayBuffer()),
     ])
     //called when all simu related res are loaded
     .then((values) => {
@@ -439,8 +441,8 @@ export function promiseSimulater(mapView, parameters, countryCode){
             popDensity: new Uint8Array(values[6]),
             windPowDens:{at50:new Uint8Array(values[7])},
             pools: new Uint8Array(values[5]),
+            // riverDisplay: new Uint8Array(values[8]),
         };
-        simuCreateInfo.mapView = mapView;
 
         simuCreateInfo.hydro = {
             stations: new Float32Array(values[3]),

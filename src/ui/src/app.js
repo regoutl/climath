@@ -22,7 +22,7 @@ export class App extends React.Component{
             },
             country: '',
         };
-        this.parameters = null;
+        this.parameters = null; // content of parameters.json
 
         this.setCountry('be');
     }

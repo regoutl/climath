@@ -12,7 +12,7 @@ countries       = this.simu.cProd.countries
 closeRequested
 */
 export default function NukeDetails (props){
-    let nuke = props.productionMeans.centrals.nuke;
+    let nuke = props.parameters.energies.nuke;
 
     return (<div className='detailContent'>
         <h3>{tr('Nuclear reactors')}</h3>
@@ -55,7 +55,7 @@ export default function NukeDetails (props){
             </div>
             <div>
                 <h4>{tr('Accident risk')}</h4>
-                <p>{tr('We assume that Fukushima-like event happend with probability ' + Math.round(100000*nuke.boom.probability)/1000 + '% per central, per year.')}</p>
+                <p>{tr('We assume that Fukushima-like event happend with probability ' + Math.round(100000*nuke.accident.probability.year[0])/1000 + '% per central, per year.')}</p>
                 <p>{tr('In case of accident : ')}</p>
                 <ul className='default'>
                     <li>{tr('A radius of 10 km around the central must be evacueted')}</li>

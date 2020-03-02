@@ -6,14 +6,14 @@ import {PlotTile, MathTextTile} from './sharedtiles.js';
 function StorageCapacity(props){
     let math = [
         <p>{tr('The storage capacity of a battery of volume V is')}</p>,
-        <img src="data/battery/capa.svg" alt="Pv production eq" />,
+        <img src="res/symbols/battery/capa.svg" alt="Pv production eq" />,
         <ul>
         {[
-            {img:'symbols/density', descr: 'is the storage density (Wh/m3)'},
-            {img:'symbols/decline', descr: 'is the yearly storage capacity decline'},
-            {img:'symbols/year', descr: 'is the current year'},
-            {img:'symbols/year0', descr: 'is the build year'},
-        ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+            {img:'shared/density', descr: 'is the storage density (Wh/m3)'},
+            {img:'shared/decline', descr: 'is the yearly storage capacity decline'},
+            {img:'shared/year', descr: 'is the current year'},
+            {img:'shared/year0', descr: 'is the build year'},
+        ].map((i) => <li key={i.img}><img src={"res/symbols/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
 
         </ul>
     ];
@@ -32,16 +32,16 @@ function StorageCapacity(props){
 }
 
 function StoredEnergy(props){
-    let math = [<img src="data/battery/storedEq.svg" alt="Pv production eq" />,
+    let math = [<img src="res/symbols/battery/storedEq.svg" alt="Pv production eq" />,
         <ul>
             {[{img:'battery/st', descr: 'is the energy stored at hour t (Wh)'},
-            {img:'symbols/decline', descr: 'is the yearly storage capacity decline'},
+            {img:'shared/decline', descr: 'is the yearly storage capacity decline'},
             {img:'battery/d', descr: 'is the hourly power loss'},
-            {img:'symbols/efficiency', descr: 'is the round trip efficiency'},
+            {img:'shared/efficiency', descr: 'is the round trip efficiency'},
             {img:'battery/it', descr: 'is the energy send to load the battery (average for this hour) (W)'},
-            {img:'symbols/prod', descr: 'is the energy production of the battery (average for this hour) (W)'},
+            {img:'shared/prod', descr: 'is the energy production of the battery (average for this hour) (W)'},
             {img:'battery/capacity', descr: 'is the storage capacity'},
-        ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+        ].map((i) => <li key={i.img}><img src={"res/symbols/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
         </ul>];
 
 
@@ -63,7 +63,7 @@ function StorageCapacityDecline(props){
 function PowerLoss(props){
     let math =[<p>{tr('It is estimated that, every month, the stored energy decrease by 2%.')}</p>,
     <p>{tr('The hourly power loss is then simply :')}</p>,
-    <img src='data/battery/lossMtoH.svg' />,
+    <img src='res/symbols/battery/lossMtoH.svg' />,
     <p>730 = number of hour per month in a 365 day year</p>];
 
 
@@ -75,7 +75,7 @@ function PowerLoss(props){
 function RoundTripEfficiency(props){
     let math =[    <p>{tr('It is the ratio between the retreived energy and the energy put in.')}</p>,
         <p>{tr("We assume that 'half' the loss happend at load time and 'half' at unload time, hence the ")}
-            <img src='data/battery/sqrtEffi.svg' alt ='sqrt effi' />{tr(' in the equation')}
+            <img src='res/symbols/battery/sqrtEffi.svg' alt ='sqrt effi' />{tr(' in the equation')}
         </p>,
         <p>{tr('We estimate round trip efficiency to be 0.9.')}</p>]
     let text =[  <p>{tr('It is the ratio between the retreived energy and the energy put in.')}</p>,
@@ -89,7 +89,7 @@ function RoundTripEfficiency(props){
 /** @brief this class provide a lot of explainations about pv
 */
 export default function BatteryDetails (props){
-    let bat = props.productionMeans.storage.solutions.battery;
+    let bat = props.parameters.energies.storage.battery;
 
 
     return (<div className='detailContent'>

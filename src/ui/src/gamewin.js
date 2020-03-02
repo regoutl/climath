@@ -10,7 +10,6 @@ import {isTouchScreen,isMobile,isSmallScreen,isLandscape} from '../screenDetecti
 
 import {TutoDialog} from './dialogs/tutodialog.js';
 
-import Scene from '../scene.js';
 
 import {Simulateur, promiseSimulater, objSum} from '../../simulateur/simulateur.js';
 
@@ -36,19 +35,15 @@ export default class GameWin extends React.Component{
             help: NullHelp,
         };
 
-        this.scene = new Scene();
-
-
-        promiseSimulater(this.scene, this.props.parameters, this.props.country).then(s =>{
-            this.scene.setMap(s.cMap);
-
+        promiseSimulater(this.props.parameters, this.props.country)
+        .then(s =>{
             this.simu = s;
 
             this.forceUpdate();
         })
-        .catch(err => {
-            alert(err);
-        });
+        .catch(err => {alert(err);});
+
+
     }
 
 
@@ -80,6 +75,10 @@ export default class GameWin extends React.Component{
 
 
     render(){
+        if(!this.simu){
+            return <p>Chargement ... </p>;
+        }
+
         if(this.state.currentDialog == TutoDialog){
             return (
                 <div className="vLayout" style={{width: '100%', height: '100%'}}>
@@ -89,9 +88,6 @@ export default class GameWin extends React.Component{
             );
         }
 
-        if(!this.simu){
-            return <p>Chargement ... </p>;
-        }
 
         let cProd = this.simu.cProd;
         let cMap = this.simu.cMap;
@@ -123,7 +119,6 @@ export default class GameWin extends React.Component{
     _makeMapView(){
         return (
             <MapView
-                scene = {this.scene}
                 simu = {this.simu}
                 onDetailsRequested = {(c) => {this.setState({help: c})}}
                 showOnlyMap = {this.state.currentDialog == TutoDialog}
@@ -189,7 +184,7 @@ export default class GameWin extends React.Component{
                 >
                 <CloseButton closeRequested={() => this.setState({help: NullHelp})}/>
                 <Help
-                    parameters = {this.props.strParameters}
+                    parameters = {this.props.parameters}
                 />
             </div>);
         }

@@ -31,7 +31,7 @@ s.init(canvas)
 s.draw(...)
  */
 export default class Scene{
-    constructor(){
+    constructor(canvas){
 
         //array of positions of ponctual stuff (nuke, ccgt, ...). format : type, pos
         this.items = [];
@@ -44,18 +44,20 @@ export default class Scene{
             type: undefined,
             radius: null
         };
+
+        this._init(canvas);
     }
 
     //should be called once, with the valid canvas
-    init(canvas){
+    _init(canvas){
         if(this.gl){
             console.log('Wrining :no second init');
 //            return;
         }
 
-        if(this.cMap === undefined){
-            console.log('need to call setMap before init');
-        }
+        // if(this.cMap === undefined){
+        //     console.log('need to call setMap before init');
+        // }
 
         this.gl = canvas.getContext("webgl", { alpha: false });
 
@@ -69,16 +71,16 @@ export default class Scene{
         gl.clearColor(1, 1, 1, 1);
 
         this._initMapShader();
-        this._initTextures();
         this._initPointShader();
     }
 
-    //shoud be called with the map
-    setMap(cMap){
-        this.cMap = cMap;
+    setModel(simu){
+        this.cMap = simu.cMap;
+        simu.cMap.view = this;
+
+        this._initTextures();//init tex when
+
     }
-
-
 
     /** @brief update the given layer*/
     update(layerName){
@@ -332,8 +334,11 @@ export default class Scene{
 
     }
     _initTexFlows(){
+        console.log('Loading flows for be');
+
         let self = this;
-        fetch('hydro/flowdisplay.bin')
+
+        fetch('data/be/gameRdy/flowdisplay.bin')
         .then((response) => {return response.arrayBuffer();})
         .then((waterData) => {
             self.water = new PaletteTexture(self.gl, 1);

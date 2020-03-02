@@ -37,7 +37,7 @@ export default class Storage /*extends AbstractProductionMean*/{
 
     this.solutions.battery.perYear = {};
     this.solutions.battery.perYear.cost
-      = new Yearly.Raw(parameters.battery.onm);
+      = new Yearly.Raw(parameters.battery.perYear.cost);
 
     this.solutions.battery.energyDensity
       = new Yearly.Raw(parameters.battery.energyDensity);

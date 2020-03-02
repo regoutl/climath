@@ -2,6 +2,7 @@ import {tr} from '../../tr.js';
 import MapLayers from './maplayers.js';
 import {BuildDock, TouchBuildDock} from './builddock.js';
 import {isTouchScreen,isMobile,isSmallScreen,isLandscape} from '../screenDetection.js';
+import Scene from '../scene.js';
 
 function isCentral(type){
     return type == 'nuke' || type == 'ccgt' || type == 'fusion';
@@ -53,6 +54,8 @@ export default class MapView extends React.Component{
         };
 
         this.canvas = React.createRef();
+
+        this.scene = null; // initiated in comp did mount
     }
 
 
@@ -93,9 +96,10 @@ export default class MapView extends React.Component{
     }
 
     componentDidMount(){
-        this.props.scene.init(this.canvas.current);
+        //lower level rendering functions.
+        this.scene = new Scene(this.canvas.current);
 
-        console.log("mount mapview !");
+        this.scene.setModel(this.props.simu);
 
         this.draw();
         window.addEventListener('resize', this.draw);
@@ -152,14 +156,17 @@ export default class MapView extends React.Component{
     }
 
     draw(){
+        if(!this.scene)
+            return;
+
         //update the cursor
-        this.props.scene.cursor={
+        this.scene.cursor={
                         type:this.state.targetBuild.type,
                         radius: this.state.targetBuild.radius,
                         pos:this.state.targetBuild.pos
                     };
 
-        this.props.scene.draw(
+        this.scene.draw(
                 this.transform,
                 this.state.base,
                 this.state.energyGrid,

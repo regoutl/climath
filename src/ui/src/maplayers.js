@@ -62,7 +62,7 @@ export default class MapLayers extends React.Component{
 
         if(props.base == 'popDensity'){
             ans.push(
-                <div>
+                <div key='legend'>
 
                 </div>
             );

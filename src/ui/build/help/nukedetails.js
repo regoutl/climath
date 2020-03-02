@@ -10,7 +10,7 @@ countries       = this.simu.cProd.countries
 closeRequested
 */
 export default function NukeDetails(props) {
-    var nuke = props.productionMeans.centrals.nuke;
+    var nuke = props.parameters.energies.nuke;
 
     return React.createElement(
         'div',
@@ -93,7 +93,7 @@ export default function NukeDetails(props) {
                 React.createElement(
                     'p',
                     null,
-                    tr('We assume that Fukushima-like event happend with probability ' + Math.round(100000 * nuke.boom.probability) / 1000 + '% per central, per year.')
+                    tr('We assume that Fukushima-like event happend with probability ' + Math.round(100000 * nuke.accident.probability.year[0]) / 1000 + '% per central, per year.')
                 ),
                 React.createElement(
                     'p',

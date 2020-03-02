@@ -7,14 +7,14 @@ function StorageCapacity(props) {
         'p',
         null,
         tr('The storage capacity of a battery of volume V is')
-    ), React.createElement('img', { src: 'data/battery/capa.svg', alt: 'Pv production eq' }), React.createElement(
+    ), React.createElement('img', { src: 'res/symbols/battery/capa.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
         null,
-        [{ img: 'symbols/density', descr: 'is the storage density (Wh/m3)' }, { img: 'symbols/decline', descr: 'is the yearly storage capacity decline' }, { img: 'symbols/year', descr: 'is the current year' }, { img: 'symbols/year0', descr: 'is the build year' }].map(function (i) {
+        [{ img: 'shared/density', descr: 'is the storage density (Wh/m3)' }, { img: 'shared/decline', descr: 'is the yearly storage capacity decline' }, { img: 'shared/year', descr: 'is the current year' }, { img: 'shared/year0', descr: 'is the build year' }].map(function (i) {
             return React.createElement(
                 'li',
                 { key: i.img },
-                React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                React.createElement('img', { src: "res/symbols/" + i.img + ".svg", alt: i.descr }),
                 ' ',
                 tr(i.descr)
             );
@@ -41,14 +41,14 @@ function StorageCapacity(props) {
 }
 
 function StoredEnergy(props) {
-    var math = [React.createElement('img', { src: 'data/battery/storedEq.svg', alt: 'Pv production eq' }), React.createElement(
+    var math = [React.createElement('img', { src: 'res/symbols/battery/storedEq.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
         null,
-        [{ img: 'battery/st', descr: 'is the energy stored at hour t (Wh)' }, { img: 'symbols/decline', descr: 'is the yearly storage capacity decline' }, { img: 'battery/d', descr: 'is the hourly power loss' }, { img: 'symbols/efficiency', descr: 'is the round trip efficiency' }, { img: 'battery/it', descr: 'is the energy send to load the battery (average for this hour) (W)' }, { img: 'symbols/prod', descr: 'is the energy production of the battery (average for this hour) (W)' }, { img: 'battery/capacity', descr: 'is the storage capacity' }].map(function (i) {
+        [{ img: 'battery/st', descr: 'is the energy stored at hour t (Wh)' }, { img: 'shared/decline', descr: 'is the yearly storage capacity decline' }, { img: 'battery/d', descr: 'is the hourly power loss' }, { img: 'shared/efficiency', descr: 'is the round trip efficiency' }, { img: 'battery/it', descr: 'is the energy send to load the battery (average for this hour) (W)' }, { img: 'shared/prod', descr: 'is the energy production of the battery (average for this hour) (W)' }, { img: 'battery/capacity', descr: 'is the storage capacity' }].map(function (i) {
             return React.createElement(
                 'li',
                 { key: i.img },
-                React.createElement('img', { src: "data/" + i.img + ".svg", alt: i.descr }),
+                React.createElement('img', { src: "res/symbols/" + i.img + ".svg", alt: i.descr }),
                 ' ',
                 tr(i.descr)
             );
@@ -87,7 +87,7 @@ function PowerLoss(props) {
         'p',
         null,
         tr('The hourly power loss is then simply :')
-    ), React.createElement('img', { src: 'data/battery/lossMtoH.svg' }), React.createElement(
+    ), React.createElement('img', { src: 'res/symbols/battery/lossMtoH.svg' }), React.createElement(
         'p',
         null,
         '730 = number of hour per month in a 365 day year'
@@ -111,7 +111,7 @@ function RoundTripEfficiency(props) {
         'p',
         null,
         tr("We assume that 'half' the loss happend at load time and 'half' at unload time, hence the "),
-        React.createElement('img', { src: 'data/battery/sqrtEffi.svg', alt: 'sqrt effi' }),
+        React.createElement('img', { src: 'res/symbols/battery/sqrtEffi.svg', alt: 'sqrt effi' }),
         tr(' in the equation')
     ), React.createElement(
         'p',
@@ -134,7 +134,7 @@ function RoundTripEfficiency(props) {
 /** @brief this class provide a lot of explainations about pv
 */
 export default function BatteryDetails(props) {
-    var bat = props.productionMeans.storage.solutions.battery;
+    var bat = props.parameters.energies.storage.battery;
 
     return React.createElement(
         'div',

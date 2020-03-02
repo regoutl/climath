@@ -16,8 +16,6 @@ import { isTouchScreen, isMobile, isSmallScreen, isLandscape } from '../screenDe
 
 import { TutoDialog } from './dialogs/tutodialog.js';
 
-import Scene from '../scene.js';
-
 import { Simulateur, promiseSimulater, objSum } from '../../simulateur/simulateur.js';
 
 function NullDialog(props) {
@@ -46,17 +44,14 @@ var GameWin = function (_React$Component) {
             help: NullHelp
         };
 
-        _this.scene = new Scene();
-
-        promiseSimulater(_this.scene, _this.props.parameters, _this.props.country).then(function (s) {
-            _this.scene.setMap(s.cMap);
-
+        promiseSimulater(_this.props.parameters, _this.props.country).then(function (s) {
             _this.simu = s;
 
             _this.forceUpdate();
         }).catch(function (err) {
             alert(err);
         });
+
         return _this;
     }
 
@@ -87,20 +82,20 @@ var GameWin = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            if (!this.simu) {
+                return React.createElement(
+                    'p',
+                    null,
+                    'Chargement ... '
+                );
+            }
+
             if (this.state.currentDialog == TutoDialog) {
                 return React.createElement(
                     'div',
                     { className: 'vLayout', style: { width: '100%', height: '100%' } },
                     this._makeMapView(),
                     this._makeDialog()
-                );
-            }
-
-            if (!this.simu) {
-                return React.createElement(
-                    'p',
-                    null,
-                    'Chargement ... '
                 );
             }
 
@@ -134,7 +129,6 @@ var GameWin = function (_React$Component) {
             var _this2 = this;
 
             return React.createElement(MapView, {
-                scene: this.scene,
                 simu: this.simu,
                 onDetailsRequested: function onDetailsRequested(c) {
                     _this2.setState({ help: c });
@@ -213,7 +207,7 @@ var GameWin = function (_React$Component) {
                             return _this4.setState({ help: NullHelp });
                         } }),
                     React.createElement(Help, {
-                        parameters: this.props.strParameters
+                        parameters: this.props.parameters
                     })
                 );
             } else {

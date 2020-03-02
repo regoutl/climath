@@ -160,7 +160,7 @@ function EffiDecl(props) {
 parameters : string. same format as parameters.json
 */
 export default function PvDetails(props) {
-    var json = JSON.parse(props.parameters);
+    var json = props.parameters;
 
     var pv = json.energies.pv;
 

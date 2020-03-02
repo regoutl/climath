@@ -14,6 +14,7 @@ import { tr } from '../../tr.js';
 import MapLayers from './maplayers.js';
 import { BuildDock, TouchBuildDock } from './builddock.js';
 import { isTouchScreen, isMobile, isSmallScreen, isLandscape } from '../screenDetection.js';
+import Scene from '../scene.js';
 
 function isCentral(type) {
     return type == 'nuke' || type == 'ccgt' || type == 'fusion';
@@ -70,6 +71,8 @@ var MapView = function (_React$Component) {
         };
 
         _this.canvas = React.createRef();
+
+        _this.scene = null; // initiated in comp did mount
         return _this;
     }
 
@@ -111,9 +114,10 @@ var MapView = function (_React$Component) {
     }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
-            this.props.scene.init(this.canvas.current);
+            //lower level rendering functions.
+            this.scene = new Scene(this.canvas.current);
 
-            console.log("mount mapview !");
+            this.scene.setModel(this.props.simu);
 
             this.draw();
             window.addEventListener('resize', this.draw);
@@ -173,14 +177,16 @@ var MapView = function (_React$Component) {
     }, {
         key: 'draw',
         value: function draw() {
+            if (!this.scene) return;
+
             //update the cursor
-            this.props.scene.cursor = {
+            this.scene.cursor = {
                 type: this.state.targetBuild.type,
                 radius: this.state.targetBuild.radius,
                 pos: this.state.targetBuild.pos
             };
 
-            this.props.scene.draw(this.transform, this.state.base, this.state.energyGrid, this.state.flows);
+            this.scene.draw(this.transform, this.state.base, this.state.energyGrid, this.state.flows);
         }
 
         /** @brief returns a react component for a detailed build dock

@@ -82,7 +82,7 @@ var MapLayers = function (_React$Component) {
             }
 
             if (props.base == 'popDensity') {
-                ans.push(React.createElement('div', null));
+                ans.push(React.createElement('div', { key: 'legend' }));
             }
 
             return ans;

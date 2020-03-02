@@ -31,7 +31,7 @@ export var App = function (_React$Component) {
             },
             country: ''
         };
-        _this.parameters = null;
+        _this.parameters = null; // content of parameters.json
 
         _this.setCountry('be');
         return _this;

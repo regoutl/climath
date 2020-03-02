@@ -73,6 +73,12 @@
 				"in2050":26,
 				"comment":"Inclut le carburant",
 				"source":"https://www.oecd-nea.org/ndd/pubs/2010/6819-projected-costs.pdf"
+			}
+		},
+		"accident":{
+			"probability":{
+				"year":[0.0001989],
+				"unit":"a/iy"
 			},
             "disaster":{
                 "label":"Frais de nettoyage du terrain apres un incident nucléaire",
@@ -214,18 +220,20 @@
 				"time": 1,
 				"deconstructionRatio":0.05
 			},
-			"onm":{
-				"years":[380, 380, 380, 380, 380,
-								 380, 380, 380, 380, 380,
-							 	 380, 380, 380, 380, 380,
-								 380, 380, 380, 380],
- 			  "in2050": 156,
-				"valMul":0.0011,
-				"ctrlPts": [{"x": 2018, "y": 380}, {"x": 2021, "y": 180}],
-				"unit":"€/Sy",
-				"source":"https://www.nrel.gov/docs/fy19osti/73222.pdf",
-				"comment": "Battery cost projections for 4-hour lithium-ion systems. ",
-				"label":"Battery per year cost"
+			"perYear":{
+				"cost":{
+					"years":[380, 380, 380, 380, 380,
+									 380, 380, 380, 380, 380,
+								 	 380, 380, 380, 380, 380,
+									 380, 380, 380, 380],
+	 			  "in2050": 156,
+					"valMul":0.0011,
+					"ctrlPts": [{"x": 2018, "y": 380}, {"x": 2021, "y": 180}],
+					"unit":"€/Sy",
+					"source":"https://www.nrel.gov/docs/fy19osti/73222.pdf",
+					"comment": "Battery cost projections for 4-hour lithium-ion systems. ",
+					"label":"Battery per year cost"
+				}
 			},
 			"energyDensity":{
 				"source":"Battery storage density",

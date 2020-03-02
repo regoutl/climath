@@ -112,7 +112,7 @@ export class Raw{
 		if(j.unit)
 			this.unit = j.unit;
 
-		this.years		= j.years;
+		this.years		= [...j.years];
 		if(j.histoUntill)
 			this.histoUntill= j.histoUntill;
 		else
@@ -132,8 +132,8 @@ export class Raw{
 			this.endVal = this.years[50];
 
 		if(j.ctrlPts){
-			this.nowCtrl	= j.ctrlPts[0];
-			this.endCtrl	= j.ctrlPts[1];
+			this.nowCtrl	= {...j.ctrlPts[0]};
+			this.endCtrl	= {...j.ctrlPts[1]};
 		}
 		else{
 			this.nowCtrl = {x: this.histoUntill, y:this.lastHistoVal()};

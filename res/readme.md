@@ -1,1 +1,1 @@
-Folder about assets : images, fonts, etc
+Folder about assets : images, fonts, dic, etc

@@ -36,20 +36,20 @@ export function PlotTile(props) {
 }
 
 export function CentralProduction(props) {
-    var math = [React.createElement('img', { src: 'data/nuke/production.svg', alt: 'Pv production eq' }), React.createElement(
+    var math = [React.createElement('img', { src: 'res/symbols/nuke/production.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
         null,
         React.createElement(
             'li',
             null,
-            React.createElement('img', { src: 'data/symbols/nameplate.svg', alt: 'Nuke' }),
+            React.createElement('img', { src: 'res/symbols/shared/nameplate.svg', alt: 'Nuke' }),
             ' ',
             tr('is the central pic production')
         ),
         React.createElement(
             'li',
             null,
-            React.createElement('img', { src: 'data/symbols/capaFact.svg', alt: 'Nuke' }),
+            React.createElement('img', { src: 'res/symbols/shared/capaFact.svg', alt: 'Nuke' }),
             ' ',
             tr('is the capacity factor')
         )

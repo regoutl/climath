@@ -16,10 +16,10 @@ export function PlotTile(props){
 
 export function CentralProduction(props){
     let math = [
-        <img src="data/nuke/production.svg" alt="Pv production eq" />,
+        <img src="res/symbols/nuke/production.svg" alt="Pv production eq" />,
         <ul>
-            <li><img src="data/symbols/nameplate.svg" alt="Nuke" /> {tr('is the central pic production')}</li>
-            <li><img src="data/symbols/capaFact.svg" alt="Nuke" /> {tr('is the capacity factor')}</li>
+            <li><img src="res/symbols/shared/nameplate.svg" alt="Nuke" /> {tr('is the central pic production')}</li>
+            <li><img src="res/symbols/shared/capaFact.svg" alt="Nuke" /> {tr('is the capacity factor')}</li>
         </ul>
     ];
 

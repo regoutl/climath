@@ -5,11 +5,11 @@ import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 
 function Demand(props){
     let math =[
-        <img src="data/conso/eq.svg" alt="Pv production eq" />,
+        <img src="res/symbols/conso/eq.svg" alt="Pv production eq" />,
         <ul>{[
             {img:'tax/pop', descr: 'is the population'},
             {img:'conso/powerDemandPerCap', descr: 'is the power consumption per capita'},
-            ].map((i) => <li key={i.img}><img src={"data/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
+            ].map((i) => <li key={i.img}><img src={"res/symbols/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
         </ul>
     ];
 
@@ -21,36 +21,24 @@ function Demand(props){
 
 /** @brief this class provide a lot of explainations about pv
 */
-export default class OriginDetails extends React.Component{
+export default function OriginDetails (props){
+    let be = props.parameters.countries.belgium;
 
-    /* accepted props
-    productionMeans = this.simu.cProd.productionMeans
-    countries       = this.simu.cProd.countries
-    closeRequested
-    */
-    constructor(props){
-        super(props);
-    }
+    return (<div className='detailContent'>
+        <h3>{tr('Energy origin')}</h3>
 
-    render(){
-        let be = this.props.countries.belgium;
+        <div className="hWrapLayout">
+            <Demand />
 
-        return (<div className='detailContent'>
-            <h3>{tr('Energy origin')}</h3>
+            <PlotTile
+                title='Population'
+                plot={be.pop}
+            />
 
-            <div className="hWrapLayout">
-                <Demand />
-
-                <PlotTile
-                    title='Population'
-                    plot={be.pop}
-                />
-
-                <PlotTile
-                    title='Power consumption per capita'
-                    plot={be.consoPerCap}
-                />
-            </div>
-        </div>);
-    }
+            <PlotTile
+                title='Power consumption per capita'
+                plot={be.consoPerCap}
+            />
+        </div>
+    </div>);
 }
