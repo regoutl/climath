@@ -5,9 +5,9 @@ import {PlotTile, MathTextTile} from './sharedtiles.js';
 
 function StorageCapacity(props){
     let math = [
-        <p>{tr('The storage capacity of a battery of volume V is')}</p>,
-        <img src="res/symbols/battery/capa.svg" alt="Pv production eq" />,
-        <ul>
+        <p key='1'>{tr('The storage capacity of a battery of volume V is')}</p>,
+        <img key='2' src="res/symbols/battery/capa.svg" alt="Pv production eq" />,
+        <ul key='3'>
         {[
             {img:'shared/density', descr: 'is the storage density (Wh/m3)'},
             {img:'shared/decline', descr: 'is the yearly storage capacity decline'},
@@ -18,8 +18,8 @@ function StorageCapacity(props){
         </ul>
     ];
 
-    let text = [<p>{tr('The storage capacity depends on :')}</p>,
-        <ul className='default'>
+    let text = [<p key='1'>{tr('The storage capacity depends on :')}</p>,
+        <ul key='2' className='default'>
             {[
                 'The size of the battery.',
                 'Amount of energy stored per unit volume. ',
@@ -32,8 +32,8 @@ function StorageCapacity(props){
 }
 
 function StoredEnergy(props){
-    let math = [<img src="res/symbols/battery/storedEq.svg" alt="Pv production eq" />,
-        <ul>
+    let math = [<img key='1' src="res/symbols/battery/storedEq.svg" alt="Pv production eq" />,
+        <ul key='2'>
             {[{img:'battery/st', descr: 'is the energy stored at hour t (Wh)'},
             {img:'shared/decline', descr: 'is the yearly storage capacity decline'},
             {img:'battery/d', descr: 'is the hourly power loss'},
@@ -49,22 +49,26 @@ function StoredEnergy(props){
 }
 
 function StorageCapacityDecline(props){
+    let shared =  <p key='1'>{tr('It is estimated that, after 10 year, a battery can only store ' +
+            75
+    +'% of its original capacity.')}</p>;
+
     let math = [
-        <p>{tr('It is estimated that, after 10 year, a battery can only store 75% of its original capacity.')}</p>,
-        <p>{tr('The yearly storage decline is then simply :')}</p>,
-        <img src='data/battery/decl10Todecl.svg' />
+        shared,
+        <p key='2'>{tr('The yearly storage decline is then simply :')}</p>,
+        <img key='3' src='res/symbols/battery/decl10Todecl.svg' />
     ];
 
-    let text = (<p>{tr('It is estimated that, after 10 year, a battery can only store 75% of its original capacity.')}</p>)    ;
+    let text = shared;
 
     return <MathTextTile title= 'Storage capacity decline' math={math} text={text} />
 }
 
 function PowerLoss(props){
-    let math =[<p>{tr('It is estimated that, every month, the stored energy decrease by 2%.')}</p>,
-    <p>{tr('The hourly power loss is then simply :')}</p>,
-    <img src='res/symbols/battery/lossMtoH.svg' />,
-    <p>730 = number of hour per month in a 365 day year</p>];
+    let math =[<p key='1'>{tr('It is estimated that, every month, the stored energy decrease by 2%.')}</p>,
+    <p key='2'>{tr('The hourly power loss is then simply :')}</p>,
+    <img  key='3' src='res/symbols/battery/lossMtoH.svg' />,
+    <p key='4'>730 = number of hour per month in a 365 day year</p>];
 
 
     let text= <p>{tr('It is estimated that, every month, the stored energy decrease by 2%.')}</p>;
@@ -73,13 +77,13 @@ function PowerLoss(props){
 }
 
 function RoundTripEfficiency(props){
-    let math =[    <p>{tr('It is the ratio between the retreived energy and the energy put in.')}</p>,
-        <p>{tr("We assume that 'half' the loss happend at load time and 'half' at unload time, hence the ")}
+    let math =[    <p key='1'>{tr('It is the ratio between the retreived energy and the energy put in.')}</p>,
+        <p key='2'>{tr("We assume that 'half' the loss happend at load time and 'half' at unload time, hence the ")}
             <img src='res/symbols/battery/sqrtEffi.svg' alt ='sqrt effi' />{tr(' in the equation')}
         </p>,
-        <p>{tr('We estimate round trip efficiency to be 0.9.')}</p>]
-    let text =[  <p>{tr('It is the ratio between the retreived energy and the energy put in.')}</p>,
-        <p>{tr('We estimate round trip efficiency to be 0.9.')}</p>];
+        <p key='3'>{tr('We estimate round trip efficiency to be 0.9.')}</p>]
+    let text =[  <p key='5'>{tr('It is the ratio between the retreived energy and the energy put in.')}</p>,
+        <p key='4'>{tr('We estimate round trip efficiency to be 0.9.')}</p>];
 
     return <MathTextTile title= 'Round trip efficiency' math={math} text={text} />
 
@@ -92,7 +96,7 @@ export default function BatteryDetails (props){
     let bat = props.parameters.energies.storage.battery;
 
 
-    return (<div className='detailContent'>
+    return (<div className='detailContent' style={props.restyle}>
         <h3>{tr('Batteries (Li-ion)')}</h3>
         <p>{tr('Batteries are devices that store electricity.')}</p>
 
@@ -106,6 +110,7 @@ export default function BatteryDetails (props){
                 title='Build energy'
                 caption='Battery manufacturing requires some energy.'
                 plot={bat.build.energy}
+                comment="We assume they are build in China"
             />
 
             <PlotTile

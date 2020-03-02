@@ -27,13 +27,13 @@ export var App = function (_React$Component) {
                 // text : plain text description of the equation
                 // math : math description, with a quick explaination of the parameters
                 equationDisplay: 'text',
-                toggleEquationDisplay: _this.toggleEquationDisplay.bind(_this)
+                toggleEquationDisplay: _this.toggleEquationDisplay.bind(_this),
+                canEditParameters: true
             },
             country: ''
         };
         _this.parameters = null; // content of parameters.json
 
-        _this.setCountry('be');
         return _this;
     }
 
@@ -53,25 +53,14 @@ export var App = function (_React$Component) {
         value: function startGame() {
             //todo : validations checks (is parameters loaded etc)
 
-            this.setState({ currentPage: 'gameWin' });
-        }
-    }, {
-        key: 'setCountry',
-        value: function setCountry(code) {
-            var _this2 = this;
-
-            fetch('data/' + code + '/defaultParameters.json').then(function (response) {
-                return response.json();
-            }) //   no txt to json conv
-            .then(function (params) {
-                _this2.parameters = params;
-                _this2.setState({ country: code });
+            this.setState(function (state) {
+                return { currentPage: 'gameWin', context: Object.assign({}, state.context, { canEditParameters: false }) };
             });
         }
     }, {
         key: 'render',
         value: function render() {
-            var _this3 = this;
+            var _this2 = this;
 
             var content = void 0;
 
@@ -83,9 +72,10 @@ export var App = function (_React$Component) {
             } else if (this.state.currentPage == 'newGame') {
                 content = React.createElement(NewGameDialog, {
                     onStart: this.startGame.bind(this),
-                    onCountryChange: this.setCountry.bind(this),
-                    onParamChange: function onParamChange(strParam) {
-                        return _this3.setState({ strParameters: strParam });
+                    country: this.state.country,
+                    parameters: this.parameters,
+                    onCountryChange: function onCountryChange(countryCode, parameters) {
+                        _this2.parameters = parameters;_this2.setState({ country: countryCode });
                     }
                 });
             } else throw 'todo';

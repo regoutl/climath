@@ -303,6 +303,7 @@ td{
 /* Details  */
 .detailContent{
     user-select: text;
+    padding: 5px;
 }
 .detailContent h3{
     font-size: 1.4em;
@@ -462,4 +463,37 @@ td{
     top: 50%;
     left: -15px;
     transform: translate(0, -50%);
+}
+
+
+
+#editParamPage >*:first-child{
+    border-right: 1px solid grey;
+}
+
+#editParamPage nav > *{
+    height: 30px;
+    padding: 5px;
+    line-height: 30px;
+}
+
+#editParamPage nav > div{
+    padding-left: 15px;
+    cursor: pointer;
+}
+#editParamPage nav > h2{
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+#editParamPage nav > div:hover{
+    background: rgb(150, 150, 255);
+    color: white;
+}
+
+#editParamPage{
+    height: 100%;
+}
+#editParamPage .detailContent{
+    overflow: auto;
 }

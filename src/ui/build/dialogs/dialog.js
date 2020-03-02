@@ -76,6 +76,11 @@ export function Dialog(props) {
                 'div',
                 { className: 'button white', onClick: props.onNext },
                 tr('Next')
+            ),
+            props.onStart && React.createElement(
+                'div',
+                { className: 'button white', onClick: props.onStart },
+                tr('Start')
             )
         )
     );

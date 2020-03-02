@@ -19,12 +19,12 @@ export class App extends React.Component{
                 // math : math description, with a quick explaination of the parameters
                 equationDisplay: 'text',
                 toggleEquationDisplay: this.toggleEquationDisplay.bind(this),
+                canEditParameters: true,
             },
             country: '',
         };
         this.parameters = null; // content of parameters.json
 
-        this.setCountry('be');
     }
 
     toggleEquationDisplay(){
@@ -38,17 +38,11 @@ export class App extends React.Component{
     startGame(){
         //todo : validations checks (is parameters loaded etc)
 
-        this.setState({currentPage: 'gameWin'});
-    }
-
-    setCountry(code){
-        fetch('data/' + code + '/defaultParameters.json')
-        .then((response) => response.json()) //   no txt to json conv
-        .then((params) => {
-            this.parameters = params;
-            this.setState({country: code});
+        this.setState((state) => {
+            return {currentPage: 'gameWin', context: {...state.context, canEditParameters: false}}
         });
     }
+
 
     render(){
         let content;
@@ -62,8 +56,9 @@ export class App extends React.Component{
         else if(this.state.currentPage == 'newGame'){
             content = <NewGameDialog
                 onStart = {this.startGame.bind(this)}
-                onCountryChange = {this.setCountry.bind(this)}
-                onParamChange = {(strParam) => this.setState({strParameters: strParam})}
+                country={this.state.country}
+                parameters={this.parameters}
+                onCountryChange = {(countryCode, parameters) => {this.parameters = parameters; this.setState({country: countryCode})}}
              />;
         }
         else

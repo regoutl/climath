@@ -21,15 +21,15 @@ export default class Pv extends IntermittentProductionMean{
         this.area= parameters.init.area; ///m2 installed. usefull for o&m compute
         this.areaNowBuilding = 0;
 
-        this.efficiency = new Yearly.Raw(0);
-        this.efficiency.fromJSON(parameters.efficiency);
+        this.efficiency = new Yearly.Raw(parameters.efficiency);
 
-        this._build.energy = new Yearly.Raw(0);
-        this._build.energy.fromJSON(parameters.build.energy);
+        this._build.energy = new Yearly.Raw(parameters.build.energy);
 
         /// initial capacity is not null, create groups that match its spec
         this.groups.set(Math.pow(parameters.init.powerDecline25Years, 1/25.0),
                         {nameplate: this.capacity, nowBuilding: 0});
+
+        this.yearlyPowerDecline = Math.pow(parameters.efficiencyDecline25Years, 1/25);
     }
 
     //do power decline, add newly builds and compute yearly cost
@@ -76,7 +76,7 @@ export default class Pv extends IntermittentProductionMean{
         if(parameters.installedIn === undefined)
           parameters.installedIn = 'belgium';
         if(parameters.powerDecline === undefined)
-          parameters.powerDecline = Math.pow(0.95, 1/25);
+          parameters.powerDecline = this.yearlyPowerDecline;
         if(parameters.priceMul === undefined)
           parameters.priceMul = 1;
 

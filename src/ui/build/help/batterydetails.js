@@ -5,11 +5,11 @@ import { PlotTile, MathTextTile } from './sharedtiles.js';
 function StorageCapacity(props) {
     var math = [React.createElement(
         'p',
-        null,
+        { key: '1' },
         tr('The storage capacity of a battery of volume V is')
-    ), React.createElement('img', { src: 'res/symbols/battery/capa.svg', alt: 'Pv production eq' }), React.createElement(
+    ), React.createElement('img', { key: '2', src: 'res/symbols/battery/capa.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
-        null,
+        { key: '3' },
         [{ img: 'shared/density', descr: 'is the storage density (Wh/m3)' }, { img: 'shared/decline', descr: 'is the yearly storage capacity decline' }, { img: 'shared/year', descr: 'is the current year' }, { img: 'shared/year0', descr: 'is the build year' }].map(function (i) {
             return React.createElement(
                 'li',
@@ -23,11 +23,11 @@ function StorageCapacity(props) {
 
     var text = [React.createElement(
         'p',
-        null,
+        { key: '1' },
         tr('The storage capacity depends on :')
     ), React.createElement(
         'ul',
-        { className: 'default' },
+        { key: '2', className: 'default' },
         ['The size of the battery.', 'Amount of energy stored per unit volume. ', 'The battery\'s age. Batteries storage capacity declines over time. '].map(function (i) {
             return React.createElement(
                 'li',
@@ -41,9 +41,9 @@ function StorageCapacity(props) {
 }
 
 function StoredEnergy(props) {
-    var math = [React.createElement('img', { src: 'res/symbols/battery/storedEq.svg', alt: 'Pv production eq' }), React.createElement(
+    var math = [React.createElement('img', { key: '1', src: 'res/symbols/battery/storedEq.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
-        null,
+        { key: '2' },
         [{ img: 'battery/st', descr: 'is the energy stored at hour t (Wh)' }, { img: 'shared/decline', descr: 'is the yearly storage capacity decline' }, { img: 'battery/d', descr: 'is the hourly power loss' }, { img: 'shared/efficiency', descr: 'is the round trip efficiency' }, { img: 'battery/it', descr: 'is the energy send to load the battery (average for this hour) (W)' }, { img: 'shared/prod', descr: 'is the energy production of the battery (average for this hour) (W)' }, { img: 'battery/capacity', descr: 'is the storage capacity' }].map(function (i) {
             return React.createElement(
                 'li',
@@ -59,21 +59,19 @@ function StoredEnergy(props) {
 }
 
 function StorageCapacityDecline(props) {
-    var math = [React.createElement(
+    var shared = React.createElement(
         'p',
-        null,
-        tr('It is estimated that, after 10 year, a battery can only store 75% of its original capacity.')
-    ), React.createElement(
-        'p',
-        null,
-        tr('The yearly storage decline is then simply :')
-    ), React.createElement('img', { src: 'data/battery/decl10Todecl.svg' })];
-
-    var text = React.createElement(
-        'p',
-        null,
-        tr('It is estimated that, after 10 year, a battery can only store 75% of its original capacity.')
+        { key: '1' },
+        tr('It is estimated that, after 10 year, a battery can only store ' + 75 + '% of its original capacity.')
     );
+
+    var math = [shared, React.createElement(
+        'p',
+        { key: '2' },
+        tr('The yearly storage decline is then simply :')
+    ), React.createElement('img', { key: '3', src: 'res/symbols/battery/decl10Todecl.svg' })];
+
+    var text = shared;
 
     return React.createElement(MathTextTile, { title: 'Storage capacity decline', math: math, text: text });
 }
@@ -81,15 +79,15 @@ function StorageCapacityDecline(props) {
 function PowerLoss(props) {
     var math = [React.createElement(
         'p',
-        null,
+        { key: '1' },
         tr('It is estimated that, every month, the stored energy decrease by 2%.')
     ), React.createElement(
         'p',
-        null,
+        { key: '2' },
         tr('The hourly power loss is then simply :')
-    ), React.createElement('img', { src: 'res/symbols/battery/lossMtoH.svg' }), React.createElement(
+    ), React.createElement('img', { key: '3', src: 'res/symbols/battery/lossMtoH.svg' }), React.createElement(
         'p',
-        null,
+        { key: '4' },
         '730 = number of hour per month in a 365 day year'
     )];
 
@@ -105,26 +103,26 @@ function PowerLoss(props) {
 function RoundTripEfficiency(props) {
     var math = [React.createElement(
         'p',
-        null,
+        { key: '1' },
         tr('It is the ratio between the retreived energy and the energy put in.')
     ), React.createElement(
         'p',
-        null,
+        { key: '2' },
         tr("We assume that 'half' the loss happend at load time and 'half' at unload time, hence the "),
         React.createElement('img', { src: 'res/symbols/battery/sqrtEffi.svg', alt: 'sqrt effi' }),
         tr(' in the equation')
     ), React.createElement(
         'p',
-        null,
+        { key: '3' },
         tr('We estimate round trip efficiency to be 0.9.')
     )];
     var text = [React.createElement(
         'p',
-        null,
+        { key: '5' },
         tr('It is the ratio between the retreived energy and the energy put in.')
     ), React.createElement(
         'p',
-        null,
+        { key: '4' },
         tr('We estimate round trip efficiency to be 0.9.')
     )];
 
@@ -138,7 +136,7 @@ export default function BatteryDetails(props) {
 
     return React.createElement(
         'div',
-        { className: 'detailContent' },
+        { className: 'detailContent', style: props.restyle },
         React.createElement(
             'h3',
             null,
@@ -157,7 +155,8 @@ export default function BatteryDetails(props) {
             React.createElement(PlotTile, {
                 title: 'Build energy',
                 caption: 'Battery manufacturing requires some energy.',
-                plot: bat.build.energy
+                plot: bat.build.energy,
+                comment: 'We assume they are build in China'
             }),
             React.createElement(PlotTile, {
                 title: 'Operation and maintenance costs',

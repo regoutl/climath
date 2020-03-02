@@ -14,7 +14,7 @@ export default function NukeDetails(props) {
 
     return React.createElement(
         'div',
-        { className: 'detailContent' },
+        { className: 'detailContent', style: props.restyle },
         React.createElement(
             'h3',
             null,

@@ -14,7 +14,7 @@ closeRequested
 export default function NukeDetails (props){
     let nuke = props.parameters.energies.nuke;
 
-    return (<div className='detailContent'>
+    return (<div className='detailContent'  style={props.restyle}>
         <h3>{tr('Nuclear reactors')}</h3>
         <p>{tr('Nuclear reactors are devices that transform radioactivity into electricity.')}</p>
 

@@ -10,10 +10,9 @@ export default function CcgtDetails(props){
 
 
 
-    return (<div className='detailContent'>
+    return (<div className='detailContent' style={props.restyle}>
         <h3>{tr('Gas centrals')}</h3>
         <p>{tr('Gas centrals transform chemical energy into electricity.')}</p>
-
 
         <div className="hWrapLayout">
             <CentralProduction />

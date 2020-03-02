@@ -1,4 +1,5 @@
 {
+"countryCode": "be",
 "thisFileMoneyUnit": "€2019",
 "energies":{
 	"ccgt":{
@@ -198,7 +199,8 @@
 			"capacity":3.58,
 			"area": 80000000,
 			"powerDecline25Years": 0.8
-		}
+		},
+		"efficiencyDecline25Years": 0.95
 	},
 
 	"storage":{

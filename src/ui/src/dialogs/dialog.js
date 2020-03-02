@@ -54,6 +54,7 @@ export function Dialog(props){
                 {props.onDetails && <div className="button white" onClick={props.onDetails}>{tr('Details...')}</div>}
                 {props.onSkip && <div className="button white" onClick={props.onSkip}>{tr('Skip this')}</div>}
                 {props.onNext && <div className="button white" onClick={props.onNext}>{tr('Next')}</div>}
+                {props.onStart && <div className="button white" onClick={props.onStart}>{tr('Start')}</div>}
             </div>
         </div>
     );

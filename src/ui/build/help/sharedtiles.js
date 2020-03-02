@@ -27,6 +27,11 @@ export function PlotTile(props) {
             tr(props.caption)
         ),
         React.createElement(ReactPlot, { data: props.plot }),
+        props.comment && React.createElement(
+            'p',
+            null,
+            tr(props.comment)
+        ),
         React.createElement(
             'p',
             { className: 'pSource' },
@@ -36,9 +41,9 @@ export function PlotTile(props) {
 }
 
 export function CentralProduction(props) {
-    var math = [React.createElement('img', { src: 'res/symbols/nuke/production.svg', alt: 'Pv production eq' }), React.createElement(
+    var math = [React.createElement('img', { key: '1', src: 'res/symbols/nuke/production.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
-        null,
+        { key: '2' },
         React.createElement(
             'li',
             null,
@@ -82,19 +87,19 @@ export function CoolingTile(props) {
 
     var math = [React.createElement(
         'p',
-        null,
+        { key: '1' },
         tr('Primary energy efficiency is ') + props.primEnergyEffi
     ), React.createElement(
         'p',
-        null,
+        { key: '2' },
         tr('This means that for 100 J of gas, ') + Math.round(props.primEnergyEffi * 100) + tr(' J of electricity are produced, and ') + Math.round(100 - props.primEnergyEffi * 100) + tr(' J of heat must be dissipated.')
     ), React.createElement(
         'p',
-        null,
+        { key: '3' },
         tr('Evacuhating this heat by boiling 20 deg water requires ') + valStr(m3PerWh, 'm3/Wh') + tr(' produced')
     ), React.createElement(
         'p',
-        { className: 'pSource' },
+        { key: '4', className: 'pSource' },
         props.source
     )];
 
@@ -161,3 +166,45 @@ export var MathTextTile = function (_React$Component) {
 }(React.Component);
 
 MathTextTile.contextType = AppContext;
+
+/*props :
+value : whatever
+onChange = function(new val)
+*/
+export var NumberEditOrShow = function (_React$Component2) {
+    _inherits(NumberEditOrShow, _React$Component2);
+
+    function NumberEditOrShow() {
+        _classCallCheck(this, NumberEditOrShow);
+
+        return _possibleConstructorReturn(this, (NumberEditOrShow.__proto__ || Object.getPrototypeOf(NumberEditOrShow)).apply(this, arguments));
+    }
+
+    _createClass(NumberEditOrShow, [{
+        key: 'render',
+        value: function render() {
+            var props = this.props;
+
+            if (this.context.canEditParameters) return React.createElement('input', { type: 'text',
+                value: props.value,
+                onChange: function onChange(e) {
+                    var v = Number(e.target.value);
+                    if (Number.isNaN(v) || props.min > v || props.max < v) return;
+                    props.onChange(v);
+                },
+
+                style: { width: 30 }
+            });else {
+                return React.createElement(
+                    'span',
+                    null,
+                    props.value
+                );
+            }
+        }
+    }]);
+
+    return NumberEditOrShow;
+}(React.Component);
+
+NumberEditOrShow.contextType = AppContext;

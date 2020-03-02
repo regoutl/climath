@@ -1,11 +1,13 @@
 
 import {tr} from '../../../tr.js';
-import {PlotTile, MathTextTile} from './sharedtiles.js';
+import {PlotTile, MathTextTile, NumberEditOrShow} from './sharedtiles.js';
+import {AppContext} from '../appcontext.js';
 
 function Production(props){
-    let math =  [<p>Production of a PV farm of area <img src='res/symbols/shared/area.svg'/> is : </p>,
-            <img src="res/symbols/pv/production.svg" alt="Pv production eq" />,
-            <ul>
+
+    let math =  [<p key='1'>Production of a PV farm of area <img src='res/symbols/shared/area.svg'/> is : </p>,
+            <img  key='2' src="res/symbols/pv/production.svg" alt="Pv production eq" />,
+            <ul  key='3'>
                 {[{img:'shared/radFlux', descr: 'is the maximal radiant flux (W/m2)'},
                     {img:'shared/efficiency', descr: 'is the pannel efficiency at y0'},
                     {img:'shared/capaFactT', descr: 'is the capacity factor at that hour'},
@@ -15,15 +17,15 @@ function Production(props){
                 ].map((i) => <li key={i.img}><img src={"res/symbols/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
             </ul>];
 
-    let text = [<p>{tr('The production depends on :')}</p>,
-        <ul className='default'>
+    let text = [<p key='introTxt'>{tr('The production depends on :')}</p>,
+        <ul className='default' key='list'>
             {[
                 'The area',
                 'The amount of sun. ' +
                 'The amount of sun depends on the location (we call it \'radiant flux\') ' +
                 'and the time of the day/year (we call it \'Capacity factor\').',
                 'The panel efficiency. This decrease with time. ',
-            ].map((i) => <li key={i.substr(5, 2)}>{tr(i)}</li>)}
+            ].map((i) => <li key={i}>{tr(i)}</li>)}
         </ul>
     ];
 
@@ -37,23 +39,25 @@ function Production(props){
 }
 
 function RadFlux(props){
-    return (            <div>
-                    <h4>{tr('Radiant flux')}</h4>
-                    <div className='hLayout'>
-                        <div>
-                            <img src="res/symbols/pv/maxRadFlux.svg" alt="max rad flux eq" />
-                            <ul>
-                                <li><img src='res/symbols/shared/avgCapaFact.svg' alt='avgCapaFact' /> {tr('is the average capacity factor')}</li>
-                                <li><img src='res/symbols/pv/avgGhi.svg' alt='average global hori irradiance' /> {tr(' is the average Global Horizontal Irradiance')}</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <img src='data/pv/globalHorisontalIrradiance.png' alt='ghi be' width="120"/>
-                            <p className="pSource">https://globalsolaratlas.info/</p>
-                        </div>
-                    </div>
+    return (
+        <div>
+            <h4>{tr('Radiant flux')}</h4>
+            <div className='hLayout'>
+                <div>
+                    <img src="res/symbols/pv/maxRadFlux.svg" alt="max rad flux eq" />
+                    <ul>
+                        <li><img src='res/symbols/shared/avgCapaFact.svg' alt='avgCapaFact' /> {tr('is the average capacity factor')}</li>
+                        <li><img src='res/symbols/pv/avgGhi.svg' alt='average global hori irradiance' /> {tr(' is the average Global Horizontal Irradiance')}</li>
+                    </ul>
                 </div>
-);
+                <div>
+                    <a href={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'}>
+                        <img src={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'} alt='ghi be' width="120"/>
+                    </a>
+                    <p className="pSource">https://globalsolaratlas.info/</p>
+                </div>
+            </div>
+        </div>);
 }
 
 function CapaFact(props){
@@ -61,30 +65,46 @@ function CapaFact(props){
         <h4>{tr('Capacity factor')}</h4>
         <p>{tr('Naturally, photovoltaic panels do not produce all day long. To model this, we use a hourly capacity factor for each hour of the year based on the history.')}</p>
 
-        <a href="data/pv/allBePvCapaFact.csv">{tr('Download the historic data for Belgium (1985-2016)')}</a>
+        <a href={"data/" + props.country + "/pv/allBePvCapaFact.csv"}>{tr('Download the historic data')}</a>
         <p className="pSource">https://www.renewables.ninja/downloads</p>
     </div>);
 }
 
-function EffiDecl(props){
-    let math = [
-        <p>{tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')}</p>,
+class EffiDecl extends React.Component{
+    render(){
+        let props = this.props;
+        let val = props.pv.efficiencyDecline25Years * 100;
 
-        <p>{tr('The yearly efficiency decline is then simply :')}</p>,
-        <img src='res/symbols/pv/decl25Todecl.svg' />,
-        <p className="pSource"><a href='https://news.energysage.com/sunpower-solar-panels-complete-review'>Sumpower</a></p>
-    ];
+        let shared = <p key='1'>{tr('The efficiency of a solar pannel declines with time. ' +
+        'This simulation assumes that, after 25 years, the panel is still ')}
+        <NumberEditOrShow
+            value={val}
+            onChange={(v) => {
+                props.pv.efficiencyDecline25Years = v/ 100;
+                this.forceUpdate();
+            }}
+            min={0}
+            max={100}
+            />
+         {tr('% effective.')}</p>;
 
-    let text = [        <p>{tr('The efficiency of a solar pannel declines with time. This simulation assumes that, after 25 years, the panel is still 95% effective.')}</p>];
+        let math = [
+            shared,
+            <p key='2'>{tr('The yearly efficiency decline is then simply :')}</p>,
+            <img  key='3' src='res/symbols/pv/decl25Todecl.svg' />,
+            <p key='4' className="pSource"><a href='https://news.energysage.com/sunpower-solar-panels-complete-review'>Sumpower</a></p>
+        ];
 
-    return (
-        <MathTextTile
-            title="Efficiency decline"
-            math={math}
-            text={text}
-        />
-    );
+        let text = [shared];
 
+        return (
+            <MathTextTile
+                title="Efficiency decline"
+                math={math}
+                text={text}
+            />
+        );
+    }
 }
 
 /** @brief this class provide a lot of explainations about pv
@@ -93,9 +113,7 @@ function EffiDecl(props){
 parameters : string. same format as parameters.json
 */
 export default function PvDetails (props){
-    let json = props.parameters;
-
-    let pv = json.energies.pv;
+    let pv = props.parameters.energies.pv;
 
 
     return (<div className='detailContent'>
@@ -106,7 +124,7 @@ export default function PvDetails (props){
         <div className="hWrapLayout">
             <Production />
 
-            <RadFlux />
+            <RadFlux country={props.parameters.countryCode} />
 
 
             <PlotTile
@@ -120,6 +138,7 @@ export default function PvDetails (props){
                 title="Build energy"
                 caption="Solar pannel manufacturing requires some energy. "
                 plot={pv.build.energy}
+                comment="We assume they are build in China"
             />
 
 
@@ -137,8 +156,8 @@ export default function PvDetails (props){
             />
 
 
-            <CapaFact />
-            <EffiDecl />
+            <CapaFact country={props.parameters.countryCode}/>
+            <EffiDecl pv={pv} />
         </div>
     </div>);
 }

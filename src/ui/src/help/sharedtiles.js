@@ -10,14 +10,15 @@ export function PlotTile(props){
 
         {props.caption && <p>{tr(props.caption)}</p>}
         <ReactPlot data={props.plot} />
+        {props.comment && <p>{tr(props.comment)}</p>}
         <p className="pSource">{props.plot.source}</p>
     </div>);
 }
 
 export function CentralProduction(props){
     let math = [
-        <img src="res/symbols/nuke/production.svg" alt="Pv production eq" />,
-        <ul>
+        <img key='1' src="res/symbols/nuke/production.svg" alt="Pv production eq" />,
+        <ul key='2'>
             <li><img src="res/symbols/shared/nameplate.svg" alt="Nuke" /> {tr('is the central pic production')}</li>
             <li><img src="res/symbols/shared/capaFact.svg" alt="Nuke" /> {tr('is the capacity factor')}</li>
         </ul>
@@ -47,10 +48,10 @@ export function CoolingTile(props){
 
 
     let math = [
-        <p>{tr('Primary energy efficiency is ') + props.primEnergyEffi}</p>,
-        <p>{tr('This means that for 100 J of gas, ')+Math.round(props.primEnergyEffi*100)+ tr(' J of electricity are produced, and ') + Math.round(100 - props.primEnergyEffi*100) + tr(' J of heat must be dissipated.')}</p>,
-        <p>{tr('Evacuhating this heat by boiling 20 deg water requires ')  + valStr(m3PerWh, 'm3/Wh') + tr(' produced')}</p>,
-        <p className="pSource">{props.source}</p>
+        <p key='1'>{tr('Primary energy efficiency is ') + props.primEnergyEffi}</p>,
+        <p key='2'>{tr('This means that for 100 J of gas, ')+Math.round(props.primEnergyEffi*100)+ tr(' J of electricity are produced, and ') + Math.round(100 - props.primEnergyEffi*100) + tr(' J of heat must be dissipated.')}</p>,
+        <p key='3'>{tr('Evacuhating this heat by boiling 20 deg water requires ')  + valStr(m3PerWh, 'm3/Wh') + tr(' produced')}</p>,
+        <p key='4' className="pSource">{props.source}</p>
     ];
 
     let text = <p>{tr('Thermic centrals heats water in order to produce electricity. ' +
@@ -95,3 +96,34 @@ export class MathTextTile extends React.Component{
 }
 
 MathTextTile.contextType = AppContext;
+
+
+
+/*props :
+value : whatever
+onChange = function(new val)
+*/
+export class NumberEditOrShow extends React.Component{
+    render(){
+        let props = this.props;
+
+        if(this.context.canEditParameters)
+            return (
+                <input type='text'
+                    value={props.value}
+                    onChange={(e) => {
+                        let v = Number(e.target.value);
+                        if(Number.isNaN(v) || props.min > v || props.max < v)
+                            return;
+                        props.onChange(v);
+                    }}
+
+                    style={{width: 30}}
+                />);
+        else{
+            return <span>{props.value}</span>;
+        }
+    }
+}
+
+NumberEditOrShow.contextType = AppContext;

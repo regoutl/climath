@@ -9,6 +9,31 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import { tr } from "../../../tr.js";
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 
+import { Dialog } from './dialog.js';
+import PvDetails from '../help/pvdetails.js';
+import NukeDetails from '../help/nukedetails.js';
+import CcgtDetails from '../help/ccgtdetails.js';
+import WindDetails from '../help/winddetails.js';
+import BatteryDetails from '../help/batterydetails.js';
+import FusionDetails from '../help/fusiondetails.js';
+import CurrentCountryDetails from '../help/currentcountrydetails.js';
+
+import { CloseButton } from '../closebutton.js';
+
+//to be checked
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
 /** @brief this dialog prompt user with choice of the region and parameters
 @note it prevent clicks on the page
 */
@@ -23,8 +48,10 @@ export var NewGameDialog = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (NewGameDialog.__proto__ || Object.getPrototypeOf(NewGameDialog)).call(this, props));
 
-        _this.state = { region: 'belgium', paramSet: 'default' };
+        _this.state = { region: 'belgium', paramSet: 'default', edit: null };
         _this.key = _this.keyPressed.bind(_this);
+
+        _this.setCountry('be');
         return _this;
     }
 
@@ -68,20 +95,42 @@ export var NewGameDialog = function (_React$Component) {
         key: 'handleParamChange',
         value: function handleParamChange() {}
     }, {
+        key: 'setCountry',
+        value: function setCountry(code) {
+            var _this2 = this;
+
+            fetch('data/' + code + '/defaultParameters.json').then(function (response) {
+                return response.json();
+            }) //   no txt to json conv
+            .then(function (params) {
+                _this2.props.onCountryChange(code, params);
+            });
+        }
+    }, {
+        key: 'editParam',
+        value: function editParam() {
+            // if(this.state.paramSet == 'default')
+            //     this.newParam();
+
+            this.setState({ help: PvDetails });
+        }
+    }, {
+        key: 'newParam',
+        value: function newParam() {
+            var name = prompt('Enter name');
+        }
+    }, {
         key: 'render',
         value: function render() {
-
-            return React.createElement(
-                'div',
-                { style: { position: 'absolute', width: '100%', 'height': '100%', zIndex: 100000000, alignItems: 'center', justifyContent: 'center' }, className: 'vLayout' },
-                React.createElement(
-                    'div',
-                    { className: 'dialog vLayout', ref: this.me, style: { position: 'static', flex: '0 0' } },
-                    React.createElement(
-                        'h3',
-                        null,
-                        tr("New game")
-                    ),
+            if (this.state.help) {
+                return this._makeHelp();
+            } else {
+                return React.createElement(
+                    Dialog,
+                    {
+                        title: 'New game',
+                        onStart: this.props.onStart
+                    },
                     React.createElement(
                         'table',
                         null,
@@ -122,28 +171,84 @@ export var NewGameDialog = function (_React$Component) {
                                     'td',
                                     null,
                                     React.createElement(
-                                        'select',
-                                        { value: this.state.paramSet, onChange: this.handleParamChange.bind(this) },
-                                        React.createElement(
-                                            'option',
-                                            { value: 'default' },
-                                            tr('Default')
-                                        )
+                                        'div',
+                                        { className: 'button white', onClick: this.editParam.bind(this) },
+                                        tr('Edit...')
                                     )
                                 )
                             )
                         )
+                    )
+                );
+            }
+        }
+
+        /** @brief returns a react component for the current help
+        @note : help must be not null
+        */
+
+    }, {
+        key: '_makeHelp',
+        value: function _makeHelp() {
+            var _this3 = this;
+
+            var energies = [{ label: 'Solar panels', target: PvDetails }, { label: 'Wind turbines', target: WindDetails }, { label: 'Batteries', target: BatteryDetails }, { label: 'Nuclear power', target: NukeDetails }, { label: 'Gas centrals', target: CcgtDetails }, { label: 'Fusion', target: FusionDetails }];
+
+            var countries = [{ label: 'Belgium', target: CurrentCountryDetails }];
+
+            var Help = this.state.help;
+            return React.createElement(
+                'div',
+                {
+                    id: 'editParamPage',
+                    className: 'hLayout'
+                },
+                React.createElement(
+                    'div',
+                    { className: 'vLayout', style: { minWidth: 200 } },
+                    React.createElement(
+                        'nav',
+                        { className: 'vLayout' },
+                        React.createElement(
+                            'h2',
+                            null,
+                            tr('Energies')
+                        ),
+                        energies.map(function (p) {
+                            return React.createElement(
+                                'div',
+                                { key: p.label, onClick: function onClick() {
+                                        return _this3.setState({ help: p.target });
+                                    } },
+                                tr(p.label)
+                            );
+                        }),
+                        React.createElement(
+                            'h2',
+                            null,
+                            tr('Countries')
+                        ),
+                        countries.map(function (p) {
+                            return React.createElement(
+                                'div',
+                                { key: p.label, onClick: function onClick() {
+                                        return _this3.setState({ help: p.target });
+                                    } },
+                                tr(p.label)
+                            );
+                        })
                     ),
                     React.createElement(
                         'div',
-                        { className: 'hLayout' },
-                        React.createElement(
-                            'div',
-                            { className: 'button white', onClick: this.props.onStart },
-                            tr("Start")
-                        )
+                        { className: 'button black', onClick: function onClick() {
+                                return _this3.setState({ help: null });
+                            } },
+                        tr('Ok')
                     )
-                )
+                ),
+                React.createElement(Help, {
+                    parameters: this.props.parameters
+                })
             );
         }
     }]);
