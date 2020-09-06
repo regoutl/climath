@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 [![CC BY-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+=======
+[![CC BY-SA 4.0][cc-by-nc-sa-shield]][nc-by-sa]
+>>>>>>> 0c994503a95b7caabb057d4bb60494f744265658
 
 This work is licensed under a
 [Attribution-NonCommercial-ShareAlike 4.0 International][cc-by-nc-sa].
