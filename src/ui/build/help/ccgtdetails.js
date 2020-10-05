@@ -59,7 +59,7 @@ export default function CcgtDetails(props) {
                     'Source ?'
                 )
             ),
-            React.createElement(CoolingTile, { primEnergyEffi: ccgt.primEnergyEffi })
+            React.createElement(CoolingTile, { primEnergyEffi: ccgt.primEnEfficiency })
         )
     );
 }

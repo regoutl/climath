@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 self.addEventListener('install', function(e) {
  e.waitUntil(
    caches.open('climath').then(function(cache) {

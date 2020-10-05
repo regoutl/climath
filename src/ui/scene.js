@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 
 
 import {tr} from '../tr.js';
@@ -355,10 +357,10 @@ export default class Scene{
 
     }
     _initWindPowDens(){
-      this.windPowDensAt50 = new PaletteTexture(this.gl, 1);
+      this.windPowDensAt100 = new PaletteTexture(this.gl, 1);
 
-      this.windPowDensAt50.defaultGradiant(0, 162);
-      this.windPowDensAt50.update(this.cMap.windPowDens.at50);
+      this.windPowDensAt100.defaultGradiant(0, 162);
+      this.windPowDensAt100.update(this.cMap.windPowDens.at100);
     }
 
 

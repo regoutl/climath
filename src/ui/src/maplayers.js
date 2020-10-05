@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import {tr} from '../../tr.js';
 
 /* this shows the buttons to select the displayed layers and the legend
@@ -13,13 +15,13 @@ export default class MapLayers extends React.Component{
 
         let ans = [];
         if(this.state.open){
-            let bases = ['groundUse', 'popDensity', 'windPowDensAt50'];
+            let bases = ['groundUse', 'popDensity', 'windPowDensAt100'];
             let layers = ['energyGrid', 'flows'];
 
             let name2icon = {
                 'groundUse':'groundUse.jpg',
                 'popDensity':'pop.png',
-                'windPowDensAt50':'windbis.jpeg',
+                'windPowDensAt100':'windbis.jpeg',
                 'energyGrid':'electricEnergy.png',
                 'flows':'flows.png',
             }

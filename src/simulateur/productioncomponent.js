@@ -1,3 +1,4 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
 "use strict";
 
 import * as Yearly from "../timevarin.js";

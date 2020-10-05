@@ -249,6 +249,51 @@
 		"efficiency":{
 			"histoUntill": 2018,
 			"years": [0.4],
+			"source": "https://www.thewindpower.net/windfarm_fr_2701_estinnes.php",
+			"in2050": 0.45,
+			"comment": "",
+			"label":"Wind efficiency"
+		},
+		"deconstructionRatio":0.05,
+		"build":{
+			"time": 1,
+			"cost":{
+				"label":"Wind build cost (onshore, @100m)",
+				"unit":"€/i",
+				"years":[11.8],
+				"valMul":1000000,
+				"source":"https://www.lecho.be/entreprises/energie/des-chinois-rachetent-le-plus-grand-parc-eolien-belge/9814913.html",
+				"comment":"note : data source  :  135m height.  2010."
+			}
+		},
+		"density":{
+			"label":"Wind (onshore, @100m) density",
+			"unit":"i/m2",
+			"years":[4.2],
+			"valMul":1e-6,
+			"source":"",
+			"comment":"Hard to find precise number here. 4 is likely a hight consentration farm."
+		},
+		"init":{
+			"_capacityunit":"W",
+			"_capacityvalMul":1000000000,
+			"capacity":3.25
+		},
+		"perYear":{
+			"cost":{
+				"label":"Wind (terrestre, @100m) per Year cost",
+				"unit":"€/Ny",
+				"years":[45],
+				"valMul":0.001,
+				"source":"https://analysis.newenergyupdate.com/wind-energy-update/us-wind-om-costs-estimated-48000mw-falling-costs-create-new-industrial-uses-iea",
+				"comment":"to check"
+			}
+		}
+	},
+	"_wind_backup_50":{
+		"efficiency":{
+			"histoUntill": 2018,
+			"years": [0.4],
 			"source": "https://greenliving.lovetoknow.com/Efficiency_of_Wind_Energy",
 			"in2050": 0.45,
 			"comment": "",
@@ -267,11 +312,11 @@
 			}
 		},
 		"density":{
-			"label":"Wind (onshore, @50m) density",
+			"label":"Wind (onshore, @100m) density",
 			"unit":"i/m2",
-			"years":[4.23],
+			"years":[20],
 			"valMul":1e-6,
-			"source":"",
+			"source":"https://en.wikipedia.org/wiki/F%C3%A2nt%C3%A2nele-Cogealac_Wind_Farm",
 			"comment":""
 		},
 		"init":{
@@ -408,9 +453,13 @@
 		},
 		"consoPerCap":{
 			"histoUntill": 2018,
-			"years": [64.9, 64.6, 63.9, 66.3, 66.3, 65.5, 65.4, 65.2, 66.2, 60.6, 64.3, 58.2, 56.2, 57, 53.8, 55.2, 57.3, 57.4, 56.9],
-			"source": "https://ourworldindata.org/energy-production-and-changing-energy-sources#global-total-energy-production-long-run-view-by-source",
-			"valMul": 114.08,
+			"years":
+					[	64.9, 64.6, 63.9, 66.3, 66.3,
+						65.5, 65.4, 65.2, 66.2, 60.6,
+						64.3, 58.2, 56.2, 57,   53.8,
+						55.2, 57.3, 57.4, 56.9],
+			"source": "https://bestat.statbel.fgov.be/bestat/crosstable.xhtml?datasource=0e22d3ca-1721-4f98-80a9-df41ab32e72b&fbclid=IwAR2nNfxWgvLxOTrqwcsQE3TWwAhH6uwuEqVSdLDmsEuiidkZz0B4DNAOi6M",
+			"valMul": 92.29,
 			"in2050": 49,
 			"unit":"W/H",
 			"label":"Belgium w per cap"

@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import ProductionComponent from './productioncomponent.js';
 import MapComponent from './mapcomponent.js';
 import HydroComponent from './hydrocomponent.js';
@@ -423,6 +425,8 @@ export function promiseSimulater(parameters, countryCode){
             .then(response => response.arrayBuffer()),
         fetch('data/' + countryCode + '/gameRdy/windPowDens50.bin')
             .then(response => response.arrayBuffer()),
+        fetch('data/' + countryCode + '/gameRdy/windPowDens100.bin')
+            .then(response => response.arrayBuffer()),
         // fetch('data/' + countryCode + '/gameRdy/flowdisplay.bin')
         //     .then(response => response.arrayBuffer()),
     ])
@@ -439,7 +443,10 @@ export function promiseSimulater(parameters, countryCode){
         simuCreateInfo.map = {
             groundUse: new Uint8Array(values[0]),
             popDensity: new Uint8Array(values[6]),
-            windPowDens:{at50:new Uint8Array(values[7])},
+            windPowDens:{
+                at50:new Uint8Array(values[7]),
+                at100:new Uint8Array(values[8]),
+            },
             pools: new Uint8Array(values[5]),
             // riverDisplay: new Uint8Array(values[8]),
         };

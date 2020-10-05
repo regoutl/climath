@@ -1,3 +1,4 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
 import IntermittentProductionMean from './intermittentproductionmean.js';
 import * as Yearly from "../timevarin.js";
 import BuildInfo from './buildinfo.js';

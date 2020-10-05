@@ -1,3 +1,4 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
 import PriorityQueue from '../res/priorityqueue.js';
 
 /** @brief execute building at build.build.end */

@@ -1,4 +1,24 @@
-/** option.compact : [0-2], 0 = less compact, 2 = most compact. default 0
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
+/** @brief : Transform a number + unit into a human readable string
+
+@details
+	Units : An unit must NOT contain any multiplier (kilo, nano, etc).
+	Symbols are :
+
+	(H)uman
+	(W)att
+	(N)ameplate : plant pic production (W, but not efficive)
+	(h)our
+	(€)
+	(C)arbon (grams)
+	(i)tem : an item (no matter what)
+	(y)ear
+	(m)eters
+	(S)torage : Wh (stored)
+
+
+option.compact : [0-2], 0 = less compact, 2 = most compact. default 0
 options.mag int [-3, 5] : force mag order. 1 => k aso. default : auto detect.
 options.forceSign : bool. default false. if true, will write '+3' instead of '3'
 */
@@ -75,8 +95,12 @@ export function quantityToHuman(value, unit, options){
 	return sign + orderVal + ' ' + unitToHuman(suffix + unit, options.compact);
 }
 
-
+/** @brief convert an unit into a human readable string
+*/
 export function unitToHuman(unit, compact){
+	if(compact == undefined)
+		compact = 0;
+
 	var tmp = unit;
 	if(unit.match(/^(m|μ|ν)(€|C)/) && unit.match(/\//)){
 		if(unit[0] == 'm')

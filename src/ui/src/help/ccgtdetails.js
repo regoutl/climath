@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 
 import {tr} from '../../../tr.js';
 import {PlotTile, CentralProduction, CoolingTile} from './sharedtiles.js';
@@ -42,7 +44,7 @@ export default function CcgtDetails(props){
                 <p className="pSource">Source ?</p>
             </div>
 
-            <CoolingTile primEnergyEffi={ccgt.primEnergyEffi} />
+            <CoolingTile primEnergyEffi={ccgt.primEnEfficiency} />
         </div>
     </div>);
 }

@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 
 import {tr} from '../../../tr.js';
 import {PlotTile, CentralProduction, CoolingTile, MathTextTile} from './sharedtiles.js';
@@ -72,7 +74,7 @@ export default function NukeDetails (props){
                 <p>{tr('Therefore they are included in the O&M cost of the central and in its footprint.')}</p>
             </div>
 
-            <CoolingTile primEnergyEffi={nuke.primEnergyEffi} />
+            <CoolingTile primEnergyEffi={nuke.primEnEfficiency} />
         </div>
     </div>);
 

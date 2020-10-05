@@ -21,7 +21,7 @@ function Production(props) {
     ), React.createElement('img', { key: '2', src: 'res/symbols/pv/production.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
         { key: '3' },
-        [{ img: 'shared/radFlux', descr: 'is the maximal radiant flux (W/m2)' }, { img: 'shared/efficiency', descr: 'is the pannel efficiency at y0' }, { img: 'shared/capaFactT', descr: 'is the capacity factor at that hour' }, { img: 'shared/decline', descr: 'is the yearly efficiency decline' }, { img: 'shared/year', descr: 'is the current year' }, { img: 'shared/year0', descr: 'is the build year' }].map(function (i) {
+        [{ img: 'shared/radFlux', descr: 'is the maximal radiant flux' }, { img: 'shared/efficiency', descr: 'is the pannel efficiency at y0' }, { img: 'shared/capaFactT', descr: 'is the capacity factor at that hour' }, { img: 'shared/decline', descr: 'is the yearly efficiency decline' }, { img: 'shared/year', descr: 'is the current year' }, { img: 'shared/year0', descr: 'is the build year' }].map(function (i) {
             return React.createElement(
                 'li',
                 { key: i.img },
@@ -35,11 +35,11 @@ function Production(props) {
     var text = [React.createElement(
         'p',
         { key: 'introTxt' },
-        tr('The production depends on :')
+        tr('The production of a solar panel depends on :')
     ), React.createElement(
         'ul',
         { className: 'default', key: 'list' },
-        ['The area', 'The amount of sun. ' + 'The amount of sun depends on the location (we call it \'radiant flux\') ' + 'and the time of the day/year (we call it \'Capacity factor\').', 'The panel efficiency. This decrease with time. '].map(function (i) {
+        ['its area. ', 'the amount of sun it receives, ' + 'which depends on the panel location ' + 'and on the time of the day/year.', 'its efficiency.  '].map(function (i) {
             return React.createElement(
                 'li',
                 { key: i },
@@ -56,20 +56,45 @@ function Production(props) {
 }
 
 function RadFlux(props) {
-    return React.createElement(
+    var text = React.createElement(
         'div',
-        null,
+        { className: 'hLayout' },
         React.createElement(
-            'h4',
+            'div',
             null,
-            tr('Radiant flux')
+            tr("This map shows the average sunshine. ")
         ),
         React.createElement(
             'div',
-            { className: 'hLayout' },
+            null,
+            React.createElement(
+                'a',
+                { href: 'data/' + props.country + '/pv/globalHorisontalIrradiance.png' },
+                React.createElement('img', { src: 'data/' + props.country + '/pv/globalHorisontalIrradiance.png', alt: 'ghi be', width: '120' })
+            ),
+            React.createElement(
+                'p',
+                { className: 'pSource' },
+                'https://globalsolaratlas.info/'
+            )
+        )
+    );
+
+    var math = React.createElement(
+        'div',
+        { className: 'hLayout' },
+        React.createElement(
+            'div',
+            null,
+            tr("This map shows the maximal radian flux (W/m2)."),
             React.createElement(
                 'div',
-                null,
+                { style: { transform: "scale(0.7)" } },
+                React.createElement(
+                    'h5',
+                    null,
+                    'Note : computation method'
+                ),
                 React.createElement('img', { src: 'res/symbols/pv/maxRadFlux.svg', alt: 'max rad flux eq' }),
                 React.createElement(
                     'ul',
@@ -89,23 +114,29 @@ function RadFlux(props) {
                         tr(' is the average Global Horizontal Irradiance')
                     )
                 )
+            )
+        ),
+        React.createElement(
+            'div',
+            null,
+            React.createElement(
+                'a',
+                { href: 'data/' + props.country + '/pv/globalHorisontalIrradiance.png' },
+                React.createElement('img', { src: 'data/' + props.country + '/pv/globalHorisontalIrradiance.png', alt: 'ghi be', width: '120' })
             ),
             React.createElement(
-                'div',
-                null,
-                React.createElement(
-                    'a',
-                    { href: 'data/' + props.country + '/pv/globalHorisontalIrradiance.png' },
-                    React.createElement('img', { src: 'data/' + props.country + '/pv/globalHorisontalIrradiance.png', alt: 'ghi be', width: '120' })
-                ),
-                React.createElement(
-                    'p',
-                    { className: 'pSource' },
-                    'https://globalsolaratlas.info/'
-                )
+                'p',
+                { className: 'pSource' },
+                'https://globalsolaratlas.info/'
             )
         )
     );
+
+    return React.createElement(MathTextTile, {
+        title: 'Sunshine map',
+        math: math,
+        text: text
+    });
 }
 
 function CapaFact(props) {

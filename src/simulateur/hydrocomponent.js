@@ -1,3 +1,4 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
 
 /** @brief this component check that no river go negative.
 @note : maybe move it to nuke component (as it is the only user) ?

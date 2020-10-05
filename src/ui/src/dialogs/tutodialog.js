@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import {tr} from "../../../tr.js";
 import {Dialog} from './dialog.js';
 import {isTouchScreen} from '../../screenDetection.js';

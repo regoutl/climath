@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 
 import AbstractProductionMean from './abstractproductionmean.js';
 import * as Yearly from "../timevarin.js";

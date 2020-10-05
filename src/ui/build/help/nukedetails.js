@@ -144,7 +144,7 @@ export default function NukeDetails(props) {
                     tr('Therefore they are included in the O&M cost of the central and in its footprint.')
                 )
             ),
-            React.createElement(CoolingTile, { primEnergyEffi: nuke.primEnergyEffi })
+            React.createElement(CoolingTile, { primEnergyEffi: nuke.primEnEfficiency })
         )
     );
 }

@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import GameWin from './gamewin.js';
 import {AppContext} from './appcontext.js';
 import {NewGameDialog} from './dialogs/newgamedialog.js';

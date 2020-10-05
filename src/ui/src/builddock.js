@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import {tr} from "../../tr.js";
 import { quantityToHuman as valStr} from '../quantitytohuman.js';
 import {isTouchScreen,isMobile,isSmallScreen,isLandscape} from '../screenDetection.js';
@@ -18,9 +20,9 @@ const energyIcons = [
     {name: 'Battery',               src:'bat.png',      target:'battery',},
     {name: 'Gas-fired power plant', src:'ccgt.png',     target:'ccgt',   },
     {name: 'Wind turbine',          src:'wind.png',     target:'wind',   },
-    {name: 'Nuclear fusion',        src:'fusion.png',   target:'fusion', },
-    {name: 'Demolish',              src:'demolish.png', target:'demolish',
-},
+    // {name: 'Nuclear fusion',        src:'fusion.png',   target:'fusion', },
+//     {name: 'Demolish',              src:'demolish.png', target:'demolish',
+// },
 ];
 const detailForTech ={
     "pv":PvDetails,

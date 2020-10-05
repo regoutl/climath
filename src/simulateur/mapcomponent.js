@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import Scene from '../ui/scene.js';
 
 const GroundUsage = {
@@ -57,7 +59,8 @@ export default class MapComponent{
         this.pixelArea = this.plank * this.plank; //m2 / pix
 
         this.avgIrradiance = 1030; //W/m2
-        this.avgWindPowerDensity50 = 400; //W/m2
+        this.avgWindPowerDensity50 = 328; //W/m2 (src : globalwindatlas)
+        this.avgWindPowerDensity100 = 477; //W/m2 (src : globalwindatlas)
         this.totalArea = 30600e6; //m2
         this.totalPop = 11.4e6; //hab
         this.avgPopDensity = this.totalPop / this.totalArea;
@@ -127,6 +130,8 @@ export default class MapComponent{
                 fields[i] = A * this.avgPopDensity;
             else if(fields[i] == 'windPower50')
                 fields[i] = A * this.avgWindPowerDensity50;
+            else if(fields[i] == 'windPower100')
+                fields[i] = A * this.avgWindPowerDensity100;
             else
                 throw 'to do';
         }
@@ -165,6 +170,7 @@ export default class MapComponent{
     areaAt(x, y){return this.pixelArea;}
     radiantFluxAt(x, y){return this.avgIrradiance * this.pixelArea;}
     windPower50At(x, y){return this.windPowDens.at50[x + y * this.width] * 8.0 * this.pixelArea;}
+    windPower100At(x, y){return this.windPowDens.at100[x + y * this.width] * 8.0 * this.pixelArea;}
     populationAt(x, y){return popDensitylegend[this.popDensity[y*this.width+x]]* this.popGrowthSinceStart * this.pixelArea;}
     energyAt(x, y){ return this.energyGrid[y*this.width+x]; }
     groundUseAt(x,y){return this.groundUse[y*this.width+x];}

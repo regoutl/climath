@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import IntermittentProductionMean from './intermittentproductionmean.js';
 import * as Yearly from "../timevarin.js";
 import BuildInfo from './buildinfo.js';
@@ -42,54 +44,66 @@ export default class Wind extends IntermittentProductionMean{
     */
     buildInfo(parameters, zone){
         if(parameters.height === undefined){
-            parameters.height = 50;
+            parameters.height = 100;
         }
 
-        parameters.extraSumDemolish = 'windPower50';
+        parameters.extraSumDemolish = 'windPower100';
 
         let [area, windPower] = this.simu.cMap.reduceIf(
-                                        ['area', 'windPower50'],
+                                        ['area', 'windPower100'],
                                         zone,
                                         ['buildable']);
 
         return this._buildInfo(parameters, area, windPower);
     }
 
-  //same spec as pv._prepareCapex
-  _buildInfo(parameters, area, windPower){
-      let info = new BuildInfo(parameters);
+    //same spec as pv._prepareCapex
+    _buildInfo(parameters, area, windPower){
+        let info = new BuildInfo(parameters);
 
-      info.build.end = this.endOfBuild(info);
+        info.build.end = this.endOfBuild(info);
 
-      let windPowerDensity = windPower / area;
-      if(area == 0)
-          windPowerDensity = 0;
+        let avgWindPowerDensityAt100 = windPower / area;
+        if(area == 0)
+            avgWindPowerDensityAt100 = 0;
 
-      //src : https://en.wikipedia.org/wiki/Belwind (offshore, @95m  :/)
-      const maxWindTurbinePerSquareMeter = this.density.at(info.build.begin); //todo : check for onshore
+        let avgWindPowerDensity = avgWindPowerDensityAt100 * 1.25; //integral over rotor coef @todo
 
-      const rotorRadius = 45.0;
+        let percentile90WindPowerDensity = avgWindPowerDensity * 2.2;
 
-      let count = area * maxWindTurbinePerSquareMeter;
+        //src : https://en.wikipedia.org/wiki/Belwind (offshore, @95m  :/)
+        const maxWindTurbinePerSquareMeter = this.density.at(info.build.begin); //todo : check for onshore
 
-      let section = count * rotorRadius * rotorRadius * 3.14; //m2
+        const rotorRadius = 49.5;//General Electric: 2.5XLe
 
-      let initNameplate
-          = section * windPowerDensity
+        let count = area * maxWindTurbinePerSquareMeter;
+
+
+
+        let section = count * rotorRadius * rotorRadius * 3.14; //m2
+
+        let initNameplate
+          = section * percentile90WindPowerDensity
             * this.efficiency.at(info.build.begin);
-      info.nameplate = new Yearly.Raw(initNameplate);
-      info.nameplate.unit = 'N';
+        // console.log(initNameplate / count * 1e-6);
+        //
+        // console.log('N ' + initNameplate * 1e-6);
+
+        // console.log('Nameplate / item (MW) ', initNameplate/count * 1e-6);
+
+        info.nameplate = new Yearly.Raw(initNameplate);
+        info.nameplate.unit = 'N';
 
 
-      info.build.co2 = 0; // C / Wh
-      info.build.cost  =  this._buildCost(parameters, area);
+        info.build.co2 = 0; // C / Wh
+        info.build.cost  =  this._buildCost(parameters, area);
 
 
-      info.perYear.cost = this.perYear.cost.at(info.build.end) * initNameplate;
-      info.avgCapacityFactor = 0.229; //todo : do a real computation ?
+        info.perYear.cost = this.perYear.cost.at(info.build.end) * initNameplate;
+        info.avgCapacityFactor = 0.229; //todo : do a real computation ?
 
-      return info;
-  }
+        return info;
+    }
 
     _buildCost(parameters, area){
         const maxWindTurbinePerSquareMeter = this.density.at(parameters.year); //todo : check for onshore

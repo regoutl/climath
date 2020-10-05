@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import {tr} from '../../tr.js';
 import MapLayers from './maplayers.js';
 import {BuildDock, TouchBuildDock} from './builddock.js';

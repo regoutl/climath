@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import { quantityToHuman as valStr } from '../quantitytohuman.js';
 import {tr} from '../../tr.js';
 import {periodAvgCo2} from '../../periodavgco2.js';

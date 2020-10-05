@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 
 // compute the average co2 per year on the given period. from = index of 1st. to = index of last (not included)
 export function periodAvgCo2(history, from, to){

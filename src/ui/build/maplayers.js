@@ -32,13 +32,13 @@ var MapLayers = function (_React$Component) {
 
             var ans = [];
             if (this.state.open) {
-                var bases = ['groundUse', 'popDensity', 'windPowDensAt50'];
+                var bases = ['groundUse', 'popDensity', 'windPowDensAt100'];
                 var layers = ['energyGrid', 'flows'];
 
                 var name2icon = {
                     'groundUse': 'groundUse.jpg',
                     'popDensity': 'pop.png',
-                    'windPowDensAt50': 'windbis.jpeg',
+                    'windPowDensAt100': 'windbis.jpeg',
                     'energyGrid': 'electricEnergy.png',
                     'flows': 'flows.png'
                 };

@@ -1,3 +1,4 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
 
 
 /** information about a build

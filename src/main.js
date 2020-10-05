@@ -1,9 +1,5 @@
-/*
-This file is part of Benergy. Benergy is free software: you can redistribute it and/or modify
- it under the terms of the GPL-3.0-only.
+// Copyright 2020, ASBL Math for climate, All rights reserved.
 
-Copyright 2020, louis-amedee regout, charles edwin de brouwer
-*/
 
 "use strict";
 

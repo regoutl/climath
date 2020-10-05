@@ -1,3 +1,5 @@
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 
 import {tr} from '../../../tr.js';
 import {PlotTile, MathTextTile, NumberEditOrShow} from './sharedtiles.js';
@@ -8,7 +10,7 @@ function Production(props){
     let math =  [<p key='1'>Production of a PV farm of area <img src='res/symbols/shared/area.svg'/> is : </p>,
             <img  key='2' src="res/symbols/pv/production.svg" alt="Pv production eq" />,
             <ul  key='3'>
-                {[{img:'shared/radFlux', descr: 'is the maximal radiant flux (W/m2)'},
+                {[{img:'shared/radFlux', descr: 'is the maximal radiant flux'},
                     {img:'shared/efficiency', descr: 'is the pannel efficiency at y0'},
                     {img:'shared/capaFactT', descr: 'is the capacity factor at that hour'},
                     {img:'shared/decline', descr: 'is the yearly efficiency decline'},
@@ -17,14 +19,14 @@ function Production(props){
                 ].map((i) => <li key={i.img}><img src={"res/symbols/" + i.img +".svg"} alt={i.descr} /> {tr(i.descr)}</li>)}
             </ul>];
 
-    let text = [<p key='introTxt'>{tr('The production depends on :')}</p>,
+    let text = [<p key='introTxt'>{tr('The production of a solar panel depends on :')}</p>,
         <ul className='default' key='list'>
             {[
-                'The area',
-                'The amount of sun. ' +
-                'The amount of sun depends on the location (we call it \'radiant flux\') ' +
-                'and the time of the day/year (we call it \'Capacity factor\').',
-                'The panel efficiency. This decrease with time. ',
+                'its area. ',
+                'the amount of sun it receives, ' +
+                'which depends on the panel location ' +
+                'and on the time of the day/year.',
+                'its efficiency.  ',
             ].map((i) => <li key={i}>{tr(i)}</li>)}
         </ul>
     ];
@@ -39,25 +41,47 @@ function Production(props){
 }
 
 function RadFlux(props){
-    return (
-        <div>
-            <h4>{tr('Radiant flux')}</h4>
-            <div className='hLayout'>
-                <div>
-                    <img src="res/symbols/pv/maxRadFlux.svg" alt="max rad flux eq" />
-                    <ul>
-                        <li><img src='res/symbols/shared/avgCapaFact.svg' alt='avgCapaFact' /> {tr('is the average capacity factor')}</li>
-                        <li><img src='res/symbols/pv/avgGhi.svg' alt='average global hori irradiance' /> {tr(' is the average Global Horizontal Irradiance')}</li>
-                    </ul>
-                </div>
-                <div>
-                    <a href={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'}>
-                        <img src={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'} alt='ghi be' width="120"/>
-                    </a>
-                    <p className="pSource">https://globalsolaratlas.info/</p>
-                </div>
-            </div>
-        </div>);
+  let text = <div className='hLayout'>
+                  <div>
+                    {tr("This map shows the average sunshine. ")}
+                  </div>
+                  <div>
+                      <a href={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'}>
+                          <img src={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'} alt='ghi be' width="120"/>
+                      </a>
+                      <p className="pSource">https://globalsolaratlas.info/</p>
+                  </div>
+              </div>
+;
+
+  let math =
+    <div className='hLayout'>
+                  <div>
+                    {tr("This map shows the maximal radian flux (W/m2).")}
+                      <div style={{transform: "scale(0.7)"}}>
+                        <h5>Note : computation method</h5>
+                        <img src="res/symbols/pv/maxRadFlux.svg" alt="max rad flux eq" />
+                        <ul>
+                            <li><img src='res/symbols/shared/avgCapaFact.svg' alt='avgCapaFact' /> {tr('is the average capacity factor')}</li>
+                            <li><img src='res/symbols/pv/avgGhi.svg' alt='average global hori irradiance' /> {tr(' is the average Global Horizontal Irradiance')}</li>
+                        </ul>
+                      </div>
+                  </div>
+                  <div>
+                      <a href={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'}>
+                          <img src={'data/' + props.country + '/pv/globalHorisontalIrradiance.png'} alt='ghi be' width="120"/>
+                      </a>
+                      <p className="pSource">https://globalsolaratlas.info/</p>
+                  </div>
+              </div>;
+
+  return (
+      <MathTextTile
+          title="Sunshine map"
+          math={math}
+          text={text}
+      />
+  );
 }
 
 function CapaFact(props){
