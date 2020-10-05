@@ -62,8 +62,15 @@ export default class MapView extends React.Component{
 
 
     setTargetBuildState(attrName, val){
+        // console.log(val);
+        // console.log(attrName);
         this.setState((state) => {
-            let ans = {targetBuild: {...state.targetBuild, [attrName]: val}};
+            let radius = state.targetBuild.radius;
+            if(attrName == 'type')
+                radius = (val == 'battery') ? 10 : 50;
+            // console.log(attrName, val, radius);
+
+            let ans = {targetBuild: {...state.targetBuild, [attrName]: val, radius: radius}};
             return ans;
         });
     }

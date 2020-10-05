@@ -136,7 +136,7 @@ export default class Storage /*extends AbstractProductionMean*/{
           throw 'only bat supported';
 
         if(parameters.height === undefined)
-            parameters.height = 5;//5 is a coef that should be controllable by the user. height of the battery
+            parameters.height = 1;//5 is a coef that should be controllable by the user. height of the battery
 
         let a = this.simu.cMap.reduceIf(['area'], zone,
                                         ['buildable']);

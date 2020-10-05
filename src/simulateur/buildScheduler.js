@@ -1,5 +1,5 @@
 // Copyright 2020, ASBL Math for climate, All rights reserved.
-import PriorityQueue from '../res/priorityqueue.js';
+import PriorityQueue from '../res/code/priorityqueue.js';
 
 /** @brief execute building at build.build.end */
 export default class BuildScheduler{

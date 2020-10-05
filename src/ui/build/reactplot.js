@@ -6,6 +6,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import { tr } from "../../tr.js";
 import { Raw } from '../../timevarin.js';
 import { AppContext } from './appcontext.js';

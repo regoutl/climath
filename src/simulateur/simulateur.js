@@ -103,6 +103,7 @@ export class Simulateur{
         // nothin to build, skip
         if(!buildMenuState || !buildMenuState.type)
             return null;
+        // console.log(buildMenuState);
 
         let parameters = this._getBuildMenuStateParameters(buildMenuState);
 

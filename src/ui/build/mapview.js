@@ -10,6 +10,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// Copyright 2020, ASBL Math for climate, All rights reserved.
+
 import { tr } from '../../tr.js';
 import MapLayers from './maplayers.js';
 import { BuildDock, TouchBuildDock } from './builddock.js';
@@ -79,8 +81,16 @@ var MapView = function (_React$Component) {
     _createClass(MapView, [{
         key: 'setTargetBuildState',
         value: function setTargetBuildState(attrName, val) {
+            // console.log(val);
+            // console.log(attrName);
             this.setState(function (state) {
-                var ans = { targetBuild: Object.assign({}, state.targetBuild, _defineProperty({}, attrName, val)) };
+                var _Object$assign;
+
+                var radius = state.targetBuild.radius;
+                if (attrName == 'type') radius = val == 'battery' ? 10 : 50;
+                // console.log(attrName, val, radius);
+
+                var ans = { targetBuild: Object.assign({}, state.targetBuild, (_Object$assign = {}, _defineProperty(_Object$assign, attrName, val), _defineProperty(_Object$assign, 'radius', radius), _Object$assign)) };
                 return ans;
             });
         }
