@@ -1,10 +1,10 @@
-# License
-
-This work is copyrighted by Asbl 'Math for climate', 2020. All right reserved.
-
 # Climath
 
 Carbon transition simulator.
+
+# License
+
+This work is copyrighted by ASBL 'Math for climate', 2020. All right reserved.
 
 <!---note d'installation :
 si certaines requetes ajax echouent, lancer via lamp

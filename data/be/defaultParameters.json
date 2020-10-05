@@ -213,24 +213,31 @@
 					"unit":"Wh/S"
 				},
 				"cost":{
-					"label":"Battery build cost",
+					"years":[380, 380, 380, 380, 380,
+									 380, 380, 380, 380, 380,
+								 	 380, 380, 380, 380, 380,
+									 380, 380, 380, 380],
+	 			    "in2050": 156,
+					"valMul":0.0011,
+					"ctrlPts": [{"x": 2018, "y": 380}, {"x": 2021, "y": 180}],
 					"unit":"€/S",
-					"years":[0],
-					"source":"au pif",
-					"comment":""
+					"source":"https://www.nrel.gov/docs/fy19osti/73222.pdf",
+					"comment": "Battery cost projections for 4-hour lithium-ion systems. ",
+					"label":"Battery build cost"
 				},
 				"time": 1,
 				"deconstructionRatio":0.05
 			},
 			"perYear":{
 				"cost":{
-					"years":[380, 380, 380, 380, 380,
-									 380, 380, 380, 380, 380,
-								 	 380, 380, 380, 380, 380,
-									 380, 380, 380, 380],
-	 			  "in2050": 156,
-					"valMul":0.0011,
-					"ctrlPts": [{"x": 2018, "y": 380}, {"x": 2021, "y": 180}],
+					"years":[
+						7.5, 7.5, 7.5, 7.5, 7.5,
+						7.5, 7.5, 7.5, 7.5, 7.5,
+						7.5, 7.5, 7.5, 7.5, 7.5,
+						7.5, 7.5, 7.5
+					],
+ 	 			    "in2050": 3,
+					"valMul":0.000892,
 					"unit":"€/Sy",
 					"source":"https://www.nrel.gov/docs/fy19osti/73222.pdf",
 					"comment": "Battery cost projections for 4-hour lithium-ion systems. ",

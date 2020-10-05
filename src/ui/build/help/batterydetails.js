@@ -155,6 +155,11 @@ export default function BatteryDetails(props) {
             React.createElement(StorageCapacity, null),
             React.createElement(StoredEnergy, null),
             React.createElement(PlotTile, {
+                title: 'Build cost',
+                caption: 'Battery construction cost',
+                plot: bat.build.cost
+            }),
+            React.createElement(PlotTile, {
                 title: 'Build energy',
                 caption: 'Battery manufacturing requires some energy.',
                 plot: bat.build.energy,

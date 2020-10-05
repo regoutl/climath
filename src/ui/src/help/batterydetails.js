@@ -109,6 +109,11 @@ export default function BatteryDetails (props){
             <StoredEnergy />
 
             <PlotTile
+                title="Build cost"
+                caption="Battery construction cost"
+                plot={bat.build.cost}
+            />
+            <PlotTile
                 title='Build energy'
                 caption='Battery manufacturing requires some energy.'
                 plot={bat.build.energy}

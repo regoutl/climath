@@ -110,7 +110,7 @@ export function unitToHuman(unit, compact){
 	}
 
 	if(compact == 0)
-		tmp = tmp.replace('/', ' par ').replace('€', '(2019) €').replace('i', 'item').replace('H', ' habitant ').replace('y', ' an ').replace('N', 'W (pic) ').replace('C', 'gCO2eq');
+		tmp = tmp.replace('/', ' per ').replace('€', '(2019) €').replace('i', 'item').replace('H', ' inhabitant ').replace('y', ' year ').replace('N', 'W (peak) ').replace('C', 'gCO2eq');
 	else
 		tmp = tmp.replace('N', 'Wp').replace('C', 'gCO2');
 
@@ -134,7 +134,7 @@ function plainTextEuro(amound){
 	let coef = 1, unit = '';
 	if(Math.abs(amound) >= 1000000000){
 		coef = 0.000000001;
-		unit = 'milliard';
+		unit = 'billion';
 	}
 	else if(Math.abs(amound) >= 1000000){
 		coef = 0.000001;
@@ -142,7 +142,7 @@ function plainTextEuro(amound){
 	}
 	else if(Math.abs(amound) >= 1000){
 		coef = 0.001;
-		unit = 'miles';
+		unit = 'thousand';
 	}
 	else if(Math.abs(amound) >= 1){}
 	else if(Math.abs(amound) >= 0.001){
