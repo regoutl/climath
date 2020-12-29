@@ -22,7 +22,7 @@ class StdLayout extends React.Component{
         return [
             <NavBar key="nav" onLangChanged={() => this.forceUpdate() }/>,
             <Content key="content"  />,
-            <footer key="footer">        </footer>];
+            <footer key="footer"><div>Copyright Math for climate ASBL, 2020</div></footer>];
 
     }
 
@@ -39,6 +39,9 @@ setLang().then(() => {
     path = path.substr(1);
 
     switch (path) {
+        case "":
+            content = Index;
+            break;
         case "index.html":
             content = Index;
             break;
@@ -49,7 +52,7 @@ setLang().then(() => {
             content = About;
             break;
         default:
-            console.log("No route found");
+            console.log("No route found", path);
             return;
     }
 

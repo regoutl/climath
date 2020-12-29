@@ -109,6 +109,11 @@ nav > *.selected{
 
 }
 
+footer{
+    padding-top: 30px;
+    padding-bottom: 30px;
+    border-top: 1px solid rgb(200, 200, 200);
+}
 
 body > .pane{
     min-height: 100%;
