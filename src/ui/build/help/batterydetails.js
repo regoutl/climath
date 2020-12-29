@@ -46,7 +46,7 @@ function StoredEnergy(props) {
     var math = [React.createElement('img', { key: '1', src: 'res/symbols/battery/storedEq.svg', alt: 'Pv production eq' }), React.createElement(
         'ul',
         { key: '2' },
-        [{ img: 'battery/st', descr: 'is the energy stored at hour t (Wh)' }, { img: 'shared/decline', descr: 'is the yearly storage capacity decline' }, { img: 'battery/d', descr: 'is the hourly power loss' }, { img: 'shared/efficiency', descr: 'is the round trip efficiency' }, { img: 'battery/it', descr: 'is the energy send to load the battery (average for this hour) (W)' }, { img: 'shared/prod', descr: 'is the energy production of the battery (average for this hour) (W)' }, { img: 'battery/capacity', descr: 'is the storage capacity' }].map(function (i) {
+        [{ img: 'battery/st', descr: 'is the energy stored at hour t (Wh)' }, { img: 'battery/d', descr: 'is the hourly power loss' }, { img: 'shared/efficiency', descr: 'is the round trip efficiency' }, { img: 'battery/it', descr: 'is the energy send to load the battery (average for this hour) (W)' }, { img: 'shared/prod', descr: 'is the energy production of the battery (average for this hour) (W)' }, { img: 'battery/capacity', descr: 'is the storage capacity' }].map(function (i) {
             return React.createElement(
                 'li',
                 { key: i.img },

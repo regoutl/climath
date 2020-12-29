@@ -11,6 +11,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import GameWin from './gamewin.js';
 import { AppContext } from './appcontext.js';
 import { NewGameDialog } from './dialogs/newgamedialog.js';
+import { downloadDic } from '../../tr.js';
 
 /** @brief switch between full layouts*/
 export var App = function (_React$Component) {
@@ -78,9 +79,20 @@ export var App = function (_React$Component) {
                     parameters: this.parameters,
                     onCountryChange: function onCountryChange(countryCode, parameters) {
                         _this2.parameters = parameters;_this2.setState({ country: countryCode });
+                    },
+                    onLangChange: function onLangChange() {
+                        return _this2.forceUpdate();
                     }
                 });
             } else throw 'todo';
+
+            //localhost only, adds the download dictionary button
+            if (location.hostname == 'localhost') {
+                var downloadDicButton = React.createElement('img', { src: 'res/icons/download.png', id: 'bDownloadDic', title: '(Dev) download dic', className: 'mainButton', onClick: function onClick() {
+                        return downloadDic();
+                    } });
+                content = [content, downloadDicButton];
+            }
 
             return React.createElement(
                 AppContext.Provider,

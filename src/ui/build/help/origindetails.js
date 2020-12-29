@@ -20,11 +20,20 @@ function Demand(props) {
         })
     )];
 
-    var text = React.createElement(
+    var text = [React.createElement(
         'p',
         null,
         tr('The energy demand represent how much energy your population consumes. ')
-    );
+    ), React.createElement(
+        'p',
+        null,
+        tr('Climath assumes that all energy consumed is electric.'),
+        React.createElement(
+            'a',
+            { href: '' },
+            tr('Learn more')
+        )
+    )];
 
     return React.createElement(MathTextTile, { title: 'Energy demand', math: math, text: text });
 }
@@ -52,6 +61,8 @@ export default function OriginDetails(props) {
             }),
             React.createElement(PlotTile, {
                 title: 'Power consumption per capita',
+                caption: "Total energy consumtion per person.",
+                comment: 'This is higher than the current electric energy consumption, because we want all energy usage used to be electrified.',
                 plot: be.consoPerCap
             })
         )

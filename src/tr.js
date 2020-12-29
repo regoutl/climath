@@ -2,10 +2,12 @@
 
 
 
-let lang = "fr";
+let lang = undefined;
 let dic = {};
 
 const supported = ['fr', 'nl', 'en'];
+
+export {supported as supportedLanguages};
 
 /** @brief swith the current language
 @param language : string. the new language to translate to.
@@ -41,10 +43,27 @@ export function setLang(language){
     .then(newDic => {
         dic = newDic;
     })
-    .catch(e => {alert('dictionary load failed ' + e); dic = {}})
-    ;
+    .catch(e => {alert('dictionary load failed ' + e); dic = {}});
 }
 
+export function getCurrentLang(){
+    if(lang === undefined){
+        if(localStorage.getItem('lastLangUsed'))
+            lang = localStorage.getItem('lastLangUsed');
+        else
+            lang = navigator.language.slice(0, 2);
+    }
+
+    if(!supported.includes(lang)){
+        alert( 'lang ' + lang + ' not supported. defaulting to english');
+        lang = "en";
+    }
+
+    localStorage.setItem('lastLangUsed', lang)
+
+
+    return lang;
+}
 
 /** @brief translate a string into the current language
 @param str : text to translate. can contain once a %d, that will be replaced by the count
@@ -111,10 +130,11 @@ function download(filename, text) {
 
 //download dic button + functionnality ================================
 
-function downloadDic(){
+export function downloadDic(){
     //add a line break for all the lines we have to translate
     download(lang + "tmp.dic",JSON.stringify(dic).replace(/},/g, "},\n"));
 }
+
 
 // //this code is for dev only
 // $(function(){

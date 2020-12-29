@@ -222,22 +222,30 @@ var GameWin = function (_React$Component) {
         value: function _makeNextTurnButton() {
             var _this5 = this;
 
+            var now = this.simu.year;
+            var endTerm = Math.floor((now + 5) / 5) * 5;
+
+            var onClick = function onClick() {
+                localStorage.setItem('nextYearClickedOnce', true);
+                for (; now < endTerm; now++) {
+                    _this5.runYear();
+                }
+            };
+
             return React.createElement(
                 'div',
                 {
                     id: 'bNextTurn',
                     className: 'button black',
                     title: tr("Go to the next year"),
-                    onClick: function onClick() {
-                        localStorage.setItem('nextYearClickedOnce', true);_this5.runYear();
-                    }
+                    onClick: onClick
                 },
-                tr("Next turn"),
+                tr("Next term") + " (" + endTerm + ")",
                 localStorage.getItem('buildMenuClickedOnce') && !localStorage.getItem('nextYearClickedOnce') && //add help
                 React.createElement(
                     'div',
                     { className: 'balloon' },
-                    tr('Next year !')
+                    tr('Next term !')
                 )
             );
         }

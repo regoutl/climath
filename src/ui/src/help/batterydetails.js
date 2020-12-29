@@ -37,7 +37,6 @@ function StoredEnergy(props){
     let math = [<img key='1' src="res/symbols/battery/storedEq.svg" alt="Pv production eq" />,
         <ul key='2'>
             {[{img:'battery/st', descr: 'is the energy stored at hour t (Wh)'},
-            {img:'shared/decline', descr: 'is the yearly storage capacity decline'},
             {img:'battery/d', descr: 'is the hourly power loss'},
             {img:'shared/efficiency', descr: 'is the round trip efficiency'},
             {img:'battery/it', descr: 'is the energy send to load the battery (average for this hour) (W)'},

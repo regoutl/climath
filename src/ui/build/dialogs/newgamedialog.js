@@ -8,7 +8,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 // Copyright 2020, ASBL Math for climate, All rights reserved.
 
-import { tr } from "../../../tr.js";
+import { tr, setLang, getCurrentLang } from "../../../tr.js";
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 
 import { Dialog } from './dialog.js';
@@ -124,6 +124,8 @@ export var NewGameDialog = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
+            var _this3 = this;
+
             if (this.state.help) {
                 return this._makeHelp();
             } else {
@@ -135,7 +137,7 @@ export var NewGameDialog = function (_React$Component) {
                     },
                     React.createElement(
                         'table',
-                        null,
+                        { id: 'newGameDialog' },
                         React.createElement(
                             'tbody',
                             null,
@@ -157,6 +159,40 @@ export var NewGameDialog = function (_React$Component) {
                                             'option',
                                             { value: 'belgium' },
                                             tr('Belgium')
+                                        )
+                                    )
+                                )
+                            ),
+                            React.createElement(
+                                'tr',
+                                null,
+                                React.createElement(
+                                    'th',
+                                    null,
+                                    tr('Language')
+                                ),
+                                React.createElement(
+                                    'td',
+                                    null,
+                                    React.createElement(
+                                        'select',
+                                        { value: getCurrentLang(), onChange: function onChange(code) {
+                                                return setLang(code.target.value).then(_this3.props.onLangChange.bind(_this3));
+                                            } },
+                                        React.createElement(
+                                            'option',
+                                            { value: 'en' },
+                                            'English'
+                                        ),
+                                        React.createElement(
+                                            'option',
+                                            { value: 'fr' },
+                                            'Fran\xE7ais'
+                                        ),
+                                        React.createElement(
+                                            'option',
+                                            { value: 'nl' },
+                                            'Neederlands'
                                         )
                                     )
                                 )
@@ -192,7 +228,7 @@ export var NewGameDialog = function (_React$Component) {
     }, {
         key: '_makeHelp',
         value: function _makeHelp() {
-            var _this3 = this;
+            var _this4 = this;
 
             var energies = [{ label: 'Solar panels', target: PvDetails }, { label: 'Wind turbines', target: WindDetails }, { label: 'Batteries', target: BatteryDetails }, { label: 'Nuclear power', target: NukeDetails }, { label: 'Gas centrals', target: CcgtDetails }, { label: 'Fusion', target: FusionDetails }];
 
@@ -220,7 +256,7 @@ export var NewGameDialog = function (_React$Component) {
                             return React.createElement(
                                 'div',
                                 { key: p.label, onClick: function onClick() {
-                                        return _this3.setState({ help: p.target });
+                                        return _this4.setState({ help: p.target });
                                     } },
                                 tr(p.label)
                             );
@@ -234,7 +270,7 @@ export var NewGameDialog = function (_React$Component) {
                             return React.createElement(
                                 'div',
                                 { key: p.label, onClick: function onClick() {
-                                        return _this3.setState({ help: p.target });
+                                        return _this4.setState({ help: p.target });
                                     } },
                                 tr(p.label)
                             );
@@ -243,7 +279,7 @@ export var NewGameDialog = function (_React$Component) {
                     React.createElement(
                         'div',
                         { className: 'button black', onClick: function onClick() {
-                                return _this3.setState({ help: null });
+                                return _this4.setState({ help: null });
                             } },
                         tr('Ok')
                     )

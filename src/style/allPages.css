@@ -1,0 +1,124 @@
+@font-face {
+    font-family: futura;
+    src: url('../../res/FutuLt.ttf');
+}
+
+@font-face {
+    font-family: libertine;
+    src: url('../../res/fonts/LinLibertine_R.ttf');
+}
+
+
+*{
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    font-weight: normal;
+    text-align: left;
+
+    vertical-align: top;
+    font-family: libertine, sans-serif;
+}
+
+a{
+    color: black;
+}
+
+h1{
+    font-size: 30px;
+    padding: 10px;
+}
+
+h1, h2, h3, h4{
+    font-family: futura;
+}
+h3{
+    font-size: 1.5em;
+}
+h5{
+  font-weight: bold;
+}
+
+
+
+ul{
+   list-style-type: none;
+   margin-left: 10px;
+}
+ul.default{
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+table{
+    border-collapse: collapse;
+}
+
+td{
+    padding: 2px;
+}
+
+
+.button{
+    display:block;
+    padding:0.35em 1.2em;
+    margin:0.3em;
+    border-radius:0.12em;
+    box-sizing: border-box;
+    text-decoration:none;
+    font-family: futura;
+    font-weight:300;
+    text-align:center;
+    transition: all 0.2s;
+    cursor: pointer;
+    height: 35px;
+}
+
+.button.black{
+    color:black;
+    border:1px solid black;
+
+}
+
+.button.black:hover{
+    color:white;
+    background-color:black;
+
+}
+
+
+.button.white{
+    color:white;
+    border:1px solid white;
+}
+.button.white:hover{
+    color:black;
+    background-color:white;
+}
+
+
+.hFlex{
+    display: flex;
+    flex-direction: row;
+
+}
+.vFlex{
+    display: flex;
+    flex-direction: column;
+}
+
+.hLayout{
+    display: flex;
+    flex-direction: row;
+
+    overflow: hidden;
+    flex: 1 1;
+}
+
+.vLayout{
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+    flex: 1 1;
+}

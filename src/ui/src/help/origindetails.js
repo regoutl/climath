@@ -15,7 +15,8 @@ function Demand(props){
         </ul>
     ];
 
-    let text = <p>{tr('The energy demand represent how much energy your population consumes. ')}</p>;
+    let text = [<p>{tr('The energy demand represent how much energy your population consumes. ')}</p>,
+    <p>{tr('Climath assumes that all energy consumed is electric.')}<a href="">{tr('Learn more')}</a></p>];
 
     return <MathTextTile title='Energy demand' math={math} text={text} />
 
@@ -29,6 +30,7 @@ export default function OriginDetails (props){
     return (<div className='detailContent'>
         <h3>{tr('Energy origin')}</h3>
 
+
         <div className="hWrapLayout">
             <Demand />
 
@@ -39,6 +41,8 @@ export default function OriginDetails (props){
 
             <PlotTile
                 title='Power consumption per capita'
+                caption={"Total energy consumtion per person."}
+                comment="This is higher than the current electric energy consumption, because we want all energy usage used to be electrified."
                 plot={be.consoPerCap}
             />
         </div>

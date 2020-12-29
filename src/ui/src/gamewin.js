@@ -197,18 +197,27 @@ export default class GameWin extends React.Component{
 
 
     _makeNextTurnButton(){
+        let now = this.simu.year;
+        let endTerm = Math.floor((now + 5) / 5) * 5;
+
+        let onClick = () => {
+            localStorage.setItem('nextYearClickedOnce', true);
+            for(; now < endTerm; now++)
+                this.runYear();
+        };
+
         return (<div
             id="bNextTurn"
             className="button black"
             title={tr("Go to the next year")}
-            onClick={() => {localStorage.setItem('nextYearClickedOnce', true); this.runYear();}}
+            onClick={onClick}
         >
-            {tr("Next turn")}
+            {tr("Next term") + " (" + endTerm + ")"}
 
             {   localStorage.getItem('buildMenuClickedOnce') &&
                 !localStorage.getItem('nextYearClickedOnce') && //add help
                 (<div className='balloon'>
-                    {tr('Next year !')}
+                    {tr('Next term !')}
                 </div>)
             }
         </div>);

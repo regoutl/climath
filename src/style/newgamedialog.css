@@ -1,0 +1,13 @@
+
+
+#newGameDialog  td {
+    width: 100%;
+}
+
+#newGameDialog  td > *{
+    width: 100%;
+    margin: 5px 10px;
+}
+#newGameDialog th{
+    vertical-align: middle;
+}

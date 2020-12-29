@@ -3,7 +3,7 @@
 import GameWin from './gamewin.js';
 import {AppContext} from './appcontext.js';
 import {NewGameDialog} from './dialogs/newgamedialog.js';
-
+import {downloadDic} from '../../tr.js';
 
 
 
@@ -61,10 +61,17 @@ export class App extends React.Component{
                 country={this.state.country}
                 parameters={this.parameters}
                 onCountryChange = {(countryCode, parameters) => {this.parameters = parameters; this.setState({country: countryCode})}}
+                onLangChange={() => this.forceUpdate()}
              />;
         }
         else
             throw 'todo';
+
+        //localhost only, adds the download dictionary button
+        if(location.hostname == 'localhost'){
+            let downloadDicButton = <img src="res/icons/download.png" id="bDownloadDic" title="(Dev) download dic" className="mainButton" onClick={() => downloadDic()}/>;
+            content = [content, downloadDicButton];
+        }
 
 
         return (

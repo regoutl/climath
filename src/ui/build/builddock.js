@@ -180,7 +180,10 @@ function InputSlider(props) {
 }
 
 function BuildDetailsAny(props) {
-    var show = [{ "n": "Installation cost", "cn": "buildCost", "unit": "€" }, { "n": "Installation co2", "cn": "buildCo2", "unit": "C" }, { "n": "Per year cost", "cn": "perYearCost", "unit": "€" }, { "n": "Per year co2", "cn": "perYearCo2", "unit": "C" }, { "n": "Production", "cn": "avgProd", "unit": "W" }, { "n": "Population", "cn": "pop", "unit": "H" }, { "n": "Explosion cost", "cn": "explCost", "unit": "€" }, { "n": "Cooling", "cn": "coolingWaterRate", "unit": "m3/s" }, { "n": "Storage capacity", "cn": "storageCapacity", "unit": "S" }, { "n": "Build time", "cn": "buildDelay", "unit": "y" }, { "n": "Demolish cost", "cn": "demolishCost", "unit": "€" }];
+    var show = [{ "n": "Installation cost", "cn": "buildCost", "unit": "€" }, { "n": "Installation co2", "cn": "buildCo2", "unit": "C" }, { "n": "Per year cost", "cn": "perYearCost", "unit": "€" }, { "n": "Per year co2", "cn": "perYearCo2", "unit": "C" }, { "n": "Production", "cn": "avgProd", "unit": "W" },
+
+    // {"n":"Population",          "cn":"pop",             "unit":"H"}, //disabled by desing
+    { "n": "Explosion cost", "cn": "explCost", "unit": "€" }, { "n": "Cooling", "cn": "coolingWaterRate", "unit": "m3/s" }, { "n": "Storage capacity", "cn": "storageCapacity", "unit": "S" }, { "n": "Build time", "cn": "buildDelay", "unit": "y" }, { "n": "Demolish cost", "cn": "demolishCost", "unit": "€" }];
 
     return React.createElement(
         'table',

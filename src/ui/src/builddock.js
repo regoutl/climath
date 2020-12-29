@@ -180,7 +180,8 @@ function BuildDetailsAny(props){
         {"n":"Per year cost",       "cn":"perYearCost",     "unit":"€"},
         {"n":"Per year co2",        "cn":"perYearCo2",      "unit":"C"},
         {"n":"Production",          "cn":"avgProd",         "unit":"W"},
-        {"n":"Population",          "cn":"pop",             "unit":"H"},
+
+        // {"n":"Population",          "cn":"pop",             "unit":"H"}, //disabled by desing
         {"n":"Explosion cost",      "cn":"explCost",        "unit":"€"},
         {"n":"Cooling",             "cn":"coolingWaterRate","unit":"m3/s"},
         {"n":"Storage capacity",    "cn":"storageCapacity", "unit":"S",},

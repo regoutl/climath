@@ -1,18 +1,10 @@
-@font-face {
-    font-family: futura;
-    src: url('../../res/FutuLt.ttf');
-}
+
 
 *{
-    margin: 0;
-    padding: 0;
     font-size: var(--based-font-size);
-    text-decoration: none;
-    font-weight: normal;
-    text-align: left;
-
-    vertical-align: top;
 }
+
+
 
 sup{
     vertical-align: super;
@@ -45,37 +37,7 @@ header{
     display: none;
 }
 
-h1{
-    font-size: 30px;
-    padding: 10px;
-}
 
-h1, h2, h3, h4{
-    font-family: futura;
-}
-h3{
-    font-size: 1.5em;
-}
-h5{
-  font-weight: bold;
-}
-
-ul{
-   list-style-type: none;
-   margin-left: 10px;
-}
-ul.default{
-    list-style-type: disc;
-    list-style-position: inside;
-}
-
-table{
-    border-collapse: collapse;
-}
-
-td{
-    padding: 2px;
-}
 
 /** BUILD MENU ----------------------------------*/
 
@@ -105,28 +67,6 @@ td{
 /** REACT =====================================================**/
 
 
-.hFlex{
-    display: flex;
-    flex-direction: row;
-
-}
-
-
-.hLayout{
-    display: flex;
-    flex-direction: row;
-
-    overflow: hidden;
-    flex: 1 1;
-}
-
-.vLayout{
-    display: flex;
-    flex-direction: column;
-
-    overflow: hidden;
-    flex: 1 1;
-}
 
 
 #statusBar{
@@ -205,42 +145,6 @@ td{
     bottom: 10px;
 }
 
-.button{
-    display:block;
-    padding:0.35em 1.2em;
-    margin:0.3em;
-    border-radius:0.12em;
-    box-sizing: border-box;
-    text-decoration:none;
-    font-family: futura;
-    font-weight:300;
-    text-align:center;
-    transition: all 0.2s;
-    cursor: pointer;
-    height: 35px;
-}
-
-.button.black{
-    color:black;
-    border:0.1em solid black;
-
-}
-
-.button.black:hover{
-    color:white;
-    background-color:black;
-
-}
-
-
-.button.white{
-    color:white;
-    border:0.1em solid white;
-}
-.button.white:hover{
-    color:black;
-    background-color:white;
-}
 
 
 
@@ -500,4 +404,18 @@ td{
 }
 #editParamPage .detailContent{
     overflow: auto;
+}
+
+
+
+
+
+
+#bDownloadDic{
+    position:absolute;
+    top: 70px;
+    left: 10px;
+    z-index:  1000000;
+    cursor: pointer;
+    width: 20px;
 }

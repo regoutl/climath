@@ -5,7 +5,9 @@ import ReactPlot from '../reactplot.js';
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 import {AppContext} from '../appcontext.js';
 
-/* accepted props : title, caption, plot*/
+/* accepted props : title, caption (text above plot), plot (the data), comment (text under plot).
+All props are translated by this function
+*/
 export function PlotTile(props){
     return (<div>
         <h4>{tr(props.title)}</h4>

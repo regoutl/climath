@@ -4,6 +4,7 @@ import {tr} from "../../../tr.js";
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 import {pieChart, stackedLineChart} from '../../charts.js';
 import {Dialog} from './dialog.js';
+import EmissionsDetails from '../help/emissionsdetails.js';
 
 export class Co2Dialog extends React.Component{
 
@@ -61,6 +62,7 @@ export class Co2Dialog extends React.Component{
         return (
             <Dialog
                 onOk={props.closeRequested}
+                onDetails = {() => props.detailsRequested(EmissionsDetails)}
                 title="Emissions"
                 style={{top:'statusbar',}}
             >

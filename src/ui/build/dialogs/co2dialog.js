@@ -12,6 +12,7 @@ import { tr } from "../../../tr.js";
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 import { pieChart, stackedLineChart } from '../../charts.js';
 import { Dialog } from './dialog.js';
+import EmissionsDetails from '../help/emissionsdetails.js';
 
 export var Co2Dialog = function (_React$Component) {
     _inherits(Co2Dialog, _React$Component);
@@ -79,6 +80,9 @@ export var Co2Dialog = function (_React$Component) {
                 Dialog,
                 {
                     onOk: props.closeRequested,
+                    onDetails: function onDetails() {
+                        return props.detailsRequested(EmissionsDetails);
+                    },
                     title: 'Emissions',
                     style: { top: 'statusbar' }
                 },

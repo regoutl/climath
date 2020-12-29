@@ -1,6 +1,6 @@
 // Copyright 2020, ASBL Math for climate, All rights reserved.
 
-import {tr} from "../../../tr.js";
+import {tr, setLang, getCurrentLang} from "../../../tr.js";
 import { quantityToHuman as valStr } from '../../quantitytohuman.js';
 
 import {Dialog} from './dialog.js';
@@ -99,6 +99,7 @@ export class NewGameDialog extends React.Component{
 
     }
 
+
     render(){
         if(this.state.help){
             return this._makeHelp();
@@ -109,12 +110,22 @@ export class NewGameDialog extends React.Component{
                     title="New game"
                     onStart={this.props.onStart}
                 >
-                    <table><tbody>
+                    <table id="newGameDialog"><tbody>
                     <tr>
                         <th>{tr('Region')}</th>
                         <td>
                             <select value={this.state.region} onChange={this.handleRegionChange.bind(this)}>
                                 <option value="belgium">{tr('Belgium')}</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{tr('Language')}</th>
+                        <td>
+                            <select value={getCurrentLang()} onChange={(code) => setLang(code.target.value).then(this.props.onLangChange.bind(this))}>
+                                <option value="en">English</option>
+                                <option value="fr">Français</option>
+                                <option value="nl">Neederlands</option>
                             </select>
                         </td>
                     </tr>

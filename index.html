@@ -1,33 +1,87 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 	<meta charset="utf-8">
 	<title>Climath</title>
 	<link rel="manifest" href="appManifest.json">
 	<link rel='icon' href='res/icons/climath192.png'>
-	<link rel="stylesheet" href="src/style/var.css">
-	<link rel="stylesheet" href="src/style/main.css">
+	<link rel="stylesheet" href="src/style/allPages.css">
+	<link rel="stylesheet" href="src/style/index.css">
 	<meta name="viewport" content="width=device-width,user-scalable=no">
-
-
-	<!-- replaced by the next 3, local files
-
-		<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-		<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
-		<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>-->
 
 	<script src="res/code/react.development.js" crossorigin></script>
 	<script src="res/code/react-dom.development.js" crossorigin></script>
 	<script src="res/code/babel.min.js"></script>
 
-
-<!--	<script src="res/jQuery.js"></script>-->
-	<script src="res/code/glpk.min.js"></script>
-	<script src="src/rand.js"></script>
-
-	<script src="src/main.js" type="module"></script>
+	<script src="src/ui/build/rest/regularpage.js" type="module"></script>
 </head>
-<body>
-	    <div id="root"></div>
+<body class="vFlex">
+	<header class="hFlex">
+		<a href="index.html"  class="hFlex">
+			<img src='res/icons/climath192.png' alt="logo climath" />
+
+			<h1>Climath</h1>
+		</a>
+
+		<nav class="hFlex">
+			<a href="play.html">
+				Play
+			</a>
+			<a href="articles.html">
+				Articles
+			</a>
+			<a href="about.html">
+				About
+			</a>
+		</nav>
+
+	</header>
+	<div class="pane hFlex" id="pane1">
+		<div id="carousel">
+			<img src="res/brol/earth_wind.png" alt="earth wind"  />
+		</div>
+		<div id="doTheMath" class="vFlex">
+			<h2>How can we reach carbon neutrality by 2050 ? </h2>
+			<!-- <h2>Math for the climate </h2>
+			<i>How can we reach carbon neutrality by 2050 ? </i> -->
+			<ul class="default">
+				<li>
+					Build your own low carbon scenario
+				</li>
+				<li>
+					Understand the tradeoffs of each technologies
+				</li>
+				<li>
+					Learn the math behind energies
+				</li>
+				<li>
+					Personalize the model with your parameters
+				</li>
+			</ul>
+			<a class="button black" href="play.html">
+				Play now
+			</a>
+
+		</div>
+	</div>
+	<footer>
+
+	</footer>
+	<!-- <div id="disqus_thread"></div>
+	<script>
+	    // /**
+	    // var disqus_config = function () {
+		//     this.page.url = "http:";  // Replace PAGE_URL with your page's canonical URL variable
+		//     this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+	    // };
+	    (function() { // DON'T EDIT BELOW THIS LINE
+		    var d = document, s = d.createElement('script');
+		    s.src = 'https://climath-info.disqus.com/embed.js';
+		    s.setAttribute('data-timestamp', +new Date());
+		    (d.head || d.body).appendChild(s);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript> -->
+
 </body>
 </html>
