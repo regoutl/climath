@@ -2,9 +2,16 @@
   "name": "climath",
   "version": "1.0.0",
   "description": "simulateur de transition energetique",
-  "main": "main.js",
+  "homepage": "https://github.com/regoutl/climath#readme",
+  "main": "electron.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "react-scripts build",
+    "start": "react-scripts start",
+    "electron:start": "concurrently -k \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electronmon .\"",
+    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=res/icons/climath.png --prune=true --out=release-builds",
+   "package-win": "electron-packager . climath --overwrite --asar=true --platform=win32 --arch=ia32 --icon=res/icons/climath.png --prune=true --out=release-builds --version-string.CompanyName=Climath --version-string.FileDescription=climath --version-string.ProductName=\"climath\"",
+   "package-linux": "electron-packager . climath --overwrite --asar=true --platform=linux --arch=x64 --icon=res/icons/climath.png --prune=true --out=release-builds"
   },
   "repository": {
     "type": "git",
@@ -16,10 +23,31 @@
   "bugs": {
     "url": "https://github.com/regoutl/climath/issues"
   },
-  "homepage": "https://github.com/regoutl/climath#readme",
   "dependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-react-app": "^3.1.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^17.0.1",
+    "electron-builder": "^22.14.13",
+    "electron-packager": "^15.4.0",
+    "electronmon": "^2.0.2",
+    "wait-on": "^6.0.1"
+  },
+  "browserslist": {
+    "production": [
+      "last 1 electron version",
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 electron version",
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

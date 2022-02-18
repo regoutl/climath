@@ -1,2 +1,5 @@
 internal/
 node_modules/
+release-builds/
+dist/
+*.zip
